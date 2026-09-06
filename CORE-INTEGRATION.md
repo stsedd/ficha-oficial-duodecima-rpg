@@ -1,35 +1,54 @@
-# Guia da Duodécima × Duodécima Core
+# Ficha da Duodécima · integração com Duodécima Core
 
-Esta versão do Guia usa o **Duodécima Core** como fonte canônica para a primeira camada mecânica compartilhada.
+Versão: **v5.2 Core**
 
-## Core configurado
+## Fonte canônica
 
-`https://stsedd.github.io/duodecima-core`
+A ficha tenta carregar as regras atuais de:
 
-## Dados sincronizados automaticamente
+`https://stsedd.github.io/duodecima-core/`
 
-- atributos;
+No carregamento, `core-bridge.js` lê o `manifest.json` e sincroniza:
+
+- deuses e kits;
+- habilidades passivas e ativas;
+- estruturas complexas de habilidades (`tiers`, `variants`, `options`);
 - perícias;
-- proficiência;
-- treinamento/estacas;
 - talentos;
-- recursos principais e Sanidade;
-- descanso;
-- combate compartilhado;
 - condições;
-- morte;
-- grupos divinos;
-- deuses, bonificações, recursos e habilidades completas.
+- progressão de BP;
+- níveis de talento e de treinamento;
+- Energia, descanso e Exaustão;
+- equipamentos básicos compartilhados.
 
-## Fallback
+A ficha mantém `gods.js`, `abilities.js`, `skills.js`, `talents.js` e `system.js` como **snapshot local de emergência**. Eles não são mais a fonte canônica quando o Core está online.
 
-`content.js` permanece no pacote como **snapshot local**. Se o Core estiver temporariamente indisponível, o Guia continua funcionando com esse conteúdo em vez de abrir em branco.
+## Status no cabeçalho
 
-No rodapé da sidebar aparece:
+- `CORE <versão>`: a ficha está usando o Core.
+- `SNAPSHOT LOCAL`: o Core não carregou e a ficha usa os dados locais.
 
-- `CORE <versão>` quando a sincronização remota funcionou;
-- `SNAPSHOT LOCAL` quando o fallback está sendo usado.
+## Saves
 
-## Próxima etapa
+Os saves continuam no navegador e permanecem compatíveis com o schema v21. O save guarda escolhas do personagem (`godId`, talentos escolhidos, estacas etc.), não uma cópia das descrições atuais dos kits. Assim, reworks feitos no Core aparecem na ficha sem recriar o personagem.
 
-Depois de publicar e validar esta versão, a próxima integração é a Ficha da Duodécima consumindo o mesmo Core.
+## Habilidades complexas
+
+A ficha agora preserva blocos complexos vindos do Core. Em Vulcano, por exemplo, `Autômato` renderiza:
+
+- Bastião;
+- Infiltrador;
+- Utilitário;
+
+Sub-habilidades com progressões próprias recebem controles independentes de estacas e salvam seus valores em `abilityStakes` com chaves internas próprias.
+
+## Teste de sincronização recomendado
+
+Depois de publicar esta versão:
+
+1. confirme que o cabeçalho mostra `CORE 2026.09.04.1` (ou versão posterior);
+2. abra Vulcano → Autômato e confirme as três variantes;
+3. depois faça uma alteração real em Iuppiter **somente no Duodécima Core**;
+4. publique o Core;
+5. recarregue Guia e Ficha;
+6. os dois devem exibir a alteração sem editar seus repositórios.

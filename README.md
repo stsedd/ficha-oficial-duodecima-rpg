@@ -1,17 +1,19 @@
-# Guia da Duodécima — v2.2 · Core + Ficha Oficial
+# Character Archive · Ficha Oficial da Duodécima · v5.2 Core
 
-Esta versão mantém a integração com o Duodécima Core e adiciona um destaque permanente para a Ficha Oficial da Duodécima.
+Ficha de personagem da Legio XII Fulminata integrada ao **Duodécima Core**.
 
-**Ficha:** https://stsedd.github.io/ficha-oficial-duodecima-rpg/
+## O que mudou
 
-# Guia da Duodécima · v2.1 Core
+- Regras compartilhadas passam a vir de `https://stsedd.github.io/duodecima-core/`.
+- 51 kits divinos são carregados do Core quando online.
+- Perícias, talentos e condições são carregados do Core.
+- Parte das progressões compartilhadas (BP, Energia, treinamento, descanso e Exaustão) passa a consultar o Core.
+- Habilidades complexas do Core são preservadas; `Autômato`, de Vulcano, exibe Bastião, Infiltrador e Utilitário com progressões internas próprias.
+- A antiga penalidade cumulativa por retornar após 0 HP foi removida também dos textos residuais da ficha.
+- Os arquivos locais de regras permanecem como fallback para evitar tela quebrada se o Core estiver indisponível.
 
-Versão GitHub Pages do Guia da Duodécima conectada ao **Duodécima Core**.
+## Publicação
 
-- Visual v2.0 preservado.
-- 51 kits continuam disponíveis.
-- Regras compartilhadas são carregadas do Core em runtime.
-- `content.js` funciona como snapshot local/fallback.
-- Sem build, npm ou servidor.
+O ZIP é root-ready para GitHub Pages. Substitua os arquivos da raiz do repositório atual da ficha e mantenha Pages publicado a partir de `main / (root)`.
 
-Consulte `CORE-INTEGRATION.md` para detalhes da sincronização e `DEPLOY-GITHUB.md` para publicação.
+Leia `CORE-INTEGRATION.md` para o teste de sincronização.

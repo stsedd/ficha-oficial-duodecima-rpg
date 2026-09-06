@@ -3,55 +3,48 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#070707">
-  <meta name="description" content="Guia da Duodécima — sistema, Roma, magia, crafting e panteão da Legio XII Fulminata.">
-  <title>Guia da Duodécima</title>
-  <link rel="stylesheet" href="styles.css?v=2.2">
+  <meta name="theme-color" content="#050505">
+  <title>Character Archive — Legio XII Fulminata</title>
+  <link rel="stylesheet" href="styles.css?v=5.2">
 </head>
-<body>
-<div class="app-shell">
-  <aside class="sidebar" id="sidebar">
-    <button class="sidebar-collapse" id="sidebarCollapse" type="button" aria-label="Recolher menu" title="Recolher menu">‹</button>
-    <a class="brand" href="#page:sistema" aria-label="Guia da Duodécima">
-      <img src="assets/legio.webp" alt="Símbolo da Duodécima Legião Fulminata">
-      <span><b>LEGIO XII FULMINATA</b><strong>Guia da Duodécima</strong></span>
-    </a>
-    <nav class="page-nav" aria-label="Seções principais">
-      <button data-page="sistema">Sistema</button>
-      <button data-page="crafting">Crafting</button>
-      <button data-page="roma">Sobre Roma</button>
-      <button data-page="magia">Magia</button>
-      <button data-page="deuses">Deuses</button>
-    </nav>
-    <a class="sheet-cta" href="https://stsedd.github.io/ficha-oficial-duodecima-rpg/" target="_blank" rel="noopener noreferrer" aria-label="Monte sua ficha de personagem">
-      <span class="sheet-cta-mark" aria-hidden="true">XII</span>
-      <span class="sheet-cta-copy"><small>FICHA OFICIAL</small><strong>Monte sua ficha aqui</strong><em>Crie e acompanhe seu personagem</em></span>
-      <span class="sheet-cta-arrow" aria-hidden="true">↗</span>
-    </a>
-    <div class="sidebar-divider"></div>
-    <div class="section-nav-title">Nesta página</div>
-    <nav class="section-nav" id="sectionNav"></nav>
-    <div class="sidebar-note">LEG · XII · FULMINATA<br><span>Base consolidada · 2026</span><div class="core-status" id="coreStatus"><i></i><span>CORE · CARREGANDO</span></div></div>
-  </aside>
-
-  <main class="workspace">
-    <header class="topbar">
-      <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">☰</button>
-      <div class="page-title"><span id="pageEyebrow">ARCHIVVM</span><h1 id="pageTitle">Sistema</h1></div>
-      <div class="search-wrap">
-        <input id="globalSearch" type="search" placeholder="Buscar regra, deus, habilidade..." autocomplete="off">
-        <kbd>⌘ K</kbd>
-        <div class="search-results" id="searchResults" hidden></div>
+<body data-theme="standard">
+  <main class="shell">
+    <header class="topbar compact-topbar">
+      <div class="brand-lockup">
+        <span class="brand-icon legion-brand-icon" aria-hidden="true"><img src="legio-mark-clean.png" alt="Símbolo da Legião XII"><span class="brand-fallback" hidden>XII</span></span>
+        <div class="brand-copy">
+          <p class="eyebrow">LEGIO XII FULMINATA</p>
+          <h1>Character Archive</h1>
+        </div>
+      </div>
+      <div class="actions compact-actions">
+        <div id="coreStatus" class="core-status loading" title="Sincronizando regras"><i></i><span>CORE…</span></div>
+        <button id="exportBtn" class="ghost small-btn" type="button">Exportar JSON</button>
+        <label class="ghost file-btn small-btn">Importar JSON<input id="importInput" type="file" accept="application/json"></label>
+        <button id="resetBtn" class="danger small-btn" type="button">Resetar</button>
       </div>
     </header>
-    <div class="content" id="content"></div>
-    <footer class="site-footer"><span>LEGIO XII FULMINATA</span><b>Guia da Duodécima</b><small>Sistema consolidado para GitHub Pages.</small></footer>
+
+    <section id="creationView" class="grid two"></section>
+    <section id="sheetView" class="hidden"></section>
+
+    <footer>
+      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · tema padrão.</p>
+    </footer>
   </main>
-</div>
-<button class="to-top" id="toTop" type="button" aria-label="Voltar ao topo" title="Voltar ao topo">↑</button>
-<div class="scrim" id="scrim"></div>
-<script src="content.js?v=2.2"></script>
-<script src="core-bridge.js?v=2.2"></script>
-<script>Promise.resolve(window.DUODECIMA_CORE_READY).finally(()=>{const s=document.createElement('script');s.src='app.js?v=2.2';document.body.appendChild(s);});</script>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="skills.js?v=5.2"></script>
+  <script src="gods.js?v=5.2"></script>
+  <script src="abilities.js?v=5.2"></script>
+  <script src="abilities-extra.js?v=5.2"></script>
+  <script src="system.js?v=5.2"></script>
+  <script src="talents.js?v=5.2"></script>
+  <script src="magic.js?v=5.2"></script>
+  <script src="roma.js?v=5.2"></script>
+  <script src="familiars.js?v=5.2"></script>
+  <script src="core-bridge.js?v=5.2"></script>
+  <script src="bootstrap.js?v=5.2"></script>
 </body>
 </html>
