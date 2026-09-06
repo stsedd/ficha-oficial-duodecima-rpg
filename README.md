@@ -1,3 +1,11 @@
+# Ficha da Duodécima — v5.3 visual + Core
+
+Esta é a baseline visual posterior à v5.2. O Duodécima Core continua sendo a fonte canônica das regras; a v5.3 altera interface, hierarquia visual, responsividade e ergonomia de combate sem alterar a lógica compartilhada.
+
+Destaques: HUD sticky de combate, Autômato de Vulcano reestruturado, branding corrigido, Nível/BP centralizados e grids de poderes mais legíveis.
+
+---
+
 # Character Archive · Ficha Oficial da Duodécima · v5.2 Core
 
 Ficha de personagem da Legio XII Fulminata integrada ao **Duodécima Core**.

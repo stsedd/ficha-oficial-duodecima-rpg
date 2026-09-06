@@ -407,13 +407,16 @@
     </section>`;
   }
   function renderCombatResourceDock(){
-    const g=god(),rMax=resourceMax();
+    const g=god(),rMax=resourceMax(),fDef=fixedDefense();
     const mini=(kind,label,current,max)=>{const inputId=`combat-${kind}Manual`,ratio=max?clamp((Number(current)||0)/Number(max)*100,0,100):0;return `<div class="combat-resource-chip resource-${kind}"><span>${label}</span><strong>${current}<small>/${max}</small></strong><div class="combat-mini-meter"><i style="width:${ratio}%"></i></div><div class="combat-resource-adjust"><input id="${inputId}" data-resource-manual-input="${kind}" type="number" step="1" placeholder="+/−"><button type="button" data-manual-resource="${kind}" data-manual-input="${inputId}" title="Aplicar">↵</button></div></div>`};
-    return `<section class="combat-resource-dock">
+    const readOnly=(kind,label,value,caption='')=>`<div class="combat-resource-chip combat-readonly ${kind}"><span>${label}</span><strong>${value}</strong>${caption?`<small>${caption}</small>`:''}</div>`;
+    return `<section class="combat-resource-dock" aria-label="Recursos de combate">
       ${mini('hp','HP',state.currentHp,hpMax())}
       ${mini('en','Energia',state.currentEnergy,energyMax())}
       ${mini('san','Sanidade',state.currentSanity,100)}
-      ${g.resource?mini('resource',g.resource.name,state.resourceCurrent,rMax).replace(`data-manual-resource="resource"`,'data-manual-resource="resource"').replace(`data-resource-manual-input="resource"`,'data-resource-manual-input="resource"'):''}
+      ${g.resource?mini('resource',g.resource.name,state.resourceCurrent,rMax):''}
+      ${readOnly('dock-defense','Defesa',fDef!==null?fDef:signed(defenseBonus()),Number(state.tempMods?.defense)?`ajuste manual ${signed(state.tempMods.defense)}`:'valor atual')}
+      ${readOnly('dock-dt','DT',castDT(),`${attrName(g.casting)} · ataque ${signed(castAttack())}`)}
     </section>`;
   }
   function renderResourceSummaryPanel(){
@@ -855,11 +858,11 @@
     const value=coreStakeValue(key);
     return `<div class="core-subtiers">${(tiers||[]).map(t=>`<div class="core-subtier ${coreTierCurrent(t,value)?'current':''}"><b>${esc(t.label||t.id||'Estaca')}</b><p>${esc(t.text||'')}</p></div>`).join('')}</div><div class="core-substake"><div class="row between"><span>Estacas</span><b>${value}/30</b></div><input type="range" min="0" max="30" value="${value}" data-core-stakes="${esc(key)}"><div class="stake-quick"><button data-core-stake-set="${esc(key)}:0">0</button><button data-core-stake-set="${esc(key)}:16">16</button><button data-core-stake-set="${esc(key)}:30">30</button></div></div>`;
   }
-  function renderCoreVariant(a,v){
+  function renderCoreVariant(a,v,open=false){
     const stats=v.stats?Object.entries(v.stats).map(([k,val])=>`<span><small>${k==='hpFormula'?'HP':k==='defense'?'DEFESA':esc(k)}</small><b>${esc(val)}</b></span>`).join(''):'';
-    const traits=(v.traits||[]).length?`<ul>${v.traits.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'';
-    const abilities=(v.abilities||[]).map(sub=>{const key=coreSubStakeKey(a,v.id||v.name,sub.id||sub.name);return `<section class="core-subability"><h5>${esc(sub.name)}</h5>${sub.description?`<p>${esc(sub.description)}</p>`:''}${(sub.tiers||[]).length?renderCoreTierRows(sub.tiers,key):''}</section>`}).join('');
-    return `<article class="core-variant"><header><h4>${esc(v.name)}</h4>${v.description?`<p>${esc(v.description)}</p>`:''}</header>${stats?`<div class="core-stat-pills">${stats}</div>`:''}${traits}${abilities?`<div class="core-variant-abilities">${abilities}</div>`:''}</article>`;
+    const traits=(v.traits||[]).length?`<ul class="core-traits">${v.traits.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'';
+    const abilities=(v.abilities||[]).map(sub=>{const key=coreSubStakeKey(a,v.id||v.name,sub.id||sub.name);return `<section class="core-subability"><div class="core-subability-head"><h5>${esc(sub.name)}</h5>${(sub.tiers||[]).length?'<span>progressão própria</span>':''}</div>${sub.description?`<p>${esc(sub.description)}</p>`:''}${(sub.tiers||[]).length?renderCoreTierRows(sub.tiers,key):''}</section>`}).join('');
+    return `<details class="core-variant" ${open?'open':''}><summary><div class="core-variant-summary-copy"><h4>${esc(v.name)}</h4>${v.description?`<p>${esc(v.description)}</p>`:''}</div>${stats?`<div class="core-stat-pills">${stats}</div>`:''}<span class="core-variant-toggle">⌄</span></summary><div class="core-variant-body">${traits}${abilities?`<div class="core-variant-abilities">${abilities}</div>`:''}</div></details>`;
   }
   function renderCoreBlocks(a){
     const blocks=Array.isArray(a.coreBlocks)?a.coreBlocks:[];
@@ -868,7 +871,7 @@
       if(b.type==='description'){if(String(b.text||'').trim()===String(a.summary||'').trim())return '';return `<p class="core-description">${esc(b.text||'')}</p>`;}
       if(b.type==='note')return `<div class="core-note">${esc(b.text||'')}</div>`;
       if(b.type==='tiers')return a.tiers?'':`<div class="core-subtiers plain">${(b.items||[]).map(t=>`<div class="core-subtier"><b>${esc(t.label||t.id)}</b><p>${esc(t.text||'')}</p></div>`).join('')}</div>`;
-      if(b.type==='variants')return `<div class="core-complex"><div class="core-block-label">${esc(b.label||'Variantes')}</div><div class="core-variant-grid">${(b.items||[]).map(v=>renderCoreVariant(a,v)).join('')}</div></div>`;
+      if(b.type==='variants')return `<div class="core-complex"><div class="core-block-label">${esc(b.label||'Variantes')}</div><div class="core-variant-grid">${(b.items||[]).map((v,i)=>renderCoreVariant(a,v,i===0)).join('')}</div></div>`;
       if(b.type==='options')return `<div class="core-complex"><div class="core-block-label">${esc(b.label||'Opções')}</div><div class="core-option-grid">${(b.items||[]).map(o=>`<article><h4>${esc(o.name)}</h4>${o.base?`<p>${esc(o.base)}</p>`:''}${o.upgrade?`<small>${esc(o.upgrade)}</small>`:''}</article>`).join('')}</div></div>`;
       return '';
     }).join('')}</div>`;
@@ -877,7 +880,10 @@
   function renderAbility(a){
     const maxSt=magicAbilityStakeMax(a),rawSt=stakesOf(a),st=Math.min(rawSt,maxSt),locked=a.type==='active'&&state.level<a.level,cost=a.type==='active'?a.cost:null;
     const tiers=a.tiers?[['low','0–15',a.tiers.low,st<=15],['mid','16–29',a.tiers.mid,st>=16&&st<=29],['high','30+',a.tiers.high,st>=30]].filter(x=>x[2]):[];
-    return `<article class="ability-card ${locked?'ability-locked':''} ${a.type==='active'?'active-ability':'passive-ability'}"><div class="ability-head"><div><div class="row ability-title-row"><b>${a.name}</b>${a.sourceGodId&&a.sourceGodId!==state.godId?`<span class="pill warn">${godById(a.sourceGodId)?.name||'Legado'}</span>`:''}</div><div class="ability-meta">${a.type==='active'?(a.isExtra?'<span>Extra</span>':`<span>Nv ${a.level}</span><span>${cost} EN</span>`):'<span>Passiva</span>'}${state.magic?.enabled&&maxSt===29?'<span>mágico · até 29</span>':''}</div></div></div><p class="ability-summary">${a.summary}</p>${renderCoreBlocks(a)}${tiers.length?`<div class="ability-tier-list">${tiers.map(([key,label,text,current])=>`<div class="ability-tier ${current?'current':''}" data-tier="${key}"><b>${label}</b><p>${text}</p></div>`).join('')}</div><div class="stake-compact"><div class="row between"><span>Estacas</span><b>${st}/${maxSt}</b></div><input type="range" min="0" max="${maxSt}" value="${st}" data-stakes="${abilityKey(a)}" data-stake-max="${maxSt}"><div class="stake-quick"><button data-stake-set="${abilityKey(a)}:0" data-stake-limit="${maxSt}">0</button><button data-stake-set="${abilityKey(a)}:16" data-stake-limit="${maxSt}">16</button>${maxSt>=30?`<button data-stake-set="${abilityKey(a)}:30" data-stake-limit="${maxSt}">30</button>`:''}</div></div>`:`<div class="ability-tier-list single"><div class="ability-tier current"><p>${a.extra||'Sem estacas mecânicas cadastradas.'}</p></div></div>`}${a.extra&&a.tiers?`<details class="ability-notes"><summary>Observações</summary><p>${a.extra}</p></details>`:''}${a.type==='active'?`<div class="ability-actions">${a.isExtra?'<span class="pill warn">Habilidade extra</span>':(locked?`<span class="locked">Bloqueada até o nível ${a.level}</span>`:`<button class="primary" data-use-ability="${abilityKey(a)}" data-cost="${cost}">Usar · −${cost} EN</button>`)}${a.isExtra?'':`<small>EN atual ${state.currentEnergy}</small>`}</div>`:''}</article>`;
+    const complex=(a.coreBlocks||[]).some(b=>b.type==='variants'||b.type==='options');
+    const summary=String(a.summary||'');
+    const summaryHtml=complex&&summary.length>260?`<details class="ability-lore"><summary>Descrição da habilidade</summary><p>${esc(summary)}</p></details>`:`<p class="ability-summary">${esc(summary)}</p>`;
+    return `<article class="ability-card ${locked?'ability-locked':''} ${a.type==='active'?'active-ability':'passive-ability'} ${a.isExtra?'extra-ability':''} ${complex?'ability-complex':''}"><div class="ability-head"><div><div class="row ability-title-row"><b>${esc(a.name)}</b>${a.sourceGodId&&a.sourceGodId!==state.godId?`<span class="pill warn">${godById(a.sourceGodId)?.name||'Legado'}</span>`:''}</div><div class="ability-meta">${a.type==='active'?(a.isExtra?'<span class="meta-extra">Extra</span>':`<span>Nv ${a.level}</span><span>${cost} EN</span>`):'<span>Passiva</span>'}${state.magic?.enabled&&maxSt===29?'<span>mágico · até 29</span>':''}</div></div></div>${summaryHtml}${renderCoreBlocks(a)}${tiers.length?`<div class="ability-tier-list">${tiers.map(([key,label,text,current])=>`<div class="ability-tier ${current?'current':''}" data-tier="${key}"><b>${label}</b><p>${esc(text)}</p></div>`).join('')}</div><div class="stake-compact"><div class="row between"><span>Estacas</span><b>${st}/${maxSt}</b></div><input type="range" min="0" max="${maxSt}" value="${st}" data-stakes="${abilityKey(a)}" data-stake-max="${maxSt}"><div class="stake-quick"><button data-stake-set="${abilityKey(a)}:0" data-stake-limit="${maxSt}">0</button><button data-stake-set="${abilityKey(a)}:16" data-stake-limit="${maxSt}">16</button>${maxSt>=30?`<button data-stake-set="${abilityKey(a)}:30" data-stake-limit="${maxSt}">30</button>`:''}</div></div>`:`${!complex?`<div class="ability-tier-list single"><div class="ability-tier current"><p>${esc(a.extra||'Sem estacas mecânicas cadastradas.')}</p></div></div>`:''}`}${a.extra&&a.tiers?`<details class="ability-notes"><summary>Observações</summary><p>${esc(a.extra)}</p></details>`:''}${a.type==='active'?`<div class="ability-actions">${a.isExtra?'<span class="pill warn">Habilidade extra</span>':(locked?`<span class="locked">Bloqueada até o nível ${a.level}</span>`:`<button class="primary" data-use-ability="${abilityKey(a)}" data-cost="${cost}">Usar · −${cost} EN</button>`)}${a.isExtra?'':`<small>EN atual ${state.currentEnergy}</small>`}</div>`:''}</article>`;
   }
   function applyManualResource(kind,input){
     const delta=Number(input?.value);if(!Number.isFinite(delta)||delta===0){notify('Digite um ajuste, por exemplo -37 ou 20.');return}
