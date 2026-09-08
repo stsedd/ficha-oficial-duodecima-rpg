@@ -52,3 +52,7 @@ Depois de publicar esta versão:
 4. publique o Core;
 5. recarregue Guia e Ficha;
 6. os dois devem exibir a alteração sem editar seus repositórios.
+
+
+## Core 2026.09.08.1
+A ficha já entende as regras compartilhadas de Vis, Legados e sacrifício mágico abaixo de zero.

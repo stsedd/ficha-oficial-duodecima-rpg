@@ -1,2 +1,1 @@
-Ficha da Duodécima v5.4 · visual hotfix cache-proof
-Core: Duodécima Core remoto
+Ficha da Duodécima v5.5 · ajustes mecânicos de Vis, Magia e Legados · Core 2026.09.08.1
