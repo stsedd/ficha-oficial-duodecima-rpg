@@ -3198,3 +3198,160 @@ body[data-special="snow"] .fortune-value{color:#376a85!important}
   body[data-special="snow"] :is(.progress>i,.core-stat-meter>i,.resource-meter>i,.combat-mini-meter>i){animation:none!important}
   body[data-special="snow"] .equipment-card,body[data-special="snow"] .equipment-card::after{transition:none!important}
 }
+
+/* =========================================================
+   v5.9.5 — refinamento visual dos temas Fogo e Neve
+   ========================================================= */
+
+/* Correção estrutural extra: o input de nível não deve herdar a caixa nativa em nenhum tema/navegador. */
+body #levelOrbInput,
+body .rail-orb-level input#levelOrbInput{
+  all:unset!important;
+  display:block!important;
+  box-sizing:border-box!important;
+  width:54px!important;
+  height:30px!important;
+  margin:0 auto!important;
+  padding:0!important;
+  font:700 24px/30px var(--serif)!important;
+  text-align:center!important;
+  color:inherit!important;
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+  -webkit-appearance:none!important;
+  -moz-appearance:textfield!important;
+  appearance:textfield!important;
+  caret-color:currentColor!important;
+}
+body #levelOrbInput::-webkit-outer-spin-button,
+body #levelOrbInput::-webkit-inner-spin-button{display:none!important;-webkit-appearance:none!important;margin:0!important}
+
+@keyframes duoFlameLickV595{0%,100%{transform:translateY(0) scaleY(1);opacity:.92}50%{transform:translateY(-2px) scaleY(1.06);opacity:1}}
+@keyframes duoFlameShimmerV595{0%,100%{opacity:.68;filter:drop-shadow(0 0 8px rgba(255,120,35,.18))}50%{opacity:.92;filter:drop-shadow(0 0 12px rgba(255,150,55,.28))}}
+@keyframes duoSnowPulseV595{0%,100%{opacity:.9;transform:translateY(0)}50%{opacity:1;transform:translateY(1px)}}
+
+/* ---------- TEMA ESPECIAL FOGO: mais chama real e destaque nas imagens ---------- */
+body[data-special="fire"] .fire-flame-bed{
+  opacity:.24!important;
+  height:185px!important;
+  background:url('fire-flame-rim-v595.svg') center bottom/100% 185px no-repeat!important;
+}
+body[data-special="fire"] .fire-flame-bed i::before{opacity:.92!important;filter:drop-shadow(0 0 10px rgba(255,127,30,.35))}
+body[data-special="fire"] .fire-embers i{width:4px;height:4px;background:#ffb04d;box-shadow:0 0 6px #ff5d18,0 0 14px rgba(255,137,35,.72)!important}
+body[data-special="fire"] .fire-heat-haze{display:block;position:fixed;inset:auto -10vw 0;z-index:1;height:32vh;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(255,101,26,.05) 28%,rgba(255,70,10,.08));mix-blend-mode:screen;opacity:.52;filter:blur(14px)}
+
+body[data-special="fire"] :is(.profile-cover,.rail-portrait,.equipment-card-media,.inventory-image-preview.has-image,.equipment-card-glyph){position:relative;overflow:hidden}
+body[data-special="fire"] .profile-cover::before,
+body[data-special="fire"] .rail-portrait::before,
+body[data-special="fire"] .equipment-card-media::before,
+body[data-special="fire"] .inventory-image-preview.has-image::before,
+body[data-special="fire"] .equipment-card-glyph::before{
+  content:"";position:absolute;left:-4%;right:-4%;bottom:-2px;height:18%;min-height:18px;max-height:52px;z-index:5;pointer-events:none;opacity:.95;
+  background:url('fire-flame-rim-v595.svg') center bottom/100% 100% no-repeat;
+  animation:duoFlameLickV595 3.6s ease-in-out infinite;
+}
+body[data-special="fire"] .profile-cover::before{height:44px;left:-2%;right:-2%}
+body[data-special="fire"] .rail-portrait::before{height:42px}
+body[data-special="fire"] .equipment-card-media::before,
+body[data-special="fire"] .inventory-image-preview.has-image::before,
+body[data-special="fire"] .equipment-card-glyph::before{height:24px}
+
+body[data-special="fire"] .profile-cover::after,
+body[data-special="fire"] .rail-portrait::after,
+body[data-special="fire"] .equipment-card-media::after,
+body[data-special="fire"] .inventory-image-preview.has-image::after,
+body[data-special="fire"] .equipment-card-glyph::after{
+  content:"";position:absolute;inset:0;z-index:6;pointer-events:none;opacity:.84;
+  background:url('fire-flame-corner-v594.svg') left bottom/96px 96px no-repeat,
+             url('fire-flame-corner-v594.svg') right top/88px 88px no-repeat;
+  mix-blend-mode:screen;
+  animation:duoFlameShimmerV595 4.2s ease-in-out infinite;
+}
+body[data-special="fire"] .equipment-card-media::after,
+body[data-special="fire"] .inventory-image-preview.has-image::after,
+body[data-special="fire"] .equipment-card-glyph::after{background:url('fire-flame-corner-v594.svg') left bottom/54px 54px no-repeat,url('fire-flame-corner-v594.svg') right top/52px 52px no-repeat!important;opacity:.72!important}
+body[data-special="fire"] .profile-cover::after{background:url('fire-flame-corner-v594.svg') left bottom/130px 130px no-repeat,url('fire-flame-corner-v594.svg') right top/120px 120px no-repeat!important;opacity:.74!important}
+body[data-special="fire"] .rail-portrait{box-shadow:inset 0 0 0 4px #120603,0 0 0 1px rgba(255,125,36,.18),0 18px 34px rgba(0,0,0,.44),0 0 30px rgba(255,76,12,.08)!important}
+body[data-special="fire"] .equipment-card-media,
+body[data-special="fire"] .inventory-image-preview.has-image,
+body[data-special="fire"] .equipment-card-glyph{box-shadow:0 0 0 1px rgba(255,110,30,.16),0 0 22px rgba(255,86,12,.07),inset 0 0 26px rgba(0,0,0,.22)!important}
+body[data-special="fire"] .profile-cover{box-shadow:0 18px 34px rgba(0,0,0,.34),0 0 0 1px rgba(255,120,35,.14),0 0 38px rgba(255,86,12,.06)!important}
+
+/* ---------- TEMA ESPECIAL NEVE: menos rosa, mais gelo/neve visível ---------- */
+body[data-special="snow"]{
+  --bg:#e6eef4!important;
+  --bg-soft:#edf4f8!important;
+  --panel:#eef5f8!important;
+  --panel2:#f8fbfd!important;
+  --panel3:#e2ebf1!important;
+  --line:#b0c4cf!important;
+  --text:#213946!important;
+  --muted:#6b8593!important;
+  --red:#4b7b96!important;
+  --red-dark:#2d566c!important;
+  --red2:#31586e!important;
+  --gold:#7fa3b5!important;
+  --theme-accent:#6191ac!important;
+  --theme-accent-deep:#355d74!important;
+  --theme-accent-bright:#a2cade!important;
+  --theme-accent-rgb:97,145,172!important;
+  --theme-accent-contrast:#f7fdff!important;
+  --theme-wash:#e3edf3!important;
+  color:#203844!important;
+  background:#e6eef4!important;
+  background-image:linear-gradient(rgba(251,254,255,.78),rgba(232,240,245,.88)),url('snow-cracks-v594.svg')!important;
+  background-size:auto,980px 735px!important;
+}
+body[data-special="snow"]::before{opacity:.52!important;background-image:url('snow-cracks-v594.svg'),radial-gradient(circle at 16% 10%,rgba(255,255,255,.92),transparent 30%),radial-gradient(circle at 84% 74%,rgba(146,196,219,.18),transparent 42%)!important;background-size:1200px 900px,100% 100%,100% 100%!important}
+body[data-special="snow"] .snow-fall{display:block!important;opacity:1!important}
+body[data-special="snow"] .snow-fall i{background:radial-gradient(circle at 35% 35%,#fff 0,#fff 24%,#e7f5fb 55%,rgba(121,173,199,.48) 100%)!important;box-shadow:0 0 8px rgba(255,255,255,.95),0 0 16px rgba(182,221,240,.55)!important;opacity:.92!important}
+body[data-special="snow"] .snow-mist{opacity:.4!important;height:220px!important;filter:blur(24px)!important;background:radial-gradient(ellipse at 18% 100%,rgba(255,255,255,.96),transparent 58%),radial-gradient(ellipse at 74% 100%,rgba(228,242,249,.9),transparent 64%)!important}
+body[data-special="snow"] .snow-drift{opacity:.82!important;height:84px!important;background:linear-gradient(180deg,rgba(255,255,255,0),rgba(245,251,253,.72) 36%,rgba(231,241,246,.98))!important}
+
+body[data-special="snow"] :is(.archive-brandbar,.archive-toolbar,.character-rail,.card,.subcard,.ability-card,.combat-resource-dock,.resource-dock,.theme-dialog-card,.help-dialog-card,.sheet-tabs,.inventory-item,.weapon-card,.familiar-card,.spell-card,.core-variant,.core-subability,.core-subtier,.combat-resource-chip,.core-stat){
+  border-color:#b4c9d4!important;
+  color:#213946!important;
+  box-shadow:0 10px 26px rgba(52,86,104,.085),inset 0 1px 0 rgba(255,255,255,.96)!important;
+}
+body[data-special="snow"] :is(.profile-cover,.rail-portrait,.equipment-card-media,.inventory-image-preview.has-image,.equipment-card-glyph){position:relative;overflow:hidden}
+body[data-special="snow"] .profile-cover::before,
+body[data-special="snow"] .rail-portrait::before,
+body[data-special="snow"] .equipment-card-media::before,
+body[data-special="snow"] .inventory-image-preview.has-image::before,
+body[data-special="snow"] .equipment-card-glyph::before{
+  content:"";position:absolute;left:-2%;right:-2%;top:-1px;height:24%;min-height:20px;max-height:58px;z-index:6;pointer-events:none;opacity:.98;
+  background:url('snow-cap-v595.svg') center top/100% 100% no-repeat;
+  animation:duoSnowPulseV595 6.4s ease-in-out infinite;
+}
+body[data-special="snow"] .profile-cover::before{height:54px!important}
+body[data-special="snow"] .rail-portrait::before{height:46px!important}
+body[data-special="snow"] .equipment-card-media::before,
+body[data-special="snow"] .inventory-image-preview.has-image::before,
+body[data-special="snow"] .equipment-card-glyph::before{height:28px!important}
+body[data-special="snow"] .profile-cover::after,
+body[data-special="snow"] .rail-portrait::after,
+body[data-special="snow"] .equipment-card-media::after,
+body[data-special="snow"] .inventory-image-preview.has-image::after,
+body[data-special="snow"] .equipment-card-glyph::after{
+  content:"";position:absolute;inset:0;z-index:7;pointer-events:none;opacity:.92;
+  background:url('snow-frost-corner-v594.svg') left top/92px 92px no-repeat,
+             url('snow-frost-corner-v594.svg') right bottom/92px 92px no-repeat;
+  mix-blend-mode:screen;
+}
+body[data-special="snow"] .equipment-card-media::after,
+body[data-special="snow"] .inventory-image-preview.has-image::after,
+body[data-special="snow"] .equipment-card-glyph::after{background:url('snow-frost-corner-v594.svg') left top/56px 56px no-repeat,url('snow-frost-corner-v594.svg') right bottom/56px 56px no-repeat!important;opacity:.9!important}
+body[data-special="snow"] .profile-cover::after{background:url('snow-frost-corner-v594.svg') left top/128px 128px no-repeat,url('snow-frost-corner-v594.svg') right bottom/128px 128px no-repeat!important;opacity:.88!important}
+body[data-special="snow"] .rail-portrait,
+body[data-special="snow"] .equipment-card-media,
+body[data-special="snow"] .inventory-image-preview.has-image,
+body[data-special="snow"] .equipment-card-glyph{box-shadow:0 0 0 1px rgba(144,184,205,.28),0 0 22px rgba(152,205,228,.14),inset 0 0 24px rgba(255,255,255,.32)!important}
+body[data-special="snow"] .sheet-tabs button.active{color:#24485b!important;box-shadow:inset 0 -3px 0 #5688a2,0 6px 18px rgba(85,135,161,.12)!important}
+body[data-special="snow"] .primary{background:linear-gradient(180deg,#84b4cc,#4a7e98)!important;border-color:#5389a3!important;color:#f8fdff!important}
+body[data-special="snow"] .theme-toggle,body[data-special="snow"] .theme-dialog,body[data-special="snow"] .theme-choice{color:#274656!important}
+body[data-special="snow"] :is(.eyebrow,.archive-brand-kicker,.rail-brandline b,.equipment-card-type i){color:#467895!important}

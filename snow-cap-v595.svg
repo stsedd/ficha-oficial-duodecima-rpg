@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 140" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="snowFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".98"/>
+      <stop offset=".58" stop-color="#f3fbff" stop-opacity=".96"/>
+      <stop offset="1" stop-color="#d7eaf5" stop-opacity=".94"/>
+    </linearGradient>
+    <linearGradient id="iceShadow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d7edf8" stop-opacity="0"/>
+      <stop offset="1" stop-color="#96bfd4" stop-opacity=".38"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#snowFill)" d="M0 35c32-8 74-9 112 7 28 12 48 4 83-4 53-13 103 21 160 20 46 0 81-18 126-20 67-3 109 31 171 26 52-4 76-32 126-33 62-2 98 22 141 21 29 0 57-12 85-18 59-13 105-5 196 10V0H0Z"/>
+  <path fill="url(#iceShadow)" d="M0 44c54 8 102 8 142 1 44-8 76 12 110 15 41 4 74-18 114-18 41 0 69 15 105 16 51 1 83-21 133-21 61 0 95 27 145 27 56 0 96-25 145-25 38 0 69 11 106 15 37 4 78-5 100-10v17H0Z" opacity=".8"/>
+  <g fill="#d7edf8" opacity=".92">
+    <path d="M126 40c10 24 12 49 5 74-8 18-18 18-26 0-5-25-3-50 8-74Z"/>
+    <path d="M286 49c9 20 11 40 4 60-6 15-14 15-21 0-4-20-2-40 7-60Z"/>
+    <path d="M458 46c11 26 14 54 5 80-8 20-18 20-26 0-5-26-4-53 7-80Z"/>
+    <path d="M616 52c9 18 11 37 4 55-6 13-13 13-19 0-4-18-2-37 6-55Z"/>
+    <path d="M788 43c10 23 12 47 4 69-7 17-16 17-23 0-5-22-3-45 7-69Z"/>
+    <path d="M976 48c8 18 10 37 3 54-5 12-11 12-17 0-4-17-2-35 5-54Z"/>
+  </g>
+  <g fill="#ffffff" opacity=".82">
+    <circle cx="88" cy="24" r="6"/><circle cx="374" cy="17" r="5"/><circle cx="570" cy="24" r="4.5"/><circle cx="881" cy="18" r="5"/><circle cx="1096" cy="22" r="6"/>
+  </g>
+</svg>

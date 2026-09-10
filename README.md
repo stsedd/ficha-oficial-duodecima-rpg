@@ -1,3 +1,5 @@
+Atualização v5.9.5: refinamento visual dos temas especiais Fogo e Neve, com reforço de neve acumulada/geada e chamas visíveis nas imagens.
+
 # Ficha da Duodécima — v5.3 visual + Core
 
 Esta é a baseline visual posterior à v5.2. O Duodécima Core continua sendo a fonte canônica das regras; a v5.3 altera interface, hierarquia visual, responsividade e ergonomia de combate sem alterar a lógica compartilhada.
@@ -46,5 +48,5 @@ Modo Dark/Light e paleta são independentes. Novos pastéis: Blush, Peach, Lilac
 ## v5.9.2
 Adiciona a camada de Temas Especiais, começando por Fogo. O tema é visual, salvo por ficha e não altera o Core.
 
-## v5.9.4
+## v5.9.5
 Tema Especial Neve adicionado como opção independente das paletas. Inclui gelo rachado, geada, flocos animados, bordas congeladas e acabamento azul/cinza claro. Esta versão também corrige de forma estrutural o campo de Nível e altera a Bênção de Fortuna para +10 HP atual/máximo enquanto ativa.
