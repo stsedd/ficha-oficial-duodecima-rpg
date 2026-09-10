@@ -295,7 +295,7 @@
     out.appearance=Object.assign({mode:'dark',palette:'red',special:'none'},data?.appearance||{});
     out.appearance.mode=out.appearance.mode==='light'?'light':'dark';
     out.appearance.palette=THEME_PALETTES[out.appearance.palette]?out.appearance.palette:'red';
-    out.appearance.special=['fire','snow'].includes(out.appearance.special)?out.appearance.special:'none';
+    out.appearance.special=['fire','snow','storm'].includes(out.appearance.special)?out.appearance.special:'none';
     out.fortuneBlessing=Object.assign({enabled:false,tempHp:0,appliedToHp:false},data?.fortuneBlessing||{});
     out.fortuneBlessing.enabled=!!out.fortuneBlessing.enabled;
     if(out.fortuneBlessing.enabled&&!out.fortuneBlessing.appliedToHp&&out.currentHp!=null)out.currentHp=(Number(out.currentHp)||0)+10;
@@ -457,8 +457,8 @@
     const h=state.history||{}, banner=String(h.bannerUrl||''), pos=clamp(Number(h.bannerPositionY)||50,0,100), zoom=clamp(Number(h.bannerScale)||100,100,170), bg=byId('siteBannerBg'), wrap=byId('bannerMiniWrap'), mini=byId('bannerMini'), clear=byId('clearBannerBtn'), name=byId('bannerCharacterName'), bannerBtn=byId('bannerBtn'), controls=byId('bannerControls'), posInput=byId('bannerPositionInput'), scaleInput=byId('bannerScaleInput'), posValue=byId('bannerPositionValue'), scaleValue=byId('bannerScaleValue'), modeBtn=byId('themeModeBtn'), paletteBtn=byId('themePaletteBtn'), paletteLabel=byId('themePaletteLabel'), paletteSwatch=byId('themePaletteSwatch'), specialBtn=byId('themeSpecialBtn'), specialLabel=byId('themeSpecialLabel'), specialSwatch=byId('themeSpecialSwatch');
     const mode=state.appearance?.mode==='light'?'light':'dark';
     const palette=THEME_PALETTES[state.appearance?.palette]?state.appearance.palette:'red';
-    const special=['fire','snow'].includes(state.appearance?.special)?state.appearance.special:'none';
-    const effectiveMode=special==='fire'?'dark':special==='snow'?'light':mode;
+    const special=['fire','snow','storm'].includes(state.appearance?.special)?state.appearance.special:'none';
+    const effectiveMode=special==='snow'?'light':(special==='fire'||special==='storm'?'dark':mode);
     document.body.dataset.theme=effectiveMode==='light'?'light':'standard';
     document.body.dataset.mode=effectiveMode;
     document.body.dataset.palette=palette;
@@ -468,7 +468,7 @@
       modeBtn.classList.toggle('is-light',effectiveMode==='light');
       modeBtn.classList.toggle('special-overridden',special!=='none');
       modeBtn.setAttribute('aria-pressed',effectiveMode==='light'?'true':'false');
-      modeBtn.setAttribute('title',special==='fire'?'Fogo usa modo escuro. Clique para sair do tema especial e ir para Light.':special==='snow'?'Neve usa modo claro. Clique para sair do tema especial e ir para Dark.':(effectiveMode==='light'?'Mudar para Dark':'Mudar para Light'));
+      modeBtn.setAttribute('title',special==='fire'?'Fogo usa modo escuro. Clique para sair do tema especial e ir para Light.':special==='snow'?'Neve usa modo claro. Clique para sair do tema especial e ir para Dark.':special==='storm'?'Tempestade usa modo escuro. Clique para sair do tema especial e ir para Light.':(effectiveMode==='light'?'Mudar para Dark':'Mudar para Light'));
       const icon=modeBtn.querySelector('.theme-toggle-icon'),label=modeBtn.querySelector('.theme-toggle-copy b');
       if(icon)icon.textContent=effectiveMode==='light'?'☀':'☾';
       if(label)label.textContent=effectiveMode==='light'?'Light':'Dark';
@@ -476,9 +476,9 @@
     if(paletteBtn)paletteBtn.setAttribute('aria-label',`Tema de cor atual: ${THEME_PALETTES[palette].label}`);
     if(paletteLabel)paletteLabel.textContent=THEME_PALETTES[palette].label;
     if(paletteSwatch)paletteSwatch.dataset.palette=palette;
-    if(specialBtn){specialBtn.classList.toggle('active-special',special!=='none');specialBtn.classList.toggle('is-snow',special==='snow');specialBtn.setAttribute('aria-label',`Tema especial atual: ${special==='fire'?'Fogo':special==='snow'?'Neve':'Nenhum'}`)}
-    if(specialLabel)specialLabel.textContent=special==='fire'?'Fogo':special==='snow'?'Neve':'Nenhum';
-    if(specialSwatch){specialSwatch.textContent=special==='fire'?'🔥':special==='snow'?'❄':'✦';specialSwatch.classList.toggle('is-fire',special==='fire');specialSwatch.classList.toggle('is-snow',special==='snow')}
+    if(specialBtn){specialBtn.classList.toggle('active-special',special!=='none');specialBtn.classList.toggle('is-snow',special==='snow');specialBtn.classList.toggle('is-storm',special==='storm');specialBtn.setAttribute('aria-label',`Tema especial atual: ${special==='fire'?'Fogo':special==='snow'?'Neve':special==='storm'?'Tempestade':'Nenhum'}`)}
+    if(specialLabel)specialLabel.textContent=special==='fire'?'Fogo':special==='snow'?'Neve':special==='storm'?'Tempestade':'Nenhum';
+    if(specialSwatch){specialSwatch.textContent=special==='fire'?'🔥':special==='snow'?'❄':special==='storm'?'⚡':'✦';specialSwatch.classList.toggle('is-fire',special==='fire');specialSwatch.classList.toggle('is-snow',special==='snow');specialSwatch.classList.toggle('is-storm',special==='storm')}
     document.querySelectorAll('[data-palette-choice]').forEach(btn=>{const selected=special==='none'&&btn.dataset.paletteChoice===palette;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',selected?'true':'false')});
     document.querySelectorAll('[data-special-choice]').forEach(btn=>{const selected=btn.dataset.specialChoice===special;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',selected?'true':'false')});
     if(bg){
@@ -1139,11 +1139,11 @@
     if(help)help.onclick=()=>{if(helpDialog?.showModal)helpDialog.showModal();};
     if(posInput)posInput.oninput=e=>{state.history.bannerPositionY=clamp(Number(e.target.value)||50,0,100);save();syncShellChrome();};
     if(scaleInput)scaleInput.oninput=e=>{state.history.bannerScale=clamp(Number(e.target.value)||100,100,170);save();syncShellChrome();};
-    if(modeBtn)modeBtn.onclick=()=>{state.appearance=state.appearance||{mode:'dark',palette:'red',special:'none'};if(state.appearance.special==='fire'){state.appearance.special='none';state.appearance.mode='light';}else if(state.appearance.special==='snow'){state.appearance.special='none';state.appearance.mode='dark';}else state.appearance.mode=state.appearance.mode==='light'?'dark':'light';save();syncShellChrome();notify(state.appearance.mode==='light'?'Modo Light ativado.':'Modo Dark ativado.');};
+    if(modeBtn)modeBtn.onclick=()=>{state.appearance=state.appearance||{mode:'dark',palette:'red',special:'none'};if(state.appearance.special==='fire'||state.appearance.special==='storm'){state.appearance.special='none';state.appearance.mode='light';}else if(state.appearance.special==='snow'){state.appearance.special='none';state.appearance.mode='dark';}else state.appearance.mode=state.appearance.mode==='light'?'dark':'light';save();syncShellChrome();notify(state.appearance.mode==='light'?'Modo Light ativado.':'Modo Dark ativado.');};
     if(paletteBtn)paletteBtn.onclick=()=>{syncShellChrome();if(themeDialog?.showModal)themeDialog.showModal();};
     if(specialBtn)specialBtn.onclick=()=>{syncShellChrome();if(themeDialog?.showModal)themeDialog.showModal();};
     document.querySelectorAll('[data-palette-choice]').forEach(btn=>btn.onclick=()=>{const palette=btn.dataset.paletteChoice;if(!THEME_PALETTES[palette])return;state.appearance=state.appearance||{mode:'dark',palette:'red',special:'none'};state.appearance.palette=palette;state.appearance.special='none';save();syncShellChrome();notify(`Tema ${THEME_PALETTES[palette].label} ativado.`);});
-    document.querySelectorAll('[data-special-choice]').forEach(btn=>btn.onclick=()=>{const choice=btn.dataset.specialChoice;const special=choice==='fire'?'fire':choice==='snow'?'snow':'none';state.appearance=state.appearance||{mode:'dark',palette:'red',special:'none'};state.appearance.special=special;save();syncShellChrome();notify(special==='fire'?'Tema especial Fogo ativado.':special==='snow'?'Tema especial Neve ativado.':'Tema especial desativado.');});
+    document.querySelectorAll('[data-special-choice]').forEach(btn=>btn.onclick=()=>{const choice=btn.dataset.specialChoice;const special=choice==='fire'?'fire':choice==='snow'?'snow':choice==='storm'?'storm':'none';state.appearance=state.appearance||{mode:'dark',palette:'red',special:'none'};state.appearance.special=special;save();syncShellChrome();notify(special==='fire'?'Tema especial Fogo ativado.':special==='snow'?'Tema especial Neve ativado.':special==='storm'?'Tema especial Tempestade ativado.':'Tema especial desativado.');});
   }
   function toggleCondition(name,on){if(on&&!state.conditions.includes(name))state.conditions.push(name);if(!on)state.conditions=state.conditions.filter(x=>x!==name);save();renderSheet()}
   function shortRest(){if(state.death.dead){notify('Personagem morto não pode descansar.');return}if(state.currentHp===0){notify('Em 0 HP, estabilize e recupere 1 HP antes de descansar.');return}const hp=Number(system.rests?.short?.hp??25),en=Number(system.rests?.short?.energy??150);setHp(state.currentHp+hp);setEnergy(state.currentEnergy+en);save();renderSheet();notify(`Descanso curto: +${hp} HP e +${en} Energia.`)}
