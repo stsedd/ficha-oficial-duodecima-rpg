@@ -32,3 +32,8 @@ Leia `CORE-INTEGRATION.md` para o teste de sincronização.
 - Sacrifício mágico permite FOR/DES/CON negativos e recalcula Energia máxima automaticamente.
 - Legado Composto e Legado Direto receberam nomenclatura/descrições mais claras na criação.
 - A configuração de troca de passivas e ativas dos Legados agora é uma seção visível na Visão Geral, em vez de ficar escondida em um disclosure.
+
+
+## v5.9 — Aparência
+
+A ficha agora separa **Modo** (Dark / Light) de **Tema** (paleta). As paletas Vermelho, Rosa, Azul, Laranja, Verde, Roxo, Dourado, Prata, Vinho, Teal, Sépia, Mono Black e Mono White podem ser combinadas com os dois modos. A escolha é local à ficha e acompanha o JSON exportado.

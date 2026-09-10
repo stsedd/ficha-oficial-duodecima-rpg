@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Character Archive — Legio XII Fulminata · v5.8.2</title>
-  <link rel="stylesheet" href="styles-v582.css?v=5.8.2">
+  <title>Character Archive — Legio XII Fulminata · v5.9.0</title>
+  <link rel="stylesheet" href="styles-v590.css?v=5.9.0">
 </head>
 <body data-theme="standard">
   <main class="shell">
@@ -15,12 +15,14 @@
         <strong>Character Archive</strong>
         <span id="bannerCharacterName" class="archive-brand-character"></span>
       </div>
-      <button id="themeToggleBtn" class="theme-toggle" type="button" aria-label="Alternar entre tema escuro e claro" title="Alterar tema"><span class="theme-toggle-icon" aria-hidden="true">☾</span><span class="theme-toggle-copy"><small>TEMA</small><b>Escuro</b></span></button>
+      <div class="appearance-top-actions" aria-label="Aparência da ficha">
+        <button id="themeModeBtn" class="theme-toggle appearance-mode-btn" type="button" aria-label="Alternar entre modo dark e light" title="Alternar Dark / Light"><span class="theme-toggle-icon" aria-hidden="true">☾</span><span class="theme-toggle-copy"><small>MODO</small><b>Dark</b></span></button>
+        <button id="themePaletteBtn" class="theme-toggle theme-palette-btn" type="button" aria-haspopup="dialog" aria-controls="themeDialog" title="Escolher tema de cor"><span id="themePaletteSwatch" class="theme-palette-swatch" aria-hidden="true"></span><span class="theme-toggle-copy"><small>TEMA</small><b id="themePaletteLabel">Vermelho</b></span></button>
+      </div>
     </section>
 
     <header id="siteBanner" class="profile-cover" aria-label="Banner do personagem">
       <div id="siteBannerBg" class="profile-cover-bg" aria-hidden="true"></div>
-      <div class="profile-cover-empty"><span>CAPA DO PERSONAGEM</span><small>Adicione uma imagem para personalizar o banner</small></div>
     </header>
 
     <section class="archive-toolbar" aria-label="Arquivo e personalização da ficha">
@@ -48,9 +50,31 @@
     <section id="sheetView" class="hidden"></section>
 
     <footer>
-      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.8.2</p>
+      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.9.0</p>
     </footer>
   </main>
+
+  <dialog id="themeDialog" class="theme-dialog">
+    <form method="dialog" class="theme-dialog-card">
+      <div class="row between theme-dialog-head"><div><p class="eyebrow">APARÊNCIA</p><h2>Escolher tema</h2><p class="muted compact">A paleta usa o modo Dark ou Light escolhido no botão ao lado.</p></div><button value="cancel" class="theme-dialog-close" aria-label="Fechar">×</button></div>
+      <div class="theme-palette-grid" role="listbox" aria-label="Temas de cor">
+        <button type="button" class="theme-choice" data-palette-choice="red" style="--choice:#d53645;--choice2:#7d1e2b"><i></i><span><b>Vermelho</b><small>Legio XII</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="pink" style="--choice:#e44788;--choice2:#8f2856"><i></i><span><b>Rosa</b><small>Rosa & vinho</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="blue" style="--choice:#3f7fd8;--choice2:#234b89"><i></i><span><b>Azul</b><small>Azul imperial</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="orange" style="--choice:#dd702f;--choice2:#884019"><i></i><span><b>Laranja</b><small>Âmbar quente</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="green" style="--choice:#3f9b68;--choice2:#245f42"><i></i><span><b>Verde</b><small>Laurel</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="purple" style="--choice:#8a59cf;--choice2:#50307c"><i></i><span><b>Roxo</b><small>Púrpura</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="gold" style="--choice:#b88939;--choice2:#6f4d1c"><i></i><span><b>Dourado</b><small>Aureum</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="silver" style="--choice:#919aa8;--choice2:#535d69"><i></i><span><b>Prata</b><small>Argentum</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="wine" style="--choice:#9d3450;--choice2:#5d1c2e"><i></i><span><b>Vinho</b><small>Bordô</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="teal" style="--choice:#319a92;--choice2:#1d5d59"><i></i><span><b>Teal</b><small>Verde-azulado</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="sepia" style="--choice:#9a6c45;--choice2:#5c3d25"><i></i><span><b>Sépia</b><small>Pergaminho</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="mono-black" style="--choice:#2f2f32;--choice2:#0e0e10"><i></i><span><b>Mono Black</b><small>Grafite</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="mono-white" style="--choice:#e9e9e9;--choice2:#9f9f9f"><i></i><span><b>Mono White</b><small>Pérola</small></span></button>
+      </div>
+      <div class="theme-dialog-foot"><span>O tema fica salvo nesta ficha e acompanha o JSON exportado.</span><button value="cancel" class="primary">Concluir</button></div>
+    </form>
+  </dialog>
 
   <dialog id="helpDialog" class="help-dialog">
     <form method="dialog" class="help-dialog-card">
@@ -63,16 +87,16 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script src="skills-v582.js?v=5.8.2"></script>
-  <script src="gods-v582.js?v=5.8.2"></script>
-  <script src="abilities-v582.js?v=5.8.2"></script>
-  <script src="abilities-extra-v582.js?v=5.8.2"></script>
-  <script src="system-v582.js?v=5.8.2"></script>
-  <script src="talents-v582.js?v=5.8.2"></script>
-  <script src="magic-v582.js?v=5.8.2"></script>
-  <script src="roma-v582.js?v=5.8.2"></script>
-  <script src="familiars-v582.js?v=5.8.2"></script>
-  <script src="core-bridge-v582.js?v=5.8.2"></script>
-  <script src="bootstrap-v582.js?v=5.8.2"></script>
+  <script src="skills-v590.js?v=5.9.0"></script>
+  <script src="gods-v590.js?v=5.9.0"></script>
+  <script src="abilities-v590.js?v=5.9.0"></script>
+  <script src="abilities-extra-v590.js?v=5.9.0"></script>
+  <script src="system-v590.js?v=5.9.0"></script>
+  <script src="talents-v590.js?v=5.9.0"></script>
+  <script src="magic-v590.js?v=5.9.0"></script>
+  <script src="roma-v590.js?v=5.9.0"></script>
+  <script src="familiars-v590.js?v=5.9.0"></script>
+  <script src="core-bridge-v590.js?v=5.9.0"></script>
+  <script src="bootstrap-v590.js?v=5.9.0"></script>
 </body>
 </html>
