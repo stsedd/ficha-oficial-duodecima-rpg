@@ -3355,3 +3355,143 @@ body[data-special="snow"] .sheet-tabs button.active{color:#24485b!important;box-
 body[data-special="snow"] .primary{background:linear-gradient(180deg,#84b4cc,#4a7e98)!important;border-color:#5389a3!important;color:#f8fdff!important}
 body[data-special="snow"] .theme-toggle,body[data-special="snow"] .theme-dialog,body[data-special="snow"] .theme-choice{color:#274656!important}
 body[data-special="snow"] :is(.eyebrow,.archive-brand-kicker,.rail-brandline b,.equipment-card-type i){color:#467895!important}
+
+/* =========================================================
+   v5.9.6 — organização dos ornamentos Fogo/Neve
+   ========================================================= */
+
+/* Camada frontal de neve: alguns flocos passam na frente da ficha. */
+.snow-fall-front{display:none;position:fixed;inset:-12vh 0 0;z-index:95;pointer-events:none;overflow:hidden}
+.snow-fall-front i{--x:50%;--size:13px;--dur:12s;--delay:0s;position:absolute;top:-8vh;left:var(--x);width:var(--size);height:var(--size);color:rgba(255,255,255,.95);filter:drop-shadow(0 0 6px rgba(158,210,236,.42));animation:duoSnowFall var(--dur) linear var(--delay) infinite,duoSnowSway 4.2s ease-in-out var(--delay) infinite alternate}
+.snow-fall-front i::before{content:"❄";display:block;font-size:var(--size);line-height:1}
+.snow-fall-front i:nth-child(1){--x:6%;--size:12px;--dur:12s;--delay:-3s}
+.snow-fall-front i:nth-child(2){--x:14%;--size:18px;--dur:15s;--delay:-7s}
+.snow-fall-front i:nth-child(3){--x:22%;--size:10px;--dur:11s;--delay:-2s}
+.snow-fall-front i:nth-child(4){--x:31%;--size:16px;--dur:16s;--delay:-10s}
+.snow-fall-front i:nth-child(5){--x:39%;--size:9px;--dur:13s;--delay:-4s}
+.snow-fall-front i:nth-child(6){--x:48%;--size:15px;--dur:14s;--delay:-8s}
+.snow-fall-front i:nth-child(7){--x:57%;--size:11px;--dur:12s;--delay:-1s}
+.snow-fall-front i:nth-child(8){--x:65%;--size:17px;--dur:17s;--delay:-11s}
+.snow-fall-front i:nth-child(9){--x:73%;--size:9px;--dur:13s;--delay:-5s}
+.snow-fall-front i:nth-child(10){--x:81%;--size:14px;--dur:15s;--delay:-9s}
+.snow-fall-front i:nth-child(11){--x:88%;--size:19px;--dur:18s;--delay:-12s}
+.snow-fall-front i:nth-child(12){--x:94%;--size:10px;--dur:12s;--delay:-6s}
+.snow-fall-front i:nth-child(13){--x:27%;--size:7px;--dur:20s;--delay:-13s;opacity:.72}
+.snow-fall-front i:nth-child(14){--x:69%;--size:7px;--dur:19s;--delay:-15s;opacity:.7}
+
+/* Reorganiza fogo e neve nas margens: menos espalhado no meio, mais contido nas bordas. */
+body[data-special="fire"] :is(.profile-cover,.rail-portrait,.equipment-card-media,.inventory-image-preview.has-image,.equipment-card-glyph,.familiar-head-large,.weapon-editor-head),
+body[data-special="snow"] :is(.profile-cover,.rail-portrait,.equipment-card-media,.inventory-image-preview.has-image,.equipment-card-glyph,.familiar-head-large,.weapon-editor-head){
+  position:relative!important;
+  overflow:hidden!important;
+}
+
+/* -------- FOGO: chama organizada nas bordas inferiores e cantos -------- */
+body[data-special="fire"] .fire-flame-bed{
+  bottom:-10px!important;
+  height:138px!important;
+  opacity:.17!important;
+  background:url('fire-flame-rim-v595.svg') center bottom/100% 118px no-repeat!important;
+}
+body[data-special="fire"] .fire-heat-haze{opacity:.42!important;height:24vh!important}
+
+body[data-special="fire"] :is(.profile-cover,.rail-portrait,.equipment-card-media,.inventory-image-preview.has-image,.equipment-card-glyph,.familiar-head-large,.weapon-editor-head)::before{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;right:0!important;bottom:-1px!important;
+  height:24px!important;
+  z-index:6!important;
+  pointer-events:none!important;
+  background:url('fire-flame-band-v594.svg') center bottom/100% 24px no-repeat!important;
+  opacity:.42!important;
+  mix-blend-mode:screen!important;
+}
+body[data-special="fire"] .profile-cover::before,
+body[data-special="fire"] .rail-portrait::before{height:34px!important;background-size:100% 32px!important;opacity:.5!important}
+
+body[data-special="fire"] :is(.profile-cover,.rail-portrait,.equipment-card-media,.inventory-image-preview.has-image,.equipment-card-glyph,.familiar-head-large,.weapon-editor-head)::after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:7!important;
+  pointer-events:none!important;
+  background:
+    url('fire-flame-corner-v594.svg') left bottom/44px 44px no-repeat,
+    url('fire-flame-corner-v594.svg') right bottom/44px 44px no-repeat!important;
+  opacity:.58!important;
+  mix-blend-mode:screen!important;
+}
+body[data-special="fire"] .profile-cover::after,
+body[data-special="fire"] .rail-portrait::after{background:url('fire-flame-corner-v594.svg') left bottom/74px 74px no-repeat,url('fire-flame-corner-v594.svg') right bottom/74px 74px no-repeat!important;opacity:.62!important}
+body[data-special="fire"] .equipment-card-media,
+body[data-special="fire"] .inventory-image-preview.has-image,
+body[data-special="fire"] .equipment-card-glyph,
+body[data-special="fire"] .familiar-head-large,
+body[data-special="fire"] .weapon-editor-head{
+  box-shadow:0 0 0 1px rgba(255,121,30,.18),0 0 16px rgba(255,93,20,.09),inset 0 0 22px rgba(0,0,0,.24)!important;
+}
+
+/* -------- NEVE: acúmulo no topo + geada nos cantos, com flocos na frente -------- */
+body[data-special="snow"] .snow-fall{z-index:1!important;opacity:.36!important}
+body[data-special="snow"] .snow-fall-front{display:block!important}
+body[data-special="snow"] .snow-mist{opacity:.34!important;height:180px!important}
+body[data-special="snow"] .snow-drift{opacity:.68!important;height:62px!important}
+
+body[data-special="snow"] :is(.profile-cover,.rail-portrait,.equipment-card-media,.inventory-image-preview.has-image,.equipment-card-glyph,.familiar-head-large,.weapon-editor-head)::before{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;right:0!important;top:-1px!important;
+  height:28px!important;
+  z-index:6!important;
+  pointer-events:none!important;
+  background:url('snow-cap-v595.svg') center top/100% 28px no-repeat!important;
+  opacity:.98!important;
+}
+body[data-special="snow"] .profile-cover::before,
+body[data-special="snow"] .rail-portrait::before{height:40px!important;background-size:100% 40px!important}
+
+body[data-special="snow"] :is(.profile-cover,.rail-portrait,.equipment-card-media,.inventory-image-preview.has-image,.equipment-card-glyph,.familiar-head-large,.weapon-editor-head)::after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:7!important;
+  pointer-events:none!important;
+  background:
+    url('snow-frost-edge-v594.svg') center top/100% 16px no-repeat,
+    url('snow-frost-corner-v594.svg') left top/54px 54px no-repeat,
+    url('snow-frost-corner-v594.svg') right top/54px 54px no-repeat!important;
+  opacity:.84!important;
+  mix-blend-mode:screen!important;
+}
+body[data-special="snow"] .profile-cover::after,
+body[data-special="snow"] .rail-portrait::after{background:url('snow-frost-edge-v594.svg') center top/100% 20px no-repeat,url('snow-frost-corner-v594.svg') left top/78px 78px no-repeat,url('snow-frost-corner-v594.svg') right top/78px 78px no-repeat!important;opacity:.9!important}
+body[data-special="snow"] .equipment-card-media,
+body[data-special="snow"] .inventory-image-preview.has-image,
+body[data-special="snow"] .equipment-card-glyph,
+body[data-special="snow"] .familiar-head-large,
+body[data-special="snow"] .weapon-editor-head,
+body[data-special="snow"] .rail-portrait{
+  box-shadow:0 0 0 1px rgba(164,193,210,.36),0 0 18px rgba(170,210,228,.16),inset 0 0 20px rgba(255,255,255,.36)!important;
+}
+
+/* Ornamento geral mais organizado também em alguns blocos grandes, mas sempre na borda superior/inferior. */
+body[data-special="snow"] :is(.character-rail,.card,.subcard,.ability-card){position:relative}
+body[data-special="snow"] :is(.character-rail,.ability-card)::before{
+  content:"";position:absolute;left:12px;right:12px;top:-1px;height:12px;pointer-events:none;z-index:1;
+  background:url('snow-frost-edge-v594.svg') center top/100% 12px no-repeat;opacity:.36;
+}
+body[data-special="fire"] :is(.character-rail,.ability-card){position:relative}
+body[data-special="fire"] :is(.character-rail,.ability-card)::after{
+  content:"";position:absolute;left:14px;right:14px;bottom:-1px;height:12px;pointer-events:none;z-index:1;
+  background:url('fire-flame-band-v594.svg') center bottom/100% 12px no-repeat;opacity:.2;
+}
+
+@media(max-width:720px){
+  .snow-fall-front i:nth-child(n+11){display:none}
+  body[data-special="fire"] :is(.profile-cover,.rail-portrait)::after{background-size:58px 58px,58px 58px!important}
+  body[data-special="snow"] :is(.profile-cover,.rail-portrait)::after{background-size:60px 60px,60px 60px,100% 18px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .snow-fall-front{display:none!important}
+}
