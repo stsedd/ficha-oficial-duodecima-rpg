@@ -1,4 +1,4 @@
-# v5.8.1 — tema claro completo + Bênção de Fortuna
+# v5.8.2 — tema claro completo + Bênção de Fortuna
 
 - Tema claro revisado para remover superfícies pretas remanescentes, incluindo HUD de combate, atributos, perícias, talentos e habilidades divinas.
 - Bênção de Fortuna adicionada como opção da ficha: ao marcar, concede 10 HP temporários sem alterar o HP máximo normal.
