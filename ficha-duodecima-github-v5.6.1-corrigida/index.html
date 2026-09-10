@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#050505">
+  <title>Character Archive — Legio XII Fulminata · v5.6</title>
+  <link rel="stylesheet" href="styles-v55.css?v=5.6.0">
+</head>
+<body data-theme="standard">
+  <main class="shell">
+    <header class="topbar compact-topbar">
+      <div class="brand-lockup">
+        <span class="brand-icon legion-brand-icon" aria-hidden="true"><img src="legio-header-v55.png?v=5.6.0" alt="Símbolo da Legião XII" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="brand-fallback" hidden>XII</span></span>
+        <div class="brand-copy">
+          <p class="eyebrow">LEGIO XII FULMINATA</p>
+          <h1>Character Archive</h1>
+        </div>
+      </div>
+      <div class="actions compact-actions">
+        <div id="coreStatus" class="core-status loading" title="Sincronizando regras"><i></i><span>CORE…</span></div>
+        <button id="exportBtn" class="ghost small-btn" type="button">Exportar JSON</button>
+        <label class="ghost file-btn small-btn">Importar JSON<input id="importInput" type="file" accept="application/json"></label>
+        <button id="resetBtn" class="danger small-btn" type="button">Resetar</button>
+      </div>
+    </header>
+
+    <section id="creationView" class="grid two"></section>
+    <section id="sheetView" class="hidden"></section>
+
+    <footer>
+      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.6</p>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="skills-v55.js?v=5.6.0"></script>
+  <script src="gods-v55.js?v=5.6.0"></script>
+  <script src="abilities-v55.js?v=5.6.0"></script>
+  <script src="abilities-extra-v55.js?v=5.6.0"></script>
+  <script src="system-v55.js?v=5.6.0"></script>
+  <script src="talents-v55.js?v=5.6.0"></script>
+  <script src="magic-v55.js?v=5.6.0"></script>
+  <script src="roma-v55.js?v=5.6.0"></script>
+  <script src="familiars-v55.js?v=5.6.0"></script>
+  <script src="core-bridge-v55.js?v=5.6.0"></script>
+  <script src="bootstrap-v55.js?v=5.6.0"></script>
+</body>
+</html>
