@@ -1,4 +1,4 @@
-# v5.9.3 — Tema Especial Fogo 2.0
+# v5.9.4 — Tema Especial Fogo 2.0
 
 - Corrige o input de Nível para permanecer totalmente transparente em todos os temas, inclusive Fogo.
 - Adiciona chamas desenhadas de verdade ao tema Fogo, sem depender só de laranja/glow.
