@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Character Archive — Legio XII Fulminata · v5.7</title>
+  <title>Character Archive — Legio XII Fulminata · v5.7.2</title>
   <link rel="stylesheet" href="styles-v57.css?v=5.7.0">
 </head>
 <body data-theme="standard">
@@ -38,13 +38,17 @@
         <button id="resetBtn" class="danger small-btn" type="button">Resetar</button>
         <input id="bannerUploadInput" type="file" accept="image/*" hidden>
       </div>
+      <div id="bannerControls" class="banner-controls hidden" aria-label="Ajustes do banner">
+        <label class="banner-control"><span>Posição vertical</span><input id="bannerPositionInput" type="range" min="0" max="100" step="1" value="50"><b id="bannerPositionValue">50%</b></label>
+        <label class="banner-control"><span>Zoom da capa</span><input id="bannerScaleInput" type="range" min="100" max="170" step="1" value="100"><b id="bannerScaleValue">100%</b></label>
+      </div>
     </section>
 
     <section id="creationView" class="grid two"></section>
     <section id="sheetView" class="hidden"></section>
 
     <footer>
-      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.7</p>
+      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.7.2</p>
     </footer>
   </main>
 
