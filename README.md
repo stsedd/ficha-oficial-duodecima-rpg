@@ -41,3 +41,7 @@ A ficha agora separa **Modo** (Dark / Light) de **Tema** (paleta). As paletas Ve
 
 ## Temas v5.9.1
 Modo Dark/Light e paleta são independentes. Novos pastéis: Blush, Peach, Lilac, Sage, Lemon, Mauve, Coral, Aqua, Sand e Sky. No modo Light, superfícies recebem uma tonalidade suave baseada na paleta.
+
+
+## v5.9.2
+Adiciona a camada de Temas Especiais, começando por Fogo. O tema é visual, salvo por ficha e não altera o Core.

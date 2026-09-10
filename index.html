@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Character Archive — Legio XII Fulminata · v5.9.1</title>
-  <link rel="stylesheet" href="styles-v591.css?v=5.9.1">
+  <title>Character Archive — Legio XII Fulminata · v5.9.2</title>
+  <link rel="stylesheet" href="styles-v592.css?v=5.9.1">
 </head>
 <body data-theme="standard">
   <main class="shell">
@@ -18,6 +18,7 @@
       <div class="appearance-top-actions" aria-label="Aparência da ficha">
         <button id="themeModeBtn" class="theme-toggle appearance-mode-btn" type="button" aria-label="Alternar entre modo dark e light" title="Alternar Dark / Light"><span class="theme-toggle-icon" aria-hidden="true">☾</span><span class="theme-toggle-copy"><small>MODO</small><b>Dark</b></span></button>
         <button id="themePaletteBtn" class="theme-toggle theme-palette-btn" type="button" aria-haspopup="dialog" aria-controls="themeDialog" title="Escolher tema de cor"><span id="themePaletteSwatch" class="theme-palette-swatch" aria-hidden="true"></span><span class="theme-toggle-copy"><small>TEMA</small><b id="themePaletteLabel">Vermelho</b></span></button>
+        <button id="themeSpecialBtn" class="theme-toggle theme-special-btn" type="button" aria-haspopup="dialog" aria-controls="themeDialog" title="Escolher tema especial"><span id="themeSpecialSwatch" class="theme-special-swatch" aria-hidden="true">✦</span><span class="theme-toggle-copy"><small>ESPECIAL</small><b id="themeSpecialLabel">Nenhum</b></span></button>
       </div>
     </section>
 
@@ -50,7 +51,7 @@
     <section id="sheetView" class="hidden"></section>
 
     <footer>
-      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.9.1</p>
+      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.9.2</p>
     </footer>
   </main>
 
@@ -89,6 +90,11 @@
         <button type="button" class="theme-choice" data-palette-choice="mono-black" style="--choice:#2f2f32;--choice2:#0e0e10;--choice-bg:#e4e4e6"><i></i><span><b>Mono Black</b><small>Grafite</small></span></button>
         <button type="button" class="theme-choice" data-palette-choice="mono-white" style="--choice:#e9e9e9;--choice2:#9f9f9f;--choice-bg:#f1f1f1"><i></i><span><b>Mono White</b><small>Pérola</small></span></button>
       </div>
+      <div class="theme-section-label special-label"><b>Temas especiais</b><span>Efeitos visuais completos, independentes das paletas</span></div>
+      <div class="special-theme-grid" role="listbox" aria-label="Temas especiais">
+        <button type="button" class="theme-choice special-theme-choice" data-special-choice="none" style="--choice:#787075;--choice2:#282427;--choice-bg:#ddd7d9"><i></i><span><b>Nenhum</b><small>Usar modo + cor</small></span></button>
+        <button type="button" class="theme-choice special-theme-choice fire-theme-choice" data-special-choice="fire" style="--choice:#ff671f;--choice2:#6e1607;--choice-bg:#261008"><i>🔥</i><span><b>Fogo</b><small>Carvão · brasa · incandescência</small></span></button>
+      </div>
       <div class="theme-dialog-foot"><span>O tema fica salvo nesta ficha e acompanha o JSON exportado.</span><button value="cancel" class="primary">Concluir</button></div>
     </form>
   </dialog>
@@ -102,18 +108,20 @@
     </form>
   </dialog>
 
+  <div class="fire-embers" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
   <div id="toast" class="toast hidden"></div>
 
-  <script src="skills-v591.js?v=5.9.1"></script>
-  <script src="gods-v591.js?v=5.9.1"></script>
-  <script src="abilities-v591.js?v=5.9.1"></script>
-  <script src="abilities-extra-v591.js?v=5.9.1"></script>
-  <script src="system-v591.js?v=5.9.1"></script>
-  <script src="talents-v591.js?v=5.9.1"></script>
-  <script src="magic-v591.js?v=5.9.1"></script>
-  <script src="roma-v591.js?v=5.9.1"></script>
-  <script src="familiars-v591.js?v=5.9.1"></script>
-  <script src="core-bridge-v591.js?v=5.9.1"></script>
-  <script src="bootstrap-v591.js?v=5.9.1"></script>
+  <script src="skills-v592.js?v=5.9.1"></script>
+  <script src="gods-v592.js?v=5.9.1"></script>
+  <script src="abilities-v592.js?v=5.9.1"></script>
+  <script src="abilities-extra-v592.js?v=5.9.1"></script>
+  <script src="system-v592.js?v=5.9.1"></script>
+  <script src="talents-v592.js?v=5.9.1"></script>
+  <script src="magic-v592.js?v=5.9.1"></script>
+  <script src="roma-v592.js?v=5.9.1"></script>
+  <script src="familiars-v592.js?v=5.9.1"></script>
+  <script src="core-bridge-v592.js?v=5.9.1"></script>
+  <script src="bootstrap-v592.js?v=5.9.1"></script>
 </body>
 </html>
