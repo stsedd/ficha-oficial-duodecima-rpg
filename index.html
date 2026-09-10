@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Character Archive — Legio XII Fulminata · v5.9.0</title>
-  <link rel="stylesheet" href="styles-v590.css?v=5.9.0">
+  <title>Character Archive — Legio XII Fulminata · v5.9.1</title>
+  <link rel="stylesheet" href="styles-v591.css?v=5.9.1">
 </head>
 <body data-theme="standard">
   <main class="shell">
@@ -50,27 +50,44 @@
     <section id="sheetView" class="hidden"></section>
 
     <footer>
-      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.9.0</p>
+      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.9.1</p>
     </footer>
   </main>
 
   <dialog id="themeDialog" class="theme-dialog">
     <form method="dialog" class="theme-dialog-card">
       <div class="row between theme-dialog-head"><div><p class="eyebrow">APARÊNCIA</p><h2>Escolher tema</h2><p class="muted compact">A paleta usa o modo Dark ou Light escolhido no botão ao lado.</p></div><button value="cancel" class="theme-dialog-close" aria-label="Fechar">×</button></div>
+      <div class="theme-section-label"><b>Cores</b><span>Paletas mais marcadas</span></div>
       <div class="theme-palette-grid" role="listbox" aria-label="Temas de cor">
-        <button type="button" class="theme-choice" data-palette-choice="red" style="--choice:#d53645;--choice2:#7d1e2b"><i></i><span><b>Vermelho</b><small>Legio XII</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="pink" style="--choice:#e44788;--choice2:#8f2856"><i></i><span><b>Rosa</b><small>Rosa & vinho</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="blue" style="--choice:#3f7fd8;--choice2:#234b89"><i></i><span><b>Azul</b><small>Azul imperial</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="orange" style="--choice:#dd702f;--choice2:#884019"><i></i><span><b>Laranja</b><small>Âmbar quente</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="green" style="--choice:#3f9b68;--choice2:#245f42"><i></i><span><b>Verde</b><small>Laurel</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="purple" style="--choice:#8a59cf;--choice2:#50307c"><i></i><span><b>Roxo</b><small>Púrpura</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="gold" style="--choice:#b88939;--choice2:#6f4d1c"><i></i><span><b>Dourado</b><small>Aureum</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="silver" style="--choice:#919aa8;--choice2:#535d69"><i></i><span><b>Prata</b><small>Argentum</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="wine" style="--choice:#9d3450;--choice2:#5d1c2e"><i></i><span><b>Vinho</b><small>Bordô</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="teal" style="--choice:#319a92;--choice2:#1d5d59"><i></i><span><b>Teal</b><small>Verde-azulado</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="sepia" style="--choice:#9a6c45;--choice2:#5c3d25"><i></i><span><b>Sépia</b><small>Pergaminho</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="mono-black" style="--choice:#2f2f32;--choice2:#0e0e10"><i></i><span><b>Mono Black</b><small>Grafite</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="mono-white" style="--choice:#e9e9e9;--choice2:#9f9f9f"><i></i><span><b>Mono White</b><small>Pérola</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="red" style="--choice:#d53645;--choice2:#7d1e2b;--choice-bg:#f6d9dd"><i></i><span><b>Vermelho</b><small>Legio XII</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="pink" style="--choice:#e44788;--choice2:#8f2856;--choice-bg:#f7d8e8"><i></i><span><b>Rosa</b><small>Rosa & vinho</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="blue" style="--choice:#3f7fd8;--choice2:#234b89;--choice-bg:#dde9f8"><i></i><span><b>Azul</b><small>Azul imperial</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="orange" style="--choice:#dd702f;--choice2:#884019;--choice-bg:#f8e2d1"><i></i><span><b>Laranja</b><small>Âmbar quente</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="green" style="--choice:#3f9b68;--choice2:#245f42;--choice-bg:#dcefe3"><i></i><span><b>Verde</b><small>Laurel</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="purple" style="--choice:#8a59cf;--choice2:#50307c;--choice-bg:#e8ddf5"><i></i><span><b>Roxo</b><small>Púrpura</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="gold" style="--choice:#b88939;--choice2:#6f4d1c;--choice-bg:#f4e8c9"><i></i><span><b>Dourado</b><small>Aureum</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="silver" style="--choice:#919aa8;--choice2:#535d69;--choice-bg:#e8ebef"><i></i><span><b>Prata</b><small>Argentum</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="wine" style="--choice:#9d3450;--choice2:#5d1c2e;--choice-bg:#ecdce1"><i></i><span><b>Vinho</b><small>Bordô</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="teal" style="--choice:#319a92;--choice2:#1d5d59;--choice-bg:#d7eeec"><i></i><span><b>Teal</b><small>Verde-azulado</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="sepia" style="--choice:#9a6c45;--choice2:#5c3d25;--choice-bg:#eee2d7"><i></i><span><b>Sépia</b><small>Pergaminho</small></span></button>
+      </div>
+      <div class="theme-section-label pastel-label"><b>Pastéis</b><span>Referência suave para o modo Light</span></div>
+      <div class="theme-palette-grid pastel-grid" role="listbox" aria-label="Temas pastel">
+        <button type="button" class="theme-choice" data-palette-choice="blush" style="--choice:#d96b83;--choice2:#9f3e55;--choice-bg:#f7e1e6"><i></i><span><b>Blush</b><small>#F7E1E6</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="peach" style="--choice:#d98249;--choice2:#9a4f26;--choice-bg:#ffd6a5"><i></i><span><b>Peach</b><small>#FFD6A5</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="lilac" style="--choice:#9c78cf;--choice2:#684597;--choice-bg:#e6d6f7"><i></i><span><b>Lilac</b><small>#E6D6F7</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="sage" style="--choice:#6f9f70;--choice2:#456c49;--choice-bg:#d6ead4"><i></i><span><b>Sage</b><small>#D6EAD4</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="lemon" style="--choice:#c69c2e;--choice2:#856315;--choice-bg:#fef3b0"><i></i><span><b>Lemon</b><small>#FEF3B0</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="mauve" style="--choice:#a47ba8;--choice2:#6c4c70;--choice-bg:#e6d6e7"><i></i><span><b>Mauve</b><small>#E6D6E7</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="coral" style="--choice:#e16f63;--choice2:#a64038;--choice-bg:#ffc1b6"><i></i><span><b>Coral</b><small>#FFC1B6</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="aqua" style="--choice:#5caaa5;--choice2:#347470;--choice-bg:#d0f0ed"><i></i><span><b>Aqua</b><small>#D0F0ED</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="sand" style="--choice:#a87a47;--choice2:#6f4d2b;--choice-bg:#ead8b0"><i></i><span><b>Sand</b><small>#EAD8B0</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="sky" style="--choice:#789acf;--choice2:#4a6591;--choice-bg:#dce6f7"><i></i><span><b>Sky</b><small>#DCE6F7</small></span></button>
+      </div>
+      <div class="theme-section-label mono-label"><b>Monocromáticos</b><span>Sem cor secundária</span></div>
+      <div class="theme-palette-grid mono-grid" role="listbox" aria-label="Temas monocromáticos">
+        <button type="button" class="theme-choice" data-palette-choice="mono-black" style="--choice:#2f2f32;--choice2:#0e0e10;--choice-bg:#e4e4e6"><i></i><span><b>Mono Black</b><small>Grafite</small></span></button>
+        <button type="button" class="theme-choice" data-palette-choice="mono-white" style="--choice:#e9e9e9;--choice2:#9f9f9f;--choice-bg:#f1f1f1"><i></i><span><b>Mono White</b><small>Pérola</small></span></button>
       </div>
       <div class="theme-dialog-foot"><span>O tema fica salvo nesta ficha e acompanha o JSON exportado.</span><button value="cancel" class="primary">Concluir</button></div>
     </form>
@@ -87,16 +104,16 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script src="skills-v590.js?v=5.9.0"></script>
-  <script src="gods-v590.js?v=5.9.0"></script>
-  <script src="abilities-v590.js?v=5.9.0"></script>
-  <script src="abilities-extra-v590.js?v=5.9.0"></script>
-  <script src="system-v590.js?v=5.9.0"></script>
-  <script src="talents-v590.js?v=5.9.0"></script>
-  <script src="magic-v590.js?v=5.9.0"></script>
-  <script src="roma-v590.js?v=5.9.0"></script>
-  <script src="familiars-v590.js?v=5.9.0"></script>
-  <script src="core-bridge-v590.js?v=5.9.0"></script>
-  <script src="bootstrap-v590.js?v=5.9.0"></script>
+  <script src="skills-v591.js?v=5.9.1"></script>
+  <script src="gods-v591.js?v=5.9.1"></script>
+  <script src="abilities-v591.js?v=5.9.1"></script>
+  <script src="abilities-extra-v591.js?v=5.9.1"></script>
+  <script src="system-v591.js?v=5.9.1"></script>
+  <script src="talents-v591.js?v=5.9.1"></script>
+  <script src="magic-v591.js?v=5.9.1"></script>
+  <script src="roma-v591.js?v=5.9.1"></script>
+  <script src="familiars-v591.js?v=5.9.1"></script>
+  <script src="core-bridge-v591.js?v=5.9.1"></script>
+  <script src="bootstrap-v591.js?v=5.9.1"></script>
 </body>
 </html>

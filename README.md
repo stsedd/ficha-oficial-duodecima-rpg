@@ -37,3 +37,7 @@ Leia `CORE-INTEGRATION.md` para o teste de sincronização.
 ## v5.9 — Aparência
 
 A ficha agora separa **Modo** (Dark / Light) de **Tema** (paleta). As paletas Vermelho, Rosa, Azul, Laranja, Verde, Roxo, Dourado, Prata, Vinho, Teal, Sépia, Mono Black e Mono White podem ser combinadas com os dois modos. A escolha é local à ficha e acompanha o JSON exportado.
+
+
+## Temas v5.9.1
+Modo Dark/Light e paleta são independentes. Novos pastéis: Blush, Peach, Lilac, Sage, Lemon, Mauve, Coral, Aqua, Sand e Sky. No modo Light, superfícies recebem uma tonalidade suave baseada na paleta.
