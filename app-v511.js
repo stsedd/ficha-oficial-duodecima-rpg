@@ -21,6 +21,7 @@
     ['arma-distancia','Arma (à distância)'],
     ['consumivel','Consumível'],
     ['item-magico','Item mágico'],
+    ['municao','Munição'],
     ['outro','Outro']
   ];
   const THEME_PALETTES = {
@@ -31,10 +32,56 @@
     'mono-black':{label:'Mono Black'}, 'mono-white':{label:'Mono White'}
   };
 
+  const ITEM_LIBRARY = [
+    {id:'heal-minor',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Cura Menor',effect:'Cura 2d4+2 de HP',notes:'Recupera 2d4+2 de HP.',qty:1,showInDeck:true},
+    {id:'heal-major',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Cura Maior',effect:'Cura 4d4+4 de HP',notes:'Recupera 4d4+4 de HP.',qty:1,showInDeck:true},
+    {id:'heal-superior',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Cura Superior',effect:'Cura 8d8+8 de HP',notes:'Recupera 8d8+8 de HP.',qty:1,showInDeck:true},
+    {id:'porte-fisico',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Porte Físico',effect:'Vantagem em testes de FOR, DES e CON por 1 hora',notes:'Por 1 hora, concede vantagem em testes de Força, Destreza e Constituição. Não afeta ataques nem defesas.',qty:1,showInDeck:true},
+    {id:'porte-mental',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Porte Mental',effect:'Vantagem em testes de INT, FÉ e CAR por 1 hora',notes:'Por 1 hora, concede vantagem em testes de Inteligência, Fé e Carisma, incluindo foco, autocontrole e resistências mentais relacionadas.',qty:1,showInDeck:true},
+    {id:'bottled-breath',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Bottled Breath',effect:'Respira debaixo d’água por 30 min',notes:'Permite respirar debaixo d’água por 30 minutos.',qty:1,showInDeck:true},
+    {id:'oil-slipperiness',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Oil of Slipperiness',effect:'+2 contra agarrões e amarras por 1 hora',notes:'Por 1 hora, concede +2 contra agarrões, amarras e contenções semelhantes.',qty:1,showInDeck:true},
+    {id:'res-elemental',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Resistência Elemental',effect:'Resistência temporária a um elemento',notes:'Concede resistência temporária a um tipo de dano elemental escolhido.',qty:1,showInDeck:true,ask:'elemental'},
+    {id:'res-veneno',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Resistência a Veneno',effect:'Resistência a veneno e +2 contra envenenamento',notes:'Concede resistência a dano de veneno e +2 em testes contra ser envenenado.',qty:1,showInDeck:true},
+    {id:'invisibilidade',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção da Invisibilidade',effect:'Invisível por 1 hora',notes:'Torna o usuário invisível por 1 hora. Ações ofensivas encerram o efeito imediatamente.',qty:1,showInDeck:true},
+    {id:'totem-vantagem',group:'Alquimia',kind:'inventory',category:'item-magico',name:'Totem da Vantagem',effect:'1 uso: Ataque, Defesa ou Perícia com vantagem',notes:'Uma vez, permite realizar um teste de Ataque, Defesa ou Perícia com vantagem. Após o uso, perde a magia e se torna um item comum.',qty:1,showInDeck:true},
+    {id:'falar-animais',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Falar com Animais',effect:'Comunicação com um tipo de animal por 1 hora',notes:'Permite compreender e se comunicar com um tipo específico de animal por 1 hora.',qty:1,showInDeck:true,ask:'animal'},
+    {id:'heroismo',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Heroísmo',effect:'3 turnos: vantagem contra medo + 2 HP/turno',notes:'Por 3 turnos, concede vantagem contra medo, pânico, terror e semelhantes. Nesse período, o usuário recebe 2 HP no início de seus turnos.',qty:1,showInDeck:true},
+    {id:'res-charme-medo',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Resistência a Enfeitiçamento ou Medo',effect:'Vantagem contra charme e medo por 1 minuto',notes:'Por 1 minuto, concede vantagem contra medo, pavor, charme, fascinação, manipulação emocional, sedução mágica e efeitos semelhantes.',qty:1,showInDeck:true},
+    {id:'velocidade',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção da Velocidade',effect:'+2 em testes de DES e Defesa (não ataques)',notes:'Aumenta temporariamente a velocidade do usuário. Soma +2 em testes de Destreza, incluindo Defesa, desde que não sejam ataques.',qty:1,showInDeck:true},
+    {id:'lagrimas-grifo',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Lágrimas de Grifo',effect:'3 turnos: 1d4+1 HP no início do turno',notes:'Por 3 turnos, recupera 1d4+1 HP no início do turno do usuário.',qty:1,showInDeck:true},
+    {id:'lagrimas-grifo-maior',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Lágrimas de Grifo Maior',effect:'3 turnos: 2d4+2 HP no início do turno',notes:'Por 3 turnos, recupera 2d4+2 HP no início do turno do usuário.',qty:1,showInDeck:true},
+    {id:'lagrimas-grifo-suprema',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Lágrimas de Grifo Suprema',effect:'3 turnos: 3d8+4 HP no início do turno',notes:'Por 3 turnos, recupera 3d8+4 HP no início do turno do usuário.',qty:1,showInDeck:true},
+    {id:'res-fisica-exaustao',group:'Alquimia',kind:'inventory',category:'consumivel',name:'Poção de Resistência Física e à Exaustão',effect:'12h: RD 1 física e exaustão reduzida',notes:'Por 12 horas, concede RD 1 contra dano físico. Nesse período, o ônus de efeitos de Exaustão é reduzido pela metade.',qty:1,showInDeck:true},
+
+    {id:'weapon-melee-ferro-aco',group:'Forja · Armas',kind:'weapon',name:'Arma corpo a corpo',type:'corpo-a-corpo',attr:'for',material:'ferro-aco',equipped:true},
+    {id:'weapon-melee-mithril',group:'Forja · Armas',kind:'weapon',name:'Arma corpo a corpo',type:'corpo-a-corpo',attr:'for',material:'mithril',equipped:true},
+    {id:'weapon-melee-bronze-celestial',group:'Forja · Armas',kind:'weapon',name:'Arma corpo a corpo',type:'corpo-a-corpo',attr:'for',material:'bronze-celestial',equipped:true},
+    {id:'weapon-melee-uro',group:'Forja · Armas',kind:'weapon',name:'Arma corpo a corpo',type:'corpo-a-corpo',attr:'for',material:'uro',equipped:true},
+    {id:'weapon-melee-ouro-imperial',group:'Forja · Armas',kind:'weapon',name:'Arma corpo a corpo',type:'corpo-a-corpo',attr:'for',material:'ouro-imperial',equipped:true},
+    {id:'weapon-melee-ferro-estigio',group:'Forja · Armas',kind:'weapon',name:'Arma corpo a corpo',type:'corpo-a-corpo',attr:'for',material:'ferro-estigio',equipped:true},
+
+    {id:'ammo-ferro-aco',group:'Forja · Munições',kind:'inventory',category:'municao',name:'Munição de Ferro / Aço',material:'Ferro / Aço',effect:'Bônus de material: +0 em ataques à distância',notes:'Template padrão de munição de Ferro / Aço. Ao usar esta munição, aplique o bônus de material correspondente ao ataque à distância.',qty:1,showInDeck:false},
+    {id:'ammo-mithril',group:'Forja · Munições',kind:'inventory',category:'municao',name:'Munição de Mithril',material:'Mithril',effect:'Bônus de material: +1 em ataques à distância',notes:'Template padrão de munição de Mithril. Ao usar esta munição, aplique o bônus de material correspondente ao ataque à distância.',qty:1,showInDeck:false},
+    {id:'ammo-bronze-celestial',group:'Forja · Munições',kind:'inventory',category:'municao',name:'Munição de Bronze Celestial',material:'Bronze Celestial',effect:'Bônus de material: +1 em ataques à distância',notes:'Template padrão de munição de Bronze Celestial. Ao usar esta munição, aplique o bônus de material correspondente ao ataque à distância.',qty:1,showInDeck:false},
+    {id:'ammo-uro',group:'Forja · Munições',kind:'inventory',category:'municao',name:'Munição de Uro',material:'Uro',effect:'Bônus de material: +2 em ataques à distância',notes:'Template padrão de munição de Uro. Ao usar esta munição, aplique o bônus de material correspondente ao ataque à distância.',qty:1,showInDeck:false},
+    {id:'ammo-ouro-imperial',group:'Forja · Munições',kind:'inventory',category:'municao',name:'Munição de Ouro Imperial',material:'Ouro Imperial',effect:'Bônus de material: +3 em ataques à distância',notes:'Template padrão de munição de Ouro Imperial. Ao usar esta munição, aplique o bônus de material correspondente ao ataque à distância.',qty:1,showInDeck:false},
+    {id:'ammo-ferro-estigio',group:'Forja · Munições',kind:'inventory',category:'municao',name:'Munição de Ferro Estígio',material:'Ferro Estígio',effect:'Bônus de material: +3 em ataques à distância',notes:'Template padrão de munição de Ferro Estígio. Ao usar esta munição, aplique o bônus de material correspondente ao ataque à distância.',qty:1,showInDeck:false},
+
+    {id:'armor-ferro-aco',group:'Forja · Armaduras',kind:'armor',name:'Armadura de Ferro / Aço',type:'leve',material:'ferro-aco',equipped:true},
+    {id:'armor-mithril',group:'Forja · Armaduras',kind:'armor',name:'Armadura de Mithril',type:'defensiva',material:'mithril',equipped:true},
+    {id:'armor-bronze-celestial',group:'Forja · Armaduras',kind:'armor',name:'Armadura de Bronze Celestial',type:'defensiva',material:'bronze-celestial',equipped:true},
+    {id:'armor-uro',group:'Forja · Armaduras',kind:'armor',name:'Armadura de Uro',type:'responsiva',material:'uro',equipped:true},
+
+    {id:'shield-ferro-aco',group:'Forja · Escudos',kind:'shield',name:'Escudo de Ferro / Aço',material:'ferro-aco',equipped:true},
+    {id:'shield-mithril',group:'Forja · Escudos',kind:'shield',name:'Escudo de Mithril',material:'mithril',equipped:true},
+    {id:'shield-bronze-celestial',group:'Forja · Escudos',kind:'shield',name:'Escudo de Bronze Celestial',material:'bronze-celestial',equipped:true},
+    {id:'shield-uro',group:'Forja · Escudos',kind:'shield',name:'Escudo de Uro',material:'uro',equipped:true}
+  ];
+
   function normalizeInventoryCategory(id){
     const map={
       'arma':'arma-corpo','arma-magica':'item-magico','armadura':'outro','escudo':'outro',
-      'heranca':'outro','reliquia':'item-magico','consumivel':'consumivel','material':'outro',
+      'heranca':'outro','reliquia':'item-magico','consumivel':'consumivel','municao':'municao','material':'outro',
       'crafting':'outro','ferramenta':'outro','missao':'outro','magico':'item-magico','geral':'outro','outro':'outro',
       'arma-corpo':'arma-corpo','arma-distancia':'arma-distancia','item-magico':'item-magico'
     };
@@ -742,7 +789,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     </section>`;
   }
   function inventoryCategoryIcon(id){
-    return ({'arma-corpo':'⚔','arma-distancia':'🏹','consumivel':'✚','item-magico':'✦','outro':'◈'})[id]||'◈';
+    return ({'arma-corpo':'⚔','arma-distancia':'🏹','consumivel':'✚','item-magico':'✦','municao':'➶','outro':'◈'})[id]||'◈';
   }
   function equipmentCardLabel(kind,id=''){
     if(kind==='armor')return {icon:'🛡',label:'ARMADURA'};
@@ -752,36 +799,79 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   }
   function compactText(text,limit=120){const clean=String(text||'').replace(/\s+/g,' ').trim();if(!clean)return '';return clean.length>limit?clean.slice(0,limit-1)+'…':clean}
 
+  function libraryItemById(id){return ITEM_LIBRARY.find(x=>x.id===id)||null}
+  function libraryOptions(){
+    const byGroup={};
+    ITEM_LIBRARY.forEach(item=>{(byGroup[item.group]||(byGroup[item.group]=[])).push(item)});
+    return Object.entries(byGroup).map(([group,items])=>`<optgroup label="${esc(group)}">${items.map(item=>`<option value="${item.id}">${esc(item.name)}${item.kind==='weapon'?' · arma':item.kind==='armor'?' · armadura':item.kind==='shield'?' · escudo':''}</option>`).join('')}</optgroup>`).join('');
+  }
+  function createInventoryItemFromLibrary(template){
+    const item={id:uid('item'),name:template.name||'Item',qty:Math.max(0,Number(template.qty)||1),category:normalizeInventoryCategory(template.category||'outro'),material:String(template.material||''),rune:'',effect:String(template.effect||''),notes:String(template.notes||''),imageUrl:'',showInDeck:!!template.showInDeck,isHeritage:false,attackAttr:String(template.attackAttr||'for'),attackBonus:Number(template.attackBonus)||0,damage:String(template.damage||''),range:String(template.range||'')};
+    if(template.ask==='elemental'){
+      const picked=(window.prompt('Qual elemento / tipo de dano essa poção vai resistir?','Fogo')||'').trim();
+      if(picked){item.effect=`Resistência a ${picked}`;item.notes=`Concede resistência temporária a ${picked}.`;item.material=picked;}
+    }
+    if(template.ask==='animal'){
+      const picked=(window.prompt('Com qual tipo de animal essa poção permite falar?','Pássaros')||'').trim();
+      if(picked){item.effect=`Comunicação com ${picked} por 1 hora`;item.notes=`Permite compreender e se comunicar com ${picked} por 1 hora.`;item.material=picked;}
+    }
+    return item;
+  }
+  function applyLibraryTemplate(template){
+    if(!template)return false;
+    if(template.kind==='inventory'){
+      state.inventory.items.push(createInventoryItemFromLibrary(template));
+      return true;
+    }
+    if(template.kind==='weapon'){
+      const m=material(template.material);
+      state.weapons.push({id:uid('weapon'),name:template.name||'Nova arma',type:template.type||'corpo-a-corpo',attr:template.attr||'for',material:template.material||'ferro-aco',stakes:0,resistanceCurrent:m.unbreakable?0:m.resistance,attackExtra:Number(template.attackExtra)||0,damageExtra:Number(template.damageExtra)||0,equipped:template.equipped!==false,imageUrl:'',isHeritage:false,notes:template.notes||''});
+      return true;
+    }
+    if(template.kind==='armor'){
+      const m=material(template.material),atype=armorType(template.type||'leve');
+      state.armor={...state.armor,equipped:template.equipped!==false,name:template.name||'Armadura',type:atype.id,material:m.id,resistanceCurrent:m.unbreakable?0:m.resistance,imageUrl:'',isHeritage:false,notes:template.notes||''};
+      return true;
+    }
+    if(template.kind==='shield'){
+      const m=material(template.material);
+      state.shield={...state.shield,equipped:template.equipped!==false,name:template.name||'Escudo',material:m.id,stakes:0,resistanceCurrent:m.unbreakable?0:m.resistance,imageUrl:'',isHeritage:false,notes:template.notes||''};
+      return true;
+    }
+    return false;
+  }
+
   function equipmentCardVisual(imageUrl,glyph){
     return imageUrl?`<div class="equipment-card-media"><img src="${esc(imageUrl)}" alt=""></div>`:`<div class="equipment-card-glyph">${glyph}</div>`;
   }
   function renderEquippedDeck(){
     const cards=[];
     const a=state.armor,t=armorType(a.type),am=material(a.material),sh=state.shield,sm=material(sh.material);
-    const card=(cls,editKey,badge,topRightLabel,visual,title,subtitle,description,stats,extra='')=>{
+    const card=(cls,editKey,badge,metaLabels,visual,title,subtitle,description,stats,extra='')=>{
       const desc=compactText(description||'',180);
-      return `<article class="equipment-card equipment-card--ornate ${cls}" tabindex="0"><div class="equipment-card-frame"><div class="equipment-card-visual-shell"><div class="equipment-card-topline"><span class="equipment-card-topbadge equipment-card-topbadge--left"><i>${badge.icon}</i><span>${esc(badge.label)}</span></span>${topRightLabel?`<span class="equipment-card-topbadge equipment-card-topbadge--right">${esc(topRightLabel)}</span>`:''}</div>${visual}<button class="equipment-card-edit" data-edit-equipment="${esc(editKey)}" type="button">Editar</button></div><div class="equipment-card-divider" aria-hidden="true"><span></span></div><div class="equipment-card-copy centered"><h4 class="equipment-card-title" title="${esc(title)}">${esc(title)}</h4>${subtitle?`<div class="equipment-card-subtitle">${esc(subtitle)}</div>`:''}${desc?`<p class="equipment-card-description">${esc(desc)}</p>`:''}</div><div class="equipment-card-stats">${stats.map(x=>`<span class="equipment-card-stat">${x}</span>`).join('')}</div>${extra}</div></article>`;
+      const metas=(metaLabels||[]).filter(Boolean);
+      return `<article class="equipment-card equipment-card--ornate ${cls}" tabindex="0"><div class="equipment-card-frame"><div class="equipment-card-visual-shell"><div class="equipment-card-topline"><span class="equipment-card-topbadge equipment-card-topbadge--left"><i>${badge.icon}</i><span>${esc(badge.label)}</span></span></div>${visual}<button class="equipment-card-edit" data-edit-equipment="${esc(editKey)}" type="button">Editar</button></div><div class="equipment-card-divider" aria-hidden="true"><span></span></div><div class="equipment-card-copy centered"><h4 class="equipment-card-title" title="${esc(title)}">${esc(title)}</h4>${subtitle?`<div class="equipment-card-subtitle">${esc(subtitle)}</div>`:''}${metas.length?`<div class="equipment-card-meta">${metas.map(m=>`<span class="equipment-card-metabadge">${esc(m)}</span>`).join('')}</div>`:''}${desc?`<p class="equipment-card-description">${esc(desc)}</p>`:''}</div><div class="equipment-card-stats">${stats.map(x=>`<span class="equipment-card-stat">${x}</span>`).join('')}</div>${extra}</div></article>`;
     };
     if(a.equipped){
       const badge=equipmentCardLabel('armor');
-      cards.push(card('armor','armor',badge,a.isHeritage?'HERANÇA':String(am.name||'').toUpperCase(),equipmentCardVisual(a.imageUrl,'◈'),a.name||'Armadura',`${String(t.name||'').toUpperCase()} · ${String(am.name||'').toUpperCase()}`,a.notes,[`DEF +${t.defense}`,`RD ${t.reduction}`]));
+      cards.push(card('armor','armor',badge,[String(am.name||'').toUpperCase(),a.isHeritage?'HERANÇA':''],equipmentCardVisual(a.imageUrl,'◈'),a.name||'Armadura',String(t.name||'').toUpperCase(),a.notes,[`DEF +${t.defense}`,`RD ${t.reduction}`]));
     }
     if(sh.equipped){
       const badge=equipmentCardLabel('shield');
-      cards.push(card('shield','shield',badge,sh.isHeritage?'HERANÇA':String(sm.name||'').toUpperCase(),equipmentCardVisual(sh.imageUrl,'⬡'),sh.name||'Escudo',String(sm.name||'').toUpperCase(),sh.notes,[`DEF +${shieldDefense()}`,`${Number(sh.stakes)||0}/30 ESTACAS`]));
+      cards.push(card('shield','shield',badge,[String(sm.name||'').toUpperCase(),sh.isHeritage?'HERANÇA':''],equipmentCardVisual(sh.imageUrl,'⬡'),sh.name||'Escudo','ESCUDO PADRÃO',sh.notes,[`DEF +${shieldDefense()}`,`${Number(sh.stakes)||0}/30 ESTACAS`]));
     }
     (state.weapons||[]).filter(w=>w.equipped!==false).forEach(w=>{
       const wm=material(w.material),badge={icon:w.type==='distancia'?'🏹':'⚔',label:w.type==='distancia'?'À DISTÂNCIA':'CORPO A CORPO'};
-      cards.push(card('weapon',`weapon:${w.id}`,badge,w.isHeritage?'HERANÇA':String(wm.name||'').toUpperCase(),equipmentCardVisual(w.imageUrl,'✦'),w.name||'Arma',`${w.attr==='des'?'DESTREZA':'FORÇA'} · ${String(wm.name||'').toUpperCase()}`,w.notes,[`ATQ ${signed(weaponAttack(w))}`,weaponDamageFormula(w)]));
+      cards.push(card('weapon',`weapon:${w.id}`,badge,[String(wm.name||'').toUpperCase(),w.isHeritage?'HERANÇA':''],equipmentCardVisual(w.imageUrl,'✦'),w.name||'Arma',w.attr==='des'?'DESTREZA':'FORÇA',w.notes,[`ATQ ${signed(weaponAttack(w))}`,weaponDamageFormula(w)]));
     });
     (state.inventory?.items||[]).filter(it=>it.showInDeck).forEach(it=>{
       const base=equipmentCardLabel('item',it.category),badge={icon:base.icon,label:inventoryCategoryLabel(it.category).replace(/^Arma \(|\)$/g,'').toUpperCase()},isWeapon=it.category==='arma-corpo'||it.category==='arma-distancia';
       const description=it.effect||it.rune||it.notes||'';
       const subtitle=isWeapon?`${it.attackAttr==='des'?'DESTREZA':'FORÇA'}${it.material?` · ${String(it.material).toUpperCase()}`:''}`:(it.material?String(it.material).toUpperCase():inventoryCategoryLabel(it.category).toUpperCase());
       const stats=isWeapon?[`ATQ ${signed(Number(it.attackBonus)||0)}`,esc(it.damage||'dano livre')]:[`QTD ${Math.max(0,Number(it.qty)||0)}`,compactText(it.effect||it.rune||'CONSULTA',26)];
-      const topRight=it.isHeritage?'HERANÇA':(it.material?String(it.material).toUpperCase():(it.effect||it.rune?'ATIVO':'ITEM'));
+      const meta=[it.material?String(it.material).toUpperCase():'',it.isHeritage?'HERANÇA':'',(it.effect||it.rune)&&it.category!=='consumivel'?'ATIVO':''];
       const extra=it.category==='consumivel'?`<button class="equipment-consume-btn" data-consume-item="${it.id}" ${Math.max(0,Number(it.qty)||0)<=0?'disabled':''}>Consumir 1</button>`:'';
-      cards.push(card(`item ${it.category}`,`item:${it.id}`,badge,topRight,equipmentCardVisual(it.imageUrl,'✧'),it.name||'Item',subtitle,description,stats,extra));
+      cards.push(card(`item ${it.category}`,`item:${it.id}`,badge,meta,equipmentCardVisual(it.imageUrl,'✧'),it.name||'Item',subtitle,description,stats,extra));
     });
     if(!cards.length)return `<div class="equipment-deck-empty"><span>✦</span><b>Seu baralho está vazio</b><p>Equipe armas, armadura ou escudo, ou fixe itens do inventário para vê-los aqui.</p><button type="button" data-go-tab="inventory" class="primary">Abrir inventário</button></div>`;
     return `<div class="equipment-deck upgraded-equipment-deck">${cards.join('')}</div>`;
@@ -875,8 +965,8 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   }
 
   function renderInventoryTab(){
-    const inv=state.inventory||defaultInventory(),totalDn=(Number(inv.aureus)||0)*100+(Number(inv.denarius)||0);
-    return `<section class="tab-pane ${state.activeTab==='inventory'?'':'hidden'}" data-pane="inventory"><section class="inventory-toolbar-card card"><div><p class="eyebrow">NOVO ITEM</p><h2>Adicionar ao inventário</h2><p class="muted compact">Escolha o tipo primeiro. Armas entram no sistema mecânico; consumíveis e itens especiais usam o acervo.</p></div><div class="inventory-add-row"><select id="inventoryAddKind"><option value="weapon-melee">⚔ Arma (corpo a corpo)</option><option value="weapon-ranged">🏹 Arma (à distância)</option><option value="consumivel">✚ Consumível</option><option value="item-magico">✦ Item mágico</option><option value="outro">◈ Outro</option></select><button id="addInventoryByKind" class="primary">+ Adicionar</button></div><div class="inventory-filter-row"><input id="inventorySearch" placeholder="Buscar item pelo nome..."><select id="inventoryFilter"><option value="all">Todos</option><option value="weapons">Armas</option><option value="consumivel">Consumíveis</option><option value="item-magico">Itens mágicos</option><option value="heritage">Heranças</option><option value="outro">Outros</option></select></div></section><div class="grid two mechanics-section inventory-ledger"><article class="card"><p class="eyebrow">MOEDAS</p><h2>Aureus & Denários</h2><div class="grid two"><label><span class="label">Aureus</span><input id="invAureus" type="number" min="0" step="1" value="${Number(inv.aureus)||0}"></label><label><span class="label">Denários</span><input id="invDenarius" type="number" min="0" step="1" value="${Number(inv.denarius)||0}"></label></div><div class="subcard compact" style="margin-top:10px">Referência: <b>1 Aureus = 100 denários</b> · total equivalente atual: <b>${totalDn} dn</b>.</div></article><article class="card"><p class="eyebrow">ACERVO</p><h2>Como o inventário funciona</h2><p class="muted">No inventário, os cards ficam maiores e guardam a explicação completa. No <b>baralho de combate</b>, aparecem apenas imagem, tipo, título e informações cruciais.</p><label><span class="label">Notas gerais de inventário</span><textarea id="inventoryNotes" rows="4" placeholder="Baú, itens emprestados, materiais reservados...">${esc(inv.notes||'')}</textarea></label></article></div><section class="mechanics-section"><div class="section-title"><div><p class="eyebrow">PROTEÇÃO</p><h2>Armadura & escudo</h2></div></div><div class="grid two inventory-filter-target" data-inventory-kind="protection">${renderArmorCard()}${renderShieldCard()}</div></section><article class="card mechanics-section inventory-filter-target" data-inventory-kind="weapons"><div class="section-title"><div><p class="eyebrow">ARMAS</p><h2>Armas & treinamento</h2></div><span class="pill">${state.weapons.length} cadastrada(s)</span></div><p class="muted">Aqui ficam as armas que usam cálculo automático de ataque, dano, material e estacas. Marque uma arma como equipada para ela entrar no baralho de combate.</p><div class="weapon-list">${state.weapons.length?state.weapons.map(renderWeapon).join(''):'<div class="notice">Nenhuma arma cadastrada ainda.</div>'}</div></article><section class="mechanics-section"><div class="section-title"><div><p class="eyebrow">DEMAIS ITENS</p><h2>Consumíveis, itens mágicos & outros</h2></div><span class="pill">${inv.items.length} item(ns)</span></div><div class="inventory-grid inventory-grid-large" style="margin-top:12px">${inv.items.length?inv.items.map(renderInventoryItem).join(''):'<div class="notice wide">Nenhum item cadastrado ainda.</div>'}</div></section></section>`;
+    const inv=state.inventory,totalDn=(Number(inv.aureus)||0)*100+(Number(inv.denarius)||0);
+    return `<section class="tab-pane ${state.activeTab==='inventory'?'':'hidden'}" data-pane="inventory"><section class="inventory-toolbar-card card"><div><p class="eyebrow">NOVO ITEM</p><h2>Adicionar ao inventário</h2><p class="muted compact">Adicione itens manuais ou importe modelos prontos da biblioteca. Nome, imagem, notas, quantidade e exibição no baralho continuam editáveis depois.</p></div><div class="inventory-toolbar-grid"><div class="inventory-add-row"><select id="inventoryAddKind"><option value="weapon-melee">⚔ Arma (corpo a corpo)</option><option value="weapon-ranged">🏹 Arma (à distância)</option><option value="consumivel">✚ Consumível</option><option value="item-magico">✦ Item mágico</option><option value="municao">➶ Munição</option><option value="outro">◈ Outro</option></select><button id="addInventoryByKind" class="primary">+ Adicionar</button></div><div class="inventory-add-row inventory-library-row"><select id="inventoryLibrarySelect"><option value="">Biblioteca de itens…</option>${libraryOptions()}</select><button id="addInventoryFromLibrary" class="ghost">+ Importar modelo</button></div></div><div class="inventory-filter-row"><input id="inventorySearch" placeholder="Buscar item pelo nome..."><select id="inventoryFilter"><option value="all">Todos</option><option value="weapons">Armas</option><option value="consumivel">Consumíveis</option><option value="item-magico">Itens mágicos</option><option value="heritage">Heranças</option><option value="municao">Munições</option><option value="outro">Outros</option></select></div></section><div class="grid two mechanics-section inventory-ledger"><article class="card"><p class="eyebrow">MOEDAS</p><h2>Aureus & Denários</h2><div class="coin-pair"><label class="coin-card"><span class="label">Aureus</span><input id="invAureus" type="number" min="0" step="1" value="${Number(inv.aureus)||0}"><small>1 aureus = 100 dn</small></label><label class="coin-card"><span class="label">Denários</span><input id="invDenarius" type="number" min="0" step="1" value="${Number(inv.denarius)||0}"><small>Total equivalente: ${totalDn} dn</small></label></div></article><article class="card"><p class="eyebrow">ACERVO</p><h2>Como o inventário funciona</h2><p class="muted">No inventário, os cards ficam maiores e guardam a explicação completa. No <b>baralho de combate</b>, aparecem imagem, categoria, título, metadados curtos e informações cruciais.</p><label><span class="label">Notas gerais de inventário</span><textarea id="inventoryNotes" rows="4" placeholder="Baú, itens emprestados, materiais reservados...">${esc(inv.notes||'')}</textarea></label></article></div><section class="mechanics-section"><div class="section-title"><div><p class="eyebrow">PROTEÇÃO</p><h2>Armadura & escudo</h2></div></div><div class="grid two inventory-filter-target" data-inventory-kind="protection">${renderArmorCard()}${renderShieldCard()}</div></section><article class="card mechanics-section inventory-filter-target" data-inventory-kind="weapons"><div class="section-title"><div><p class="eyebrow">ARMAS</p><h2>Armas & treinamento</h2></div><span class="pill">${state.weapons.length} cadastrada(s)</span></div><p class="muted">Aqui ficam as armas que usam cálculo automático de ataque, dano, material e estacas. Marque uma arma como equipada para ela entrar no baralho de combate.</p><div class="weapon-list">${state.weapons.length?state.weapons.map(renderWeapon).join(''):'<div class="notice">Nenhuma arma cadastrada ainda.</div>'}</div></article><section class="mechanics-section"><div class="section-title"><div><p class="eyebrow">DEMAIS ITENS</p><h2>Consumíveis, itens mágicos, munições & outros</h2></div><span class="pill">${inv.items.length} item(ns)</span></div><div class="inventory-grid inventory-grid-large" style="margin-top:12px">${inv.items.length?inv.items.map(renderInventoryItem).join(''):'<div class="notice wide">Nenhum item cadastrado ainda.</div>'}</div></section></section>`;
   }
 
   function consumeInventoryItem(id){const inv=state.inventory||defaultInventory(),it=inv.items.find(x=>x.id===id);if(!it||it.category!=='consumivel')return;const qty=Math.max(0,Number(it.qty)||0);if(qty<=0)return;if(qty===1){inv.items=inv.items.filter(x=>x.id!==id);notify(`${it.name||'Consumível'} consumido e removido do inventário.`)}else{it.qty=qty-1;notify(`${it.name||'Consumível'} consumido · ${it.qty} restante(s).`)}save();render();}
@@ -886,13 +976,14 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     const au=byId('invAureus');if(au)au.onchange=e=>{inv.aureus=Math.max(0,Number(e.target.value)||0);save();renderSheet()};
     const dn=byId('invDenarius');if(dn)dn.onchange=e=>{inv.denarius=Math.max(0,Number(e.target.value)||0);save();renderSheet()};
     const notes=byId('inventoryNotes');if(notes)notes.oninput=e=>{inv.notes=e.target.value;save()};
-    const add=byId('addInventoryByKind');if(add)add.onclick=()=>{const kind=byId('inventoryAddKind')?.value||'outro';if(kind==='weapon-melee'||kind==='weapon-ranged'){const m=material('ferro-aco');state.weapons.push({id:uid('weapon'),name:'Nova arma',type:kind==='weapon-ranged'?'distancia':'corpo-a-corpo',attr:'for',material:'ferro-aco',stakes:0,resistanceCurrent:m.resistance,attackExtra:0,damageExtra:0,equipped:true,imageUrl:'',isHeritage:false,notes:''})}else{inv.items.push({id:uid('item'),name:kind==='consumivel'?'Novo consumível':kind==='item-magico'?'Novo item mágico':'Novo item',qty:1,category:kind,material:'',rune:'',effect:'',notes:'',imageUrl:'',showInDeck:false,isHeritage:false,attackAttr:'for',attackBonus:0,damage:'',range:''})}save();renderSheet()};
+    const add=byId('addInventoryByKind');if(add)add.onclick=()=>{const kind=byId('inventoryAddKind')?.value||'outro';if(kind==='weapon-melee'||kind==='weapon-ranged'){const m=material('ferro-aco');state.weapons.push({id:uid('weapon'),name:'Nova arma',type:kind==='weapon-ranged'?'distancia':'corpo-a-corpo',attr:'for',material:'ferro-aco',stakes:0,resistanceCurrent:m.resistance,attackExtra:0,damageExtra:0,equipped:true,imageUrl:'',isHeritage:false,notes:''})}else{inv.items.push({id:uid('item'),name:kind==='consumivel'?'Novo consumível':kind==='item-magico'?'Novo item mágico':kind==='municao'?'Nova munição':'Novo item',qty:1,category:kind,material:'',rune:'',effect:'',notes:'',imageUrl:'',showInDeck:false,isHeritage:false,attackAttr:'for',attackBonus:0,damage:'',range:''})}save();renderSheet()};
     document.querySelectorAll('[data-remove-item]').forEach(b=>b.onclick=()=>{inv.items=inv.items.filter(x=>x.id!==b.dataset.removeItem);save();renderSheet()});
     document.querySelectorAll('[data-item-field]').forEach(el=>{const handler=()=>{const [id,field]=el.dataset.itemField.split(':'),it=inv.items.find(x=>x.id===id);if(!it)return;let value=el.value;if(field==='qty')value=Math.max(0,Number(value)||0);if(field==='attackBonus')value=Number(value)||0;if(field==='category')value=normalizeInventoryCategory(value);it[field]=value;if(field==='effect')it.rune=value;save();if(['category','qty'].includes(field))renderSheet()};el.onchange=handler;if(el.tagName==='TEXTAREA'||['name','material','effect','notes','damage','range'].includes((el.dataset.itemField||'').split(':')[1]))el.oninput=handler});
     document.querySelectorAll('[data-item-check]').forEach(el=>el.onchange=()=>{const [id,field]=el.dataset.itemCheck.split(':'),it=inv.items.find(x=>x.id===id);if(!it)return;it[field]=el.checked;save();renderSheet()});
     document.querySelectorAll('[data-item-deck]').forEach(el=>el.onchange=()=>{const it=inv.items.find(x=>x.id===el.dataset.itemDeck);if(!it)return;it.showInDeck=el.checked;save();renderSheet()});
     document.querySelectorAll('[data-upload-item-image]').forEach(b=>b.onclick=()=>{const it=inv.items.find(x=>x.id===b.dataset.uploadItemImage);if(!it)return;chooseStoredImage(url=>{it.imageUrl=url;save();renderSheet();notify('Imagem do item atualizada.')})});
     document.querySelectorAll('[data-clear-item-image]').forEach(b=>b.onclick=()=>{const it=inv.items.find(x=>x.id===b.dataset.clearItemImage);if(!it)return;it.imageUrl='';save();renderSheet()});
+    const libraryBtn=byId('addInventoryFromLibrary');if(libraryBtn)libraryBtn.onclick=()=>{const tpl=libraryItemById(byId('inventoryLibrarySelect')?.value||'');if(!tpl){notify('Escolha um modelo da biblioteca.');return;}applyLibraryTemplate(tpl);save();renderSheet();notify(`Modelo importado: ${tpl.name}.`)};
     const search=byId('inventorySearch'),filter=byId('inventoryFilter');const applyFilter=()=>{const q=String(search?.value||'').trim().toLowerCase(),f=filter?.value||'all';document.querySelectorAll('[data-item-card]').forEach(card=>{const item=inv.items.find(x=>x.id===card.dataset.itemCard),name=String(item?.name||'').toLowerCase();const typeOk=f==='all'||f===item?.category||(f==='heritage'&&item?.isHeritage);card.classList.toggle('hidden',!(typeOk&&(!q||name.includes(q))))});const weaponSection=document.querySelector('[data-inventory-kind="weapons"]');if(weaponSection)weaponSection.classList.toggle('hidden',!(f==='all'||f==='weapons'||f==='heritage'));document.querySelectorAll('[data-weapon-card]').forEach(card=>{const w=state.weapons.find(x=>x.id===card.dataset.weaponCard),name=String(w?.name||'').toLowerCase(),ok=(f==='all'||f==='weapons'||(f==='heritage'&&w?.isHeritage))&&(!q||name.includes(q));card.classList.toggle('hidden',!ok)})};if(search)search.oninput=applyFilter;if(filter)filter.onchange=applyFilter;
     bindArmor();bindShield();bindWeapons();
   }

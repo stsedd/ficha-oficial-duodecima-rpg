@@ -4282,3 +4282,105 @@ body[data-theme="light"] .equipment-card--ornate .equipment-consume-btn{box-shad
   .equipment-card-title{font-size:20px}
   .equipment-card-subtitle{font-size:9px}
 }
+
+/* v5.13 inventory library + deck refinements */
+.inventory-toolbar-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:12px;
+}
+.inventory-library-row select{flex:1 1 auto;min-width:0}
+.coin-pair{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:10px;
+}
+.coin-card{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:color-mix(in srgb,var(--panel) 88%, transparent 12%);
+}
+.coin-card input{font-size:24px;font-weight:800}
+.coin-card small{color:var(--muted);line-height:1.35}
+.upgraded-equipment-deck,.equipment-deck,.equipment-summary-card,.equipment-summary-card .card{
+  overflow:visible !important;
+}
+.upgraded-equipment-deck,.equipment-deck{
+  padding-top:12px !important;
+}
+.equipment-card--ornate{
+  overflow:visible !important;
+}
+.equipment-card-frame{
+  overflow:visible !important;
+}
+.equipment-card-visual-shell{
+  padding-top:18px !important;
+}
+.equipment-card-topline{
+  justify-content:flex-start !important;
+  margin-bottom:8px !important;
+}
+.equipment-card-topbadge--right{display:none !important}
+.equipment-card-copy{
+  gap:6px !important;
+}
+.equipment-card-title{
+  font-size:15px !important;
+  line-height:1.12 !important;
+}
+.equipment-card-subtitle{
+  font-size:10px !important;
+  line-height:1.32 !important;
+}
+.equipment-card-meta{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:6px;
+  margin-top:1px;
+}
+.equipment-card-metabadge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:20px;
+  padding:3px 8px;
+  border-radius:999px;
+  border:1px solid color-mix(in srgb,var(--theme-accent) 26%, var(--line) 74%);
+  background:color-mix(in srgb,var(--panel-2) 84%, transparent 16%);
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+  line-height:1.2;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.equipment-card-description{
+  margin-top:2px !important;
+}
+.equipment-card--ornate .equipment-card-edit{
+  top:18px !important;
+}
+.equipment-card--ornate:hover,
+.equipment-card--ornate:focus-visible{
+  transform:translateY(-8px) !important;
+}
+body[data-theme="light"] .coin-card{
+  background:#fffaf6;
+  border-color:color-mix(in srgb,var(--theme-accent) 28%, #d7c5bf 72%);
+}
+body[data-theme="light"] .equipment-card-metabadge{
+  background:#fffaf5;
+  color:#6d5c62;
+  border-color:color-mix(in srgb,var(--theme-accent) 24%, #d5c3bc 76%);
+}
+@media (max-width: 860px){
+  .inventory-toolbar-grid,.coin-pair{grid-template-columns:1fr}
+}
