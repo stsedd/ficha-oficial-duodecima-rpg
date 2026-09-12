@@ -1,6 +1,8 @@
 # Ficha da Duodécima · integração com Duodécima Core
 
-Versão: **v5.2 Core**
+Versão da ficha: **v5.6**  
+Schema local de save: **22**  
+Core esperado: **2026.09.11.1 ou posterior (schema v2)**
 
 ## Fonte canônica
 
@@ -8,51 +10,24 @@ A ficha tenta carregar as regras atuais de:
 
 `https://stsedd.github.io/duodecima-core/`
 
-No carregamento, `core-bridge.js` lê o `manifest.json` e sincroniza:
+O `core-bridge-v56.js` sincroniza deuses, kits, habilidades, perícias, talentos, condições, progressões do sistema e agora também:
 
-- deuses e kits;
-- habilidades passivas e ativas;
-- estruturas complexas de habilidades (`tiers`, `variants`, `options`);
-- perícias;
-- talentos;
-- condições;
-- progressão de BP;
-- níveis de talento e de treinamento;
-- Energia, descanso e Exaustão;
-- equipamentos básicos compartilhados.
+- `resources[]` com escopo pessoal, coletivo, por alvo ou por habilidade;
+- escolhas persistentes e progressivas (`choices`);
+- efeitos estruturados de perícia (`skillEffects`).
 
-A ficha mantém `gods.js`, `abilities.js`, `skills.js`, `talents.js` e `system.js` como **snapshot local de emergência**. Eles não são mais a fonte canônica quando o Core está online.
-
-## Status no cabeçalho
-
-- `CORE <versão>`: a ficha está usando o Core.
-- `SNAPSHOT LOCAL`: o Core não carregou e a ficha usa os dados locais.
+Os arquivos `gods-v56.js`, `abilities-v56.js` e `skills-v56.js` são snapshots do Core 2026.09.11.1 para fallback offline. Os demais módulos locais v55 permanecem porque não tiveram mudança de conteúdo nesta revisão.
 
 ## Saves
 
-Os saves continuam no navegador e permanecem compatíveis com o schema v21. O save guarda escolhas do personagem (`godId`, talentos escolhidos, estacas etc.), não uma cópia das descrições atuais dos kits. Assim, reworks feitos no Core aparecem na ficha sem recriar o personagem.
+Saves v5.5 são migrados automaticamente para o schema 22. Além dos dados anteriores, o JSON passa a guardar `resourceValues`, `targetResources`, `abilityChoices`, `choiceDetails` e `abilityUses`.
 
-## Habilidades complexas
+## Teste recomendado após publicar
 
-A ficha agora preserva blocos complexos vindos do Core. Em Vulcano, por exemplo, `Autômato` renderiza:
-
-- Bastião;
-- Infiltrador;
-- Utilitário;
-
-Sub-habilidades com progressões próprias recebem controles independentes de estacas e salvam seus valores em `abilityStakes` com chaves internas próprias.
-
-## Teste de sincronização recomendado
-
-Depois de publicar esta versão:
-
-1. confirme que o cabeçalho mostra `CORE 2026.09.04.1` (ou versão posterior);
-2. abra Vulcano → Autômato e confirme as três variantes;
-3. depois faça uma alteração real em Iuppiter **somente no Duodécima Core**;
-4. publique o Core;
-5. recarregue Guia e Ficha;
-6. os dois devem exibir a alteração sem editar seus repositórios.
-
-
-## Core 2026.09.08.1
-A ficha já entende as regras compartilhadas de Vis, Legados e sacrifício mágico abaixo de zero.
+1. confirme que o cabeçalho mostra `CORE 2026.09.11.1` ou posterior;
+2. confira Iuppiter, Netuno, Plutão e Summanus e seus limites de acumuladores por nível;
+3. abra Potestas e confirme Imperium + Pontos de Potestas e a escolha Atletismo/Intimidação;
+4. abra Metus ou Somnos e teste adicionar um alvo ao tracker;
+5. abra Netuno → Estágios da Água e confirme 1/2/3 escolhas conforme estacas;
+6. abra Cimopoleia → Herança Monstruosa e confirme Scaleskin, Dentes de Tubarão e Shimmerskin;
+7. confira a aba de Perícias: P e E devem aparecer lado a lado, com badges FOR/DES/CON/INT/FÉ/CAR.

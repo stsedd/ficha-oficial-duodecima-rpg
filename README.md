@@ -1,52 +1,22 @@
-Atualização v5.9.6: refinamento visual dos temas especiais Fogo e Neve, com reforço de neve acumulada/geada e chamas visíveis nas imagens.
+# Ficha da Duodécima — v5.6 · Core schema v2
 
-# Ficha da Duodécima — v5.3 visual + Core
+Ficha oficial da Legio XII Fulminata integrada ao **Duodécima Core**. Esta versão parte da v5.5 e preserva os ajustes de Vis, Magia e Legados, adicionando suporte ao schema v2 do Core e a revisão visual da matriz de perícias.
 
-Esta é a baseline visual posterior à v5.2. O Duodécima Core continua sendo a fonte canônica das regras; a v5.3 altera interface, hierarquia visual, responsividade e ergonomia de combate sem alterar a lógica compartilhada.
+## Destaques da v5.6
 
-Destaques: HUD sticky de combate, Autômato de Vulcano reestruturado, branding corrigido, Nível/BP centralizados e grids de poderes mais legíveis.
+- múltiplos recursos divinos por personagem (`resources[]`);
+- recursos pessoais/coletivos no HUD, recursos por alvo em trackers próprios e recursos temporários dentro das habilidades;
+- escolhas divinas persistentes/progressivas salvas no JSON;
+- benefícios de perícia concedidos por passivas e escolhas aplicados automaticamente;
+- matriz de perícias em duas colunas, com os dois quadrados **P (Perito)** e **E (Expertise)**, atributo abreviado (`FOR`, `DES`, `CON`, `INT`, `FÉ`, `CAR`) e alinhamento revisado;
+- textos longos das habilidades renderizados em blocos legíveis sem duplicar notas do Core;
+- contadores para limites de uso quando a regra informa explicitamente quantidade e período;
+- migração de saves da v5.5 (schema local v21) para v5.6 (schema local v22).
 
----
+## Fonte canônica
 
-# Character Archive · Ficha Oficial da Duodécima · v5.2 Core
-
-Ficha de personagem da Legio XII Fulminata integrada ao **Duodécima Core**.
-
-## O que mudou
-
-- Regras compartilhadas passam a vir de `https://stsedd.github.io/duodecima-core/`.
-- 51 kits divinos são carregados do Core quando online.
-- Perícias, talentos e condições são carregados do Core.
-- Parte das progressões compartilhadas (BP, Energia, treinamento, descanso e Exaustão) passa a consultar o Core.
-- Habilidades complexas do Core são preservadas; `Autômato`, de Vulcano, exibe Bastião, Infiltrador e Utilitário com progressões internas próprias.
-- A antiga penalidade cumulativa por retornar após 0 HP foi removida também dos textos residuais da ficha.
-- Os arquivos locais de regras permanecem como fallback para evitar tela quebrada se o Core estiver indisponível.
+Quando online, regras compartilhadas vêm de `https://stsedd.github.io/duodecima-core/`. Os snapshots locais v5.6 ficam apenas como fallback para indisponibilidade do Core.
 
 ## Publicação
 
-O ZIP é root-ready para GitHub Pages. Substitua os arquivos da raiz do repositório atual da ficha e mantenha Pages publicado a partir de `main / (root)`.
-
-Leia `CORE-INTEGRATION.md` para o teste de sincronização.
-
-## v5.5 — ajustes mecânicos
-
-- Vis sincronizado com o Core: Fé como atributo de conjuração e Intimidação como perícia divina inicial.
-- Sacrifício mágico permite FOR/DES/CON negativos e recalcula Energia máxima automaticamente.
-- Legado Composto e Legado Direto receberam nomenclatura/descrições mais claras na criação.
-- A configuração de troca de passivas e ativas dos Legados agora é uma seção visível na Visão Geral, em vez de ficar escondida em um disclosure.
-
-
-## v5.9 — Aparência
-
-A ficha agora separa **Modo** (Dark / Light) de **Tema** (paleta). As paletas Vermelho, Rosa, Azul, Laranja, Verde, Roxo, Dourado, Prata, Vinho, Teal, Sépia, Mono Black e Mono White podem ser combinadas com os dois modos. A escolha é local à ficha e acompanha o JSON exportado.
-
-
-## Temas v5.9.1
-Modo Dark/Light e paleta são independentes. Novos pastéis: Blush, Peach, Lilac, Sage, Lemon, Mauve, Coral, Aqua, Sand e Sky. No modo Light, superfícies recebem uma tonalidade suave baseada na paleta.
-
-
-## v5.9.2
-Adiciona a camada de Temas Especiais, começando por Fogo. O tema é visual, salvo por ficha e não altera o Core.
-
-## v5.9.6
-Tema Especial Neve adicionado como opção independente das paletas. Inclui gelo rachado, geada, flocos animados, bordas congeladas e acabamento azul/cinza claro. Esta versão também corrige de forma estrutural o campo de Nível e altera a Bênção de Fortuna para +10 HP atual/máximo enquanto ativa.
+O ZIP é root-ready para GitHub Pages. Substitua os arquivos da raiz do repositório atual da Ficha e mantenha Pages publicado a partir de `main / (root)`.

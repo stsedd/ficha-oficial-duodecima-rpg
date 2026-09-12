@@ -4,131 +4,47 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Character Archive — Legio XII Fulminata · v5.9.6</title>
-  <link rel="stylesheet" href="styles-v594.css?v=5.9.4">
+  <title>Character Archive — Legio XII Fulminata · v5.6</title>
+  <link rel="stylesheet" href="styles-v56.css?v=5.6.0">
 </head>
 <body data-theme="standard">
   <main class="shell">
-    <section class="archive-brandbar" aria-label="Identificação da ficha">
-      <div class="archive-brand-copy">
-        <span class="archive-brand-kicker">LEGIO XII FULMINATA</span>
-        <strong>Character Archive</strong>
-        <span id="bannerCharacterName" class="archive-brand-character"></span>
+    <header class="topbar compact-topbar">
+      <div class="brand-lockup">
+        <span class="brand-icon legion-brand-icon" aria-hidden="true"><img src="legio-header-v55.png?v=5.5.0" alt="Símbolo da Legião XII" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="brand-fallback" hidden>XII</span></span>
+        <div class="brand-copy">
+          <p class="eyebrow">LEGIO XII FULMINATA</p>
+          <h1>Character Archive</h1>
+        </div>
       </div>
-      <div class="appearance-top-actions" aria-label="Aparência da ficha">
-        <button id="themeModeBtn" class="theme-toggle appearance-mode-btn" type="button" aria-label="Alternar entre modo dark e light" title="Alternar Dark / Light"><span class="theme-toggle-icon" aria-hidden="true">☾</span><span class="theme-toggle-copy"><small>MODO</small><b>Dark</b></span></button>
-        <button id="themePaletteBtn" class="theme-toggle theme-palette-btn" type="button" aria-haspopup="dialog" aria-controls="themeDialog" title="Escolher tema de cor"><span id="themePaletteSwatch" class="theme-palette-swatch" aria-hidden="true"></span><span class="theme-toggle-copy"><small>TEMA</small><b id="themePaletteLabel">Vermelho</b></span></button>
-        <button id="themeSpecialBtn" class="theme-toggle theme-special-btn" type="button" aria-haspopup="dialog" aria-controls="themeDialog" title="Escolher tema especial"><span id="themeSpecialSwatch" class="theme-special-swatch" aria-hidden="true">✦</span><span class="theme-toggle-copy"><small>ESPECIAL</small><b id="themeSpecialLabel">Nenhum</b></span></button>
-      </div>
-    </section>
-
-    <header id="siteBanner" class="profile-cover" aria-label="Banner do personagem">
-      <div id="siteBannerBg" class="profile-cover-bg" aria-hidden="true"></div>
-    </header>
-
-    <section class="archive-toolbar" aria-label="Arquivo e personalização da ficha">
-      <div class="archive-toolbar-copy">
+      <div class="actions compact-actions">
         <div id="coreStatus" class="core-status loading" title="Sincronizando regras"><i></i><span>CORE…</span></div>
-        <span class="archive-save-note"><b>Salvamento local</b> · esta ficha fica neste navegador</span>
-        <span id="bannerMiniWrap" class="banner-mini-wrap hidden"><img id="bannerMini" alt="Miniatura do banner"><span>capa atual</span></span>
-      </div>
-      <div class="actions archive-actions">
         <button id="exportBtn" class="ghost small-btn" type="button">Exportar JSON</button>
         <label class="ghost file-btn small-btn">Importar JSON<input id="importInput" type="file" accept="application/json"></label>
-        <button id="helpBtn" class="ghost small-btn" type="button">Ajuda</button>
-        <button id="bannerBtn" class="primary small-btn" type="button">Alterar banner</button>
-        <button id="clearBannerBtn" class="ghost small-btn hidden" type="button">Remover banner</button>
         <button id="resetBtn" class="danger small-btn" type="button">Resetar</button>
-        <input id="bannerUploadInput" type="file" accept="image/*" hidden>
       </div>
-      <div id="bannerControls" class="banner-controls hidden" aria-label="Ajustes do banner">
-        <label class="banner-control"><span>Posição vertical</span><input id="bannerPositionInput" type="range" min="0" max="100" step="1" value="50"><b id="bannerPositionValue">50%</b></label>
-        <label class="banner-control"><span>Zoom da capa</span><input id="bannerScaleInput" type="range" min="100" max="170" step="1" value="100"><b id="bannerScaleValue">100%</b></label>
-      </div>
-    </section>
+    </header>
 
     <section id="creationView" class="grid two"></section>
     <section id="sheetView" class="hidden"></section>
 
     <footer>
-      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.9.6</p>
+      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.6</p>
     </footer>
   </main>
 
-  <dialog id="themeDialog" class="theme-dialog">
-    <form method="dialog" class="theme-dialog-card">
-      <div class="row between theme-dialog-head"><div><p class="eyebrow">APARÊNCIA</p><h2>Escolher tema</h2><p class="muted compact">A paleta usa o modo Dark ou Light escolhido no botão ao lado.</p></div><button value="cancel" class="theme-dialog-close" aria-label="Fechar">×</button></div>
-      <div class="theme-section-label"><b>Cores</b><span>Paletas mais marcadas</span></div>
-      <div class="theme-palette-grid" role="listbox" aria-label="Temas de cor">
-        <button type="button" class="theme-choice" data-palette-choice="red" style="--choice:#d53645;--choice2:#7d1e2b;--choice-bg:#f6d9dd"><i></i><span><b>Vermelho</b><small>Legio XII</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="pink" style="--choice:#e44788;--choice2:#8f2856;--choice-bg:#f7d8e8"><i></i><span><b>Rosa</b><small>Rosa & vinho</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="blue" style="--choice:#3f7fd8;--choice2:#234b89;--choice-bg:#dde9f8"><i></i><span><b>Azul</b><small>Azul imperial</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="orange" style="--choice:#dd702f;--choice2:#884019;--choice-bg:#f8e2d1"><i></i><span><b>Laranja</b><small>Âmbar quente</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="green" style="--choice:#3f9b68;--choice2:#245f42;--choice-bg:#dcefe3"><i></i><span><b>Verde</b><small>Laurel</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="purple" style="--choice:#8a59cf;--choice2:#50307c;--choice-bg:#e8ddf5"><i></i><span><b>Roxo</b><small>Púrpura</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="gold" style="--choice:#b88939;--choice2:#6f4d1c;--choice-bg:#f4e8c9"><i></i><span><b>Dourado</b><small>Aureum</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="silver" style="--choice:#919aa8;--choice2:#535d69;--choice-bg:#e8ebef"><i></i><span><b>Prata</b><small>Argentum</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="wine" style="--choice:#9d3450;--choice2:#5d1c2e;--choice-bg:#ecdce1"><i></i><span><b>Vinho</b><small>Bordô</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="teal" style="--choice:#319a92;--choice2:#1d5d59;--choice-bg:#d7eeec"><i></i><span><b>Teal</b><small>Verde-azulado</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="sepia" style="--choice:#9a6c45;--choice2:#5c3d25;--choice-bg:#eee2d7"><i></i><span><b>Sépia</b><small>Pergaminho</small></span></button>
-      </div>
-      <div class="theme-section-label pastel-label"><b>Pastéis</b><span>Referência suave para o modo Light</span></div>
-      <div class="theme-palette-grid pastel-grid" role="listbox" aria-label="Temas pastel">
-        <button type="button" class="theme-choice" data-palette-choice="blush" style="--choice:#d96b83;--choice2:#9f3e55;--choice-bg:#f7e1e6"><i></i><span><b>Blush</b><small>#F7E1E6</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="peach" style="--choice:#d98249;--choice2:#9a4f26;--choice-bg:#ffd6a5"><i></i><span><b>Peach</b><small>#FFD6A5</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="lilac" style="--choice:#9c78cf;--choice2:#684597;--choice-bg:#e6d6f7"><i></i><span><b>Lilac</b><small>#E6D6F7</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="sage" style="--choice:#6f9f70;--choice2:#456c49;--choice-bg:#d6ead4"><i></i><span><b>Sage</b><small>#D6EAD4</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="lemon" style="--choice:#c69c2e;--choice2:#856315;--choice-bg:#fef3b0"><i></i><span><b>Lemon</b><small>#FEF3B0</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="mauve" style="--choice:#a47ba8;--choice2:#6c4c70;--choice-bg:#e6d6e7"><i></i><span><b>Mauve</b><small>#E6D6E7</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="coral" style="--choice:#e16f63;--choice2:#a64038;--choice-bg:#ffc1b6"><i></i><span><b>Coral</b><small>#FFC1B6</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="aqua" style="--choice:#5caaa5;--choice2:#347470;--choice-bg:#d0f0ed"><i></i><span><b>Aqua</b><small>#D0F0ED</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="sand" style="--choice:#a87a47;--choice2:#6f4d2b;--choice-bg:#ead8b0"><i></i><span><b>Sand</b><small>#EAD8B0</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="sky" style="--choice:#789acf;--choice2:#4a6591;--choice-bg:#dce6f7"><i></i><span><b>Sky</b><small>#DCE6F7</small></span></button>
-      </div>
-      <div class="theme-section-label mono-label"><b>Monocromáticos</b><span>Sem cor secundária</span></div>
-      <div class="theme-palette-grid mono-grid" role="listbox" aria-label="Temas monocromáticos">
-        <button type="button" class="theme-choice" data-palette-choice="mono-black" style="--choice:#2f2f32;--choice2:#0e0e10;--choice-bg:#e4e4e6"><i></i><span><b>Mono Black</b><small>Grafite</small></span></button>
-        <button type="button" class="theme-choice" data-palette-choice="mono-white" style="--choice:#e9e9e9;--choice2:#9f9f9f;--choice-bg:#f1f1f1"><i></i><span><b>Mono White</b><small>Pérola</small></span></button>
-      </div>
-      <div class="theme-section-label special-label"><b>Temas especiais</b><span>Efeitos visuais completos, independentes das paletas</span></div>
-      <div class="special-theme-grid" role="listbox" aria-label="Temas especiais">
-        <button type="button" class="theme-choice special-theme-choice" data-special-choice="none" style="--choice:#787075;--choice2:#282427;--choice-bg:#ddd7d9"><i></i><span><b>Nenhum</b><small>Usar modo + cor</small></span></button>
-        <button type="button" class="theme-choice special-theme-choice fire-theme-choice" data-special-choice="fire" style="--choice:#ff671f;--choice2:#6e1607;--choice-bg:#261008"><i>🔥</i><span><b>Fogo</b><small>Carvão · brasa · incandescência</small></span></button>
-        <button type="button" class="theme-choice special-theme-choice snow-theme-choice" data-special-choice="snow" style="--choice:#78aeca;--choice2:#244e67;--choice-bg:#eaf3f7"><i>❄</i><span><b>Neve</b><small>Gelo · geada · flocos</small></span></button>
-      </div>
-      <div class="theme-dialog-foot"><span>O tema fica salvo nesta ficha e acompanha o JSON exportado.</span><button value="cancel" class="primary">Concluir</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="helpDialog" class="help-dialog">
-    <form method="dialog" class="help-dialog-card">
-      <div class="row between"><div><p class="eyebrow">AJUDA RÁPIDA</p><h2>Arquivo da ficha</h2></div><button value="cancel" aria-label="Fechar">×</button></div>
-      <p>A ficha salva automaticamente no navegador. Exporte um JSON sempre que fizer alterações importantes para manter um backup fora do navegador.</p>
-      <p>As rolagens continuam sendo feitas pelo Discord. Esta página funciona como referência visual e mecânica durante as missões.</p>
-      <button class="primary" value="cancel">Entendi</button>
-    </form>
-  </dialog>
-
-  <div class="fire-embers" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  <div class="fire-flame-bed" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  <div class="fire-heat-haze" aria-hidden="true"></div>
-  <div class="snow-fall" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  <div class="snow-fall-front" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  <div class="snow-mist" aria-hidden="true"></div>
-  <div class="snow-drift" aria-hidden="true"></div>
-
   <div id="toast" class="toast hidden"></div>
 
-  <script src="skills-v594.js?v=5.9.4"></script>
-  <script src="gods-v594.js?v=5.9.4"></script>
-  <script src="abilities-v594.js?v=5.9.4"></script>
-  <script src="abilities-extra-v594.js?v=5.9.4"></script>
-  <script src="system-v594.js?v=5.9.4"></script>
-  <script src="talents-v594.js?v=5.9.4"></script>
-  <script src="magic-v594.js?v=5.9.4"></script>
-  <script src="roma-v594.js?v=5.9.4"></script>
-  <script src="familiars-v594.js?v=5.9.4"></script>
-  <script src="core-bridge-v594.js?v=5.9.4"></script>
-  <script src="bootstrap-v594.js?v=5.9.4"></script>
+  <script src="skills-v56.js?v=5.6.0"></script>
+  <script src="gods-v56.js?v=5.6.0"></script>
+  <script src="abilities-v56.js?v=5.6.0"></script>
+  <script src="abilities-extra-v55.js?v=5.5.0"></script>
+  <script src="system-v55.js?v=5.5.0"></script>
+  <script src="talents-v55.js?v=5.5.0"></script>
+  <script src="magic-v55.js?v=5.5.0"></script>
+  <script src="roma-v55.js?v=5.5.0"></script>
+  <script src="familiars-v55.js?v=5.5.0"></script>
+  <script src="core-bridge-v56.js?v=5.6.0"></script>
+  <script src="bootstrap-v56.js?v=5.6.0"></script>
 </body>
 </html>
