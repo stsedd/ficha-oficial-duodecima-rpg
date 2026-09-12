@@ -758,18 +758,34 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function renderEquippedDeck(){
     const cards=[];
     const a=state.armor,t=armorType(a.type),am=material(a.material),sh=state.shield,sm=material(sh.material);
-    const card=(cls,editKey,badge,heritage,visual,title,subtitle,description,stats,extra='')=>{
-      const desc=String(description||'').replace(/\s+/g,' ').trim();
-      return `<article class="equipment-card ${cls}" tabindex="0"><div class="equipment-card-visual-shell">${visual}<div class="equipment-card-topline"><span class="equipment-card-type"><i>${badge.icon}</i>${esc(badge.label)}</span>${heritage?'<span class="equipment-card-heritage">HERANÇA</span>':''}</div><button class="equipment-card-edit" data-edit-equipment="${esc(editKey)}" type="button">Editar</button></div><div class="equipment-card-copy centered"><b>${esc(title)}</b>${subtitle?`<span>${subtitle}</span>`:''}${desc?`<p>${esc(desc)}</p>`:''}</div><div class="equipment-card-stats">${stats.map(x=>`<span>${x}</span>`).join('')}</div>${extra}</article>`;
+    const card=(cls,editKey,badge,topRightLabel,visual,title,subtitle,description,stats,extra='')=>{
+      const desc=compactText(description||'',180);
+      return `<article class="equipment-card equipment-card--ornate ${cls}" tabindex="0"><div class="equipment-card-frame"><div class="equipment-card-visual-shell"><div class="equipment-card-topline"><span class="equipment-card-topbadge equipment-card-topbadge--left"><i>${badge.icon}</i><span>${esc(badge.label)}</span></span>${topRightLabel?`<span class="equipment-card-topbadge equipment-card-topbadge--right">${esc(topRightLabel)}</span>`:''}</div>${visual}<button class="equipment-card-edit" data-edit-equipment="${esc(editKey)}" type="button">Editar</button></div><div class="equipment-card-divider" aria-hidden="true"><span></span></div><div class="equipment-card-copy centered"><h4 class="equipment-card-title" title="${esc(title)}">${esc(title)}</h4>${subtitle?`<div class="equipment-card-subtitle">${esc(subtitle)}</div>`:''}${desc?`<p class="equipment-card-description">${esc(desc)}</p>`:''}</div><div class="equipment-card-stats">${stats.map(x=>`<span class="equipment-card-stat">${x}</span>`).join('')}</div>${extra}</div></article>`;
     };
-    if(a.equipped){const badge=equipmentCardLabel('armor');cards.push(card('armor','armor',badge,a.isHeritage,equipmentCardVisual(a.imageUrl,'◈'),a.name||'Armadura',`${esc(t.name)} · ${esc(am.name)}`,a.notes,[`DEF +${t.defense}`,`RD ${t.reduction}`]));}
-    if(sh.equipped){const badge=equipmentCardLabel('shield');cards.push(card('shield','shield',badge,sh.isHeritage,equipmentCardVisual(sh.imageUrl,'⬡'),sh.name||'Escudo',esc(sm.name),sh.notes,[`DEF +${shieldDefense()}`,`${Number(sh.stakes)||0}/30`]));}
-    (state.weapons||[]).filter(w=>w.equipped!==false).forEach(w=>{const wm=material(w.material),badge={icon:w.type==='distancia'?'🏹':'⚔',label:w.type==='distancia'?'À DISTÂNCIA':'CORPO A CORPO'};cards.push(card('weapon',`weapon:${w.id}`,badge,w.isHeritage,equipmentCardVisual(w.imageUrl,'✦'),w.name||'Arma',`${w.attr==='des'?'Destreza':'Força'} · ${esc(wm.name)}`,w.notes,[`ATQ ${signed(weaponAttack(w))}`,weaponDamageFormula(w)]));});
-    (state.inventory?.items||[]).filter(it=>it.showInDeck).forEach(it=>{const base=equipmentCardLabel('item',it.category),badge={icon:base.icon,label:inventoryCategoryLabel(it.category).replace(/^Arma \(|\)$/g,'')},isWeapon=it.category==='arma-corpo'||it.category==='arma-distancia',description=it.effect||it.rune||it.notes||'',subtitle=isWeapon?`${it.attackAttr==='des'?'Destreza':'Força'}${it.material?` · ${esc(it.material)}`:''}`:(it.material?esc(it.material):esc(inventoryCategoryLabel(it.category))),stats=isWeapon?[`ATQ ${signed(Number(it.attackBonus)||0)}`,esc(it.damage||'dano livre')]:[`QTD ${Math.max(0,Number(it.qty)||0)}`,it.effect?'EFEITO':'CONSULTA'];const extra=it.category==='consumivel'?`<button class="equipment-consume-btn" data-consume-item="${it.id}" ${Math.max(0,Number(it.qty)||0)<=0?'disabled':''}>Consumir 1</button>`:'';cards.push(card(`item ${it.category}`,`item:${it.id}`,badge,it.isHeritage,equipmentCardVisual(it.imageUrl,'✧'),it.name||'Item',subtitle,description,stats,extra));});
+    if(a.equipped){
+      const badge=equipmentCardLabel('armor');
+      cards.push(card('armor','armor',badge,a.isHeritage?'HERANÇA':String(am.name||'').toUpperCase(),equipmentCardVisual(a.imageUrl,'◈'),a.name||'Armadura',`${String(t.name||'').toUpperCase()} · ${String(am.name||'').toUpperCase()}`,a.notes,[`DEF +${t.defense}`,`RD ${t.reduction}`]));
+    }
+    if(sh.equipped){
+      const badge=equipmentCardLabel('shield');
+      cards.push(card('shield','shield',badge,sh.isHeritage?'HERANÇA':String(sm.name||'').toUpperCase(),equipmentCardVisual(sh.imageUrl,'⬡'),sh.name||'Escudo',String(sm.name||'').toUpperCase(),sh.notes,[`DEF +${shieldDefense()}`,`${Number(sh.stakes)||0}/30 ESTACAS`]));
+    }
+    (state.weapons||[]).filter(w=>w.equipped!==false).forEach(w=>{
+      const wm=material(w.material),badge={icon:w.type==='distancia'?'🏹':'⚔',label:w.type==='distancia'?'À DISTÂNCIA':'CORPO A CORPO'};
+      cards.push(card('weapon',`weapon:${w.id}`,badge,w.isHeritage?'HERANÇA':String(wm.name||'').toUpperCase(),equipmentCardVisual(w.imageUrl,'✦'),w.name||'Arma',`${w.attr==='des'?'DESTREZA':'FORÇA'} · ${String(wm.name||'').toUpperCase()}`,w.notes,[`ATQ ${signed(weaponAttack(w))}`,weaponDamageFormula(w)]));
+    });
+    (state.inventory?.items||[]).filter(it=>it.showInDeck).forEach(it=>{
+      const base=equipmentCardLabel('item',it.category),badge={icon:base.icon,label:inventoryCategoryLabel(it.category).replace(/^Arma \(|\)$/g,'').toUpperCase()},isWeapon=it.category==='arma-corpo'||it.category==='arma-distancia';
+      const description=it.effect||it.rune||it.notes||'';
+      const subtitle=isWeapon?`${it.attackAttr==='des'?'DESTREZA':'FORÇA'}${it.material?` · ${String(it.material).toUpperCase()}`:''}`:(it.material?String(it.material).toUpperCase():inventoryCategoryLabel(it.category).toUpperCase());
+      const stats=isWeapon?[`ATQ ${signed(Number(it.attackBonus)||0)}`,esc(it.damage||'dano livre')]:[`QTD ${Math.max(0,Number(it.qty)||0)}`,compactText(it.effect||it.rune||'CONSULTA',26)];
+      const topRight=it.isHeritage?'HERANÇA':(it.material?String(it.material).toUpperCase():(it.effect||it.rune?'ATIVO':'ITEM'));
+      const extra=it.category==='consumivel'?`<button class="equipment-consume-btn" data-consume-item="${it.id}" ${Math.max(0,Number(it.qty)||0)<=0?'disabled':''}>Consumir 1</button>`:'';
+      cards.push(card(`item ${it.category}`,`item:${it.id}`,badge,topRight,equipmentCardVisual(it.imageUrl,'✧'),it.name||'Item',subtitle,description,stats,extra));
+    });
     if(!cards.length)return `<div class="equipment-deck-empty"><span>✦</span><b>Seu baralho está vazio</b><p>Equipe armas, armadura ou escudo, ou fixe itens do inventário para vê-los aqui.</p><button type="button" data-go-tab="inventory" class="primary">Abrir inventário</button></div>`;
     return `<div class="equipment-deck upgraded-equipment-deck">${cards.join('')}</div>`;
   }
-
   function renderCombatEquipmentSummary(){
     const a=state.armor,t=armorType(a.type),s=state.shield,eqWeapons=(state.weapons||[]).filter(w=>w.equipped!==false);
     return `<article class="card equipment-summary-card"><div class="section-title"><div><p class="eyebrow">EQUIPAMENTO EM USO</p><h3>Baralho de combate</h3></div><button type="button" data-go-tab="inventory">Abrir Inventário</button></div>${renderEquippedDeck()}<div class="equipment-inline-summary"><span>${a.equipped?`Armadura +${t.defense} DEF / ${t.reduction} RD`:'Sem armadura'}</span><span>${s.equipped?`Escudo +${shieldDefense()} DEF`:'Sem escudo'}</span><span>${eqWeapons.length?`${eqWeapons.length} arma(s) equipada(s)`:'Sem arma equipada'}</span></div></article>`;

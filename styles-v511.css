@@ -3947,3 +3947,270 @@ body[data-special="snow"] .equipment-card::before{inset:5px!important;width:auto
 .target-resource-row{grid-template-columns:24px minmax(120px,1fr) auto 30px!important}
 .target-resource-row>input{min-width:0!important}
 @media(max-width:560px){.target-resource-row{grid-template-columns:22px minmax(90px,1fr) auto 28px!important;gap:5px!important}.target-resource-step{gap:3px!important}.target-resource-step strong{min-width:42px!important}}
+
+
+/* =========================================================
+   v5.12 — Baralho visual aproximado ao mockup aprovado
+   ========================================================= */
+:root{
+  --deck-card-bg:linear-gradient(180deg,#151014 0%,#0c090b 100%);
+  --deck-card-line:rgba(221,120,145,.45);
+  --deck-card-line-strong:rgba(232,187,116,.62);
+  --deck-card-text:#f3edf0;
+  --deck-card-muted:#c8b8bf;
+  --deck-card-soft:#a98f97;
+  --deck-card-badge-bg:rgba(255,248,249,.06);
+  --deck-card-shadow:0 18px 36px rgba(0,0,0,.32);
+  --deck-card-stat-bg:rgba(255,255,255,.03);
+  --deck-card-accent:linear-gradient(180deg,var(--red-bright),var(--red2));
+}
+body[data-theme="light"]{
+  --deck-card-bg:linear-gradient(180deg,#fffdfa 0%,#f8f0ea 100%);
+  --deck-card-line:rgba(208,138,156,.72);
+  --deck-card-line-strong:rgba(205,167,93,.75);
+  --deck-card-text:#2f2427;
+  --deck-card-muted:#725e66;
+  --deck-card-soft:#9c858d;
+  --deck-card-badge-bg:rgba(255,252,249,.96);
+  --deck-card-shadow:0 16px 30px rgba(145,89,105,.12);
+  --deck-card-stat-bg:rgba(255,255,255,.76);
+}
+
+.equipment-deck.upgraded-equipment-deck{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
+  gap:18px;
+  align-items:stretch;
+}
+.equipment-deck .equipment-card,
+.equipment-deck .equipment-card:nth-child(even),
+.equipment-deck .equipment-card:hover{
+  margin-left:0;
+  transform:none;
+  box-shadow:none;
+}
+.equipment-card--ornate{
+  min-height:auto !important;
+  padding:0 !important;
+  border:none !important;
+  background:transparent !important;
+  border-radius:26px;
+  overflow:visible;
+  box-shadow:none !important;
+}
+.equipment-card--ornate::before,
+.equipment-card--ornate::after{display:none !important}
+.equipment-card-frame{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  height:100%;
+  padding:12px 12px 16px;
+  border-radius:24px;
+  border:1px solid var(--deck-card-line);
+  background:var(--deck-card-bg);
+  box-shadow:var(--deck-card-shadow);
+  color:var(--deck-card-text);
+  overflow:hidden;
+}
+.equipment-card-frame::before,
+.equipment-card-frame::after{
+  content:"";
+  position:absolute;
+  top:14px;
+  bottom:14px;
+  width:3px;
+  border-radius:999px;
+  background:linear-gradient(180deg,var(--deck-card-line-strong),transparent 82%);
+  opacity:.95;
+}
+.equipment-card-frame::before{left:6px}
+.equipment-card-frame::after{right:6px}
+.equipment-card-visual-shell{position:relative;padding-top:34px}
+.equipment-card-topline{
+  position:absolute;
+  inset:0 0 auto 0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  z-index:2;
+}
+.equipment-card-topbadge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  max-width:calc(100% - 8px);
+  padding:8px 14px;
+  border-radius:14px;
+  border:1px solid var(--deck-card-line);
+  background:var(--deck-card-badge-bg);
+  color:var(--deck-card-text);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  line-height:1.1;
+  box-shadow:0 10px 22px rgba(0,0,0,.08);
+}
+.equipment-card-topbadge i{font-style:normal;font-size:14px;line-height:1}
+.equipment-card-topbadge--right{
+  max-width:46%;
+  justify-content:center;
+  text-align:center;
+  border-color:var(--deck-card-line-strong);
+}
+.equipment-card--ornate .equipment-card-edit{
+  position:absolute;
+  top:48px;
+  right:12px;
+  z-index:3;
+  min-height:auto;
+  padding:8px 12px;
+  border-radius:13px;
+  border:1px solid rgba(255,255,255,.28);
+  background:rgba(56,45,50,.46);
+  color:#fff;
+  font-size:11px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  backdrop-filter:blur(8px);
+}
+body[data-theme="light"] .equipment-card--ornate .equipment-card-edit{
+  background:rgba(114,96,103,.34);
+  color:#fff;
+}
+.equipment-card--ornate .equipment-card-media,
+.equipment-card--ornate .equipment-card-glyph{
+  width:100%;
+  height:290px;
+  margin:0;
+  border-radius:20px;
+  border:1px solid rgba(0,0,0,.04);
+  background:rgba(0,0,0,.12);
+  overflow:hidden;
+}
+.equipment-card--ornate .equipment-card-media::after{
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08), inset 0 -36px 56px rgba(0,0,0,.12);
+}
+.equipment-card--ornate .equipment-card-media img{object-fit:cover;object-position:center}
+.equipment-card--ornate .equipment-card-glyph{
+  display:grid;
+  place-items:center;
+  font-size:64px;
+  color:var(--deck-card-soft);
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.01));
+}
+.equipment-card-divider{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:10px;
+}
+.equipment-card-divider span{
+  width:100%;
+  height:1px;
+  position:relative;
+  background:linear-gradient(90deg,transparent,var(--deck-card-line) 14%,var(--deck-card-line) 86%,transparent);
+}
+.equipment-card-divider span::after{
+  content:"✦";
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-58%);
+  padding:0 12px;
+  background:var(--deck-card-bg);
+  color:#c99a45;
+  font-size:16px;
+  line-height:1;
+}
+.equipment-card--ornate .equipment-card-copy{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  align-items:center;
+  text-align:center;
+  padding:0 12px;
+}
+.equipment-card-title{
+  margin:0;
+  color:var(--deck-card-text);
+  font:700 clamp(26px,2vw,30px)/1.08 var(--serif);
+  letter-spacing:-.01em;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  text-wrap:balance;
+}
+.equipment-card-subtitle{
+  color:var(--deck-card-soft);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+.equipment-card-description{
+  margin:4px 0 0;
+  color:var(--deck-card-muted);
+  font:400 15px/1.45 var(--serif);
+  display:-webkit-box;
+  -webkit-line-clamp:4;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  text-wrap:pretty;
+  max-width:28ch;
+}
+.equipment-card--ornate .equipment-card-stats{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:auto;
+  padding-top:4px;
+}
+.equipment-card-stat{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:58px;
+  padding:12px 14px;
+  border-radius:16px;
+  border:1px solid var(--deck-card-line);
+  background:var(--deck-card-stat-bg);
+  color:var(--deck-card-text);
+  text-align:center;
+  font:800 16px/1.2 var(--sans);
+  letter-spacing:.01em;
+  overflow-wrap:anywhere;
+}
+.equipment-card--ornate .equipment-consume-btn{
+  width:100%;
+  margin-top:2px;
+  min-height:48px;
+  border-radius:14px;
+  border:1px solid transparent;
+  background:var(--deck-card-accent);
+  color:#fff;
+  font-weight:900;
+  box-shadow:0 10px 22px rgba(0,0,0,.14);
+}
+.equipment-card--ornate .equipment-consume-btn:disabled{opacity:.45;cursor:not-allowed}
+body[data-theme="light"] .equipment-card--ornate .equipment-consume-btn{box-shadow:0 10px 22px rgba(190,76,105,.20)}
+
+@media(max-width:1180px){
+  .equipment-card--ornate .equipment-card-media,
+  .equipment-card--ornate .equipment-card-glyph{height:250px}
+  .equipment-card-title{font-size:24px}
+}
+@media(max-width:760px){
+  .equipment-deck.upgraded-equipment-deck{grid-template-columns:1fr}
+  .equipment-card-frame{padding:11px 11px 14px}
+  .equipment-card--ornate .equipment-card-media,
+  .equipment-card--ornate .equipment-card-glyph{height:240px}
+  .equipment-card-topbadge{font-size:10px;padding:7px 11px}
+  .equipment-card--ornate .equipment-card-edit{top:44px;padding:7px 10px;font-size:10px}
+  .equipment-card-title{font-size:22px}
+  .equipment-card-description{font-size:14px;-webkit-line-clamp:5}
+}
