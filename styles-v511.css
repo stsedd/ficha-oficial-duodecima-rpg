@@ -4214,3 +4214,71 @@ body[data-theme="light"] .equipment-card--ornate .equipment-consume-btn{box-shad
   .equipment-card-title{font-size:22px}
   .equipment-card-description{font-size:14px;-webkit-line-clamp:5}
 }
+
+
+/* =========================================================
+   v5.12.1 — refinamento do baralho após teste visual
+   ========================================================= */
+.equipment-summary-card,
+.card:has(.upgraded-equipment-deck),
+.equipment-deck.upgraded-equipment-deck{
+  overflow:visible !important;
+}
+.equipment-deck.upgraded-equipment-deck{
+  padding:16px 4px 8px !important;
+  row-gap:20px;
+}
+.equipment-card--ornate{
+  position:relative;
+  z-index:0;
+  transition:transform .22s ease, filter .22s ease;
+  transform-origin:center top;
+}
+.equipment-card--ornate:hover,
+.equipment-card--ornate:focus-within{
+  z-index:12;
+  transform:translateY(-10px) scale(1.018);
+  filter:drop-shadow(0 20px 36px rgba(0,0,0,.18));
+}
+.equipment-card-frame{
+  padding:12px 14px 16px;
+}
+.equipment-card-frame::before,
+.equipment-card-frame::after{
+  width:8px;
+  top:16px;
+  bottom:16px;
+  border-radius:999px;
+  background:
+    radial-gradient(circle at center 8px, var(--deck-card-line-strong) 0 2px, transparent 2.6px),
+    radial-gradient(circle at center calc(50% - 16px), rgba(201,154,69,.72) 0 1.7px, transparent 2.4px),
+    radial-gradient(circle at center 50%, var(--deck-card-line-strong) 0 2.4px, transparent 3px),
+    radial-gradient(circle at center calc(50% + 16px), rgba(201,154,69,.72) 0 1.7px, transparent 2.4px),
+    radial-gradient(circle at center calc(100% - 8px), var(--deck-card-line-strong) 0 2px, transparent 2.6px),
+    linear-gradient(180deg, var(--deck-card-line-strong) 0%, rgba(201,154,69,.9) 24%, rgba(201,154,69,.55) 58%, transparent 94%);
+  background-repeat:no-repeat;
+  background-size:8px 16px,8px 10px,8px 12px,8px 10px,8px 16px,2px calc(100% - 22px);
+  background-position:center top,center calc(50% - 16px),center 50%,center calc(50% + 16px),center bottom,center 11px;
+  opacity:1;
+}
+.equipment-card-frame::before{left:8px}
+.equipment-card-frame::after{right:8px}
+.equipment-card-title{
+  font-size:clamp(22px,1.55vw,25px);
+  line-height:1.06;
+}
+.equipment-card-subtitle{
+  font-size:10px;
+  letter-spacing:.14em;
+}
+@media(max-width:1180px){
+  .equipment-card-title{font-size:22px}
+  .equipment-card-subtitle{font-size:9.5px}
+}
+@media(max-width:760px){
+  .equipment-deck.upgraded-equipment-deck{padding-top:12px !important}
+  .equipment-card--ornate:hover,
+  .equipment-card--ornate:focus-within{transform:translateY(-6px) scale(1.01)}
+  .equipment-card-title{font-size:20px}
+  .equipment-card-subtitle{font-size:9px}
+}
