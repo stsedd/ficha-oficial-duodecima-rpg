@@ -4497,3 +4497,93 @@ body[data-theme="light"] .inventory-library-picker[open]>summary{
 @media(max-width:560px){
   .inventory-library-row{grid-template-columns:1fr}
 }
+
+/* v5.13.2 — prioridade visual para importação */
+.inventory-toolbar-grid--priority{
+  grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr) !important;
+  gap:14px;
+  align-items:stretch;
+}
+.inventory-import-card,
+.inventory-manual-card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  background:color-mix(in srgb,var(--panel) 94%, transparent 6%);
+}
+.inventory-import-card{
+  background:color-mix(in srgb,var(--theme-accent) 5%, var(--panel) 95%);
+  box-shadow:0 10px 22px rgba(0,0,0,.06);
+}
+.inventory-import-card .eyebrow,
+.inventory-manual-card .eyebrow{margin-bottom:8px}
+.inventory-manual-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:center;
+}
+.inventory-manual-card .ghost{
+  white-space:nowrap;
+  opacity:.92;
+}
+.inventory-manual-card .muted{margin:10px 0 0}
+.inventory-library-picker{
+  border-radius:16px;
+  border-color:color-mix(in srgb,var(--theme-accent) 38%, var(--line) 62%);
+  background:color-mix(in srgb,var(--panel) 72%, var(--theme-accent) 28%);
+  overflow:hidden;
+}
+.inventory-library-picker>summary{
+  min-height:58px;
+  justify-content:flex-start;
+  padding:14px 18px;
+  font-size:1.05rem;
+  font-weight:900;
+  letter-spacing:.01em;
+}
+.inventory-library-picker>summary::before{
+  width:26px;
+  height:26px;
+  font-size:13px;
+  margin-right:12px;
+  background:color-mix(in srgb,var(--panel) 85%, transparent 15%);
+}
+.inventory-library-picker[open]>summary{
+  background:color-mix(in srgb,var(--theme-accent) 14%, var(--panel) 86%);
+}
+.inventory-library-panel{
+  padding:14px 16px 16px;
+}
+.inventory-library-controls{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  width:100%;
+}
+.inventory-library-controls select,
+.inventory-library-controls button{
+  width:100%;
+}
+.inventory-library-controls select{
+  min-width:0;
+}
+.inventory-library-controls .primary{
+  min-height:48px;
+  font-weight:850;
+}
+body[data-theme="light"] .inventory-import-card,
+body[data-theme="light"] .inventory-manual-card{
+  background:#fffaf6;
+  border-color:color-mix(in srgb,var(--theme-accent) 24%, #d8c7c1 76%);
+}
+body[data-theme="light"] .inventory-import-card{
+  background:color-mix(in srgb,var(--theme-accent) 6%, #fffaf6 94%);
+}
+@media(max-width:1050px){
+  .inventory-toolbar-grid--priority{grid-template-columns:1fr !important}
+}
+@media(max-width:680px){
+  .inventory-manual-row{grid-template-columns:1fr}
+  .inventory-library-picker>summary{font-size:1rem;padding:12px 14px}
+}
