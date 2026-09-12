@@ -19,16 +19,18 @@
   function attrName(id, attrs){ return attrs.get(id)?.name || id; }
   function skillName(id, skills){ return skills.get(id)?.name || id; }
 
-  function resourceMaxFactory(formula){
-    const raw = String(formula || '').toLowerCase();
-    return lvl => {
-      const level = Math.max(1, Number(lvl) || 1);
-      if(raw.includes('floor') && raw.includes('/10')){
-        const first = Number((raw.match(/-?\d+(?:\.\d+)?/) || ['0'])[0]);
-        return first + Math.floor(level / 10);
-      }
-      const n = Number((raw.match(/-?\d+(?:\.\d+)?/) || ['0'])[0]);
-      return Number.isFinite(n) ? n : 0;
+  function normalizeResource(r){
+    if(!r) return null;
+    return {
+      id:r.id || String(r.name || 'recurso').toLowerCase().replace(/[^a-z0-9]+/g,'-'),
+      name:r.name || 'Recurso Divino',
+      scope:r.scope || 'personal',
+      max:r.max || {type:'described',formula:r.maxFormula || '0'},
+      maxFormula:r.maxFormula || r.max?.formula || (r.max?.value != null ? String(r.max.value) : '0'),
+      sourceAbilityId:r.sourceAbilityId || null,
+      reset:r.reset || null,
+      thresholds:Array.isArray(r.thresholds) ? r.thresholds : [],
+      sharedKey:r.sharedKey || null
     };
   }
 
@@ -57,13 +59,15 @@
       skillChoice:(d.skillChoices || []).map(id => skillName(id, skills)),
       notes:[...(d.notes || [])]
     };
+    out.resources = (d.resources || []).map(normalizeResource).filter(Boolean);
     if(d.resource){
-      out.resource = {
-        name:d.resource.name,
-        maxFormula:d.resource.maxFormula || '0',
-        scope:d.resource.scope || 'personal',
-        max:resourceMaxFactory(d.resource.maxFormula)
-      };
+      const legacy = normalizeResource({
+        ...d.resource,
+        id:d.resource.id || out.resources[0]?.id || String(d.resource.name || 'recurso').toLowerCase().replace(/[^a-z0-9]+/g,'-'),
+        max:{type:'described',formula:d.resource.maxFormula || '0'}
+      });
+      out.resource = legacy;
+      if(!out.resources.length) out.resources=[legacy];
     }
     return out;
   }
@@ -92,7 +96,9 @@
       sourceGodId,
       coreBlocks:Array.isArray(a.blocks) ? a.blocks : [],
       coreTiers:Array.isArray(a.tiers) ? a.tiers : [],
-      coreCategory:a.category || a.type
+      coreCategory:a.category || a.type,
+      choices:Array.isArray(a.choices) ? a.choices : [],
+      skillEffects:Array.isArray(a.skillEffects) ? a.skillEffects : []
     };
   }
 

@@ -1,1 +1,1 @@
-Ficha da Duodécima v5.6.1 · hotfix de orbes de Nível/BP e retorno dos temas · Core 2026.09.11.1
+Ficha da Duodécima v5.7 · revisão visual completa, temas persistentes, perícias legíveis e Core schema v2 · Core 2026.09.11.1

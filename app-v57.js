@@ -1,10 +1,11 @@
 (() => {
   'use strict';
 
-  const SCHEMA_VERSION = 21;
-  const STORAGE_KEY = 'duodecima_universal_stage4_v21';
+  const SCHEMA_VERSION = 23;
+  const STORAGE_KEY = 'duodecima_universal_stage4_v23';
+  const THEME_KEY = 'duodecima_theme_v2';
   const LEGACY_KEYS = [
-    'duodecima_universal_stage3a_v20','duodecima_universal_stage2m_v19','duodecima_universal_stage2l_v18','duodecima_universal_stage2k_v17','duodecima_universal_stage2h_v14','duodecima_universal_stage2g_v13','duodecima_universal_stage2f_v12','duodecima_universal_stage2e_v11','duodecima_universal_stage2d_v10','duodecima_universal_stage2c_v9','duodecima_universal_stage2b_v8','duodecima_universal_stage2a_v7','duodecima_universal_stage1f_v6','duodecima_universal_stage1e_v5','duodecima_universal_stage1d_v4',
+    'duodecima_universal_stage4_v22','duodecima_universal_stage4_v21','duodecima_universal_stage3a_v20','duodecima_universal_stage2m_v19','duodecima_universal_stage2l_v18','duodecima_universal_stage2k_v17','duodecima_universal_stage2h_v14','duodecima_universal_stage2g_v13','duodecima_universal_stage2f_v12','duodecima_universal_stage2e_v11','duodecima_universal_stage2d_v10','duodecima_universal_stage2c_v9','duodecima_universal_stage2b_v8','duodecima_universal_stage2a_v7','duodecima_universal_stage1f_v6','duodecima_universal_stage1e_v5','duodecima_universal_stage1d_v4',
     'duodecima_universal_stage1c_v3','duodecima_universal_stage1b_v2','duodecima_universal_stage1a_v1'
   ];
   const ATTRS = [
@@ -17,22 +18,10 @@
     'Alati':'Alati','Ventis':'Ventis','Numina':'Numina'
   };
   const INVENTORY_CATEGORIES = [
-    ['arma-corpo','Arma (corpo a corpo)'],
-    ['arma-distancia','Arma (à distância)'],
-    ['consumivel','Consumível'],
-    ['item-magico','Item mágico'],
-    ['outro','Outro']
+    ['geral','Geral'],['arma','Arma'],['arma-magica','Arma mágica'],['armadura','Armadura'],['escudo','Escudo'],
+    ['heranca','Herança'],['reliquia','Relíquia'],['consumivel','Consumível'],['material','Material'],['crafting','Crafting'],
+    ['ferramenta','Ferramenta'],['missao','Missão'],['magico','Mágico / especial'],['outro','Outro']
   ];
-
-  function normalizeInventoryCategory(id){
-    const map={
-      'arma':'arma-corpo','arma-magica':'item-magico','armadura':'outro','escudo':'outro',
-      'heranca':'outro','reliquia':'item-magico','consumivel':'consumivel','material':'outro',
-      'crafting':'outro','ferramenta':'outro','missao':'outro','magico':'item-magico','geral':'outro','outro':'outro',
-      'arma-corpo':'arma-corpo','arma-distancia':'arma-distancia','item-magico':'item-magico'
-    };
-    return map[id]||'outro';
-  }
 
   const gods = window.DUODECIMA_GODS || [];
   const skills = window.DUODECIMA_SKILLS || [];
@@ -68,22 +57,22 @@
 
   const emptyAttrs = () => ({for:0,des:0,con:0,int:0,fe:0,car:0});
   const defaultDeath = () => ({successes:0,failures:0,stable:false,dead:false,atZero:false,lastRoll:null,returnCount:0});
-  const defaultArmor = () => ({equipped:false,name:'Armadura',type:'nenhuma',material:'ferro-aco',resistanceCurrent:3,imageUrl:'',isHeritage:false,notes:''});
-  const defaultShield = () => ({equipped:false,name:'Escudo',material:'ferro-aco',stakes:0,resistanceCurrent:3,masterTalent:false,imageUrl:'',isHeritage:false,notes:''});
+  const defaultArmor = () => ({equipped:false,name:'Armadura',type:'nenhuma',material:'ferro-aco',resistanceCurrent:3,imageUrl:''});
+  const defaultShield = () => ({equipped:false,name:'Escudo',material:'ferro-aco',stakes:0,resistanceCurrent:3,masterTalent:false,imageUrl:''});
   const defaultTempMods = () => ({rolls:0,defense:0,damageReduction:0});
   const defaultLineage = () => ({type:'normal',secondaryGodId:'',structureGodId:'',compoundPassiveReplacements:[],compoundActiveReplacements:[],compoundActiveSlots:[],directPrimaryPassives:[],directSecondaryPassives:[]});
   const defaultMagic = () => ({enabled:false,castingAttr:'fe',circle:1,sacrifices:{for:0,des:0,con:0},spells:[],concentrationSpellId:'',concentrationDamage:0,highCircleUsed:{6:0,7:0,8:0,9:0},notes:''});
   const defaultInventory = () => ({aureus:0,denarius:0,items:[],notes:''});
-  const defaultFamiliar = (type='auxiliar') => ({id:uid('fam'),name:'Novo familiar',type,active:false,currentHp:null,attributes:emptyAttrs(),skills:[],knownVip:false,staffApproved:false,legendaryHpMax:0,legendaryUsed:false,legendaryOccasion:'',notes:'',imageUrl:''});
+  const defaultFamiliar = (type='auxiliar') => ({id:uid('fam'),name:'Novo familiar',type,active:false,currentHp:null,attributes:emptyAttrs(),skills:[],knownVip:false,staffApproved:false,legendaryHpMax:0,legendaryUsed:false,legendaryOccasion:'',notes:''});
   const defaultFamiliars = () => ({entries:[],mountFameClaimed:false,notes:''});
   const defaultRoma = () => ({fame:0,fameEntries:[],rebentoApproved:false,affinities:[],affinityEntries:[],legionRank:'',religioRank:'',customRank:'',job:'',jobSalary:0,jobPeriod:'',cohort:'',citizenship:'',legionYears:0,serviceMarks:0,retired:false,titles:[],permissions:[],deeds:[],notes:''});
   const defaultState = () => ({
     schemaVersion:SCHEMA_VERSION,isCreated:false,name:'',player:'',level:1,godId:'iuppiter',
     baseAttributes:emptyAttrs(),levelAttributes:emptyAttrs(),attributeExtras:emptyAttrs(),divineSkillChoice:'',initialSkills:[],levelSkillChoices:{20:'',40:''},skillMeta:{},lineage:defaultLineage(),talents:[],talentDraftId:'',magic:defaultMagic(),inventory:defaultInventory(),familiars:defaultFamiliars(),roma:defaultRoma(),
-    currentHp:null,currentEnergy:null,currentSanity:100,resourceCurrent:0,
-    abilityStakes:{},conditions:[],exhaustion:0,death:defaultDeath(),tempMods:defaultTempMods(),
+    currentHp:null,currentEnergy:null,currentSanity:100,resourceCurrent:0,resourceValues:{},targetResources:{},
+    abilityStakes:{},abilityChoices:{},choiceDetails:{},abilityUses:{},conditions:[],exhaustion:0,death:defaultDeath(),tempMods:defaultTempMods(),
     skillTrainings:[],weapons:[],armor:defaultArmor(),shield:defaultShield(),lastRoll:null,
-    activeTab:'status',history:{summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',birth:'',residence:'',portraitUrl:'',bannerUrl:'',bannerPositionY:50,bannerScale:100},notes:'',
+    activeTab:'status',theme:'standard',history:{summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',birth:'',residence:'',portraitUrl:'',bannerUrl:''},notes:'',
     createdAt:null,updatedAt:null
   });
   let state = defaultState();
@@ -126,9 +115,61 @@
   function rawEnergyMax(){const e=system.energy||{},base=Number(e.base??100),every=Math.max(1,Number(e.everyLevels??5)),inc=Number(e.increment??25);return base+Math.floor(state.level/every)*inc+(state.magic?.enabled?magicSacrificeTotal()*(Number(magicRules.sacrificeEnergyEach)||25):0)}
   function hpMax(){return state.exhaustion>=5?Math.max(1,Math.floor(rawHpMax()/2)):rawHpMax()}
   function energyMax(){return state.exhaustion>=5?Math.max(1,Math.floor(rawEnergyMax()/2)):rawEnergyMax()}
-  function resourceMax(){const r=god()?.resource;return r?Number(r.max(state.level)):0}
+
+function divineResources(){
+  const structural=god()?.id||state.godId,originIds=[state.godId];
+  if(state.lineage?.type!=='normal'&&state.lineage?.secondaryGodId&&!originIds.includes(state.lineage.secondaryGodId))originIds.push(state.lineage.secondaryGodId);
+  const set=effectiveAbilitySet(),effective=[...(set?.passives||[]),...(set?.actives||[])];
+  const out=[];
+  for(const gid of originIds){
+    const g=godById(gid);if(!g)continue;
+    let rs=Array.isArray(g.resources)&&g.resources.length?g.resources:(g.resource?[{id:g.resource.id||String(g.resource.name||'recurso').toLowerCase().replace(/[^a-z0-9]+/g,'-'),name:g.resource.name||'Recurso Divino',scope:g.resource.scope||'personal',max:g.resource.max||{type:'described',formula:g.resource.maxFormula||'0'},maxFormula:g.resource.maxFormula||'0'}]:[]);
+    for(const original of rs){
+      const r={...original,_sourceGodId:gid};
+      const linked=!r.sourceAbilityId||effective.some(a=>a.sourceGodId===gid&&a.id===r.sourceAbilityId);
+      const ownerPresent=effective.some(a=>a.sourceGodId===gid)||gid===structural;
+      if(linked&&ownerPresent&&!out.some(x=>resourceKey(x)===resourceKey(r)))out.push(r);
+    }
+  }
+  return out;
+}
+
+function resourceAbilityStake(resource){
+  if(!resource?.sourceAbilityId)return 0;
+  const set=effectiveAbilitySet(),owner=resource._sourceGodId||god()?.id||state.godId;
+  const a=[...(set?.passives||[]),...(set?.actives||[])].find(x=>x.sourceGodId===owner&&x.id===resource.sourceAbilityId);
+  return a?stakesOf(a):0;
+}
+  function resourceMaxFor(resource){
+    if(!resource)return 0;
+    const m=resource.max||{},type=m.type||'described';
+    if(type==='fixed')return Math.max(0,Number(m.value)||0);
+    if(type==='levelFormula'){
+      const raw=String(m.formula||resource.maxFormula||'0').toLowerCase(),level=Math.max(1,Number(state.level)||1),base=Number((raw.match(/-?\d+(?:\.\d+)?/)||['0'])[0])||0;
+      if(raw.includes('floor')&&raw.includes('/10'))return Math.max(0,base+Math.floor(level/10));
+      return Math.max(0,base);
+    }
+    if(type==='stakeProgression'){
+      const v=resourceAbilityStake(resource),row=(m.progression||[]).find(x=>v>=Number(x.min||0)&&(x.max==null||v<=Number(x.max)));
+      return Math.max(0,Number(row?.value)||0);
+    }
+    const raw=String(m.formula||resource.maxFormula||'0'),n=Number((raw.match(/-?\d+(?:\.\d+)?/)||['0'])[0]);
+    return Math.max(0,Number.isFinite(n)?n:0);
+  }
+
+function resourceKey(resource){return `${resource?._sourceGodId||god()?.id||state.godId}:${resource?.id||'resource'}`}
+  function resourceValue(resource){const key=resourceKey(resource);return clamp(Number(state.resourceValues?.[key])||0,0,resourceMaxFor(resource))}
+  function setResourceValue(resource,next){if(!resource)return;state.resourceValues=state.resourceValues||{};state.resourceValues[resourceKey(resource)]=clamp(Number(next)||0,0,resourceMaxFor(resource))}
+  function hudResources(){return divineResources().filter(r=>r.scope==='personal'||r.scope==='collective')}
+
+function abilityResourcesFor(a){return divineResources().filter(r=>r.scope==='ability'&&r.sourceAbilityId===a.id&&(r._sourceGodId||state.godId)===(a.sourceGodId||state.godId))}
+  function targetResources(){return divineResources().filter(r=>r.scope==='target')}
+  function resourceMax(){const r=hudResources()[0];return r?resourceMaxFor(r):0}
   function divineGranted(){return [...(god().grantedSkills||[]),...(state.divineSkillChoice?[state.divineSkillChoice]:[])]}
   function skillAttr(name){return skills.find(s=>s.name===name)?.attr||null}
+  function skillId(name){return skills.find(s=>s.name===name)?.id||String(name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-')}
+  function skillNameById(id){return skills.find(s=>s.id===id)?.name||skills.find(s=>skillId(s.name)===id)?.name||id}
+  function attrAbbr(k){return ({for:'FOR',des:'DES',con:'CON',int:'INT',fe:'FÉ',car:'CAR'}[k]||String(k||'').toUpperCase())}
   function activeCondition(name){return state.conditions.includes(name)}
   function conditionData(name){return system.conditions.find(c=>c.name===name)}
   function conditionDefenseMod(){return state.conditions.reduce((t,n)=>t+(Number(conditionData(n)?.defenseMod)||0),0)}
@@ -146,7 +187,7 @@
     if(!state.skillMeta[name])state.skillMeta[name]={proficient:false,expertise:false,source:'extras',detail:''};
     return state.skillMeta[name];
   }
-  function automaticSkillSources(name){
+  function basicAutomaticSkillSources(name){
     const out=[];
     if(state.initialSkills.includes(name))out.push('Inicial');
     if(divineGranted().includes(name))out.push('Prole');
@@ -154,13 +195,101 @@
     if((skillTraining(name)?.stakes||0)>=30)out.push('Treino');
     return [...new Set(out)];
   }
+  function choiceStateKey(a,choice){return `${abilityKey(a)}:choice:${choice.id}`}
+
+
+function abilityChoiceDefs(a){
+  const explicit=Array.isArray(a?.choices)?a.choices:[];if(explicit.length)return explicit;
+  const synthetic=[];
+  (a?.skillEffects||[]).forEach((e,i)=>{if(!String(e.type||'').startsWith('choose'))return;synthetic.push({id:e.choiceId||`skill-effect-${i}`,label:e.label||'Escolha de perícia',mode:'persistent',choose:Number(e.choose)||1,allowReplace:false,options:Array.isArray(e.options)?e.options.map(id=>({id,label:skillNameById(id)})):[],dynamicOptions:e.dynamicOptions==='alreadyProficientSkills'?{type:'alreadyProficientSkills'}:e.dynamicOptions})});
+  return synthetic;
+}
+function choiceLimit(a,choice){
+  let limit=Math.max(1,Number(choice?.choose)||1),axis=choice?.progressionAxis||'stakes',progression=Array.isArray(choice?.progression)?choice.progression:[];
+  if(progression.length){
+    const value=axis==='characterLevel'?state.level:stakesOf(a);
+    for(const step of progression){const min=Number(step.min)||0,max=step.max==null?Infinity:Number(step.max);if(value>=min&&value<=max)limit=Math.max(0,Number(step.count)||limit)}
+  }
+  return limit;
+}
+function chosenFor(a,choice){
+  const raw=state.abilityChoices?.[choiceStateKey(a,choice)],limit=choiceLimit(a,choice);
+  return (Array.isArray(raw)?raw:[]).slice(0,limit);
+}
+function choiceOptions(a,choice){
+  if(choice?.dynamicOptions?.type==='alreadyProficientSkills'||choice?.dynamicOptions==='alreadyProficientSkills'){
+    return skills.filter(sk=>skillIsProficient(sk.name)).map(sk=>({id:sk.id||skillId(sk.name),label:sk.name}));
+  }
+  return Array.isArray(choice?.options)?choice.options.map(o=>typeof o==='string'?({id:o,label:skillNameById(o)}):o):[];
+}
+function choiceDetailKey(a,choice,optId){return `${choiceStateKey(a,choice)}:detail:${optId}`}
+function renderAbilityChoices(a){
+  const choices=abilityChoiceDefs(a);if(!choices.length)return '';
+  const abilityLocked=a.type==='active'&&state.level<Number(a.level||0);
+  return `<div class="ability-choice-zone">${choices.map(choice=>{
+    const limit=choiceLimit(a,choice),selected=chosenFor(a,choice),opts=choiceOptions(a,choice);
+    const selectedLabels=selected.map(id=>opts.find(o=>(o.id||o.label)===id)?.label||opts.find(o=>(o.id||o.label)===id)?.name||id);
+    const progression=Array.isArray(choice.progression)&&choice.progression.length?choice.progression.map(step=>`${step.min}${step.max==null?'+':`–${step.max}`}: ${step.count}`).join(' · '):'';
+    return `<section class="ability-choice-block ${selected.length===limit?'choice-complete':''}"><div class="row between ability-choice-head"><div><small>${choice.mode==='persistent'?'ESCOLHA PERSISTENTE':'ESCOLHA DA HABILIDADE'}</small><b>${esc(choice.label||'Escolha')}</b></div><span class="pill ${selected.length===limit?'good':''}">${selected.length}/${limit} escolhida(s)</span></div>${selected.length?`<div class="choice-current"><span>Selecionado</span><b>${selectedLabels.map(esc).join(' · ')}</b></div>`:'<div class="choice-current empty"><span>Seleção</span><b>Nenhuma opção marcada</b></div>'}${progression?`<div class="choice-progression">Limite por ${choice.progressionAxis==='characterLevel'?'nível':'estacas'}: ${esc(progression)}</div>`:''}<div class="ability-choice-options">${opts.map(opt=>{
+      const id=opt.id||opt.label,checked=selected.includes(id),disabled=abilityLocked||(!checked&&selected.length>=limit);
+      const tierText=Array.isArray(opt.tiers)?opt.tiers.map(t=>`<span><b>${esc(t.label||t.id)}</b> ${esc(t.text||'')}</span>`).join(''):'';
+      const detailKey=choiceDetailKey(a,choice,id),detail=state.choiceDetails?.[detailKey]||'';
+      return `<label class="ability-choice-option ${checked?'selected':''} ${disabled?'disabled':''}"><input type="checkbox" data-ability-choice="${esc(abilityKey(a))}|${esc(choice.id)}|${esc(id)}" ${checked?'checked':''} ${disabled?'disabled':''}><span><b>${esc(opt.label||opt.name||id)}${checked?'<em>✓ escolhida</em>':''}</b>${opt.text?`<small>${esc(opt.text)}</small>`:''}${tierText?`<div class="ability-choice-tiertext">${tierText}</div>`:''}</span></label>${checked&&opt.subchoice?`<label class="choice-detail-field"><span class="label">Detalhe da escolha</span><input data-choice-detail="${esc(detailKey)}" value="${esc(detail)}" placeholder="${opt.subchoice.type==='knownAbility'?'Habilidade ou magia escolhida…':'Escolha relacionada…'}"></label>`:''}`;
+    }).join('')}</div>${abilityLocked?`<p class="muted choice-lock-note">Disponível a partir do nível ${a.level}.</p>`:(choice.allowReplace===false?'<p class="muted choice-lock-note">A escolha fica salva na ficha. Para removê-la manualmente, a ficha pede confirmação.</p>':'')}</section>`;
+  }).join('')}</div>`;
+}
+function renderAbilityResources(a){
+  const local=abilityResourcesFor(a);
+  const targets=targetResources().filter(r=>r.sourceAbilityId===a.id&&(r._sourceGodId||state.godId)===(a.sourceGodId||state.godId));
+  const linked=divineResources().filter(r=>(r.scope==='personal'||r.scope==='collective')&&r.sourceAbilityId===a.id&&(r._sourceGodId||state.godId)===(a.sourceGodId||state.godId));
+  const linkedHtml=linked.length?`<div class="ability-linked-resources">${linked.map(r=>{const key=resourceKey(r),max=resourceMaxFor(r),cur=resourceValue(r),marks=Array.isArray(r.thresholds)&&r.thresholds.length?r.thresholds.join(' · '):'';return `<div class="ability-linked-resource"><div><span>${esc(r.name)}${r.scope==='collective'?'<em>coletivo</em>':''}</span>${marks?`<small>marcos ${esc(marks)}</small>`:''}</div><div class="ability-resource-step"><button type="button" data-divine-resource-adjust="${esc(key)}:-1" aria-label="Remover 1 de ${esc(r.name)}">−</button><strong>${cur}/${max}</strong><button type="button" data-divine-resource-adjust="${esc(key)}:1" aria-label="Adicionar 1 em ${esc(r.name)}">+</button></div></div>`}).join('')}</div>`:'';
+  const localHtml=local.length?`<div class="ability-local-resources">${local.map(r=>{const key=resourceKey(r),max=resourceMaxFor(r),cur=resourceValue(r);return `<div class="ability-local-resource"><span>${esc(r.name)}</span><div><button type="button" data-divine-resource-adjust="${esc(key)}:-1">−</button><strong>${cur}/${max}</strong><button type="button" data-divine-resource-adjust="${esc(key)}:1">+</button></div></div>`}).join('')}</div>`:'';
+  const targetHtml=targets.length?`<div class="ability-target-resources">${targets.map(r=>{const key=resourceKey(r),rows=state.targetResources?.[key]||[];return `<div><span><b>${esc(r.name)}</b> · por alvo</span><strong>${rows.length} alvo(s)</strong><small>Máx. ${resourceMaxFor(r)} por pessoa · gerencie na aba Combate</small></div>`}).join('')}</div>`:'';
+  return linkedHtml+localHtml+targetHtml;
+}
+function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===key)||null}
+  function activeAbilitySkillEffects(){
+    const prof=new Set(),expert=new Set(),sources=new Map(),expertSources=new Map(),conditional=new Map();
+    const addSource=(map,name,label)=>{if(!map.has(name))map.set(name,[]);if(label&&!map.get(name).includes(label))map.get(name).push(label)};
+    for(const sk of skills){const name=sk.name;if(basicAutomaticSkillSources(name).length||skillMetaFor(name).proficient)prof.add(name);if(talentExpertSkills().includes(name)||skillMetaFor(name).expertise)expert.add(name)}
+    const set=effectiveAbilitySet();
+    for(const a of [...(set?.passives||[]),...(set?.actives||[])]){
+      for(const e of (a.skillEffects||[])){
+        const conditionalEffect=String(e.type||'').startsWith('conditional');
+        const ids=e.skills||e.options||(e.skill?[e.skill]:[]),fixedNames=ids.map(skillNameById);
+        if(conditionalEffect){for(const name of fixedNames){if(!conditional.has(name))conditional.set(name,[]);conditional.get(name).push(`${a.name}: ${e.condition||'condicional'}`)};continue}
+        let selected=[];
+        if(String(e.type||'').startsWith('choose')){
+          const defs=abilityChoiceDefs(a),choice=defs.find(c=>c.id===e.choiceId)||defs[0];
+          selected=choice?chosenFor(a,choice).map(skillNameById):[];
+        }else selected=fixedNames;
+        for(const name of selected){
+          const label=a.name;
+          if(e.type==='proficiency'||e.type==='chooseProficiency'){prof.add(name);addSource(sources,name,label)}
+          else if(e.type==='expertise'||e.type==='chooseExpertise'){prof.add(name);expert.add(name);addSource(sources,name,label);addSource(expertSources,name,label)}
+          else if(e.type==='proficiencyOrExpertise'||e.type==='chooseProficiencyOrExpertise'){
+            if(prof.has(name)){expert.add(name);addSource(expertSources,name,label)}else{prof.add(name);addSource(sources,name,label)}
+          }
+        }
+      }
+    }
+    for(const name of expert){if(prof.has(name))continue;prof.add(name)}
+    return {prof,expert,sources,expertSources,conditional};
+  }
+  function automaticSkillSources(name){
+    const out=basicAutomaticSkillSources(name),fx=activeAbilitySkillEffects();
+    for(const x of (fx.sources.get(name)||[]))if(!out.includes(x))out.push(x);
+    for(const x of (fx.expertSources.get(name)||[]))if(!out.includes(x))out.push(x);
+    return out;
+  }
   function manualSkillSourceLabel(name){
     const m=skillMetaFor(name);if(!m.proficient)return '';
     return ({prole:'Prole',inicial:'Inicial',treino:'Treino','nivel-20':'Nível 20','nivel-40':'Nível 40',talento:'Talento',extras:'Extras'}[m.source]||'Extras');
   }
   function skillSources(name){const out=automaticSkillSources(name);const manual=manualSkillSourceLabel(name);if(manual&&!out.includes(manual))out.push(manual);return out}
-  function skillIsProficient(name){return automaticSkillSources(name).length>0||!!skillMetaFor(name).proficient}
-  function skillHasExpertise(name){return skillIsProficient(name)&&(!!skillMetaFor(name).expertise||talentExpertSkills().includes(name))}
+  function skillIsProficient(name){const fx=activeAbilitySkillEffects();return fx.prof.has(name)||automaticSkillSources(name).length>0||!!skillMetaFor(name).proficient}
+  function skillHasAutomaticExpertise(name){const fx=activeAbilitySkillEffects();return fx.expert.has(name)||talentExpertSkills().includes(name)}
+  function skillHasExpertise(name){return skillIsProficient(name)&&(!!skillMetaFor(name).expertise||skillHasAutomaticExpertise(name))}
   function skillValue(name){
     const a=skillAttr(name),base=a?effectiveAttr(a):0,trained=skillIsProficient(name),expertise=skillHasExpertise(name),fixed=god()?.skillBonuses?.[name]||0;
     let cond=attrRollConditionPenalty(a);
@@ -245,13 +374,13 @@
     out.inventory=Object.assign(defaultInventory(),data?.inventory||{});
     out.inventory.aureus=Math.max(0,Number(out.inventory.aureus)||0);
     out.inventory.denarius=Math.max(0,Number(out.inventory.denarius)||0);
-    out.inventory.items=Array.isArray(data?.inventory?.items)?data.inventory.items.map(it=>Object.assign({id:uid('item'),name:'Item',qty:1,category:'outro',material:'',rune:'',effect:'',notes:'',imageUrl:'',showInDeck:false,isHeritage:false,attackAttr:'for',attackBonus:0,damage:'',range:''},it,{category:normalizeInventoryCategory(it?.category),qty:Math.max(0,Number(it?.qty)||0),showInDeck:!!it?.showInDeck,isHeritage:!!(it?.isHeritage || it?.category==='heranca'),attackBonus:Number(it?.attackBonus)||0,effect:String(it?.effect||it?.rune||'')})):[];
+    out.inventory.items=Array.isArray(data?.inventory?.items)?data.inventory.items.map(it=>Object.assign({id:uid('item'),name:'Item',qty:1,category:'geral',material:'',rune:'',notes:'',imageUrl:'',showInDeck:false},it,{qty:Math.max(0,Number(it?.qty)||0),showInDeck:!!it?.showInDeck})):[];
     out.inventory.notes=typeof data?.inventory?.notes==='string'?data.inventory.notes:(typeof data?.crafting?.notes==='string'?data.crafting.notes:'');
     out.familiars=Object.assign(defaultFamiliars(),data?.familiars||{});
     out.familiars.mountFameClaimed=!!out.familiars.mountFameClaimed;
     out.familiars.entries=Array.isArray(data?.familiars?.entries)?data.familiars.entries.map(f=>{
       const type=['auxiliar','montaria','lendario'].includes(f?.type)?f.type:'auxiliar';
-      const x=Object.assign(defaultFamiliar(type),f||{},{type,imageUrl:String(f?.imageUrl||'')});
+      const x=Object.assign(defaultFamiliar(type),f||{},{type});
       x.attributes=emptyAttrs();for(const k of Object.keys(x.attributes))x.attributes[k]=clamp(Number(f?.attributes?.[k])||0,0,5);
       x.skills=Array.isArray(f?.skills)?f.skills.filter(Boolean).slice(0,type==='auxiliar'?1:type==='montaria'?2:6):[];
       x.currentHp=f?.currentHp==null?null:Math.max(0,Number(f.currentHp)||0);x.legendaryHpMax=Math.max(0,Number(f?.legendaryHpMax)||0);
@@ -272,18 +401,23 @@
     out.roma.deeds=Array.isArray(out.roma.deeds)?out.roma.deeds.map(x=>typeof x==='string'?{id:uid('deed'),name:x,fame:0,notes:''}:Object.assign({id:uid('deed'),name:'',fame:0,notes:''},x,{fame:Number(x?.fame)||0})):[];
     out.talents=Array.isArray(data?.talents)?data.talents.map(t=>typeof t==='string'?{id:uid('talent'),talentId:t,extra:false,params:{},notes:''}:Object.assign({id:uid('talent'),talentId:'',extra:false,params:{},notes:''},t)) : [];
     out.abilityStakes=Object.assign({},data?.abilityStakes||{});
+    out.resourceValues=Object.assign({},data?.resourceValues||{});
+    out.targetResources=(data?.targetResources&&typeof data.targetResources==='object')?JSON.parse(JSON.stringify(data.targetResources)):{};
+    out.abilityChoices=(data?.abilityChoices&&typeof data.abilityChoices==='object')?JSON.parse(JSON.stringify(data.abilityChoices)):{};
+    out.choiceDetails=Object.assign({},data?.choiceDetails||{});
+    out.abilityUses=Object.assign({},data?.abilityUses||{});
+    const migrateGodId=out.lineage?.type==='direct'&&out.lineage?.structureGodId?out.lineage.structureGodId:out.godId,migrateGod=godById(migrateGodId),firstLegacy=(migrateGod?.resources||[])[0]||migrateGod?.resource;if(firstLegacy&&Object.keys(out.resourceValues).length===0&&Number(data?.resourceCurrent)>0){const rid=firstLegacy.id||String(firstLegacy.name||'resource').toLowerCase().replace(/[^a-z0-9]+/g,'-');out.resourceValues[`${migrateGodId}:${rid}`]=Number(data.resourceCurrent)||0;}
     out.conditions=Array.isArray(data?.conditions)?data.conditions:[];
     out.exhaustion=clamp(Number(data?.exhaustion)||0,0,6);
     out.death=Object.assign(defaultDeath(),data?.death||{});
     out.tempMods=Object.assign(defaultTempMods(),data?.tempMods||{});
     out.skillTrainings=Array.isArray(data?.skillTrainings)?data.skillTrainings.map(t=>({id:t.id||uid('skill'),name:t.name||'',stakes:clamp(Number(t.stakes)||0,0,30)})):[];
-    out.weapons=Array.isArray(data?.weapons)?data.weapons.map(w=>Object.assign({id:uid('weapon'),name:'Arma',type:'corpo-a-corpo',attr:'for',material:'ferro-aco',stakes:0,resistanceCurrent:3,attackExtra:0,damageExtra:0,equipped:true,imageUrl:'',isHeritage:false,notes:''},w,{isHeritage:!!w?.isHeritage,notes:String(w?.notes||'')})):[];
+    out.weapons=Array.isArray(data?.weapons)?data.weapons.map(w=>Object.assign({id:uid('weapon'),name:'Arma',type:'corpo-a-corpo',attr:'for',material:'ferro-aco',stakes:0,resistanceCurrent:3,attackExtra:0,damageExtra:0,equipped:true,imageUrl:''},w)):[];
     out.armor=Object.assign(defaultArmor(),data?.armor||{});
     out.shield=Object.assign(defaultShield(),data?.shield||{});
     out.activeTab=(data?.activeTab==='abilities'?'combat':(['status','combat','inventory','familiars','roma','magic','history','notes'].includes(data?.activeTab)?data.activeTab:(data?.activeTab==='crafting'?'inventory':'status')));
-    out.history=Object.assign({summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',birth:'',residence:'',portraitUrl:'',bannerUrl:'',bannerPositionY:50,bannerScale:100},data?.history||{});
-    out.history.bannerPositionY=clamp(Number(out.history.bannerPositionY)||50,0,100);
-    out.history.bannerScale=clamp(Number(out.history.bannerScale)||100,100,170);
+    out.theme=['standard','parchment','obsidian','emerald'].includes(data?.theme)?data.theme:'standard';
+    out.history=Object.assign({summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',birth:'',residence:'',portraitUrl:'',bannerUrl:''},data?.history||{});
     out.notes=typeof data?.notes==='string'?data.notes:'';
     return out;
   }
@@ -297,11 +431,15 @@
     }catch(e){console.warn(e)}
   }
   function syncCurrentCaps(){
-    const h=hpMax(),e=energyMax(),r=resourceMax();
+    const h=hpMax(),e=energyMax();
     if(state.currentHp==null)state.currentHp=h;else state.currentHp=clamp(Number(state.currentHp)||0,0,h);
     if(state.currentEnergy==null)state.currentEnergy=e;else state.currentEnergy=clamp(Number(state.currentEnergy)||0,0,e);
     state.currentSanity=clamp(Number(state.currentSanity ?? 100),0,100);
-    state.resourceCurrent=clamp(state.resourceCurrent||0,0,r||0);
+    state.resourceValues=state.resourceValues||{};
+    for(const r of divineResources())setResourceValue(r,resourceValue(r));
+    const legacy=hudResources()[0];state.resourceCurrent=legacy?resourceValue(legacy):0;
+    state.targetResources=state.targetResources||{};
+    for(const r of targetResources())for(const t of (state.targetResources[resourceKey(r)]||[]))t.current=clamp(Number(t.current)||0,0,resourceMaxFor(r));
     (state.familiars?.entries||[]).forEach(f=>{const mx=familiarHpMax(f);if(f.currentHp==null)f.currentHp=mx;else f.currentHp=clamp(Number(f.currentHp)||0,0,mx)});
   }
 
@@ -388,12 +526,12 @@
         <div><div class="row between"><span class="label">8 pontos de atributos</span><b>${left} restante(s)</b></div><div class="progress"><i style="width:${clamp(spent/8*100,0,100)}%"></i></div></div>
         <div class="attrs">${ATTRS.map(a=>attrCard(...a,true)).join('')}</div><p class="dev-note">O limite normal é 5 considerando pontos da criação, progressão, talentos comuns e bônus divinos. Só efeitos que digam explicitamente ultrapassar o limite podem levar o atributo acima de 5.</p>
       </article>
-      <aside class="card stack"><div><p class="eyebrow">2 · PERÍCIAS INICIAIS</p><h2>Escolhas por Inteligência</h2><p class="muted">A ficha usa <b>2 + INT inicial</b>. Bônus divinos não consomem essas escolhas.</p></div><div class="row between"><span class="pill">Limite: ${initialSkillLimit()}</span><span class="pill">Escolhidas: ${state.initialSkills.length}</span></div><div class="skills">${skills.map(s=>{const divine=divineGranted().includes(s.name),checked=state.initialSkills.includes(s.name),disabled=divine||(!checked&&state.initialSkills.length>=initialSkillLimit());return `<label class="skill-check ${disabled?'disabled':''}"><input type="checkbox" data-skill="${esc(s.name)}" ${checked?'checked':''} ${disabled?'disabled':''}><span>${s.name}<small class="muted"> · ${s.attr.toUpperCase()}${divine?' · divina':''}</small></span></label>`}).join('')}</div><button id="finishBtn" class="primary" ${canFinishCreation()?'':'disabled'}>Criar ficha de teste</button>${!canFinishCreation()?`<p class="notice">Para concluir: distribua exatamente 8 pontos, escolha ${initialSkillLimit()} perícias por INT e preencha a escolha divina quando o kit exigir.</p>`:''}</aside>`;
+      <aside class="card stack"><div><p class="eyebrow">2 · PERÍCIAS INICIAIS</p><h2>Escolhas por Inteligência</h2><p class="muted">A ficha usa <b>2 + INT inicial</b>. Bônus divinos não consomem essas escolhas.</p></div><div class="row between"><span class="pill">Limite: ${initialSkillLimit()}</span><span class="pill">Escolhidas: ${state.initialSkills.length}</span></div><div class="skills">${skills.map(s=>{const divine=divineGranted().includes(s.name),checked=state.initialSkills.includes(s.name),disabled=divine||(!checked&&state.initialSkills.length>=initialSkillLimit());return `<label class="skill-check ${disabled?'disabled':''}"><input type="checkbox" data-skill="${esc(s.name)}" ${checked?'checked':''} ${disabled?'disabled':''}><span>${s.name}<small class="muted"> · ${attrAbbr(s.attr)}${divine?' · divina':''}</small></span></label>`}).join('')}</div><button id="finishBtn" class="primary" ${canFinishCreation()?'':'disabled'}>Criar ficha de teste</button>${!canFinishCreation()?`<p class="notice">Para concluir: distribua exatamente 8 pontos, escolha ${initialSkillLimit()} perícias por INT e preencha a escolha divina quando o kit exigir.</p>`:''}</aside>`;
     bindCreation();
   }
   function bindCreation(){
     byId('nameInput').oninput=e=>{state.name=e.target.value;save()};byId('playerInput').oninput=e=>{state.player=e.target.value;save()};
-    byId('godSelect').onchange=e=>{state.godId=e.target.value;state.divineSkillChoice='';state.initialSkills=[];state.resourceCurrent=0;if(isTriumvir(state.godId))resetLineage('normal');else if(state.lineage?.type!=='normal'&&state.lineage.secondaryGodId===state.godId)resetLineage(state.lineage.type);else if(state.lineage?.type==='direct')state.lineage.structureGodId=state.godId;save();renderCreation()};
+    byId('godSelect').onchange=e=>{state.godId=e.target.value;state.divineSkillChoice='';state.initialSkills=[];state.resourceCurrent=0;state.resourceValues={};state.targetResources={};state.abilityChoices={};state.choiceDetails={};state.abilityUses={};if(isTriumvir(state.godId))resetLineage('normal');else if(state.lineage?.type!=='normal'&&state.lineage.secondaryGodId===state.godId)resetLineage(state.lineage.type);else if(state.lineage?.type==='direct')state.lineage.structureGodId=state.godId;save();renderCreation()};
 
     const lineageType=byId('creationLineageType');if(lineageType)lineageType.onchange=e=>{const type=e.target.value;if(type!=='normal'&&isTriumvir(state.godId)){notify('Triúnviros não participam da mistura de kits por Legado.');resetLineage('normal')}else resetLineage(type);state.divineSkillChoice='';state.initialSkills=[];save();renderCreation()};
     const lineageSecondary=byId('creationSecondaryGod');if(lineageSecondary)lineageSecondary.onchange=e=>{const previous=state.lineage.secondaryGodId;state.lineage.secondaryGodId=e.target.value;if(state.lineage.type==='direct'){if(state.lineage.structureGodId===previous)state.lineage.structureGodId=e.target.value;initializeDirectSelections()}state.divineSkillChoice='';state.initialSkills=[];save();renderCreation()};
@@ -407,33 +545,8 @@
 
   function renderTabs(){
     const tabs=[['status','Visão geral'],['combat','Combate & Poderes'],['inventory','Inventário'],['familiars','Familiares'],['roma','Roma'],['magic','Magia'],['history','História'],['notes','Notas']];
-    return `<nav class="sheet-tabs" aria-label="Seções da ficha">${tabs.map(([id,label],idx)=>`<button type="button" data-tab="${id}" class="${state.activeTab===id?'active':''}"><span>${String(idx+1).padStart(2,'0')}</span>${label}</button>`).join('')}</nav>`;
+    return `<nav class="sheet-tabs" aria-label="Seções da ficha"><div class="sheet-tab-scroll">${tabs.map(([id,label],idx)=>`<button type="button" data-tab="${id}" class="${state.activeTab===id?'active':''}"><span>${String(idx+1).padStart(2,'0')}</span>${label}</button>`).join('')}</div><label class="sheet-theme-control" title="Tema visual da ficha"><span>Aparência</span><select data-theme-select aria-label="Tema visual da ficha"><option value="standard" ${state.theme==='standard'?'selected':''}>Legio XII</option><option value="parchment" ${state.theme==='parchment'?'selected':''}>Pergaminho</option><option value="obsidian" ${state.theme==='obsidian'?'selected':''}>Obsidiana</option><option value="emerald" ${state.theme==='emerald'?'selected':''}>Loureiro</option></select></label></nav>`;
   }
-  function inventoryCategoryIcon(id){
-    return ({'arma-corpo':'⚔','arma-distancia':'🏹','consumivel':'✚','item-magico':'✦','outro':'◈'})[id]||'◈';
-  }
-  function equipmentCardLabel(kind,id=''){
-    if(kind==='armor')return {icon:'🛡',label:'ARMADURA'};
-    if(kind==='shield')return {icon:'⛨',label:'ESCUDO'};
-    if(kind==='weapon')return {icon:id==='distancia'?'🏹':'⚔',label:'ARMA'};
-    return {icon:inventoryCategoryIcon(id),label:(inventoryCategoryLabel(id)||'Item').toUpperCase()};
-  }
-  function compactText(text,limit=120){
-    const clean=String(text||'').replace(/\s+/g,' ').trim();
-    if(!clean)return '';
-    return clean.length>limit?clean.slice(0,limit-1)+'…':clean;
-  }
-  function syncShellChrome(){
-    const h=state.history||{}, banner=String(h.bannerUrl||''), bg=byId('siteBannerBg'), wrap=byId('bannerMiniWrap'), mini=byId('bannerMini'), clear=byId('clearBannerBtn'), name=byId('bannerCharacterName'), bannerBtn=byId('bannerBtn');
-    if(bg){bg.style.backgroundImage=banner?`url("${banner.replace(/"/g,'\\"')}")`:'';bg.classList.toggle('has-image',!!banner)}
-    if(wrap){wrap.classList.toggle('hidden',!banner)}
-    if(mini&&banner)mini.src=banner;
-    if(clear)clear.classList.toggle('hidden',!banner);
-    if(name)name.textContent=state.isCreated&&state.name?state.name:'';
-    if(bannerBtn)bannerBtn.textContent=banner?'Trocar banner':'Adicionar banner';
-  }
-  function renderSheetHero(){ return ''; }
-
   function resourceAdjustBox(kind,label,current,max,quick,context='status',showBand=false){
     const inputId=`${context}-${kind}Manual`;
     const quickButtons=quick.map(v=>`<button type="button" data-${kind}="${v}">${Number(v)>0?'+':''}${v}</button>`).join('');
@@ -442,40 +555,46 @@
     const ratio=max?clamp((Number(current)||0)/Number(max)*100,0,100):0;
     return `<div class="resource-chip resource-${kind}"><div class="row between"><span>${label}</span><strong>${current}/${max}</strong></div><div class="resource-meter"><i style="width:${ratio}%"></i></div><div class="mini-actions">${quickButtons}${full}</div><div class="resource-manual"><input id="${inputId}" data-resource-manual-input="${kind}" type="number" step="1" placeholder="Ex.: -37 ou 20"><button type="button" data-manual-resource="${kind}" data-manual-input="${inputId}">Aplicar</button></div>${band?`<div class="status-line ${band.cls}"><b>${band.name}</b><span>${band.text}</span></div>`:''}</div>`;
   }
+  function renderDivineResourceCore(r,context='status'){
+    const current=resourceValue(r),max=resourceMaxFor(r),ratio=max?clamp(current/max*100,0,100):0,key=resourceKey(r),inputId=`${context}-divine-${String(r.id).replace(/[^a-z0-9_-]/gi,'-')}`;
+    const scopeLabel=r.scope==='collective'?'COLETIVO':r.scope==='personal'?'PESSOAL':'RECURSO';
+    return `<div class="core-stat core-resource divine-resource-card" data-resource-scope="${esc(r.scope||'personal')}"><div class="core-stat-label">${esc(r.name)} <small>${scopeLabel}</small></div><div class="core-stat-value">${current}<small>/${max}</small></div><div class="core-stat-meter"><i style="width:${ratio}%"></i></div>${r.thresholds?.length?`<div class="core-stat-caption">limiares ${r.thresholds.join(' · ')}</div>`:''}<div class="core-stat-adjust"><input id="${inputId}" data-divine-resource-input="${esc(key)}" type="number" step="1" placeholder="+/−"><button type="button" data-divine-resource-apply="${esc(key)}" data-manual-input="${inputId}" title="Aplicar">↵</button></div></div>`;
+  }
   function renderResourceDock(){
-    const g=god(),rMax=resourceMax(),band=sanityBand();
+    const band=sanityBand();
     const core=(kind,label,current,max,extra='')=>{const inputId=`status-${kind}Manual`,ratio=max?clamp((Number(current)||0)/Number(max)*100,0,100):0;return `<div class="core-stat core-${kind}"><div class="core-stat-label">${label}</div><div class="core-stat-value">${current}<small>/${max}</small></div><div class="core-stat-meter"><i style="width:${ratio}%"></i></div>${extra}<div class="core-stat-adjust"><input id="${inputId}" data-resource-manual-input="${kind}" type="number" step="1" placeholder="+/−"><button type="button" data-manual-resource="${kind}" data-manual-input="${inputId}" title="Aplicar">↵</button></div></div>`};
     return `<section class="status-core-strip">
       ${core('hp','HP',state.currentHp,hpMax())}
       ${core('san','Sanidade',state.currentSanity,100,`<div class="core-stat-caption">${band.name}</div>`)}
       <div class="core-stat core-defense"><div class="core-stat-label">Defesa</div><div class="core-stat-value">${signed(defenseBonus())}</div><div class="core-stat-caption">1d20 ${signed(defenseBonus())}</div><div class="core-stat-caption muted-mini">DES + equipamento</div></div>
       ${core('en','Energia',state.currentEnergy,energyMax())}
-      ${g.resource?core('resource',g.resource.name,state.resourceCurrent,rMax,`<div class="core-stat-caption">Acúmulo</div>`):''}
-      <div class="core-stat core-cast"><div class="core-stat-label">Conjuração</div><div class="core-stat-value">${signed(castAttack())}</div><div class="core-stat-caption">DT ${castDT()} · ${attrName(g.casting)}</div></div>
+      ${hudResources().map(r=>renderDivineResourceCore(r,'status')).join('')}
+      <div class="core-stat core-cast"><div class="core-stat-label">Conjuração</div><div class="core-stat-value">${signed(castAttack())}</div><div class="core-stat-caption">DT ${castDT()} · ${attrName(god().casting)}</div></div>
     </section>`;
   }
   function renderCombatResourceDock(){
-    const g=god(),rMax=resourceMax(),fDef=fixedDefense();
+    const g=god(),fDef=fixedDefense();
     const mini=(kind,label,current,max)=>{const inputId=`combat-${kind}Manual`,ratio=max?clamp((Number(current)||0)/Number(max)*100,0,100):0;return `<div class="combat-resource-chip resource-${kind}"><span>${label}</span><strong>${current}<small>/${max}</small></strong><div class="combat-mini-meter"><i style="width:${ratio}%"></i></div><div class="combat-resource-adjust"><input id="${inputId}" data-resource-manual-input="${kind}" type="number" step="1" placeholder="+/−"><button type="button" data-manual-resource="${kind}" data-manual-input="${inputId}" title="Aplicar">↵</button></div></div>`};
+    const divine=r=>{const current=resourceValue(r),max=resourceMaxFor(r),ratio=max?clamp(current/max*100,0,100):0,key=resourceKey(r),inputId=`combat-divine-${String(r.id).replace(/[^a-z0-9_-]/gi,'-')}`;return `<div class="combat-resource-chip resource-divine"><span>${esc(r.name)} ${r.scope==='collective'?'<em>COLETIVO</em>':''}</span><strong>${current}<small>/${max}</small></strong><div class="combat-mini-meter"><i style="width:${ratio}%"></i></div><div class="combat-resource-adjust"><input id="${inputId}" data-divine-resource-input="${esc(key)}" type="number" step="1" placeholder="+/−"><button type="button" data-divine-resource-apply="${esc(key)}" data-manual-input="${inputId}">↵</button></div></div>`};
     const readOnly=(kind,label,value,caption='')=>`<div class="combat-resource-chip combat-readonly ${kind}"><span>${label}</span><strong>${value}</strong>${caption?`<small>${caption}</small>`:''}</div>`;
     return `<section class="combat-resource-dock" aria-label="Recursos de combate">
       ${mini('hp','HP',state.currentHp,hpMax())}
       ${mini('en','Energia',state.currentEnergy,energyMax())}
       ${mini('san','Sanidade',state.currentSanity,100)}
-      ${g.resource?mini('resource',g.resource.name,state.resourceCurrent,rMax):''}
+      ${hudResources().map(divine).join('')}
       ${readOnly('dock-defense','Defesa',fDef!==null?fDef:signed(defenseBonus()),Number(state.tempMods?.defense)?`ajuste manual ${signed(state.tempMods.defense)}`:'valor atual')}
       ${readOnly('dock-dt','DT',castDT(),`${attrName(g.casting)} · ataque ${signed(castAttack())}`)}
     </section>`;
   }
   function renderResourceSummaryPanel(){
-    const g=god(),band=sanityBand(),energy=energyBand(),specialMax=resourceMax();
+    const g=god(),band=sanityBand(),energy=energyBand();
     return `<article class="card resource-summary-card"><p class="eyebrow">FOCO DO SISTEMA</p><h2>Combate rápido</h2><div class="resource-summary-grid">
       <div class="stat compact-stat"><span>HP</span><strong>${state.currentHp}/${hpMax()}</strong><small>${Math.round((state.currentHp/Math.max(1,hpMax()))*100)}%</small></div>
       <div class="stat compact-stat"><span>Energia</span><strong>${state.currentEnergy}/${energyMax()}</strong><small>${energy.name}</small></div>
       <div class="stat compact-stat"><span>Sanidade</span><strong>${state.currentSanity}/100</strong><small>${band.name}</small></div>
       <div class="stat compact-stat"><span>Defesa base</span><strong>${signed(defenseBonus())}</strong><small>DES + armadura + escudo</small></div>
       <div class="stat compact-stat"><span>Conjuração</span><strong>${signed(castAttack())}</strong><small>DT ${castDT()} · ${attrName(g.casting)}</small></div>
-      ${g.resource?`<div class="stat compact-stat"><span>${g.resource.name}</span><strong>${state.resourceCurrent}/${specialMax}</strong><small>acúmulo</small></div>`:''}
+      ${hudResources().map(r=>`<div class="stat compact-stat"><span>${esc(r.name)}</span><strong>${resourceValue(r)}/${resourceMaxFor(r)}</strong><small>${r.scope==='collective'?'coletivo':'pessoal'}</small></div>`).join('')}
     </div><div class="subcard compact" style="margin-top:12px"><b>Estado mental:</b> ${band.name}. ${band.text}</div></article>`;
   }
   function renderCompactActiveConditions(){
@@ -556,7 +675,7 @@
       <div class="rail-portrait-wrap"><div class="rail-portrait-badges"><label class="rail-orb rail-orb-level"><span>Nível</span><input id="levelOrbInput" type="number" min="1" max="100" value="${state.level}"></label><div class="rail-orb rail-orb-bp"><span>BP</span><strong>${signed(bp())}</strong></div></div><div class="rail-portrait ${h.portraitUrl?'has-image':''}"${h.portraitUrl?` style="background-image:url('${esc(h.portraitUrl)}')"`:''}>${h.portraitUrl?'':esc(initials(state.name||g.name))}</div><button id="heroPortraitUploadBtn" class="rail-photo-button" type="button">Trocar retrato</button></div>
       <div class="rail-identity"><p class="eyebrow">${esc(g.name)}${state.lineage?.type!=='normal'?' · LEGADO':''}</p><h2>${esc(state.name||'Sem nome')}</h2>${h.tagline?`<p class="rail-tagline">${esc(h.tagline)}</p>`:''}<div class="rail-meta">${profileBits.length?profileBits.map(x=>`<span>${x}</span>`).join(''):'<span>Perfil sem detalhes adicionais</span>'}</div></div>
       <div class="rail-level-row"><div class="rail-defense-stat"><span>Defesa</span><strong>${signed(defenseBonus())}</strong><label class="rail-defense-adjust" title="Bônus ou penalidade manual de Defesa">manual <input id="railDefenseAdjust" type="number" value="${Number(state.tempMods.defense)||0}"></label></div><div><span>DT</span><strong>${castDT()}</strong></div></div>
-      <div class="rail-vitals"><div><span>HP</span><b>${state.currentHp}/${hpMax()}</b></div><div><span>EN</span><b>${state.currentEnergy}/${energyMax()}</b><small>${energy.name}</small></div><div><span>SAN</span><b>${state.currentSanity}/100</b><small>${band.name}</small></div>${g.resource?`<div><span>${esc(g.resource.name)}</span><b>${state.resourceCurrent}/${resourceMax()}</b></div>`:''}</div>
+      <div class="rail-vitals"><div><span>HP</span><b>${state.currentHp}/${hpMax()}</b></div><div><span>EN</span><b>${state.currentEnergy}/${energyMax()}</b><small>${energy.name}</small></div><div><span>SAN</span><b>${state.currentSanity}/100</b><small>${band.name}</small></div>${hudResources().slice(0,2).map(r=>`<div><span>${esc(r.name)}${r.scope==='collective'?'<small>COLETIVO</small>':''}</span><b>${resourceValue(r)}/${resourceMaxFor(r)}</b></div>`).join('')}</div>
       ${renderMiniDeath()}
       <details class="rail-editor"><summary>Editar perfil</summary><div class="stack">
         <label><span class="label">Personagem</span><input id="sheetNameInput" value="${esc(state.name)}"></label>
@@ -565,7 +684,7 @@
         <div class="grid two compact-fields"><label><span class="label">Idade</span><input data-history="age" value="${esc(h.age||'')}"></label><label><span class="label">Nascimento</span><input data-history="birth" value="${esc(h.birth||'')}"></label></div>
         <div class="grid two compact-fields"><label><span class="label">Origem</span><input data-history="origin" value="${esc(h.origin||'')}"></label><label><span class="label">Residência</span><input data-history="residence" value="${esc(h.residence||h.affiliation||'')}"></label></div>
         <label><span class="label">URL do retrato</span><input data-history="portraitUrl" value="${esc(h.portraitUrl||'')}"></label><div class="row"><button id="uploadPortraitBtn" type="button">Upload do retrato</button></div>
-        <label class="hidden"><span class="label">Banner</span><input data-history="bannerUrl" value="${esc(h.bannerUrl||'')}"></label><input id="portraitUploadInput" type="file" accept="image/*" hidden>
+        <label class="hidden"><span class="label">Banner</span><input data-history="bannerUrl" value="${esc(h.bannerUrl||'')}"></label><input id="portraitUploadInput" type="file" accept="image/*" hidden><input id="bannerUploadInput" type="file" accept="image/*" hidden>
       </div></details>
       <button id="backCreation" class="ghost rail-back">Voltar à criação</button>
     </aside>`;
@@ -602,28 +721,37 @@
   function renderEquippedDeck(){
     const cards=[];
     const a=state.armor,t=armorType(a.type),am=material(a.material),sh=state.shield,sm=material(sh.material);
-    const pushCard=(html)=>cards.push(html);
-    if(a.equipped){const badge=equipmentCardLabel('armor');pushCard(`<article class="equipment-card armor" tabindex="0"><div class="equipment-card-topline"><span class="equipment-card-type"><i>${badge.icon}</i>${badge.label}</span>${a.isHeritage?'<span class="equipment-card-heritage">HERANÇA</span>':''}</div><button class="equipment-card-edit" data-edit-equipment="armor" type="button">Editar</button>${equipmentCardVisual(a.imageUrl,'◈')}<div class="equipment-card-copy centered"><b>${esc(a.name||'Armadura')}</b><span>${esc(t.name)} · ${esc(am.name)}</span>${a.notes?`<p>${esc(compactText(a.notes,86))}</p>`:''}</div><div class="equipment-card-stats"><span>DEF +${t.defense}</span><span>RD ${t.reduction}</span></div></article>`)}
-    if(sh.equipped){const badge=equipmentCardLabel('shield');pushCard(`<article class="equipment-card shield" tabindex="0"><div class="equipment-card-topline"><span class="equipment-card-type"><i>${badge.icon}</i>${badge.label}</span>${sh.isHeritage?'<span class="equipment-card-heritage">HERANÇA</span>':''}</div><button class="equipment-card-edit" data-edit-equipment="shield" type="button">Editar</button>${equipmentCardVisual(sh.imageUrl,'⬡')}<div class="equipment-card-copy centered"><b>${esc(sh.name||'Escudo')}</b><span>${esc(sm.name)}</span>${sh.notes?`<p>${esc(compactText(sh.notes,86))}</p>`:''}</div><div class="equipment-card-stats"><span>DEF +${shieldDefense()}</span><span>${Number(sh.stakes)||0}/30</span></div></article>`)}
-    (state.weapons||[]).filter(w=>w.equipped!==false).forEach(w=>{const wm=material(w.material),wt=weaponType(w.type),badge=equipmentCardLabel('weapon',w.type);pushCard(`<article class="equipment-card weapon" tabindex="0"><div class="equipment-card-topline"><span class="equipment-card-type"><i>${badge.icon}</i>${w.type==='distancia'?'À DISTÂNCIA':'CORPO A CORPO'}</span>${w.isHeritage?'<span class="equipment-card-heritage">HERANÇA</span>':''}</div><button class="equipment-card-edit" data-edit-equipment="weapon:${w.id}" type="button">Editar</button>${equipmentCardVisual(w.imageUrl,'✦')}<div class="equipment-card-copy centered"><b>${esc(w.name||'Arma')}</b><span>${w.attr==='des'?'Destreza':'Força'} · ${esc(wm.name)}</span>${w.notes?`<p>${esc(compactText(w.notes,82))}</p>`:''}</div><div class="equipment-card-stats"><span>ATQ ${signed(weaponAttack(w))}</span><span>${weaponDamageFormula(w)}</span></div></article>`)});
-    (state.inventory?.items||[]).filter(it=>it.showInDeck).forEach(it=>{const badge=equipmentCardLabel('item',it.category),effect=compactText(it.effect||it.rune||it.notes||'',78),isWeapon=it.category==='arma-corpo'||it.category==='arma-distancia';pushCard(`<article class="equipment-card item ${it.category}" tabindex="0"><div class="equipment-card-topline"><span class="equipment-card-type"><i>${badge.icon}</i>${esc(inventoryCategoryLabel(it.category).replace(/^Arma \(|\)$/g,''))}</span>${it.isHeritage?'<span class="equipment-card-heritage">HERANÇA</span>':''}</div><button class="equipment-card-edit" data-edit-equipment="item:${it.id}" type="button">Editar</button>${equipmentCardVisual(it.imageUrl,'✧')}<div class="equipment-card-copy centered"><b>${esc(it.name||'Item')}</b><span>${isWeapon?`${it.attackAttr==='des'?'Destreza':'Força'}${it.material?` · ${esc(it.material)}`:''}`:(it.material?esc(it.material):inventoryCategoryLabel(it.category))}</span>${effect?`<p>${esc(effect)}</p>`:''}</div><div class="equipment-card-stats">${isWeapon?`<span>ATQ ${signed(Number(it.attackBonus)||0)}</span><span>${esc(it.damage||'dano livre')}</span>`:`<span>QTD ${Math.max(0,Number(it.qty)||0)}</span><span>${it.effect?esc(compactText(it.effect,20)):'consulta rápida'}</span>`}</div>${it.category==='consumivel'?`<button class="equipment-consume-btn" data-consume-item="${it.id}" ${Math.max(0,Number(it.qty)||0)<=0?'disabled':''}>Consumir 1</button>`:''}</article>`)});
-    if(!cards.length)return `<div class="equipment-deck-empty"><span>✦</span><b>Seu baralho está vazio</b><p>Equipe armas, armadura ou escudo, ou fixe itens do inventário para vê-los aqui.</p><button type="button" data-go-tab="inventory" class="primary">Abrir inventário</button></div>`;
-    return `<div class="equipment-deck upgraded-equipment-deck">${cards.join('')}</div>`;
+    if(a.equipped)cards.push(`<div class="equipment-card armor"><span class="equipment-card-index">I</span><button class="equipment-card-edit" data-edit-equipment="armor" type="button">Editar</button>${equipmentCardVisual(a.imageUrl,'◈')}<div class="equipment-card-copy"><small>ARMADURA</small><b>${esc(a.name||'Armadura')}</b><span>${esc(t.name)} · ${esc(am.name)}</span></div><div class="equipment-card-stats"><span>DEF +${t.defense}</span><span>RD ${t.reduction}</span></div></div>`);
+    if(sh.equipped)cards.push(`<div class="equipment-card shield"><span class="equipment-card-index">II</span><button class="equipment-card-edit" data-edit-equipment="shield" type="button">Editar</button>${equipmentCardVisual(sh.imageUrl,'⬡')}<div class="equipment-card-copy"><small>ESCUDO</small><b>${esc(sh.name||'Escudo')}</b><span>${esc(sm.name)}</span></div><div class="equipment-card-stats"><span>DEF +${shieldDefense()}</span><span>${Number(sh.stakes)||0}/30</span></div></div>`);
+    (state.weapons||[]).filter(w=>w.equipped!==false).forEach(w=>{const wm=material(w.material),wt=weaponType(w.type);cards.push(`<div class="equipment-card weapon"><span class="equipment-card-index">${cards.length+1}</span><button class="equipment-card-edit" data-edit-equipment="weapon:${w.id}" type="button">Editar</button>${equipmentCardVisual(w.imageUrl,'✦')}<div class="equipment-card-copy"><small>ARMA</small><b>${esc(w.name||'Arma')}</b><span>${esc(wt.name)} · ${esc(wm.name)}</span></div><div class="equipment-card-stats"><span>ATQ ${signed(weaponAttack(w))}</span><span>${weaponDamageFormula(w)}</span></div></div>`)});
+    (state.inventory?.items||[]).filter(it=>it.showInDeck).forEach(it=>cards.push(`<div class="equipment-card item"><span class="equipment-card-index">${cards.length+1}</span><button class="equipment-card-edit" data-edit-equipment="item:${it.id}" type="button">Editar</button>${equipmentCardVisual(it.imageUrl,'✧')}<div class="equipment-card-copy"><small>${esc(inventoryCategoryLabel(it.category).toUpperCase())}</small><b>${esc(it.name||'Item')}</b><span>${it.material?esc(it.material):'Item do acervo'}</span></div><div class="equipment-card-stats"><span>QTD ${Math.max(0,Number(it.qty)||0)}</span>${it.rune?`<span>${esc(it.rune)}</span>`:''}</div></div>`));
+    const desired=Math.max(4,cards.length);
+    for(let i=cards.length;i<desired;i++)cards.push(`<div class="equipment-card empty"><span class="equipment-card-index">${i+1}</span><button class="equipment-card-edit" data-go-tab="inventory" type="button">Adicionar</button><div class="equipment-card-glyph">XII</div><div class="equipment-card-copy"><small>SLOT LIVRE</small><b>Item ou equipamento</b><span>Equipe ou fixe um item no baralho</span></div></div>`);
+    return `<div class="equipment-deck">${cards.join('')}</div>`;
   }
-
   function renderCombatEquipmentSummary(){
     const a=state.armor,t=armorType(a.type),s=state.shield,eqWeapons=(state.weapons||[]).filter(w=>w.equipped!==false);
     return `<article class="card equipment-summary-card"><div class="section-title"><div><p class="eyebrow">EQUIPAMENTO EM USO</p><h3>Baralho de combate</h3></div><button type="button" data-go-tab="inventory">Abrir Inventário</button></div>${renderEquippedDeck()}<div class="equipment-inline-summary"><span>${a.equipped?`Armadura +${t.defense} DEF / ${t.reduction} RD`:'Sem armadura'}</span><span>${s.equipped?`Escudo +${shieldDefense()} DEF`:'Sem escudo'}</span><span>${eqWeapons.length?`${eqWeapons.length} arma(s) equipada(s)`:'Sem arma equipada'}</span></div></article>`;
+  }
+
+  function targetResourceRows(resource){
+    const key=resourceKey(resource),rows=state.targetResources?.[key]||[],max=resourceMaxFor(resource);
+    return rows.map((t,i)=>`<div class="target-resource-row"><span class="target-resource-index">${i+1}</span><input data-target-resource-name="${esc(key)}:${esc(t.id)}" value="${esc(t.name||`Alvo ${i+1}`)}" aria-label="Nome do alvo ${i+1}"><div class="target-resource-step"><button type="button" data-target-resource-adjust="${esc(key)}:${esc(t.id)}:-1" aria-label="Remover 1 ponto">−</button><strong>${clamp(Number(t.current)||0,0,max)}/${max}</strong><button type="button" data-target-resource-adjust="${esc(key)}:${esc(t.id)}:1" aria-label="Adicionar 1 ponto">+</button></div><button type="button" class="danger target-remove" data-target-resource-remove="${esc(key)}:${esc(t.id)}" aria-label="Remover alvo">×</button></div>`).join('');
+  }
+  function renderTargetResourceTrackers(){
+    const rs=targetResources();if(!rs.length)return '';
+    return `<section class="target-resource-zone mechanics-section">${rs.map(r=>{const key=resourceKey(r),rows=state.targetResources?.[key]||[];return `<article class="card target-resource-card"><div class="section-title target-resource-title"><div><p class="eyebrow">RECURSO POR ALVO</p><h3>${esc(r.name)}</h3></div><span class="pill ${rows.length?'good':''}">${rows.length} alvo(s)</span></div><p class="muted compact">Cada pessoa mantém um contador separado de <b>0 a ${resourceMaxFor(r)}</b>. Adicione uma linha para cada alvo afetado.</p><div class="target-resource-actions"><button type="button" class="primary" data-target-resource-add="${esc(key)}">+ Adicionar alvo</button>${rows.length?`<button type="button" class="ghost" data-target-resource-clear="${esc(key)}">Limpar lista</button>`:''}</div><div class="target-resource-list">${targetResourceRows(r)||'<div class="notice">Nenhum alvo acompanhado ainda.</div>'}</div></article>`}).join('')}</section>`;
   }
 
   function renderCombatTab(fDef,set){
     const san=sanityBand(),energy=energyBand();
     return `<section class="tab-pane ${state.activeTab==='combat'?'':'hidden'}" data-pane="combat">
       ${renderCombatResourceDock()}
+      ${renderTargetResourceTrackers()}
       <section class="combat-command-grid mechanics-section">
         <article class="card combat-essentials-card"><div class="section-title"><div><p class="eyebrow">COMBATE</p><h3>Referência imediata</h3></div><button id="rollDefense" class="primary">Rolar Defesa</button></div><div class="combat-quick-values"><div><span>Defesa</span><b>${fDef!==null?fDef:`1d20 ${signed(defenseBonus())}`}</b></div><div><span>Iniciativa</span><b>1d20 ${signed(initiativeBonus())}</b></div><div><span>RD</span><b>${damageReduction()}</b></div><div><span>Conjuração</span><b>1d20 ${signed(castAttack())}</b></div><div><span>DT</span><b>${castDT()}</b></div><div><span>Sanidade</span><b>${san.name}</b></div></div><div class="compact-fields"><label><span class="label">Ajuste manual de Defesa</span><input id="tempDefense" type="number" value="${state.tempMods.defense}"></label></div>${state.lastRoll?`<div class="roll-result compact-roll"><span>${esc(state.lastRoll.label)}</span><b>${state.lastRoll.total}</b><small>d20 ${state.lastRoll.die}${state.lastRoll.modifier!==undefined?` ${signed(state.lastRoll.modifier)}`:''}</small></div>`:''}</article>
         ${renderCompactActiveConditions()}
-        <article class="card combat-rest-card"><p class="eyebrow">DESCANSOS & MODS</p><div class="row"><button id="shortRest" class="primary">Descanso curto</button><button id="longRest">Longo</button></div><div class="grid two compact-fields"><label><span class="label">RD temporária</span><input id="tempReduction" type="number" value="${state.tempMods.damageReduction}"></label><label><span class="label">Exaustão</span><select id="combatExhaustionSelect">${[0,1,2,3,4,5,6].map(n=>`<option value="${n}" ${state.exhaustion===n?'selected':''}>${n}</option>`).join('')}</select></label></div><div class="subcard compact"><b>Energia:</b> ${energy.name}<br><b>Curto:</b> +25 HP / +150 EN · <b>Longo:</b> HP e EN completos.</div></article>
+        <article class="card combat-rest-card"><p class="eyebrow">DESCANSOS & MODS</p><div class="row"><button id="shortRest" class="primary">Descanso curto</button><button id="longRest">Longo</button><button id="resetAbilityUses" type="button">Resetar usos</button></div><div class="grid two compact-fields"><label><span class="label">RD temporária</span><input id="tempReduction" type="number" value="${state.tempMods.damageReduction}"></label><label><span class="label">Exaustão</span><select id="combatExhaustionSelect">${[0,1,2,3,4,5,6].map(n=>`<option value="${n}" ${state.exhaustion===n?'selected':''}>${n}</option>`).join('')}</select></label></div><div class="subcard compact"><b>Energia:</b> ${energy.name}<br><b>Curto:</b> +25 HP / +150 EN · <b>Longo:</b> HP e EN completos.</div></article>
       </section>
       <section class="mechanics-section">${renderCombatEquipmentSummary()}</section>
       ${set?renderAbilities(set):'<div class="notice mechanics-section">Nenhum conjunto de habilidades carregado.</div>'}
@@ -685,13 +813,11 @@
     return `<div class="inventory-image-preview ${imageUrl?'has-image':''}">${imageUrl?`<img src="${esc(imageUrl)}" alt="${esc(label)}">`:'<span>sem imagem</span>'}</div>`;
   }
   function renderInventoryItem(it){
-    const isConsumable=it.category==='consumivel',isWeapon=it.category==='arma-corpo'||it.category==='arma-distancia',isRanged=it.category==='arma-distancia';
-    return `<article class="subcard inventory-item inventory-item-large" data-item-card="${it.id}" data-inventory-kind="${it.category}" data-inventory-name="${esc(String(it.name||'').toLowerCase())}" data-inventory-heritage="${it.isHeritage?'1':'0'}"><div class="inventory-item-head inventory-item-head-large">${imageEditorPreview(it.imageUrl,it.name||'Item')}<div class="inventory-item-title"><div class="row between"><div><span class="inventory-kind-kicker">${inventoryCategoryIcon(it.category)} ${esc(inventoryCategoryLabel(it.category))}</span><input class="weapon-name" data-item-field="${it.id}:name" value="${esc(it.name||'Item')}"></div><button class="danger" data-remove-item="${it.id}">Remover</button></div><div class="row inventory-image-actions"><button type="button" data-upload-item-image="${it.id}">Adicionar imagem</button>${it.imageUrl?`<button type="button" data-clear-item-image="${it.id}">Remover imagem</button>`:''}<label class="toggle-inline"><input type="checkbox" data-item-deck="${it.id}" ${it.showInDeck?'checked':''}> mostrar no baralho</label>${isConsumable?`<button type="button" class="primary" data-consume-item="${it.id}" ${Math.max(0,Number(it.qty)||0)<=0?'disabled':''}>Consumir 1</button>`:''}</div></div></div><div class="grid four compact-fields inventory-item-grid"><label><span class="label">Categoria</span><select data-item-field="${it.id}:category">${inventoryCategoryOptions(it.category)}</select></label><label><span class="label">Quantidade</span><input type="number" min="0" step="1" data-item-field="${it.id}:qty" value="${Math.max(0,Number(it.qty)||0)}"></label>${isWeapon?`<label><span class="label">Atributo da arma</span><select data-item-field="${it.id}:attackAttr"><option value="for" ${it.attackAttr==='for'?'selected':''}>Força</option><option value="des" ${it.attackAttr==='des'?'selected':''}>Destreza</option></select></label><label><span class="label">Metal da arma</span><input data-item-field="${it.id}:material" value="${esc(it.material||'')}" placeholder="Ex.: bronze celestial"></label>`:`<label><span class="label">Material / composição</span><input data-item-field="${it.id}:material" value="${esc(it.material||'')}" placeholder="Opcional"></label><div class="inventory-heritage-box"><span class="label">Herança</span><label class="toggle-inline heritage-inline"><input type="checkbox" data-item-check="${it.id}:isHeritage" ${it.isHeritage?'checked':''}> é herança</label></div>`}</div>${isWeapon?`<div class="grid four compact-fields weapon-item-details"><label><span class="label">Bônus de ataque</span><input type="number" data-item-field="${it.id}:attackBonus" value="${Number(it.attackBonus)||0}"></label><label><span class="label">Dano</span><input data-item-field="${it.id}:damage" value="${esc(it.damage||'')}" placeholder="Ex.: 1d8 + 6"></label>${isRanged?`<label><span class="label">Alcance</span><input data-item-field="${it.id}:range" value="${esc(it.range||'')}" placeholder="Ex.: 24 m"></label>`:'<div></div>'}<div class="inventory-heritage-box"><span class="label">Herança</span><label class="toggle-inline heritage-inline"><input type="checkbox" data-item-check="${it.id}:isHeritage" ${it.isHeritage?'checked':''}> é herança</label></div></div>`:''}<label><span class="label">Efeito curto / informação crucial</span><input data-item-field="${it.id}:effect" value="${esc(it.effect||it.rune||'')}" placeholder="O que deve aparecer no baralho"></label><label><span class="label">Descrição completa do item</span><textarea rows="5" data-item-field="${it.id}:notes" placeholder="Descrição, história, regras completas, observações...">${esc(it.notes||'')}</textarea></label></article>`;
+    return `<div class="subcard inventory-item" data-item-card="${it.id}"><div class="inventory-item-head">${imageEditorPreview(it.imageUrl,it.name||'Item')}<div class="inventory-item-title"><div class="row between"><input class="weapon-name" data-item-field="${it.id}:name" value="${esc(it.name||'Item')}"><button class="danger" data-remove-item="${it.id}">Remover</button></div><div class="row inventory-image-actions"><button type="button" data-upload-item-image="${it.id}">Adicionar imagem</button>${it.imageUrl?`<button type="button" data-clear-item-image="${it.id}">Remover imagem</button>`:''}<label class="toggle-inline"><input type="checkbox" data-item-deck="${it.id}" ${it.showInDeck?'checked':''}> no baralho</label></div></div></div><div class="grid three compact-fields"><label><span class="label">Quantidade</span><input type="number" min="0" step="1" data-item-field="${it.id}:qty" value="${Math.max(0,Number(it.qty)||0)}"></label><label><span class="label">Categoria</span><select data-item-field="${it.id}:category">${inventoryCategoryOptions(it.category)}</select></label><label><span class="label">Material / origem</span><input data-item-field="${it.id}:material" value="${esc(it.material||'')}" placeholder="Opcional"></label></div><label><span class="label">Runa / efeito já aplicado</span><input data-item-field="${it.id}:rune" value="${esc(it.rune||'')}" placeholder="Somente o efeito que já existe no item"></label><label><span class="label">Notas</span><textarea rows="3" data-item-field="${it.id}:notes">${esc(it.notes||'')}</textarea></label></div>`;
   }
-
   function renderInventoryTab(){
     const inv=state.inventory||defaultInventory(),totalDn=(Number(inv.aureus)||0)*100+(Number(inv.denarius)||0);
-    return `<section class="tab-pane ${state.activeTab==='inventory'?'':'hidden'}" data-pane="inventory"><section class="inventory-toolbar-card card"><div><p class="eyebrow">NOVO ITEM</p><h2>Adicionar ao inventário</h2><p class="muted compact">Escolha o tipo primeiro. Armas entram no sistema mecânico; consumíveis e itens especiais usam o acervo.</p></div><div class="inventory-add-row"><select id="inventoryAddKind"><option value="weapon-melee">⚔ Arma (corpo a corpo)</option><option value="weapon-ranged">🏹 Arma (à distância)</option><option value="consumivel">✚ Consumível</option><option value="item-magico">✦ Item mágico</option><option value="outro">◈ Outro</option></select><button id="addInventoryByKind" class="primary">+ Adicionar</button></div><div class="inventory-filter-row"><input id="inventorySearch" placeholder="Buscar item pelo nome..."><select id="inventoryFilter"><option value="all">Todos</option><option value="weapons">Armas</option><option value="consumivel">Consumíveis</option><option value="item-magico">Itens mágicos</option><option value="heritage">Heranças</option><option value="outro">Outros</option></select></div></section><div class="grid two mechanics-section inventory-ledger"><article class="card"><p class="eyebrow">MOEDAS</p><h2>Aureus & Denários</h2><div class="grid two"><label><span class="label">Aureus</span><input id="invAureus" type="number" min="0" step="1" value="${Number(inv.aureus)||0}"></label><label><span class="label">Denários</span><input id="invDenarius" type="number" min="0" step="1" value="${Number(inv.denarius)||0}"></label></div><div class="subcard compact" style="margin-top:10px">Referência: <b>1 Aureus = 100 denários</b> · total equivalente atual: <b>${totalDn} dn</b>.</div></article><article class="card"><p class="eyebrow">ACERVO</p><h2>Como o inventário funciona</h2><p class="muted">No inventário, os cards ficam maiores e guardam a explicação completa. No <b>baralho de combate</b>, aparecem apenas imagem, tipo, título e informações cruciais.</p><label><span class="label">Notas gerais de inventário</span><textarea id="inventoryNotes" rows="4" placeholder="Baú, itens emprestados, materiais reservados...">${esc(inv.notes||'')}</textarea></label></article></div><section class="mechanics-section"><div class="section-title"><div><p class="eyebrow">PROTEÇÃO</p><h2>Armadura & escudo</h2></div></div><div class="grid two inventory-filter-target" data-inventory-kind="protection">${renderArmorCard()}${renderShieldCard()}</div></section><article class="card mechanics-section inventory-filter-target" data-inventory-kind="weapons"><div class="section-title"><div><p class="eyebrow">ARMAS</p><h2>Armas & treinamento</h2></div><span class="pill">${state.weapons.length} cadastrada(s)</span></div><p class="muted">Aqui ficam as armas que usam cálculo automático de ataque, dano, material e estacas. Marque uma arma como equipada para ela entrar no baralho de combate.</p><div class="weapon-list">${state.weapons.length?state.weapons.map(renderWeapon).join(''):'<div class="notice">Nenhuma arma cadastrada ainda.</div>'}</div></article><section class="mechanics-section"><div class="section-title"><div><p class="eyebrow">DEMAIS ITENS</p><h2>Consumíveis, itens mágicos & outros</h2></div><span class="pill">${inv.items.length} item(ns)</span></div><div class="inventory-grid inventory-grid-large" style="margin-top:12px">${inv.items.length?inv.items.map(renderInventoryItem).join(''):'<div class="notice wide">Nenhum item cadastrado ainda.</div>'}</div></section></section>`;
+    return `<section class="tab-pane ${state.activeTab==='inventory'?'':'hidden'}" data-pane="inventory"><section class="mechanics-section inventory-showcase"><div class="section-title"><div><p class="eyebrow">EQUIPADOS</p><h2>Baralho de itens & equipamento</h2></div><span class="pill">Itens em uso</span></div><p class="muted compact">Armadura, escudo e armas equipadas aparecem aqui. Itens gerais também podem ser fixados no baralho para consulta rápida.</p>${renderEquippedDeck()}</section><div class="grid two mechanics-section inventory-ledger"><article class="card"><p class="eyebrow">MOEDAS</p><h2>Aureus & Denários</h2><div class="grid two"><label><span class="label">Aureus</span><input id="invAureus" type="number" min="0" step="1" value="${Number(inv.aureus)||0}"></label><label><span class="label">Denários</span><input id="invDenarius" type="number" min="0" step="1" value="${Number(inv.denarius)||0}"></label></div><div class="subcard compact" style="margin-top:10px">Referência: <b>1 Aureus = 100 denários</b> · total equivalente atual: <b>${totalDn} dn</b>.</div></article><article class="card"><p class="eyebrow">INVENTÁRIO</p><h2>Acervo do personagem</h2><p class="muted">A ficha guarda o que o personagem <b>possui</b>: equipamento, consumíveis, materiais, itens especiais e efeitos/runes já aplicados.</p><label><span class="label">Notas gerais de inventário</span><textarea id="inventoryNotes" rows="4" placeholder="Baú, itens emprestados, materiais reservados...">${esc(inv.notes||'')}</textarea></label></article></div><section class="mechanics-section"><div class="section-title"><div><p class="eyebrow">PROTEÇÃO</p><h2>Armadura & escudo</h2></div></div><div class="grid two">${renderArmorCard()}${renderShieldCard()}</div></section><article class="card mechanics-section"><div class="section-title"><div><p class="eyebrow">ARMAS</p><h2>Armas & treinamento</h2></div><button id="addWeapon" class="primary">+ Adicionar arma</button></div><p class="muted">O Inventário guarda as armas; a aba Combate usa automaticamente as que estiverem marcadas como equipadas.</p><div class="weapon-list">${state.weapons.length?state.weapons.map(renderWeapon).join(''):'<div class="notice">Nenhuma arma cadastrada ainda.</div>'}</div></article><section class="mechanics-section"><div class="section-title"><div><p class="eyebrow">ITENS</p><h2>Itens gerais</h2></div><button id="addInventoryItem" class="primary">+ Adicionar item</button></div><div class="inventory-grid" style="margin-top:12px">${inv.items.length?inv.items.map(renderInventoryItem).join(''):'<div class="notice wide">Nenhum item geral cadastrado.</div>'}</div></section></section>`;
   }
 
   function bindInventory(){
@@ -699,21 +825,19 @@
     const au=byId('invAureus');if(au)au.onchange=e=>{inv.aureus=Math.max(0,Number(e.target.value)||0);save();renderSheet()};
     const dn=byId('invDenarius');if(dn)dn.onchange=e=>{inv.denarius=Math.max(0,Number(e.target.value)||0);save();renderSheet()};
     const notes=byId('inventoryNotes');if(notes)notes.oninput=e=>{inv.notes=e.target.value;save()};
-    const add=byId('addInventoryByKind');if(add)add.onclick=()=>{const kind=byId('inventoryAddKind')?.value||'outro';if(kind==='weapon-melee'||kind==='weapon-ranged'){const m=material('ferro-aco');state.weapons.push({id:uid('weapon'),name:'Nova arma',type:kind==='weapon-ranged'?'distancia':'corpo-a-corpo',attr:'for',material:'ferro-aco',stakes:0,resistanceCurrent:m.resistance,attackExtra:0,damageExtra:0,equipped:true,imageUrl:'',isHeritage:false,notes:''})}else{inv.items.push({id:uid('item'),name:kind==='consumivel'?'Novo consumível':kind==='item-magico'?'Novo item mágico':'Novo item',qty:1,category:kind,material:'',rune:'',effect:'',notes:'',imageUrl:'',showInDeck:false,isHeritage:false,attackAttr:'for',attackBonus:0,damage:'',range:''})}save();renderSheet()};
+    const add=byId('addInventoryItem');if(add)add.onclick=()=>{inv.items.push({id:uid('item'),name:'Novo item',qty:1,category:'geral',material:'',rune:'',notes:'',imageUrl:'',showInDeck:false});save();renderSheet()};
     document.querySelectorAll('[data-remove-item]').forEach(b=>b.onclick=()=>{inv.items=inv.items.filter(x=>x.id!==b.dataset.removeItem);save();renderSheet()});
-    document.querySelectorAll('[data-item-field]').forEach(el=>{const handler=()=>{const [id,field]=el.dataset.itemField.split(':'),it=inv.items.find(x=>x.id===id);if(!it)return;let value=el.value;if(field==='qty')value=Math.max(0,Number(value)||0);if(field==='attackBonus')value=Number(value)||0;if(field==='category')value=normalizeInventoryCategory(value);it[field]=value;if(field==='effect')it.rune=value;save();if(['category','qty'].includes(field))renderSheet()};el.onchange=handler;if(el.tagName==='TEXTAREA'||['name','material','effect','notes','damage','range'].includes((el.dataset.itemField||'').split(':')[1]))el.oninput=handler});
-    document.querySelectorAll('[data-item-check]').forEach(el=>el.onchange=()=>{const [id,field]=el.dataset.itemCheck.split(':'),it=inv.items.find(x=>x.id===id);if(!it)return;it[field]=el.checked;save();renderSheet()});
+    document.querySelectorAll('[data-item-field]').forEach(el=>el.onchange=()=>{const [id,field]=el.dataset.itemField.split(':'),it=inv.items.find(x=>x.id===id);if(!it)return;it[field]=field==='qty'?Math.max(0,Number(el.value)||0):el.value;save();if(field==='category'||field==='qty')renderSheet()});
     document.querySelectorAll('[data-item-deck]').forEach(el=>el.onchange=()=>{const it=inv.items.find(x=>x.id===el.dataset.itemDeck);if(!it)return;it.showInDeck=el.checked;save();renderSheet()});
     document.querySelectorAll('[data-upload-item-image]').forEach(b=>b.onclick=()=>{const it=inv.items.find(x=>x.id===b.dataset.uploadItemImage);if(!it)return;chooseStoredImage(url=>{it.imageUrl=url;save();renderSheet();notify('Imagem do item atualizada.')})});
     document.querySelectorAll('[data-clear-item-image]').forEach(b=>b.onclick=()=>{const it=inv.items.find(x=>x.id===b.dataset.clearItemImage);if(!it)return;it.imageUrl='';save();renderSheet()});
-    const search=byId('inventorySearch'),filter=byId('inventoryFilter');const applyFilter=()=>{const q=String(search?.value||'').trim().toLowerCase(),f=filter?.value||'all';document.querySelectorAll('[data-item-card]').forEach(card=>{const item=inv.items.find(x=>x.id===card.dataset.itemCard),name=String(item?.name||'').toLowerCase();const typeOk=f==='all'||f===item?.category||(f==='heritage'&&item?.isHeritage);card.classList.toggle('hidden',!(typeOk&&(!q||name.includes(q))))});const weaponSection=document.querySelector('[data-inventory-kind="weapons"]');if(weaponSection)weaponSection.classList.toggle('hidden',!(f==='all'||f==='weapons'||f==='heritage'));document.querySelectorAll('[data-weapon-card]').forEach(card=>{const w=state.weapons.find(x=>x.id===card.dataset.weaponCard),name=String(w?.name||'').toLowerCase(),ok=(f==='all'||f==='weapons'||(f==='heritage'&&w?.isHeritage))&&(!q||name.includes(q));card.classList.toggle('hidden',!ok)})};if(search)search.oninput=applyFilter;if(filter)filter.onchange=applyFilter;
     bindArmor();bindShield();bindWeapons();
   }
 
   function renderFamiliarCard(f){
     const rule=familiarTypeRule(f.type),mx=familiarHpMax(f),spent=familiarAttrSpent(f),skillLimit=familiarSkillLimit(f),mount=f.type==='montaria',legend=f.type==='lendario';
     const route=fameTotal()>=50?'Fama ≥50':f.knownVip?'Conhecido + VIP':'rota social pendente';
-    return `<div class="familiar-card subcard ${f.active?'active':''}"><div class="familiar-head-large">${imageEditorPreview(f.imageUrl,f.name||'Familiar')}<div class="familiar-head-copy"><div class="row between"><div><input class="weapon-name" data-familiar-field="${f.id}:name" value="${esc(f.name||'Familiar')}"><div class="muted compact">${rule.name}${f.active?' · em missão':''}</div></div><button class="danger" data-remove-familiar="${f.id}">Remover</button></div><div class="row inventory-image-actions"><button type="button" data-upload-familiar-image="${f.id}">Adicionar imagem</button>${f.imageUrl?`<button type="button" data-clear-familiar-image="${f.id}">Remover imagem</button>`:''}</div></div></div><div class="grid three compact-fields" style="margin-top:10px"><label><span class="label">Tipo</span><select data-familiar-field="${f.id}:type"><option value="auxiliar" ${f.type==='auxiliar'?'selected':''}>Auxiliar</option><option value="montaria" ${f.type==='montaria'?'selected':''}>Montaria</option><option value="lendario" ${f.type==='lendario'?'selected':''}>Lendário</option></select></label><label><span class="label">Na missão</span><select data-familiar-field="${f.id}:active"><option value="0" ${!f.active?'selected':''}>Não</option><option value="1" ${f.active?'selected':''}>Sim</option></select></label>${legend?`<label><span class="label">HP máximo definido pela staff</span><input type="number" min="1" data-familiar-field="${f.id}:legendaryHpMax" value="${Number(f.legendaryHpMax)||0}"></label>`:`<div class="subcard compact"><b>HP máximo:</b> ${mx}<br><span class="muted">${rule.hpBase} base + ${rule.hpPerTen}/10 níveis do dono</span></div>`}</div><div class="familiar-hp-row"><b>HP ${Number(f.currentHp)||0}/${mx}</b><div class="row"><button data-familiar-hp="${f.id}:-5">−5</button><button data-familiar-hp="${f.id}:-1">−1</button><button data-familiar-hp="${f.id}:1">+1</button><button data-familiar-hp="${f.id}:5">+5</button><input type="number" data-familiar-hp-manual="${f.id}" placeholder="Ex.: -12" aria-label="Ajuste manual de HP"><button data-familiar-hp-apply="${f.id}">Aplicar</button></div></div>${!legend?`<div class="divider"></div><div class="row between"><b>Atributos do familiar</b><span class="pill ${spent>Number(rule.attributePoints||5)?'warn':''}">${spent}/${rule.attributePoints||5} pontos</span></div><div class="attrs familiar-attrs">${ATTRS.map(([k,a])=>`<div class="attr"><div class="attr-name">${a}</div><div class="attr-total">${Number(f.attributes?.[k])||0}</div><div class="stepper"><button data-familiar-attr="${f.id}:${k}:-1">−</button><button data-familiar-attr="${f.id}:${k}:1" ${(spent>=Number(rule.attributePoints||5)||Number(f.attributes?.[k])>=5)?'disabled':''}>+</button></div></div>`).join('')}</div><div class="grid two" style="margin-top:10px">${Array.from({length:skillLimit},(_,i)=>`<label><span class="label">Perícia ${i+1}/${skillLimit}</span><select data-familiar-skill="${f.id}:${i}"><option value="">Escolha…</option>${skills.map(sk=>`<option ${f.skills?.[i]===sk.name?'selected':''}>${sk.name}</option>`).join('')}</select></label>`).join('')}</div>`:`<div class="notice">Familiares Lendários têm estatísticas definidas pela staff, <b>2 ações</b> e uso normalmente limitado a uma missão/ocasião. A ficha não inventa atributos para eles.</div><div class="grid two compact-fields"><label><span class="label">Ocasião / condição de uso</span><input data-familiar-field="${f.id}:legendaryOccasion" value="${esc(f.legendaryOccasion||'')}"></label><label class="toggle-inline"><input type="checkbox" data-familiar-legendary-used="${f.id}" ${f.legendaryUsed?'checked':''}> uso desta ocasião já consumido</label></div>`}${mount?`<div class="mount-box"><div class="row between"><b>Requisitos de Montaria</b><span class="pill ${mountEligible(f)?'good':'warn'}">${mountEligible(f)?'elegível':'conferir'}</span></div><p class="muted compact">Rota social: ${route}. A ficha considera a combinação de uma rota social válida + aprovação da staff.</p><div class="row"><label class="toggle-inline"><input type="checkbox" data-familiar-knownvip="${f.id}" ${f.knownVip?'checked':''}> Conhecido + VIP cumprido</label><label class="toggle-inline"><input type="checkbox" data-familiar-approved="${f.id}" ${f.staffApproved?'checked':''}> aprovação da staff</label></div><div class="subcard compact" style="margin-top:8px">Montaria age imediatamente depois do dono e possui 2 perícias.</div></div>`:''}<label style="margin-top:10px"><span class="label">Notas / aparência / vínculo</span><textarea rows="3" data-familiar-field="${f.id}:notes">${esc(f.notes||'')}</textarea></label></div>`;
+    return `<div class="familiar-card subcard ${f.active?'active':''}"><div class="row between"><div><input class="weapon-name" data-familiar-field="${f.id}:name" value="${esc(f.name||'Familiar')}"><div class="muted compact">${rule.name}${f.active?' · em missão':''}</div></div><button class="danger" data-remove-familiar="${f.id}">Remover</button></div><div class="grid three compact-fields" style="margin-top:10px"><label><span class="label">Tipo</span><select data-familiar-field="${f.id}:type"><option value="auxiliar" ${f.type==='auxiliar'?'selected':''}>Auxiliar</option><option value="montaria" ${f.type==='montaria'?'selected':''}>Montaria</option><option value="lendario" ${f.type==='lendario'?'selected':''}>Lendário</option></select></label><label><span class="label">Na missão</span><select data-familiar-field="${f.id}:active"><option value="0" ${!f.active?'selected':''}>Não</option><option value="1" ${f.active?'selected':''}>Sim</option></select></label>${legend?`<label><span class="label">HP máximo definido pela staff</span><input type="number" min="1" data-familiar-field="${f.id}:legendaryHpMax" value="${Number(f.legendaryHpMax)||0}"></label>`:`<div class="subcard compact"><b>HP máximo:</b> ${mx}<br><span class="muted">${rule.hpBase} base + ${rule.hpPerTen}/10 níveis do dono</span></div>`}</div><div class="familiar-hp-row"><b>HP ${Number(f.currentHp)||0}/${mx}</b><div class="row"><button data-familiar-hp="${f.id}:-5">−5</button><button data-familiar-hp="${f.id}:-1">−1</button><button data-familiar-hp="${f.id}:1">+1</button><button data-familiar-hp="${f.id}:5">+5</button><input type="number" data-familiar-hp-manual="${f.id}" placeholder="Ex.: -12" aria-label="Ajuste manual de HP"><button data-familiar-hp-apply="${f.id}">Aplicar</button></div></div>${!legend?`<div class="divider"></div><div class="row between"><b>Atributos do familiar</b><span class="pill ${spent>Number(rule.attributePoints||5)?'warn':''}">${spent}/${rule.attributePoints||5} pontos</span></div><div class="attrs familiar-attrs">${ATTRS.map(([k,a])=>`<div class="attr"><div class="attr-name">${a}</div><div class="attr-total">${Number(f.attributes?.[k])||0}</div><div class="stepper"><button data-familiar-attr="${f.id}:${k}:-1">−</button><button data-familiar-attr="${f.id}:${k}:1" ${(spent>=Number(rule.attributePoints||5)||Number(f.attributes?.[k])>=5)?'disabled':''}>+</button></div></div>`).join('')}</div><div class="grid two" style="margin-top:10px">${Array.from({length:skillLimit},(_,i)=>`<label><span class="label">Perícia ${i+1}/${skillLimit}</span><select data-familiar-skill="${f.id}:${i}"><option value="">Escolha…</option>${skills.map(sk=>`<option ${f.skills?.[i]===sk.name?'selected':''}>${sk.name}</option>`).join('')}</select></label>`).join('')}</div>`:`<div class="notice">Familiares Lendários têm estatísticas definidas pela staff, <b>2 ações</b> e uso normalmente limitado a uma missão/ocasião. A ficha não inventa atributos para eles.</div><div class="grid two compact-fields"><label><span class="label">Ocasião / condição de uso</span><input data-familiar-field="${f.id}:legendaryOccasion" value="${esc(f.legendaryOccasion||'')}"></label><label class="toggle-inline"><input type="checkbox" data-familiar-legendary-used="${f.id}" ${f.legendaryUsed?'checked':''}> uso desta ocasião já consumido</label></div>`}${mount?`<div class="mount-box"><div class="row between"><b>Requisitos de Montaria</b><span class="pill ${mountEligible(f)?'good':'warn'}">${mountEligible(f)?'elegível':'conferir'}</span></div><p class="muted compact">Rota social: ${route}. A ficha considera a combinação de uma rota social válida + aprovação da staff.</p><div class="row"><label class="toggle-inline"><input type="checkbox" data-familiar-knownvip="${f.id}" ${f.knownVip?'checked':''}> Conhecido + VIP cumprido</label><label class="toggle-inline"><input type="checkbox" data-familiar-approved="${f.id}" ${f.staffApproved?'checked':''}> aprovação da staff</label></div><div class="subcard compact" style="margin-top:8px">Montaria age imediatamente depois do dono e possui 2 perícias.</div></div>`:''}<label style="margin-top:10px"><span class="label">Notas / aparência / vínculo</span><textarea rows="3" data-familiar-field="${f.id}:notes">${esc(f.notes||'')}</textarea></label></div>`;
   }
   function renderFamiliarsTab(){
     const fs=state.familiars||defaultFamiliars(),commons=familiarActiveCommons(),legs=familiarActiveLegendaries(),hasMount=(fs.entries||[]).some(f=>f.type==='montaria');
@@ -732,8 +856,6 @@
     document.querySelectorAll('[data-familiar-knownvip]').forEach(el=>el.onchange=()=>{const f=fs.entries.find(x=>x.id===el.dataset.familiarKnownvip);if(f){f.knownVip=el.checked;save();renderSheet()}});
     document.querySelectorAll('[data-familiar-approved]').forEach(el=>el.onchange=()=>{const f=fs.entries.find(x=>x.id===el.dataset.familiarApproved);if(f){f.staffApproved=el.checked;save();renderSheet()}});
     document.querySelectorAll('[data-familiar-legendary-used]').forEach(el=>el.onchange=()=>{const f=fs.entries.find(x=>x.id===el.dataset.familiarLegendaryUsed);if(f){f.legendaryUsed=el.checked;save();renderSheet()}});
-    document.querySelectorAll('[data-upload-familiar-image]').forEach(b=>b.onclick=()=>{const f=fs.entries.find(x=>x.id===b.dataset.uploadFamiliarImage);if(!f)return;chooseStoredImage(url=>{f.imageUrl=url;save();renderSheet();notify('Imagem do familiar atualizada.')})});
-    document.querySelectorAll('[data-clear-familiar-image]').forEach(b=>b.onclick=()=>{const f=fs.entries.find(x=>x.id===b.dataset.clearFamiliarImage);if(!f)return;f.imageUrl='';save();renderSheet()});
     const notes=byId('familiarsNotes');if(notes)notes.oninput=e=>{fs.notes=e.target.value;save()};
   }
   function fieldFrom(el){return el?.dataset?.familiarField?.split(':')?.[1]||''}
@@ -790,11 +912,9 @@
 
   function renderSheet(){
     syncCurrentCaps();const g=god(),set=effectiveAbilitySet(),fDef=fixedDefense();
-    syncShellChrome();
     sheetView.innerHTML=`<div class="sheet-frame">${renderCharacterRail(g)}<div class="sheet-main">${renderTabs()}${renderStatusTab(g)}${renderCombatTab(fDef,set)}${renderInventoryTab()}${renderFamiliarsTab()}${renderRomaTab()}${renderMagicTab()}${renderHistoryTab()}${renderNotesTab()}</div></div>`;
     bindSheet();save();
   }
-
   function renderArmorCard(){
     const a=state.armor,m=material(a.material),t=armorType(a.type),res=m.unbreakable?'∞':clamp(Number(a.resistanceCurrent)||0,0,m.resistance||0);
     return `<article class="card equipment-editor-card" id="armorEditor"><div class="row between"><p class="eyebrow">ARMADURA</p><label class="toggle-inline"><input id="armorEquipped" type="checkbox" ${a.equipped?'checked':''}> ativa</label></div><div class="equipment-editor-head">${imageEditorPreview(a.imageUrl,a.name||'Armadura')}<div class="equipment-editor-fields"><label><span class="label">Nome</span><input id="armorName" value="${esc(a.name)}"></label><div class="row inventory-image-actions"><button id="uploadArmorImage" type="button">Adicionar imagem</button>${a.imageUrl?'<button id="clearArmorImage" type="button">Remover imagem</button>':''}</div></div></div><div class="grid two"><label><span class="label">Tipo</span><select id="armorType">${system.armorTypes.map(x=>`<option value="${x.id}" ${a.type===x.id?'selected':''}>${x.name}</option>`).join('')}</select></label><label><span class="label">Material</span><select id="armorMaterial">${system.materials.map(x=>`<option value="${x.id}" ${a.material===x.id?'selected':''}>${x.name}</option>`).join('')}</select></label></div><div class="subcard compact"><b>${t.name}</b> · +${t.defense} Defesa · ${t.reduction} redução de dano<br><span class="muted">Material: ${m.name} · resistência ${m.unbreakable?'inquebrável':m.resistance} · referência de armadura: ${m.armorHint}</span></div>${!m.unbreakable?`<div class="row between"><span>Resistência atual <b>${res}/${m.resistance}</b></span><div class="row"><button data-armor-res="-1">−1</button><button data-armor-res="1">+1</button></div></div>`:'<div class="pill good">Material inquebrável</div>'}</article>`;
@@ -805,16 +925,15 @@
   }
   function renderWeapon(w){
     const m=material(w.material),wt=weaponType(w.type),res=m.unbreakable?'∞':clamp(Number(w.resistanceCurrent)||0,0,m.resistance||0),broken=!m.unbreakable&&res<=0;
-    return `<article class="weapon-card ${broken?'broken':''}" data-weapon-card="${w.id}" data-inventory-name="${esc(String(w.name||'').toLowerCase())}" data-inventory-heritage="${w.isHeritage?'1':'0'}"><div class="weapon-editor-head">${imageEditorPreview(w.imageUrl,w.name||'Arma')}<div class="weapon-editor-fields"><div class="row between"><div><span class="inventory-kind-kicker">${w.type==='distancia'?'🏹 Arma (à distância)':'⚔ Arma (corpo a corpo)'}</span><input class="weapon-name" data-weapon-field="${w.id}:name" value="${esc(w.name)}"></div><div class="row"><label class="toggle-inline"><input type="checkbox" data-weapon-equipped="${w.id}" ${w.equipped!==false?'checked':''}> equipada</label><label class="toggle-inline"><input type="checkbox" data-weapon-heritage="${w.id}" ${w.isHeritage?'checked':''}> herança</label><button class="danger" data-remove-weapon="${w.id}">Remover</button></div></div><div class="row inventory-image-actions"><button type="button" data-upload-weapon-image="${w.id}">Adicionar imagem</button>${w.imageUrl?`<button type="button" data-clear-weapon-image="${w.id}">Remover imagem</button>`:''}</div></div></div><div class="weapon-grid"><label><span class="label">Tipo</span><select data-weapon-field="${w.id}:type"><option value="corpo-a-corpo" ${w.type==='corpo-a-corpo'?'selected':''}>Corpo a corpo</option><option value="distancia" ${w.type==='distancia'?'selected':''}>À distância</option>${w.type==='desarmado'?'<option value="desarmado" selected>Desarmado / improvisado</option>':''}</select></label><label><span class="label">Atributo</span><select data-weapon-field="${w.id}:attr"><option value="for" ${w.attr==='for'?'selected':''}>Força</option><option value="des" ${w.attr==='des'?'selected':''}>Destreza</option></select></label><label><span class="label">Metal</span><select data-weapon-field="${w.id}:material">${system.materials.map(x=>`<option value="${x.id}" ${w.material===x.id?'selected':''}>${x.name}</option>`).join('')}</select></label><label><span class="label">Estacas · ${w.stakes}/30</span><input type="range" min="0" max="30" value="${w.stakes}" data-weapon-field="${w.id}:stakes"></label><label><span class="label">Bônus ataque extra</span><input type="number" value="${Number(w.attackExtra)||0}" data-weapon-field="${w.id}:attackExtra"></label><label><span class="label">Bônus dano extra</span><input type="number" value="${Number(w.damageExtra)||0}" data-weapon-field="${w.id}:damageExtra"></label></div><div class="row weapon-results"><span class="pill">Ataque ${signed(weaponAttack(w))}</span><span class="pill">Dano ${weaponDamageFormula(w)}</span><span class="pill ${Number(w.stakes)>=30?'good':''}">${Number(w.stakes)>=30?'Dominada · BP aplicado':'Sem BP · precisa 30 estacas'}</span><span class="pill">${esc(m.name)}</span></div><label><span class="label">Descrição completa / observações</span><textarea rows="3" data-weapon-field="${w.id}:notes" placeholder="História da arma, efeito especial, detalhes de uso...">${esc(w.notes||'')}</textarea></label><div class="row between"><span class="muted compact">${wt.name} · resistência ${m.unbreakable?'inquebrável':`${res}/${m.resistance}`}${broken?' · QUEBRADA':''}</span>${!m.unbreakable?`<div class="row"><button data-weapon-res="${w.id}:-1">−1 Resist.</button><button data-weapon-res="${w.id}:1">+1 Resist.</button></div>`:''}</div></article>`;
+    return `<div class="weapon-card ${broken?'broken':''}" data-weapon-card="${w.id}"><div class="weapon-editor-head">${imageEditorPreview(w.imageUrl,w.name||'Arma')}<div class="weapon-editor-fields"><div class="row between"><input class="weapon-name" data-weapon-field="${w.id}:name" value="${esc(w.name)}"><div class="row"><label class="toggle-inline"><input type="checkbox" data-weapon-equipped="${w.id}" ${w.equipped!==false?'checked':''}> equipada</label><button class="danger" data-remove-weapon="${w.id}">Remover</button></div></div><div class="row inventory-image-actions"><button type="button" data-upload-weapon-image="${w.id}">Adicionar imagem</button>${w.imageUrl?`<button type="button" data-clear-weapon-image="${w.id}">Remover imagem</button>`:''}</div></div></div><div class="weapon-grid"><label><span class="label">Tipo</span><select data-weapon-field="${w.id}:type">${system.weaponTypes.map(x=>`<option value="${x.id}" ${w.type===x.id?'selected':''}>${x.name}</option>`).join('')}</select></label><label><span class="label">Atributo</span><select data-weapon-field="${w.id}:attr"><option value="for" ${w.attr==='for'?'selected':''}>Força</option><option value="des" ${w.attr==='des'?'selected':''}>Destreza</option></select></label><label><span class="label">Material</span><select data-weapon-field="${w.id}:material">${system.materials.map(x=>`<option value="${x.id}" ${w.material===x.id?'selected':''}>${x.name}</option>`).join('')}</select></label><label><span class="label">Estacas · ${w.stakes}/30</span><input type="range" min="0" max="30" value="${w.stakes}" data-weapon-field="${w.id}:stakes"></label><label><span class="label">Bônus ataque extra</span><input type="number" value="${Number(w.attackExtra)||0}" data-weapon-field="${w.id}:attackExtra"></label><label><span class="label">Bônus dano extra</span><input type="number" value="${Number(w.damageExtra)||0}" data-weapon-field="${w.id}:damageExtra"></label></div><div class="row weapon-results"><span class="pill">Ataque ${signed(weaponAttack(w))}</span><span class="pill">Dano ${weaponDamageFormula(w)}</span><span class="pill ${Number(w.stakes)>=30?'good':''}">${Number(w.stakes)>=30?'Dominada · BP aplicado':'Sem BP · precisa 30 estacas'}</span><span class="pill">Material ${signed(m.attack)} ataque</span></div><div class="row between"><span class="muted compact">${wt.name} · resistência ${m.unbreakable?'inquebrável':`${res}/${m.resistance}`}${broken?' · QUEBRADA':''}</span>${!m.unbreakable?`<div class="row"><button data-weapon-res="${w.id}:-1">−1 Resist.</button><button data-weapon-res="${w.id}:1">+1 Resist.</button></div>`:''}</div></div>`;
   }
-
   function sourceOption(value,label,current){return `<option value="${value}" ${current===value?'selected':''}>${label}</option>`}
   function renderSkillMatrix(){
     return `<article class="card skills-ledger-card"><div class="row between skills-ledger-head"><div><p class="eyebrow">PERÍCIAS</p><h3>Todas as perícias</h3></div><span class="pill">BP +${bp()}</span></div><div class="skill-ledger">${skills.map(sk=>{
-      const automatic=automaticSkillSources(sk.name),meta=skillMetaFor(sk.name),trained=skillIsProficient(sk.name),expert=skillHasExpertise(sk.name),sources=skillSources(sk.name),fixed=god()?.skillBonuses?.[sk.name]||0;
-      const sourceHtml=automatic.length?`<div class="skill-source-tags">${sources.map(x=>`<span class="skill-source-tag">${x}</span>`).join('')}</div>`:`<select class="skill-source-select" data-skill-source="${esc(sk.name)}" ${meta.proficient?'':'disabled'}>${sourceOption('prole','Prole',meta.source)}${sourceOption('inicial','Inicial',meta.source)}${sourceOption('treino','Treino',meta.source)}${sourceOption('nivel-20','Nível 20',meta.source)}${sourceOption('nivel-40','Nível 40',meta.source)}${sourceOption('talento','Talento',meta.source)}${sourceOption('extras','Extras',meta.source)}</select>`;
-      return `<div class="skill-ledger-row ${trained?'trained':''} ${expert?'expert':''}"><div class="skill-row-main"><div class="skill-ledger-flags"><label class="skill-tiny-check ${trained?'active':''}" title="Perito"><input type="checkbox" data-skill-manual="${esc(sk.name)}" ${trained?'checked':''} ${automatic.length?'disabled':''}><span>P</span></label><label class="skill-tiny-check expert ${expert?'active':''}" title="Expertise"><input type="checkbox" data-skill-expertise="${esc(sk.name)}" ${expert?'checked':''} ${trained?'':'disabled'}><span>E</span></label></div><div class="skill-ledger-name"><b>${sk.name}</b><small>${attrName(sk.attr)}${fixed?` · kit ${signed(fixed)}`:''}</small></div><strong class="skill-roll-value">${signed(skillValue(sk.name))}</strong><details class="skill-settings"><summary title="Editar origem">•••</summary><div class="skill-settings-body">${sourceHtml}<input class="skill-detail-inline" data-skill-detail="${esc(sk.name)}" value="${esc(meta.detail||'')}" placeholder="Detalhe / origem"></div></details></div></div>`;
-    }).join('')}</div><p class="muted mini-help">P = Perito · E = Expertise. Abra “origem” apenas quando precisar editar a fonte.</p></article>`;
+      const automatic=automaticSkillSources(sk.name),meta=skillMetaFor(sk.name),trained=skillIsProficient(sk.name),expert=skillHasExpertise(sk.name),autoExpert=skillHasAutomaticExpertise(sk.name),sources=skillSources(sk.name),fixed=god()?.skillBonuses?.[sk.name]||0,conditional=activeAbilitySkillEffects().conditional.get(sk.name)||[];
+      const sourceHtml=(automatic.length||conditional.length)?`<div class="skill-source-tags">${sources.map(x=>`<span class="skill-source-tag">${esc(x)}</span>`).join('')}${conditional.map(x=>`<span class="skill-source-tag conditional">${esc(x)}</span>`).join('')}</div>`:`<select class="skill-source-select" data-skill-source="${esc(sk.name)}" ${meta.proficient?'':'disabled'}>${sourceOption('prole','Prole',meta.source)}${sourceOption('inicial','Inicial',meta.source)}${sourceOption('treino','Treino',meta.source)}${sourceOption('nivel-20','Nível 20',meta.source)}${sourceOption('nivel-40','Nível 40',meta.source)}${sourceOption('talento','Talento',meta.source)}${sourceOption('extras','Extras',meta.source)}</select>`;
+      return `<div class="skill-ledger-row ${trained?'trained':''} ${expert?'expert':''}"><div class="skill-row-main"><div class="skill-ledger-flags"><label class="skill-tiny-check ${trained?'active':''}" title="Perito"><input type="checkbox" data-skill-manual="${esc(sk.name)}" ${trained?'checked':''} ${automatic.length?'disabled':''}><span>P</span></label><label class="skill-tiny-check expert ${expert?'active':''}" title="Expertise"><input type="checkbox" data-skill-expertise="${esc(sk.name)}" ${expert?'checked':''} ${trained?'':'disabled'} ${autoExpert?'disabled':''}><span>E</span></label></div><span class="skill-attr-badge">${attrAbbr(sk.attr)}</span><div class="skill-ledger-name"><b>${esc(sk.name)}</b>${fixed?`<small>kit ${signed(fixed)}</small>`:''}</div><strong class="skill-roll-value">${signed(skillValue(sk.name))}</strong><details class="skill-settings"><summary title="Editar origem">•••</summary><div class="skill-settings-body">${sourceHtml}<input class="skill-detail-inline" data-skill-detail="${esc(sk.name)}" value="${esc(meta.detail||'')}" placeholder="Detalhe / origem"></div></details></div></div>`;
+    }).join('')}</div><p class="muted mini-help">P = Perito · E = Expertise. Os dois quadrados permanecem independentes; fontes automáticas ficam travadas para evitar apagar benefícios do kit.</p></article>`;
   }
   function renderSkillTrainingCard(){
     const chosen=new Set([...state.initialSkills,...divineGranted(),...talentGrantedSkills(),...Object.values(state.levelSkillChoices||{}).filter(Boolean),...state.skillTrainings.map(t=>t.name)]),available=skills.filter(s=>!chosen.has(s.name));
@@ -917,48 +1036,75 @@
   function coreSubStakeKey(a,variantId,subId){return `${abilityKey(a)}:core:${variantId}:${subId}`}
   function coreStakeValue(key){return clamp(Number(state.abilityStakes?.[key]||0),0,30)}
   function coreTierCurrent(tier,value){const min=Number(tier?.min??0),max=tier?.max==null?Infinity:Number(tier.max);return value>=min&&value<=max}
+
+function renderStructuredText(text,cls=''){
+  const raw=String(text||'').trim();if(!raw)return '';
+  const pieces=raw.split(/\n{2,}|\s+·\s+/).map(x=>x.trim()).filter(Boolean);
+  return pieces.map(x=>`<p${cls?` class="${cls}"`:''}>${esc(x)}</p>`).join('');
+}
   function renderCoreTierRows(tiers,key){
     const value=coreStakeValue(key);
     return `<div class="core-subtiers">${(tiers||[]).map(t=>`<div class="core-subtier ${coreTierCurrent(t,value)?'current':''}"><b>${esc(t.label||t.id||'Estaca')}</b><p>${esc(t.text||'')}</p></div>`).join('')}</div><div class="core-substake"><div class="row between"><span>Estacas</span><b>${value}/30</b></div><input type="range" min="0" max="30" value="${value}" data-core-stakes="${esc(key)}"><div class="stake-quick"><button data-core-stake-set="${esc(key)}:0">0</button><button data-core-stake-set="${esc(key)}:16">16</button><button data-core-stake-set="${esc(key)}:30">30</button></div></div>`;
   }
-  function renderCoreVariant(a,v,open=false){
-    const stats=v.stats?Object.entries(v.stats).map(([k,val])=>`<span><small>${k==='hpFormula'?'HP':k==='defense'?'DEFESA':esc(k)}</small><b>${esc(val)}</b></span>`).join(''):'';
-    const traits=(v.traits||[]).length?`<ul class="core-traits">${v.traits.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'';
-    const abilities=(v.abilities||[]).map(sub=>{const key=coreSubStakeKey(a,v.id||v.name,sub.id||sub.name);return `<section class="core-subability"><div class="core-subability-head"><h5>${esc(sub.name)}</h5>${(sub.tiers||[]).length?'<span>progressão própria</span>':''}</div>${sub.description?`<p>${esc(sub.description)}</p>`:''}${(sub.tiers||[]).length?renderCoreTierRows(sub.tiers,key):''}</section>`}).join('');
-    return `<details class="core-variant" ${open?'open':''}><summary><div class="core-variant-summary-copy"><h4>${esc(v.name)}</h4>${v.description?`<p>${esc(v.description)}</p>`:''}</div>${stats?`<div class="core-stat-pills">${stats}</div>`:''}<span class="core-variant-toggle">⌄</span></summary><div class="core-variant-body">${traits}${abilities?`<div class="core-variant-abilities">${abilities}</div>`:''}</div></details>`;
-  }
-  function renderCoreBlocks(a){
-    const blocks=Array.isArray(a.coreBlocks)?a.coreBlocks:[];
-    if(!blocks.length)return '';
-    return `<div class="core-blocks">${blocks.map(b=>{
-      if(b.type==='description'){if(String(b.text||'').trim()===String(a.summary||'').trim())return '';return `<p class="core-description">${esc(b.text||'')}</p>`;}
-      if(b.type==='note')return `<div class="core-note">${esc(b.text||'')}</div>`;
-      if(b.type==='tiers')return a.tiers?'':`<div class="core-subtiers plain">${(b.items||[]).map(t=>`<div class="core-subtier"><b>${esc(t.label||t.id)}</b><p>${esc(t.text||'')}</p></div>`).join('')}</div>`;
-      if(b.type==='variants')return `<div class="core-complex"><div class="core-block-label">${esc(b.label||'Variantes')}</div><div class="core-variant-grid">${(b.items||[]).map((v,i)=>renderCoreVariant(a,v,i===0)).join('')}</div></div>`;
-      if(b.type==='options')return `<div class="core-complex"><div class="core-block-label">${esc(b.label||'Opções')}</div><div class="core-option-grid">${(b.items||[]).map(o=>`<article><h4>${esc(o.name)}</h4>${o.base?`<p>${esc(o.base)}</p>`:''}${o.upgrade?`<small>${esc(o.upgrade)}</small>`:''}</article>`).join('')}</div></div>`;
-      return '';
-    }).join('')}</div>`;
-  }
 
-  function renderAbility(a){
-    const maxSt=magicAbilityStakeMax(a),rawSt=stakesOf(a),st=Math.min(rawSt,maxSt),locked=a.type==='active'&&state.level<a.level,cost=a.type==='active'?a.cost:null;
-    const tiers=a.tiers?[['low','0–15',a.tiers.low,st<=15],['mid','16–29',a.tiers.mid,st>=16&&st<=29],['high','30+',a.tiers.high,st>=30]].filter(x=>x[2]):[];
-    const complex=(a.coreBlocks||[]).some(b=>b.type==='variants'||b.type==='options');
-    const summary=String(a.summary||'');
-    const summaryHtml=complex&&summary.length>260?`<details class="ability-lore"><summary>Descrição da habilidade</summary><p>${esc(summary)}</p></details>`:`<p class="ability-summary">${esc(summary)}</p>`;
-    return `<article class="ability-card ${locked?'ability-locked':''} ${a.type==='active'?'active-ability':'passive-ability'} ${a.isExtra?'extra-ability':''} ${complex?'ability-complex':''}"><div class="ability-head"><div><div class="row ability-title-row"><b>${esc(a.name)}</b>${a.sourceGodId&&a.sourceGodId!==state.godId?`<span class="pill warn">${godById(a.sourceGodId)?.name||'Legado'}</span>`:''}</div><div class="ability-meta">${a.type==='active'?(a.isExtra?'<span class="meta-extra">Extra</span>':`<span>Nv ${a.level}</span><span>${cost} EN</span>`):'<span>Passiva</span>'}${state.magic?.enabled&&maxSt===29?'<span>mágico · até 29</span>':''}</div></div></div>${summaryHtml}${renderCoreBlocks(a)}${tiers.length?`<div class="ability-tier-list">${tiers.map(([key,label,text,current])=>`<div class="ability-tier ${current?'current':''}" data-tier="${key}"><b>${label}</b><p>${esc(text)}</p></div>`).join('')}</div><div class="stake-compact"><div class="row between"><span>Estacas</span><b>${st}/${maxSt}</b></div><input type="range" min="0" max="${maxSt}" value="${st}" data-stakes="${abilityKey(a)}" data-stake-max="${maxSt}"><div class="stake-quick"><button data-stake-set="${abilityKey(a)}:0" data-stake-limit="${maxSt}">0</button><button data-stake-set="${abilityKey(a)}:16" data-stake-limit="${maxSt}">16</button>${maxSt>=30?`<button data-stake-set="${abilityKey(a)}:30" data-stake-limit="${maxSt}">30</button>`:''}</div></div>`:`${!complex?`<div class="ability-tier-list single"><div class="ability-tier current"><p>${esc(a.extra||'Sem estacas mecânicas cadastradas.')}</p></div></div>`:''}`}${a.extra&&a.tiers?`<details class="ability-notes"><summary>Observações</summary><p>${esc(a.extra)}</p></details>`:''}${a.type==='active'?`<div class="ability-actions">${a.isExtra?'<span class="pill warn">Habilidade extra</span>':(locked?`<span class="locked">Bloqueada até o nível ${a.level}</span>`:`<button class="primary" data-use-ability="${abilityKey(a)}" data-cost="${cost}">Usar · −${cost} EN</button>`)}${a.isExtra?'':`<small>EN atual ${state.currentEnergy}</small>`}</div>`:''}</article>`;
-  }
-  function applyManualResource(kind,input){
-    const delta=Number(input?.value);if(!Number.isFinite(delta)||delta===0){notify('Digite um ajuste, por exemplo -37 ou 20.');return}
-    if(kind==='hp')setHp(state.currentHp+delta);else if(kind==='en')setEnergy(state.currentEnergy+delta);else if(kind==='san')setSanity(state.currentSanity+delta);else if(kind==='resource')state.resourceCurrent=clamp((state.resourceCurrent||0)+delta,0,resourceMax());
-    if(input)input.value='';save();renderSheet();const label=kind==='hp'?'HP':kind==='en'?'Energia':kind==='san'?'Sanidade':god()?.resource?.name||'Recurso';notify(`${label} ${delta>0?'+':''}${delta}.`);
-  }
+function renderCoreVariant(a,v,open=false){
+  const title=v.name||v.label||'Opção';
+  const stats=v.stats?Object.entries(v.stats).map(([k,val])=>`<span><small>${k==='hpFormula'?'HP':k==='defense'?'DEFESA':esc(k)}</small><b>${esc(val)}</b></span>`).join(''):'';
+  const traits=(v.traits||[]).length?`<ul class="core-traits">${v.traits.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'';
+  const abilities=(v.abilities||[]).map(sub=>{const key=coreSubStakeKey(a,v.id||title,sub.id||sub.name);return `<section class="core-subability"><div class="core-subability-head"><h5>${esc(sub.name)}</h5>${(sub.tiers||[]).length?'<span>progressão própria</span>':''}</div>${sub.description?renderStructuredText(sub.description):''}${(sub.tiers||[]).length?renderCoreTierRows(sub.tiers,key):''}</section>`}).join('');
+  const ownTiers=(v.tiers||[]).length?`<div class="core-subtiers plain">${(v.tiers||[]).map(t=>`<div class="core-subtier"><b>${esc(t.label||t.id)}</b>${renderStructuredText(t.text||'')}</div>`).join('')}</div>`:'';
+  return `<details class="core-variant" ${open?'open':''}><summary><div class="core-variant-summary-copy"><h4>${esc(title)}</h4>${v.description?renderStructuredText(v.description):''}</div>${stats?`<div class="core-stat-pills">${stats}</div>`:''}<span class="core-variant-toggle">⌄</span></summary><div class="core-variant-body">${traits}${ownTiers}${abilities?`<div class="core-variant-abilities">${abilities}</div>`:''}</div></details>`;
+}
 
+function renderCoreBlocks(a){
+  const blocks=Array.isArray(a.coreBlocks)?a.coreBlocks:[];
+  if(!blocks.length)return '';
+  return `<div class="core-blocks">${blocks.map(b=>{
+    if(b.type==='description'){if(String(b.text||'').trim()===String(a.summary||'').trim())return '';return `<div class="core-description">${renderStructuredText(b.text||'')}</div>`;}
+    if(b.type==='note')return `<div class="core-note">${renderStructuredText(b.text||'')}</div>`;
+    if(b.type==='tiers')return a.tiers?'':`<div class="core-subtiers plain">${(b.items||[]).map(t=>`<div class="core-subtier"><b>${esc(t.label||t.id)}</b>${renderStructuredText(t.text||'')}</div>`).join('')}</div>`;
+    if(b.type==='variants')return `<div class="core-complex"><div class="core-block-label">${esc(b.label||'Variantes')}</div><div class="core-variant-grid">${(b.items||[]).map((v,i)=>renderCoreVariant(a,v,i===0)).join('')}</div></div>`;
+    if(b.type==='options')return `<div class="core-complex"><div class="core-block-label">${esc(b.label||'Opções')}</div><div class="core-option-grid">${(b.items||[]).map(o=>`<article><h4>${esc(o.name||o.label||o.id||'Opção')}</h4>${o.base?renderStructuredText(o.base):o.text?renderStructuredText(o.text):''}${o.upgrade?`<small>${esc(o.upgrade)}</small>`:''}</article>`).join('')}</div></div>`;
+    return '';
+  }).join('')}</div>`;
+}
+
+function abilityUsageRule(a){
+  const blocks=(a.coreBlocks||[]).map(b=>b.text||'').join(' '),tiers=a.tiers?Object.values(a.tiers).join(' '):'',text=`${a.summary||''} ${a.extra||''} ${tiers} ${blocks}`.replace(/\s+/g,' ');
+  const words={uma:1,um:1,duas:2,dois:2,três:3,tres:3,quatro:4,cinco:5};
+  const match=text.match(/(?:até\s+)?(\d+|uma|um|duas|dois|três|tres|quatro|cinco)\s+vez(?:es)?\s+por\s+(cena|combate|descanso\s+curto|descanso\s+longo)/i);
+  if(!match)return null;
+  const max=Number(match[1])||words[match[1].toLowerCase()]||1,period=match[2].toLowerCase().replace(/\s+/g,' ');
+  return {max,period,label:period==='cena'?'cena':period==='combate'?'combate':period};
+}
+function abilityUsageKey(a){return abilityKey(a)}
+function abilityUses(a){return Math.max(0,Number(state.abilityUses?.[abilityUsageKey(a)])||0)}
+function renderAbilityUsage(a){
+  const rule=abilityUsageRule(a);if(!rule)return '';
+  const used=Math.min(abilityUses(a),rule.max);
+  return `<div class="ability-usage"><span>Usos · ${esc(rule.label)}</span><div><button type="button" data-ability-use-adjust="${esc(abilityUsageKey(a))}:-1">−</button><strong>${used}/${rule.max}</strong><button type="button" data-ability-use-adjust="${esc(abilityUsageKey(a))}:1">+</button><button type="button" class="ghost" data-reset-ability-use="${esc(abilityUsageKey(a))}">reset</button></div></div>`;
+}
+
+function renderAbility(a){
+  const maxSt=magicAbilityStakeMax(a),rawSt=stakesOf(a),st=Math.min(rawSt,maxSt),locked=a.type==='active'&&state.level<a.level,cost=a.type==='active'?a.cost:null;
+  const tiers=a.tiers?[['low','0–15',a.tiers.low,st<=15],['mid','16–29',a.tiers.mid,st>=16&&st<=29],['high','30+',a.tiers.high,st>=30]].filter(x=>x[2]):[];
+  const complex=(a.coreBlocks||[]).some(b=>b.type==='variants'||b.type==='options'),hasCoreNote=(a.coreBlocks||[]).some(b=>b.type==='note');
+  const summary=String(a.summary||'');
+  const summaryHtml=complex&&summary.length>260?`<details class="ability-lore"><summary>Descrição da habilidade</summary>${renderStructuredText(summary)}</details>`:`<div class="ability-summary">${renderStructuredText(summary)}</div>`;
+  const simpleFallback=!tiers.length&&!complex&&!hasCoreNote&&a.extra?`<div class="ability-tier-list single"><div class="ability-tier current">${renderStructuredText(a.extra)}</div></div>`:'';
+  return `<article class="ability-card ${locked?'ability-locked':''} ${a.type==='active'?'active-ability':'passive-ability'} ${a.isExtra?'extra-ability':''} ${complex?'ability-complex':''}"><div class="ability-head"><div><div class="row ability-title-row"><b>${esc(a.name)}</b>${a.sourceGodId&&a.sourceGodId!==state.godId?`<span class="pill warn">${godById(a.sourceGodId)?.name||'Legado'}</span>`:''}</div><div class="ability-meta">${a.type==='active'?(a.isExtra?'<span class="meta-extra">Extra</span>':`<span>Nv ${a.level}</span><span>${cost} EN</span>`):'<span>Passiva</span>'}${state.magic?.enabled&&maxSt===29?'<span>mágico · até 29</span>':''}</div></div></div>${summaryHtml}${renderCoreBlocks(a)}${renderAbilityChoices(a)}${renderAbilityResources(a)}${renderAbilityUsage(a)}${tiers.length?`<div class="ability-tier-list">${tiers.map(([key,label,text,current])=>`<div class="ability-tier ${current?'current':''}" data-tier="${key}"><b>${label}</b>${renderStructuredText(text)}</div>`).join('')}</div><div class="stake-compact"><div class="row between"><span>Estacas</span><b>${st}/${maxSt}</b></div><input type="range" min="0" max="${maxSt}" value="${st}" data-stakes="${abilityKey(a)}" data-stake-max="${maxSt}"><div class="stake-quick"><button data-stake-set="${abilityKey(a)}:0" data-stake-limit="${maxSt}">0</button><button data-stake-set="${abilityKey(a)}:16" data-stake-limit="${maxSt}">16</button>${maxSt>=30?`<button data-stake-set="${abilityKey(a)}:30" data-stake-limit="${maxSt}">30</button>`:''}</div></div>`:simpleFallback}${a.extra&&a.tiers&&!hasCoreNote?`<details class="ability-notes"><summary>Observações</summary>${renderStructuredText(a.extra)}</details>`:''}${a.type==='active'?`<div class="ability-actions">${a.isExtra?'<span class="pill warn">Habilidade extra</span>':(locked?`<span class="locked">Bloqueada até o nível ${a.level}</span>`:`<button class="primary" data-use-ability="${abilityKey(a)}" data-cost="${cost}">Usar · −${cost} EN</button>`)}${a.isExtra?'':`<small>EN atual ${state.currentEnergy}</small>`}</div>`:''}</article>`;
+}
+
+function applyManualResource(kind,input){
+  const delta=Number(input?.value);if(!Number.isFinite(delta)||delta===0){notify('Digite um ajuste, por exemplo -37 ou 20.');return}
+  if(kind==='hp')setHp(state.currentHp+delta);else if(kind==='en')setEnergy(state.currentEnergy+delta);else if(kind==='san')setSanity(state.currentSanity+delta);else return;
+  if(input)input.value='';save();renderSheet();const label=kind==='hp'?'HP':kind==='en'?'Energia':'Sanidade';notify(`${label} ${delta>0?'+':''}${delta}.`);
+}
   function bindSheet(){
+    bindThemeControls();
     document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.activeTab=b.dataset.tab;save();renderSheet()});
     document.querySelectorAll('[data-go-tab]').forEach(b=>b.onclick=()=>{state.activeTab=b.dataset.goTab;save();renderSheet()});
     document.querySelectorAll('[data-edit-equipment]').forEach(b=>b.onclick=()=>{const target=b.dataset.editEquipment;state.activeTab='inventory';save();renderSheet();setTimeout(()=>{let el=null;if(target==='armor')el=byId('armorEditor');else if(target==='shield')el=byId('shieldEditor');else if(target.startsWith('weapon:'))el=document.querySelector(`[data-weapon-card="${target.slice(7)}"]`);else if(target.startsWith('item:'))el=document.querySelector(`[data-item-card="${target.slice(5)}"]`);if(el){el.classList.add('edit-flash');el.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>el.classList.remove('edit-flash'),1400)}},0)});
-    document.querySelectorAll('[data-consume-item]').forEach(b=>b.onclick=()=>consumeInventoryItem(b.dataset.consumeItem));
     const bindLevelChange = el => { if(!el) return; el.onchange=e=>{const old=state.level;state.level=clamp(parseInt(e.target.value||1,10),1,100);while(spentLevelPoints()>earnedLevelPoints()){const k=Object.keys(state.levelAttributes).find(x=>state.levelAttributes[x]>0);if(!k)break;state.levelAttributes[k]--}syncCurrentCaps();save();renderSheet();if(state.level!==old)notify('Nível atualizado.')}; };
     bindLevelChange(byId('levelInput'));
     bindLevelChange(byId('levelOrbInput'));
@@ -968,6 +1114,19 @@
     document.querySelectorAll('[data-base-inc]').forEach(b=>b.onclick=()=>changeBase(b.dataset.baseInc,1));document.querySelectorAll('[data-base-dec]').forEach(b=>b.onclick=()=>changeBase(b.dataset.baseDec,-1));
     document.querySelectorAll('[data-lvl-inc]').forEach(b=>b.onclick=()=>changeLevelAttr(b.dataset.lvlInc,1));document.querySelectorAll('[data-lvl-dec]').forEach(b=>b.onclick=()=>changeLevelAttr(b.dataset.lvlDec,-1));
     document.querySelectorAll('[data-resource]').forEach(b=>b.onclick=()=>{state.resourceCurrent=clamp((state.resourceCurrent||0)+Number(b.dataset.resource),0,resourceMax());save();renderSheet()});
+
+document.querySelectorAll('[data-divine-resource-apply]').forEach(b=>b.onclick=()=>{const r=resourceByKey(b.dataset.divineResourceApply),input=byId(b.dataset.manualInput),delta=Number(input?.value);if(!r||!Number.isFinite(delta)||delta===0){notify('Digite um ajuste válido para o recurso.');return}setResourceValue(r,resourceValue(r)+delta);if(input)input.value='';save();renderSheet()});
+document.querySelectorAll('[data-divine-resource-adjust]').forEach(b=>b.onclick=()=>{const raw=b.dataset.divineResourceAdjust||'',idx=raw.lastIndexOf(':'),key=raw.slice(0,idx),delta=Number(raw.slice(idx+1)),r=resourceByKey(key);if(!r)return;setResourceValue(r,resourceValue(r)+delta);save();renderSheet()});
+document.querySelectorAll('[data-divine-resource-input]').forEach(input=>input.onkeydown=e=>{if(e.key!=='Enter')return;e.preventDefault();const r=resourceByKey(input.dataset.divineResourceInput),delta=Number(input.value);if(!r||!Number.isFinite(delta)||delta===0)return;setResourceValue(r,resourceValue(r)+delta);input.value='';save();renderSheet()});
+document.querySelectorAll('[data-target-resource-add]').forEach(b=>b.onclick=()=>{const key=b.dataset.targetResourceAdd;if(!state.targetResources[key])state.targetResources[key]=[];state.targetResources[key].push({id:uid('target'),name:'Novo alvo',current:0});save();renderSheet()});
+document.querySelectorAll('[data-target-resource-name]').forEach(el=>el.oninput=()=>{const raw=el.dataset.targetResourceName||'',idx=raw.lastIndexOf(':'),key=raw.slice(0,idx),id=raw.slice(idx+1),row=(state.targetResources?.[key]||[]).find(x=>x.id===id);if(row){row.name=el.value;save()}});
+document.querySelectorAll('[data-target-resource-adjust]').forEach(b=>b.onclick=()=>{const raw=b.dataset.targetResourceAdjust||'',last=raw.lastIndexOf(':'),prev=raw.lastIndexOf(':',last-1),key=raw.slice(0,prev),id=raw.slice(prev+1,last),delta=Number(raw.slice(last+1)),r=resourceByKey(key),row=(state.targetResources?.[key]||[]).find(x=>x.id===id);if(!r||!row)return;row.current=clamp((Number(row.current)||0)+delta,0,resourceMaxFor(r));save();renderSheet()});
+document.querySelectorAll('[data-target-resource-remove]').forEach(b=>b.onclick=()=>{const raw=b.dataset.targetResourceRemove||'',idx=raw.lastIndexOf(':'),key=raw.slice(0,idx),id=raw.slice(idx+1);state.targetResources[key]=(state.targetResources?.[key]||[]).filter(x=>x.id!==id);save();renderSheet()});
+document.querySelectorAll('[data-target-resource-clear]').forEach(b=>b.onclick=()=>{const key=b.dataset.targetResourceClear;if(!(state.targetResources?.[key]||[]).length)return;if(!confirm('Limpar todos os alvos acompanhados neste recurso?'))return;state.targetResources[key]=[];save();renderSheet()});
+document.querySelectorAll('[data-ability-choice]').forEach(el=>el.onchange=()=>{const [aKey,choiceId,optId]=String(el.dataset.abilityChoice||'').split('|'),set=effectiveAbilitySet(),all=[...(set?.passives||[]),...(set?.actives||[])],a=all.find(x=>abilityKey(x)===aKey),choice=abilityChoiceDefs(a).find(c=>c.id===choiceId);if(!a||!choice)return;const key=choiceStateKey(a,choice),current=Array.isArray(state.abilityChoices[key])?[...state.abilityChoices[key]]:[],limit=choiceLimit(a,choice),has=current.includes(optId);if(el.checked&&!has){if(current.length>=limit){notify(`Você já escolheu ${limit} opção(ões) nesta habilidade.`);renderSheet();return}current.push(optId)}else if(!el.checked&&has){if(choice.allowReplace===false&&current.length){const ok=confirm('Esta escolha é permanente pelas regras. Remover manualmente mesmo assim?');if(!ok){renderSheet();return}}current.splice(current.indexOf(optId),1)}state.abilityChoices[key]=current.slice(0,limit);save();renderSheet()});
+document.querySelectorAll('[data-choice-detail]').forEach(el=>el.oninput=()=>{state.choiceDetails[el.dataset.choiceDetail]=el.value;save()});
+document.querySelectorAll('[data-ability-use-adjust]').forEach(b=>b.onclick=()=>{const raw=b.dataset.abilityUseAdjust||'',idx=raw.lastIndexOf(':'),key=raw.slice(0,idx),delta=Number(raw.slice(idx+1)),set=effectiveAbilitySet(),a=[...(set?.passives||[]),...(set?.actives||[])].find(x=>abilityKey(x)===key),rule=a?abilityUsageRule(a):null;if(!rule)return;state.abilityUses[key]=clamp((Number(state.abilityUses[key])||0)+delta,0,rule.max);save();renderSheet()});
+document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{state.abilityUses[b.dataset.resetAbilityUse]=0;save();renderSheet()});
     document.querySelectorAll('[data-hp]').forEach(b=>b.onclick=()=>{setHp(state.currentHp+Number(b.dataset.hp));save();renderSheet()});
     document.querySelectorAll('[data-en]').forEach(b=>b.onclick=()=>{setEnergy(state.currentEnergy+Number(b.dataset.en));save();renderSheet()});
     document.querySelectorAll('[data-san]').forEach(b=>b.onclick=()=>{setSanity(state.currentSanity+Number(b.dataset.san));save();renderSheet()});
@@ -978,7 +1137,7 @@
     document.querySelectorAll('[data-core-stakes]').forEach(input=>input.onchange=()=>{state.abilityStakes[input.dataset.coreStakes]=clamp(Number(input.value),0,30);save();renderSheet()});
     document.querySelectorAll('[data-core-stake-set]').forEach(btn=>btn.onclick=()=>{const raw=btn.dataset.coreStakeSet||'',idx=raw.lastIndexOf(':'),key=raw.slice(0,idx),value=Number(raw.slice(idx+1));if(!key)return;state.abilityStakes[key]=clamp(value,0,30);save();renderSheet()});
     document.querySelectorAll('[data-stake-set]').forEach(b=>b.onclick=()=>{const idx=b.dataset.stakeSet.lastIndexOf(':'),key=b.dataset.stakeSet.slice(0,idx),v=Number(b.dataset.stakeSet.slice(idx+1)),limit=Number(b.dataset.stakeLimit)||30;state.abilityStakes[key]=clamp(v,0,limit);save();renderSheet()});
-    document.querySelectorAll('[data-use-ability]').forEach(b=>b.onclick=()=>useAbility(Number(b.dataset.cost)));
+    document.querySelectorAll('[data-use-ability]').forEach(b=>b.onclick=()=>useAbility(b.dataset.useAbility,Number(b.dataset.cost)));
     document.querySelectorAll('[data-condition]').forEach(c=>c.onchange=()=>toggleCondition(c.dataset.condition,c.checked));
     document.querySelectorAll('[data-remove-condition]').forEach(b=>b.onclick=()=>toggleCondition(b.dataset.removeCondition,false));
     const addConditionBtn=byId('addConditionBtn'); if(addConditionBtn) addConditionBtn.onclick=()=>{const sel=byId('conditionSelect'); if(sel&&sel.value) toggleCondition(sel.value,true)};
@@ -989,8 +1148,9 @@
     const railDef=byId('railDefenseAdjust');if(railDef)railDef.onchange=e=>{state.tempMods.defense=Number(e.target.value)||0;save();renderSheet()};
     const tdr=byId('tempReduction');if(tdr)tdr.onchange=e=>{state.tempMods.damageReduction=Number(e.target.value)||0;save();renderSheet()};
     const pBtn=byId('uploadPortraitBtn'); const pInput=byId('portraitUploadInput'); if(pBtn&&pInput){pBtn.onclick=()=>pInput.click(); pInput.onchange=e=>readImageToHistory(e.target.files?.[0],'portraitUrl')}
+    const bBtn=byId('uploadBannerBtn'); const bInput=byId('bannerUploadInput'); if(bBtn&&bInput){bBtn.onclick=()=>bInput.click(); bInput.onchange=e=>readImageToHistory(e.target.files?.[0],'bannerUrl')}
     const heroBtn=byId('heroPortraitUploadBtn'); if(heroBtn&&pInput){heroBtn.onclick=()=>pInput.click()}
-    const short=byId('shortRest');if(short)short.onclick=shortRest;const long=byId('longRest');if(long)long.onclick=longRest;
+    const short=byId('shortRest');if(short)short.onclick=shortRest;const long=byId('longRest');if(long)long.onclick=longRest;const resetUses=byId('resetAbilityUses');if(resetUses)resetUses.onclick=()=>{state.abilityUses={};save();renderSheet();notify('Contadores de uso da cena/combate resetados.')}
     const rd=byId('rollDefense');if(rd)rd.onclick=rollDefense;const ri=byId('rollInitiative');if(ri)ri.onclick=rollInitiative;
 
     document.querySelectorAll('[data-attr-extra]').forEach(el=>el.onchange=()=>{state.attributeExtras[el.dataset.attrExtra]=clamp(Number(el.value)||0,-10,10);syncCurrentCaps();save();renderSheet()});
@@ -1023,11 +1183,10 @@
     document.querySelectorAll('[data-shield-res]').forEach(b=>b.onclick=()=>{const m=material(state.shield.material);if(m.unbreakable)return;state.shield.resistanceCurrent=clamp((Number(state.shield.resistanceCurrent)||0)+Number(b.dataset.shieldRes),0,m.resistance);save();renderSheet()});
   }
   function bindWeapons(){
-    const addWeapon=byId('addWeapon');if(addWeapon)addWeapon.onclick=()=>{const m=material('ferro-aco');state.weapons.push({id:uid('weapon'),name:'Nova arma',type:'corpo-a-corpo',attr:'for',material:'ferro-aco',stakes:0,resistanceCurrent:m.resistance,attackExtra:0,damageExtra:0,equipped:true,imageUrl:'',isHeritage:false,notes:''});save();renderSheet()};
+    byId('addWeapon').onclick=()=>{const m=material('ferro-aco');state.weapons.push({id:uid('weapon'),name:'Nova arma',type:'corpo-a-corpo',attr:'for',material:'ferro-aco',stakes:0,resistanceCurrent:m.resistance,attackExtra:0,damageExtra:0,equipped:true,imageUrl:''});save();renderSheet()};
     document.querySelectorAll('[data-remove-weapon]').forEach(b=>b.onclick=()=>{state.weapons=state.weapons.filter(w=>w.id!==b.dataset.removeWeapon);save();renderSheet()});
     document.querySelectorAll('[data-weapon-equipped]').forEach(el=>el.onchange=()=>{const w=state.weapons.find(x=>x.id===el.dataset.weaponEquipped);if(!w)return;w.equipped=el.checked;save();renderSheet()});
-    document.querySelectorAll('[data-weapon-heritage]').forEach(el=>el.onchange=()=>{const w=state.weapons.find(x=>x.id===el.dataset.weaponHeritage);if(!w)return;w.isHeritage=el.checked;save();renderSheet()});
-    document.querySelectorAll('[data-weapon-field]').forEach(el=>{const handler=()=>{const [id,field]=el.dataset.weaponField.split(':'),w=state.weapons.find(x=>x.id===id);if(!w)return;let value=el.value;if(['stakes','attackExtra','damageExtra'].includes(field))value=Number(value)||0;if(field==='stakes')value=clamp(value,0,30);w[field]=value;if(field==='material'){const m=material(value);w.resistanceCurrent=m.unbreakable?null:m.resistance}save();if(field!=='notes'&&field!=='name')renderSheet()};el.onchange=handler;if(el.tagName==='TEXTAREA'||(el.dataset.weaponField||'').endsWith(':name'))el.oninput=handler});
+    document.querySelectorAll('[data-weapon-field]').forEach(el=>el.onchange=()=>{const [id,field]=el.dataset.weaponField.split(':'),w=state.weapons.find(x=>x.id===id);if(!w)return;let value=el.value;if(['stakes','attackExtra','damageExtra'].includes(field))value=Number(value)||0;if(field==='stakes')value=clamp(value,0,30);w[field]=value;if(field==='material'){const m=material(value);w.resistanceCurrent=m.unbreakable?null:m.resistance}save();renderSheet()});
     document.querySelectorAll('[data-upload-weapon-image]').forEach(b=>b.onclick=()=>{const w=state.weapons.find(x=>x.id===b.dataset.uploadWeaponImage);if(!w)return;chooseStoredImage(url=>{w.imageUrl=url;save();renderSheet();notify('Imagem da arma atualizada.')})});
     document.querySelectorAll('[data-clear-weapon-image]').forEach(b=>b.onclick=()=>{const w=state.weapons.find(x=>x.id===b.dataset.clearWeaponImage);if(!w)return;w.imageUrl='';save();renderSheet()});
     document.querySelectorAll('[data-weapon-res]').forEach(b=>b.onclick=()=>{const idx=b.dataset.weaponRes.lastIndexOf(':'),id=b.dataset.weaponRes.slice(0,idx),delta=Number(b.dataset.weaponRes.slice(idx+1)),w=state.weapons.find(x=>x.id===id);if(!w)return;const m=material(w.material);if(m.unbreakable)return;w.resistanceCurrent=clamp((Number(w.resistanceCurrent)||0)+delta,0,m.resistance);save();renderSheet()});
@@ -1054,27 +1213,32 @@
     const nr=byId('narrativeRestore');if(nr)nr.onclick=()=>{state.death.dead=false;state.death.atZero=true;setHp(1);save();renderSheet();notify('Restaurado por intervenção narrativa.')};
   }
 
-  function useAbility(cost){if(state.currentEnergy<cost){notify('Energia insuficiente.');return}setEnergy(state.currentEnergy-cost);save();renderSheet();notify(`Habilidade usada: −${cost} EN.`)}
+
+function useAbility(key,cost){
+  const set=effectiveAbilitySet(),a=[...(set?.passives||[]),...(set?.actives||[])].find(x=>abilityKey(x)===key),rule=a?abilityUsageRule(a):null;
+  if(rule&&abilityUses(a)>=rule.max){notify(`Limite de ${rule.max} uso(s) por ${rule.label} atingido.`);return}
+  if(state.currentEnergy<cost){notify('Energia insuficiente.');return}
+  setEnergy(state.currentEnergy-cost);if(rule)state.abilityUses[abilityUsageKey(a)]=abilityUses(a)+1;save();renderSheet();notify(`Habilidade usada: −${cost} EN${rule?` · ${abilityUses(a)}/${rule.max} uso(s)`:''}.`)
+}
   function changeLevelAttr(k,d){if(d>0){if(remainingLevelPoints()<=0||ordinaryAttrRaw(k)>=5)return;state.levelAttributes[k]++}else{if(state.levelAttributes[k]<=0)return;state.levelAttributes[k]--}syncCurrentCaps();save();renderSheet()}
   function readImageToHistory(file,key){if(!file)return;const reader=new FileReader();reader.onload=()=>{state.history[key]=String(reader.result||'');save();renderSheet();notify(key==='portraitUrl'?'Retrato atualizado.':'Banner atualizado.')};reader.readAsDataURL(file)}
   function chooseStoredImage(onReady){
     const input=document.createElement('input');input.type='file';input.accept='image/*';
     input.onchange=()=>{const file=input.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{const src=String(reader.result||'');const img=new Image();img.onload=()=>{try{const max=1000,scale=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round((img.naturalWidth||img.width)*scale));canvas.height=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);const compact=canvas.toDataURL('image/webp',.82);onReady(compact&&compact!=='data:,'?compact:src)}catch(err){onReady(src)}};img.onerror=()=>onReady(src);img.src=src};reader.readAsDataURL(file)};input.click();
   }
-  function consumeInventoryItem(id){
-    const inv=state.inventory||defaultInventory(),it=inv.items.find(x=>x.id===id);if(!it||it.category!=='consumivel')return;const qty=Math.max(0,Number(it.qty)||0);if(qty<=0)return;if(qty===1){inv.items=inv.items.filter(x=>x.id!==id);notify(`${it.name||'Consumível'} consumido e removido do inventário.`)}else{it.qty=qty-1;notify(`${it.name||'Consumível'} consumido · ${it.qty} restante(s).`)}save();render();
-  }
-  function bindShellChrome(){
-    const bannerBtn=byId('bannerBtn'),clear=byId('clearBannerBtn'),help=byId('helpBtn'),dialog=byId('helpDialog'),posInput=byId('bannerPositionInput'),scaleInput=byId('bannerScaleInput');
-    if(bannerBtn)bannerBtn.onclick=()=>chooseStoredImage(url=>{state.history.bannerUrl=url;state.history.bannerPositionY=50;state.history.bannerScale=100;save();syncShellChrome();render();notify('Banner atualizado.')});
-    if(clear)clear.onclick=()=>{state.history.bannerUrl='';state.history.bannerPositionY=50;state.history.bannerScale=100;save();syncShellChrome();render();notify('Banner removido.')};
-    if(help)help.onclick=()=>{if(dialog?.showModal)dialog.showModal();};
-    if(posInput)posInput.oninput=e=>{state.history.bannerPositionY=clamp(Number(e.target.value)||50,0,100);save();syncShellChrome();};
-    if(scaleInput)scaleInput.oninput=e=>{state.history.bannerScale=clamp(Number(e.target.value)||100,100,170);save();syncShellChrome();};
-  }
   function toggleCondition(name,on){if(on&&!state.conditions.includes(name))state.conditions.push(name);if(!on)state.conditions=state.conditions.filter(x=>x!==name);save();renderSheet()}
-  function shortRest(){if(state.death.dead){notify('Personagem morto não pode descansar.');return}if(state.currentHp===0){notify('Em 0 HP, estabilize e recupere 1 HP antes de descansar.');return}const hp=Number(system.rests?.short?.hp??25),en=Number(system.rests?.short?.energy??150);setHp(state.currentHp+hp);setEnergy(state.currentEnergy+en);save();renderSheet();notify(`Descanso curto: +${hp} HP e +${en} Energia.`)}
-  function longRest(){if(state.death.dead){notify('Personagem morto não pode descansar.');return}if(state.currentHp===0){notify('Em 0 HP, estabilize e recupere 1 HP antes de descansar.');return}setHp(hpMax());setEnergy(energyMax());if(state.magic?.enabled)state.magic.highCircleUsed={6:0,7:0,8:0,9:0};save();renderSheet();notify('Descanso longo: HP e Energia completos; usos mágicos altos restaurados.')}
+
+function shortRest(){
+  if(state.death.dead){notify('Personagem morto não pode descansar.');return}if(state.currentHp===0){notify('Em 0 HP, estabilize e recupere 1 HP antes de descansar.');return}
+  const hp=Number(system.rests?.short?.hp??25),en=Number(system.rests?.short?.energy??150);setHp(state.currentHp+hp);setEnergy(state.currentEnergy+en);
+  const set=effectiveAbilitySet();for(const a of [...(set?.passives||[]),...(set?.actives||[])]){const rule=abilityUsageRule(a);if(rule?.period==='descanso curto')state.abilityUses[abilityUsageKey(a)]=0}
+  save();renderSheet();notify(`Descanso curto: +${hp} HP e +${en} Energia.`)
+}
+
+function longRest(){
+  if(state.death.dead){notify('Personagem morto não pode descansar.');return}if(state.currentHp===0){notify('Em 0 HP, estabilize e recupere 1 HP antes de descansar.');return}
+  setHp(hpMax());setEnergy(energyMax());if(state.magic?.enabled)state.magic.highCircleUsed={6:0,7:0,8:0,9:0};state.abilityUses={};save();renderSheet();notify('Descanso longo: HP e Energia completos; usos limitados restaurados.')
+}
   function rollD20(label,modifier){const die=Math.floor(Math.random()*20)+1,total=die+modifier;state.lastRoll={label,die,modifier,total};save();renderSheet();notify(`${label}: ${total} (${die} no d20).`)}
   function rollDefense(){const f=fixedDefense();if(f!==null){state.lastRoll={label:'Defesa fixa',die:'—',modifier:0,total:f};save();renderSheet();notify(`Defesa fixa: ${f}.`);return}rollD20('Defesa',defenseBonus())}
   function rollInitiative(){rollD20('Iniciativa',initiativeBonus())}
@@ -1083,14 +1247,38 @@
   function addDeathFailures(n){if(state.death.dead||state.currentHp!==0)return;state.death.failures=clamp(state.death.failures+n,0,3);if(state.death.failures>=3)state.death.dead=true;save();renderSheet()}
   function signed(n){const v=Number(n)||0;return v>=0?`+${v}`:`−${Math.abs(v)}`}
 
-  function render(){syncShellChrome();creationView.classList.toggle('hidden',state.isCreated);sheetView.classList.toggle('hidden',!state.isCreated);if(state.isCreated)renderSheet();else renderCreation()}
+  function render(){creationView.classList.toggle('hidden',state.isCreated);sheetView.classList.toggle('hidden',!state.isCreated);if(state.isCreated)renderSheet();else renderCreation()}
+  function validTheme(theme){return ['standard','parchment','obsidian','emerald'].includes(theme)}
+  function currentTheme(){
+    const stateTheme=validTheme(state?.theme)?state.theme:'';
+    const stored=safeStorage.getItem(THEME_KEY)||'';
+    const dom=document.body?.dataset?.theme||'';
+    return stateTheme|| (validTheme(stored)?stored:'') || (validTheme(dom)?dom:'standard');
+  }
+  function applyTheme(theme,persist=true){
+    const next=validTheme(theme)?theme:'standard';
+    document.body.dataset.theme=next;
+    if(state)state.theme=next;
+    document.querySelectorAll('[data-theme-select],#themeSelect').forEach(select=>{if(select.value!==next)select.value=next});
+    const meta=document.querySelector('meta[name="theme-color"]');
+    const colors={standard:'#050505',parchment:'#e8ddd2',obsidian:'#091019',emerald:'#0d1511'};
+    if(meta)meta.setAttribute('content',colors[next]||colors.standard);
+    if(persist){safeStorage.setItem(THEME_KEY,next);save()}
+  }
+  function bindThemeControls(){
+    const controls=[...document.querySelectorAll('[data-theme-select],#themeSelect')];
+    controls.forEach(select=>{select.value=currentTheme();select.onchange=e=>{applyTheme(e.target.value,true);notify(`Tema: ${e.target.options[e.target.selectedIndex]?.text||e.target.value}.`)}});
+  }
   function byId(id){return document.getElementById(id)}
   function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
   function initials(name=''){const parts=String(name||'').trim().split(/\s+/).filter(Boolean);if(!parts.length)return 'XII';return (parts[0][0]||'').concat(parts.length>1?(parts[parts.length-1][0]||''):'').toUpperCase()}
 
   byId('exportBtn').onclick=()=>{save();const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`duodecima-${(state.name||'personagem').toLowerCase().replace(/[^a-z0-9]+/g,'-')}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
-  byId('importInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);const ver=Number(data.schemaVersion);if(!Number.isFinite(ver)||ver<1||ver>SCHEMA_VERSION)throw new Error('schema');state=migrate(data);syncCurrentCaps();save();render();notify('Ficha importada.')}catch(err){notify('Não foi possível importar este JSON.')}};reader.readAsText(f)};
-  byId('resetBtn').onclick=()=>{if(!confirm('Apagar a ficha local desta versão?'))return;safeStorage.removeItem(STORAGE_KEY);LEGACY_KEYS.forEach(k=>safeStorage.removeItem(k));state=defaultState();render();notify('Ficha resetada.')};
+  byId('importInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);const ver=Number(data.schemaVersion);if(!Number.isFinite(ver)||ver<1||ver>SCHEMA_VERSION)throw new Error('schema');state=migrate(data);syncCurrentCaps();applyTheme(state.theme||'standard',false);save();render();bindThemeControls();notify('Ficha importada.')}catch(err){notify('Não foi possível importar este JSON.')}};reader.readAsText(f)};
+  byId('resetBtn').onclick=()=>{if(!confirm('Apagar a ficha local desta versão?'))return;const theme=currentTheme();safeStorage.removeItem(STORAGE_KEY);LEGACY_KEYS.forEach(k=>safeStorage.removeItem(k));state=defaultState();state.theme=theme;applyTheme(theme,false);render();bindThemeControls();notify('Ficha resetada.')};
 
-  bindShellChrome();load();render();
+  load();
+  applyTheme(state.theme||currentTheme(),false);
+  bindThemeControls();
+  render();
 })();

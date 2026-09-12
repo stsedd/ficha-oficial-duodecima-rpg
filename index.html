@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Character Archive — Legio XII Fulminata · v5.6.1</title>
-  <link rel="stylesheet" href="styles-v56.css?v=5.6.1">
+  <title>Character Archive — Legio XII Fulminata · v5.7</title>
+  <link rel="stylesheet" href="styles-v57.css?v=5.7.0">
 </head>
 <body data-theme="standard">
   <main class="shell">
@@ -20,14 +20,14 @@
       <div class="actions compact-actions">
         <label class="theme-picker small-btn" title="Tema visual da ficha">
           <span>Tema</span>
-          <select id="themeSelect" aria-label="Tema visual da ficha">
+          <select id="themeSelect" data-theme-select aria-label="Tema visual da ficha">
             <option value="standard">Legio XII</option>
             <option value="parchment">Pergaminho</option>
             <option value="obsidian">Obsidiana</option>
             <option value="emerald">Loureiro</option>
           </select>
         </label>
-        <div id="coreStatus" class="core-status loading" title="Sincronizando regras"><i></i><span>CORE…</span></div>
+        <div id="coreStatus" class="core-status loading" title="Sincronizando regras"><i></i><span>CORE…</span></div><span class="version-chip" title="Versão da ficha">v5.7</span>
         <button id="exportBtn" class="ghost small-btn" type="button">Exportar JSON</button>
         <label class="ghost file-btn small-btn">Importar JSON<input id="importInput" type="file" accept="application/json"></label>
         <button id="resetBtn" class="danger small-btn" type="button">Resetar</button>
@@ -38,22 +38,22 @@
     <section id="sheetView" class="hidden"></section>
 
     <footer>
-      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.6.1</p>
+      <p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.7</p>
     </footer>
   </main>
 
   <div id="toast" class="toast hidden"></div>
 
-  <script src="skills-v56.js?v=5.6.1"></script>
-  <script src="gods-v56.js?v=5.6.1"></script>
-  <script src="abilities-v56.js?v=5.6.1"></script>
+  <script src="skills-v57.js?v=5.7.0"></script>
+  <script src="gods-v57.js?v=5.7.0"></script>
+  <script src="abilities-v57.js?v=5.7.0"></script>
   <script src="abilities-extra-v55.js?v=5.5.0"></script>
   <script src="system-v55.js?v=5.5.0"></script>
   <script src="talents-v55.js?v=5.5.0"></script>
   <script src="magic-v55.js?v=5.5.0"></script>
   <script src="roma-v55.js?v=5.5.0"></script>
   <script src="familiars-v55.js?v=5.5.0"></script>
-  <script src="core-bridge-v56.js?v=5.6.1"></script>
-  <script src="bootstrap-v56.js?v=5.6.1"></script>
+  <script src="core-bridge-v57.js?v=5.7.0"></script>
+  <script src="bootstrap-v57.js?v=5.7.0"></script>
 </body>
 </html>

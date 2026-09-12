@@ -1,33 +1,31 @@
-# Ficha da Duodécima · integração com Duodécima Core
+# Integração com Duodécima Core — Ficha v5.7
 
-Versão da ficha: **v5.6**  
-Schema local de save: **22**  
-Core esperado: **2026.09.11.1 ou posterior (schema v2)**
+Versão da ficha: **v5.7**  
+Schema local da ficha: **23**  
+Core esperado: **schema v2 / conteúdo 2026.09.11.1 ou compatível**
 
-## Fonte canônica
+## Fonte online
 
-A ficha tenta carregar as regras atuais de:
+A Ficha tenta carregar `https://stsedd.github.io/duodecima-core/` através de `core-bridge-v57.js`. O bridge lê o `manifest.json` e sincroniza deuses, kits, habilidades, perícias, talentos, condições, progressões e equipamentos.
 
-`https://stsedd.github.io/duodecima-core/`
+O bridge também preserva os campos estruturados do schema v2:
 
-O `core-bridge-v56.js` sincroniza deuses, kits, habilidades, perícias, talentos, condições, progressões do sistema e agora também:
+- `resources[]`: recursos pessoais, coletivos, por alvo e locais de habilidade;
+- `choices[]`: escolhas persistentes/progressivas dentro de habilidades;
+- `skillEffects[]`: proficiências, expertises e escolhas de perícia concedidas pelo kit.
 
-- `resources[]` com escopo pessoal, coletivo, por alvo ou por habilidade;
-- escolhas persistentes e progressivas (`choices`);
-- efeitos estruturados de perícia (`skillEffects`).
+## Fallback local
 
-Os arquivos `gods-v56.js`, `abilities-v56.js` e `skills-v56.js` são snapshots do Core 2026.09.11.1 para fallback offline. Os demais módulos locais v55 permanecem porque não tiveram mudança de conteúdo nesta revisão.
+Os arquivos `gods-v57.js`, `abilities-v57.js` e `skills-v57.js` são snapshots do Core 2026.09.11.1. Eles permitem que a ficha continue funcional se o Core online estiver temporariamente indisponível.
 
-## Saves
+## Comportamento na interface
 
-Saves v5.5 são migrados automaticamente para o schema 22. Além dos dados anteriores, o JSON passa a guardar `resourceValues`, `targetResources`, `abilityChoices`, `choiceDetails` e `abilityUses`.
+- Recursos `personal` e `collective` aparecem no HUD.
+- Recursos `target` usam uma lista independente de alvos na aba Combate. Cada pessoa mantém seu próprio contador.
+- Recursos `ability` aparecem dentro da habilidade correspondente.
+- Escolhas persistentes ficam em `abilityChoices` e mostram seleção atual + limite permitido.
+- Efeitos de perícia estruturados são aplicados à matriz de Perícias sem exigir duplicação manual.
 
-## Teste recomendado após publicar
+## Compatibilidade
 
-1. confirme que o cabeçalho mostra `CORE 2026.09.11.1` ou posterior;
-2. confira Iuppiter, Netuno, Plutão e Summanus e seus limites de acumuladores por nível;
-3. abra Potestas e confirme Imperium + Pontos de Potestas e a escolha Atletismo/Intimidação;
-4. abra Metus ou Somnos e teste adicionar um alvo ao tracker;
-5. abra Netuno → Estágios da Água e confirme 1/2/3 escolhas conforme estacas;
-6. abra Cimopoleia → Herança Monstruosa e confirme Scaleskin, Dentes de Tubarão e Shimmerskin;
-7. confira a aba de Perícias: P e E devem aparecer lado a lado, com badges FOR/DES/CON/INT/FÉ/CAR.
+A v5.7 migra saves anteriores a partir das chaves legadas, inclusive schema local 22/v5.6. Os arquivos principais v57 usam cache-buster `5.7.0` para evitar que GitHub Pages misture JS/CSS desta revisão com arquivos antigos.
