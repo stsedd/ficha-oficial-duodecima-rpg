@@ -1,28 +1,24 @@
-# Ficha da Duodécima — v5.7
+# Ficha da Duodécima — v5.10
 
-Ficha oficial da Legio XII Fulminata integrada ao **Duodécima Core schema v2**. Esta versão parte da v5.6 e mantém Vis, Magia, Legados, inventário, familiares, Roma e demais sistemas já existentes, com uma revisão completa da interface ligada ao Core.
+Ficha oficial da Legio XII Fulminata integrada ao **Duodécima Core schema v2**.
 
-## Destaques da v5.7
+A v5.10 é uma mescla deliberada de duas linhas da Ficha:
 
-- perícias em **uma coluna**, sem truncar nomes;
-- controles separados **P (Perito)** e **E (Expertise)**;
-- atributos abreviados `FOR`, `DES`, `CON`, `INT`, `FÉ`, `CAR`;
-- Nível e BP reposicionados e centralizados nos orbes do retrato;
-- temas persistentes: **Legio XII, Pergaminho, Obsidiana e Loureiro**;
-- múltiplos recursos divinos por personagem (`resources[]`);
-- recursos por alvo com uma linha independente por pessoa (Metus/Somnos);
-- recursos locais de habilidade (Vis/Victoria);
-- escolhas divinas persistentes/progressivas (`choices[]`) com seleção e limite visíveis;
-- concessões de perícia do Core (`skillEffects[]`) aplicadas automaticamente;
-- migração dos saves anteriores para o schema local 23;
-- arquivos principais com nomes `v57` para evitar cache de versões anteriores no GitHub Pages.
+- **mecânica atual**: recursos múltiplos, trackers por alvo, escolhas persistentes/progressivas, perícias e habilidades estruturadas pelo Core v2;
+- **visual aprovado da v5.9.6**: temas Dark/Light + paletas, Fogo/Neve e o baralho de equipamento organizado.
 
-## Fonte canônica
+Também adiciona um **banner puro** no topo. O usuário escolhe uma imagem e ajusta horizontal, vertical e zoom antes de salvar o enquadramento; não há texto, retrato, XII ou efeitos desenhados sobre a imagem.
 
-Quando online, regras compartilhadas vêm de `https://stsedd.github.io/duodecima-core/`. Os snapshots locais incluídos no pacote ficam como fallback caso o Core esteja indisponível.
+## Temas
+
+O tema é formado por **Modo + Paleta + Especial**. Dark e Light são independentes da cor escolhida. Há 23 paletas e os especiais Fogo e Neve.
+
+## Core
+
+Quando online, as regras compartilhadas vêm de `https://stsedd.github.io/duodecima-core/`. Os snapshots locais incluídos no pacote funcionam como fallback.
 
 ## Publicação
 
-O ZIP é **root-ready** para GitHub Pages. Substitua os arquivos da raiz do repositório atual da Ficha e mantenha Pages publicado a partir de `main / (root)`.
+O ZIP é **root-ready** para GitHub Pages. Substitua os arquivos da raiz do repositório pelos arquivos deste pacote.
 
-Consulte `CHANGELOG_V5_7.md` e `CORE-INTEGRATION.md` para detalhes.
+Consulte `CHANGELOG_V5_10.md`, `VALIDATION_V5_10.md` e `CORE-INTEGRATION.md`.
