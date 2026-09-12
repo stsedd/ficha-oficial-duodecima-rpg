@@ -3,6 +3,7 @@
 
   const SCHEMA_VERSION = 22;
   const STORAGE_KEY = 'duodecima_universal_stage4_v22';
+  const THEME_KEY = 'duodecima_theme_v1';
   const LEGACY_KEYS = [
     'duodecima_universal_stage4_v21','duodecima_universal_stage3a_v20','duodecima_universal_stage2m_v19','duodecima_universal_stage2l_v18','duodecima_universal_stage2k_v17','duodecima_universal_stage2h_v14','duodecima_universal_stage2g_v13','duodecima_universal_stage2f_v12','duodecima_universal_stage2e_v11','duodecima_universal_stage2d_v10','duodecima_universal_stage2c_v9','duodecima_universal_stage2b_v8','duodecima_universal_stage2a_v7','duodecima_universal_stage1f_v6','duodecima_universal_stage1e_v5','duodecima_universal_stage1d_v4',
     'duodecima_universal_stage1c_v3','duodecima_universal_stage1b_v2','duodecima_universal_stage1a_v1'
@@ -1237,6 +1238,23 @@ function longRest(){
   function signed(n){const v=Number(n)||0;return v>=0?`+${v}`:`−${Math.abs(v)}`}
 
   function render(){creationView.classList.toggle('hidden',state.isCreated);sheetView.classList.toggle('hidden',!state.isCreated);if(state.isCreated)renderSheet();else renderCreation()}
+  function validTheme(theme){return ['standard','parchment','obsidian','emerald'].includes(theme)}
+  function currentTheme(){const stored=safeStorage.getItem(THEME_KEY)||document.body.dataset.theme||'standard';return validTheme(stored)?stored:'standard'}
+  function applyTheme(theme,persist=true){
+    const next=validTheme(theme)?theme:'standard';
+    document.body.dataset.theme=next;
+    const select=byId('themeSelect'); if(select&&select.value!==next)select.value=next;
+    const meta=document.querySelector('meta[name="theme-color"]');
+    const colors={standard:'#050505',parchment:'#e8ddd2',obsidian:'#090c14',emerald:'#0d1511'};
+    if(meta)meta.setAttribute('content',colors[next]||colors.standard);
+    if(persist) safeStorage.setItem(THEME_KEY,next);
+  }
+  function bindThemeControl(){
+    const select=byId('themeSelect');
+    if(!select)return;
+    select.value=currentTheme();
+    select.onchange=e=>applyTheme(e.target.value,true);
+  }
   function byId(id){return document.getElementById(id)}
   function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
   function initials(name=''){const parts=String(name||'').trim().split(/\s+/).filter(Boolean);if(!parts.length)return 'XII';return (parts[0][0]||'').concat(parts.length>1?(parts[parts.length-1][0]||''):'').toUpperCase()}
@@ -1245,5 +1263,7 @@ function longRest(){
   byId('importInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);const ver=Number(data.schemaVersion);if(!Number.isFinite(ver)||ver<1||ver>SCHEMA_VERSION)throw new Error('schema');state=migrate(data);syncCurrentCaps();save();render();notify('Ficha importada.')}catch(err){notify('Não foi possível importar este JSON.')}};reader.readAsText(f)};
   byId('resetBtn').onclick=()=>{if(!confirm('Apagar a ficha local desta versão?'))return;safeStorage.removeItem(STORAGE_KEY);LEGACY_KEYS.forEach(k=>safeStorage.removeItem(k));state=defaultState();render();notify('Ficha resetada.')};
 
+  applyTheme(currentTheme(),false);
+  bindThemeControl();
   load();render();
 })();
