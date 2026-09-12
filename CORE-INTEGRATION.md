@@ -1,6 +1,6 @@
-# Integração com Duodécima Core — Ficha v5.7
+# Integração com Duodécima Core — Ficha v5.11
 
-Versão da ficha: **v5.7**  
+Versão da ficha: **v5.11**  
 Schema local da ficha: **23**  
 Core esperado: **schema v2 / conteúdo 2026.09.11.1 ou compatível**
 
@@ -28,4 +28,4 @@ Os arquivos `gods-v57.js`, `abilities-v57.js` e `skills-v57.js` são snapshots d
 
 ## Compatibilidade
 
-A v5.7 migra saves anteriores a partir das chaves legadas, inclusive schema local 22/v5.6. Os arquivos principais v57 usam cache-buster `5.7.0` para evitar que GitHub Pages misture JS/CSS desta revisão com arquivos antigos.
+A v5.11 mantém a migração dos saves legados e usa schema local 24. Os arquivos principais v511 usam cache-buster `5.11.0` para reduzir o risco de o GitHub Pages misturar JS/CSS desta revisão com arquivos antigos.
