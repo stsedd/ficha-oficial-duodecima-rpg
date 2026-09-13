@@ -1205,25 +1205,29 @@ function cleanAbilityText(text){
 }
 function structuredTextPieces(text){
   let raw=cleanAbilityText(text);if(!raw)return [];
+  raw=raw.replace(/([a-zà-ÿ])([A-ZÁÉÍÓÚÂÊÔÃÕÇ])/g,'$1 $2');
   raw=raw.replace(/(?:^|\s)·\s*/g,'\n');
-  // Cabeçalhos semânticos: isolados em uma linha própria, mesmo quando vieram colados do Discord/Core.
-  raw=raw.replace(/\s*(Mini ficha dos arautos|Possíveis ações dos arautos|Acúmulo|Efeitos)\s*/gi,'\n$1\n');
-  // Rótulos que realmente iniciam uma regra. Exigir ':' evita quebrar frases como "o arauto superior possui...".
+  // Cabeçalhos semânticos: só quebrar quando forem realmente títulos de bloco.
+  raw=raw.replace(/\s*(Mini ficha dos arautos|Possíveis ações dos arautos)\s*/gi,'\n$1\n');
+  raw=raw.replace(/\s+Acúmulo\s+(?=(?:Arauto menor|Arauto maior|Arauto superior|Atacar|Distrair|Proteger|Conduzir raio|Rajada celeste|Golpes corpo-a-corpo sob domínio elétrico|Habilidades elétricas utilizadas com sucesso|Descargas absorvidas de fonte hostil, natural ou divina|Acerto crítico com dano elétrico|Sempre que a prole|Golpes corpo a corpo|Habilidades de|Descargas de)\b)/gi,'\nAcúmulo\n');
+  raw=raw.replace(/\s+Efeitos\s+(?=(?:\d+(?:\s*[-–]\s*\d+|\+)?\s+pontos?(?:\s+ou\s+mais)?|\d+\+?\s+(?:Tensão|Fadiga|Pavor|Ressentimento))\s*:)/gi,'\nEfeitos\n');
+  raw=raw.replace(/\s+Uso de ([A-ZÁÉÍÓÚÂÊÔÃÕÇa-zà-ÿ ]{3,50}?)(?=\s+A prole pode|\s+Para cada|\s+Algumas habilidades|\s+[A-ZÁÉÍÓÚÂÊÔÃÕÇ][^.!?]{0,30} desaparece)/g,'\nUso de $1\n');
+  // Rótulos que realmente iniciam uma regra. Exigir ':' evita quebrar frases comuns.
   raw=raw.replace(/\s+(?=(?:Arauto menor|Arauto maior|Arauto superior|Atacar|Distrair|Proteger|Conduzir raio|Rajada celeste|Golpes corpo-a-corpo sob domínio elétrico|Habilidades elétricas utilizadas com sucesso|Descargas absorvidas de fonte hostil, natural ou divina|Acerto crítico com dano elétrico)\s*:)/gi,'\n');
   // Marcos de recursos/acúmulos: 2 pontos:, 10 pontos ou mais:, 4 Tensão:, etc.
   raw=raw.replace(/\s+(?=(?:\d+(?:\s*[-–]\s*\d+|\+)?\s+pontos?(?:\s+ou\s+mais)?|\d+\+?\s+(?:Tensão|Fadiga|Pavor|Ressentimento))\s*:)/gi,'\n');
-  // Observações finais relevantes também ganham respiro próprio.
-  raw=raw.replace(/\s+(?=(?:A prole só pode receber|A prole pode acumular|Os pontos desaparecem|Raiva do Trovão não paralisa|Cada arauto possui|Quando uma informação estiver separada em|O arauto superior possui)\b)/gi,'\n');
+  // Linhas importantes em recursos/acúmulos ganham respiro próprio.
+  raw=raw.replace(/\s+(?=(?:Sempre que a prole|O máximo de pontos(?: de [A-ZÁÉÍÓÚÂÊÔÃÕÇa-zà-ÿ ]+)?|A prole só pode receber|A prole pode acumular|A prole pode gastar \d+ pontos?|Para cada \d+ ponto gasto|Algumas habilidades de [A-ZÁÉÍÓÚÂÊÔÃÕÇa-zà-ÿ ]+|Caso a prole passe \d+ rodada|[A-ZÁÉÍÓÚÂÊÔÃÕÇ][A-Za-zÀ-ÿ ]+ desaparece ao final da cena|Os pontos desaparecem|Raiva do Trovão não paralisa|Cada arauto possui|Quando uma informação estiver separada em|O arauto superior possui|Filhos de [A-ZÁÉÍÓÚÂÊÔÃÕÇa-zà-ÿ ]+)\b)/gi,'\n');
   return raw.split(/\n{1,}|\s*•\s*/).map(x=>x.trim()).filter(Boolean);
 }
 function renderStructuredText(text,cls=''){
   const pieces=structuredTextPieces(text);if(!pieces.length)return '';
-  const headings=new Set(['mini ficha dos arautos','possíveis ações dos arautos','acúmulo','efeitos']);
+  const headingPatterns=[/^mini ficha dos arautos$/i,/^possíveis ações dos arautos$/i,/^acúmulo$/i,/^efeitos$/i,/^uso de .+/i];
   return pieces.map(piece=>{
     const plain=piece.trim(),low=plain.toLocaleLowerCase('pt-BR');
-    if(headings.has(low))return `<p class="structured-heading${cls?` ${cls}`:''}">${esc(plain)}</p>`;
+    if(headingPatterns.some(rx=>rx.test(low)))return `<p class="structured-heading${cls?` ${cls}`:''}">${esc(plain)}</p>`;
     const knownLabel=/^(Arauto menor|Arauto maior|Arauto superior|Atacar|Distrair|Proteger|Conduzir raio|Rajada celeste|Golpes corpo-a-corpo sob domínio elétrico|Habilidades elétricas utilizadas com sucesso|Descargas absorvidas de fonte hostil, natural ou divina|Acerto crítico com dano elétrico|Quando uma informação estiver separada em|\d+(?:\s*[-–]\s*\d+|\+)?\s+pontos?(?:\s+ou\s+mais)?|\d+\+?\s+(?:Tensão|Fadiga|Pavor|Ressentimento))\s*:\s*(.+)$/i;
-    const km=plain.match(knownLabel),sm=!km?plain.match(/^([^:]{1,32}):\s*(.+)$/):null,m=km?([km[0],km[1]+':',km[2]]):sm;
+    const km=plain.match(knownLabel),sm=!km?plain.match(/^([^:]{1,42}):\s*(.+)$/):null,m=km?([km[0],km[1]+':',km[2]]):sm;
     if(m)return `<p class="structured-item${cls?` ${cls}`:''}"><strong>${esc(m[1])}</strong><span>${esc(m[2])}</span></p>`;
     return `<p${cls?` class="${cls}"`:''}>${esc(plain)}</p>`;
   }).join('');
