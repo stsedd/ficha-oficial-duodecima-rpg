@@ -316,7 +316,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function activeAbilitySkillEffects(){
     const prof=new Set(),expert=new Set(),sources=new Map(),expertSources=new Map(),conditional=new Map();
     const addSource=(map,name,label)=>{if(!map.has(name))map.set(name,[]);if(label&&!map.get(name).includes(label))map.get(name).push(label)};
-    for(const sk of skills){const name=sk.name;if(basicAutomaticSkillSources(name).length||skillMetaFor(name).proficient)prof.add(name);if(talentExpertSkills().includes(name)||skillMetaFor(name).expertise)expert.add(name)}
+    for(const sk of skills){const name=sk.name;if(basicAutomaticSkillSources(name).length||skillMetaFor(name).proficient)prof.add(name);if(talentExpertSkills().includes(name))expert.add(name)}
     const set=effectiveAbilitySet();
     for(const a of [...(set?.passives||[]),...(set?.actives||[])]){
       for(const e of (a.skillEffects||[])){
