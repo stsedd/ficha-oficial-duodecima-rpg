@@ -1205,32 +1205,74 @@ function cleanAbilityText(text){
 }
 function structuredTextPieces(text){
   let raw=cleanAbilityText(text);if(!raw)return [];
-  raw=raw.replace(/([a-zà-ÿ])([A-ZÁÉÍÓÚÂÊÔÃÕÇ])/g,'$1 $2');
-  raw=raw.replace(/(?:^|\s)·\s*/g,'\n');
-  // Cabeçalhos semânticos: só quebrar quando forem realmente títulos de bloco.
+
+  // Corrige alguns textos do Core que chegaram colados sem espaço entre frases.
+  raw=raw.replace(/([.!?;])(?=[A-ZÁÉÍÓÚÂÊÔÃÕÇ])/g,'$1 ');
+  raw=raw.replace(/(passam)(?=(Desesperança|Esperança|Ruína|Tensão|Fadiga|Pavor|Ressentimento|Momentum|Frenesi|Potestas|Maré|Carga))/gi,'$1. ');
+
+  // Marcadores de Discord/Core viram quebras reais.
+  raw=raw.replace(/(?:^|\s)[·⚠️]+\s*/g,'\n');
+
+  // Cabeçalhos semânticos explícitos. Eles só são transformados quando aparecem
+  // em contexto mecânico, para não quebrar frases normais que contenham "efeitos".
   raw=raw.replace(/\s*(Mini ficha dos arautos|Possíveis ações dos arautos)\s*/gi,'\n$1\n');
-  raw=raw.replace(/\s+Acúmulo\s+(?=(?:Arauto menor|Arauto maior|Arauto superior|Atacar|Distrair|Proteger|Conduzir raio|Rajada celeste|Golpes corpo-a-corpo sob domínio elétrico|Habilidades elétricas utilizadas com sucesso|Descargas absorvidas de fonte hostil, natural ou divina|Acerto crítico com dano elétrico|Sempre que a prole|Golpes corpo a corpo|Habilidades de|Descargas de)\b)/gi,'\nAcúmulo\n');
-  raw=raw.replace(/\s+Efeitos\s+(?=(?:\d+(?:\s*[-–]\s*\d+|\+)?\s+pontos?(?:\s+ou\s+mais)?|\d+\+?\s+(?:Tensão|Fadiga|Pavor|Ressentimento))\s*:)/gi,'\nEfeitos\n');
-  raw=raw.replace(/\s+Uso de ([A-ZÁÉÍÓÚÂÊÔÃÕÇa-zà-ÿ ]{3,50}?)(?=\s+A prole pode|\s+Para cada|\s+Algumas habilidades|\s+[A-ZÁÉÍÓÚÂÊÔÃÕÇ][^.!?]{0,30} desaparece)/g,'\nUso de $1\n');
-  // Rótulos que realmente iniciam uma regra. Exigir ':' evita quebrar frases comuns.
-  raw=raw.replace(/\s+(?=(?:Arauto menor|Arauto maior|Arauto superior|Atacar|Distrair|Proteger|Conduzir raio|Rajada celeste|Golpes corpo-a-corpo sob domínio elétrico|Habilidades elétricas utilizadas com sucesso|Descargas absorvidas de fonte hostil, natural ou divina|Acerto crítico com dano elétrico)\s*:)/gi,'\n');
-  // Marcos de recursos/acúmulos: 2 pontos:, 10 pontos ou mais:, 4 Tensão:, etc.
+  raw=raw.replace(/\s+(Mecânica de Acúmulo|Acúmulo)\s+(?=(?:Golpes|Criatura|Acertar|Usar|Permanecer|Obter|Sempre que|Pontos de|Contato com|A prole))/gi,'\nACÚMULO\n');
+  raw=raw.replace(/\s+Efeitos\s+(?=(?:\d+(?:\s*[-–]\s*\d+|\+)?\s+pontos?(?:\s+ou\s+mais)?|\d+\+?\s+(?:Tensão|Fadiga|Pavor|Ressentimento))\s*:)/gi,'\nEFEITOS\n');
+  raw=raw.replace(/\s+Uso de\s+([A-ZÁÉÍÓÚÂÊÔÃÕÇa-zà-ÿ ]{3,44}?)(?=\s+A prole pode|\s+Para cada|\s+Ao impor|\s+Algumas habilidades|\s+[A-ZÁÉÍÓÚÂÊÔÃÕÇ][^.!?]{0,30} desaparece)/g,'\nUSO DE $1\n');
+
+  // Linhas de ganho que possuem rótulo explícito.
+  raw=raw.replace(/\s+(?=(?:Arauto menor|Arauto maior|Arauto superior|Atacar|Distrair|Proteger|Conduzir raio|Rajada celeste|Golpes corpo-a-corpo sob domínio elétrico|Golpes corpo-a-corpo ou armas combinadas com água|Habilidades elétricas utilizadas com sucesso|Habilidades hídricas utilizadas com sucesso|Descargas absorvidas de fonte hostil, natural ou divina|Acerto crítico com dano elétrico|Contato com fontes de água[^:]{0,80}|Acertar um ataque[^:]{0,100}|Usar uma habilidade[^:]{0,100}|Permanecer oculto[^:]{0,100}|Obter acerto crítico[^:]{0,100}|Criatura próxima cair a 0 HP|A própria prole reduzir uma criatura a 0 HP|Uma invocação acertar[^:]{0,100}|Permanecer em local de morte[^:]{0,100}|Crítico com dano[^:]{0,100})\s*:)/gi,'\n');
+
+  // Marcos numéricos de gasto/efeito.
   raw=raw.replace(/\s+(?=(?:\d+(?:\s*[-–]\s*\d+|\+)?\s+pontos?(?:\s+ou\s+mais)?|\d+\+?\s+(?:Tensão|Fadiga|Pavor|Ressentimento))\s*:)/gi,'\n');
-  // Linhas importantes em recursos/acúmulos ganham respiro próprio.
-  raw=raw.replace(/\s+(?=(?:Sempre que a prole|O máximo de pontos(?: de [A-ZÁÉÍÓÚÂÊÔÃÕÇa-zà-ÿ ]+)?|A prole só pode receber|A prole pode acumular|A prole pode gastar \d+ pontos?|Para cada \d+ ponto gasto|Algumas habilidades de [A-ZÁÉÍÓÚÂÊÔÃÕÇa-zà-ÿ ]+|Caso a prole passe \d+ rodada|[A-ZÁÉÍÓÚÂÊÔÃÕÇ][A-Za-zÀ-ÿ ]+ desaparece ao final da cena|Os pontos desaparecem|Raiva do Trovão não paralisa|Cada arauto possui|Quando uma informação estiver separada em|O arauto superior possui|Filhos de [A-ZÁÉÍÓÚÂÊÔÃÕÇa-zà-ÿ ]+)\b)/gi,'\n');
+
+  // Regras estruturais ficam em parágrafos separados, mas nunca palavra por palavra.
+  raw=raw.replace(/\s+(?=(?:Sempre que a prole|O máximo de pontos(?: de [^.!?]{1,80})?\s+é\b|A prole só pode receber|A prole pode acumular|A prole pode ter no máximo|A prole pode gastar \d+ pontos?|Para cada \d+ ponto gasto|Ao impor uma resistência[^.!?]{0,120}?pode gastar|Ao acumular \d+ marcas?|Cada marca de Ruína|Algumas habilidades de (?:Fobetor|Somnia)|Após o uso,|Depois disso,|As marcas pertencem|Permanecer escondido|O acúmulo por contato|Não ignora resistências|Caso a prole passe|Filhos de (?:Phobetor|Somnia))\b)/gi,'\n');
+
+  // Encerramento/perda de recursos: nomes conhecidos, sem regex ampla que possa
+  // capturar toda a frase anterior e quebrar cada palavra em uma linha.
+  raw=raw.replace(/\s+(?=(?:Os pontos desaparecem|Todos os pontos desaparecem|As marcas desaparecem|Desesperança desaparece|Esperança desaparece|Ressentimento desaparece|Momentum desaparece|Frenesi desaparece|Carga Noturna desaparece|Maré Crescente desaparece|Acúmulo Necromântico desaparece)\b)/gi,'\n');
+
+  // Repara quebras artificiais que podem surgir quando uma expressão mecânica
+  // aparece dentro do texto de um efeito, e não como nova regra de acúmulo.
+  raw=raw.replace(/\bao\n(?=usar uma habilidade\b)/gi,'ao ');
+  raw=raw.replace(/\bObter acerto\n(?=crítico\b)/gi,'Obter acerto ');
+  raw=raw.replace(/(\+2 pontos\.)\s+(?=Usar com sucesso habilidade de morte)/gi,'$1\n');
+
   return raw.split(/\n{1,}|\s*•\s*/).map(x=>x.trim()).filter(Boolean);
 }
 function renderStructuredText(text,cls=''){
   const pieces=structuredTextPieces(text);if(!pieces.length)return '';
-  const headingPatterns=[/^mini ficha dos arautos$/i,/^possíveis ações dos arautos$/i,/^acúmulo$/i,/^efeitos$/i,/^uso de .+/i];
-  return pieces.map(piece=>{
+  const isAccumulation=/(?:\bacumula\b|\bpontos? de\b|\bmarcas? de Ruína\b|\bMomentum\b|\bFrenesi\b)/i.test(cleanAbilityText(text));
+  let seenAccumulo=false,seenUse=false,seenLoss=false;
+  const out=[];
+  const heading=(label)=>`<p class="structured-heading${cls?` ${cls}`:''}">${esc(label)}</p>`;
+
+  pieces.forEach((piece,index)=>{
     const plain=piece.trim(),low=plain.toLocaleLowerCase('pt-BR');
-    if(headingPatterns.some(rx=>rx.test(low)))return `<p class="structured-heading${cls?` ${cls}`:''}">${esc(plain)}</p>`;
-    const knownLabel=/^(Arauto menor|Arauto maior|Arauto superior|Atacar|Distrair|Proteger|Conduzir raio|Rajada celeste|Golpes corpo-a-corpo sob domínio elétrico|Habilidades elétricas utilizadas com sucesso|Descargas absorvidas de fonte hostil, natural ou divina|Acerto crítico com dano elétrico|Quando uma informação estiver separada em|\d+(?:\s*[-–]\s*\d+|\+)?\s+pontos?(?:\s+ou\s+mais)?|\d+\+?\s+(?:Tensão|Fadiga|Pavor|Ressentimento))\s*:\s*(.+)$/i;
+    const explicitHeading=/^(mini ficha dos arautos|possíveis ações dos arautos|acúmulo|efeitos|uso de .+)$/i.test(plain);
+    if(explicitHeading){
+      if(/^acúmulo$/i.test(plain))seenAccumulo=true;
+      if(/^uso de /i.test(plain)||/^efeitos$/i.test(plain))seenUse=true;
+      out.push(heading(plain));return;
+    }
+
+    if(isAccumulation&&!seenAccumulo&&/(?:\bacumula\b|\brecebe 1 ponto\b|\bpontos? de [A-ZÁÉÍÓÚÂÊÔÃÕÇa-zà-ÿ]+ durante\b)/i.test(plain)){
+      out.push(heading('ACÚMULO'));seenAccumulo=true;
+    }
+    if(isAccumulation&&!seenUse&&/(?:^A prole pode gastar|^Ao impor uma resistência[^.!?]*pode gastar|^Para cada \d+ ponto gasto|^Ao acumular \d+ marcas?)/i.test(plain)){
+      out.push(heading('EFEITOS / USO'));seenUse=true;
+    }
+    if(isAccumulation&&!seenLoss&&/(?:Os pontos desaparecem|Todos os pontos desaparecem|As marcas desaparecem|Desesperança desaparece|Esperança desaparece|Ressentimento desaparece|Momentum desaparece|Frenesi desaparece|Caso a prole passe|Após 2 turnos sem|ao fim do combate|ao final da cena)/i.test(plain)){
+      out.push(heading('PERDA / ENCERRAMENTO'));seenLoss=true;
+    }
+
+    const knownLabel=/^(Arauto menor|Arauto maior|Arauto superior|Atacar|Distrair|Proteger|Conduzir raio|Rajada celeste|Golpes corpo-a-corpo sob domínio elétrico|Golpes corpo-a-corpo ou armas combinadas com água|Habilidades elétricas utilizadas com sucesso|Habilidades hídricas utilizadas com sucesso|Descargas absorvidas de fonte hostil, natural ou divina|Acerto crítico com dano elétrico|Contato com fontes de água[^:]{0,80}|Acertar um ataque[^:]{0,100}|Usar uma habilidade[^:]{0,100}|Permanecer oculto[^:]{0,100}|Obter acerto crítico[^:]{0,100}|Criatura próxima cair a 0 HP|A própria prole reduzir uma criatura a 0 HP|Uma invocação acertar[^:]{0,100}|Permanecer em local de morte[^:]{0,100}|Crítico com dano[^:]{0,100}|Quando uma informação estiver separada em|\d+(?:\s*[-–]\s*\d+|\+)?\s+pontos?(?:\s+ou\s+mais)?|\d+\+?\s+(?:Tensão|Fadiga|Pavor|Ressentimento))\s*:\s*(.+)$/i;
     const km=plain.match(knownLabel),sm=!km?plain.match(/^([^:]{1,42}):\s*(.+)$/):null,m=km?([km[0],km[1]+':',km[2]]):sm;
-    if(m)return `<p class="structured-item${cls?` ${cls}`:''}"><strong>${esc(m[1])}</strong><span>${esc(m[2])}</span></p>`;
-    return `<p${cls?` class="${cls}"`:''}>${esc(plain)}</p>`;
-  }).join('');
+    if(m)out.push(`<p class="structured-item${cls?` ${cls}`:''}"><strong>${esc(m[1])}</strong><span>${esc(m[2])}</span></p>`);
+    else out.push(`<p${cls?` class="${cls}"`:''}>${esc(plain)}</p>`);
+  });
+  return out.join('');
 }
   function renderCoreTierRows(tiers,key){
     const value=coreStakeValue(key);
