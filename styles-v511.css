@@ -4605,3 +4605,27 @@ body[data-theme="light"] .inventory-import-card{
 body[data-theme="light"] .exclusive-theme-manager{background:#fffaf6;border-color:#dac8c2}.theme-dialog-card .exclusive-theme-card{color:inherit}
 body[data-theme="light"] .exclusive-theme-card{background:#fffdf9;border-color:#d9c6c0}.exclusive-theme-card.active{background:color-mix(in srgb,var(--accent,#d53645) 5%,#fffdf9 95%)}
 @media(max-width:600px){.exclusive-theme-card{grid-template-columns:40px minmax(0,1fr)}.exclusive-theme-actions{grid-column:1/-1;justify-content:flex-end}.exclusive-theme-upload-row>*{width:100%}}
+
+
+/* =========================================================
+   v5.13.12 — CAMADA DE TEMAS EXCLUSIVOS COMPLETOS
+   Fundo e ornamentos vivem fora da .shell para não serem
+   anulados pelas paletas e superfícies da ficha padrão.
+   ========================================================= */
+.exclusive-theme-backdrop{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .exclusive-theme-backdrop{display:block}
+body[data-exclusive-theme]:not([data-exclusive-theme="none"])>.shell{position:relative;z-index:2}
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .fire-embers,
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .fire-flame-bed,
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .fire-heat-haze,
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .snow-fall,
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .snow-fall-front,
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .snow-mist,
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .snow-drift{display:none!important}

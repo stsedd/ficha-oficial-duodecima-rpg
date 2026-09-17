@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Character Archive — Legio XII Fulminata · v5.13.11</title>
-  <link rel="stylesheet" href="styles-v511.css?v=5.13.11-exclusive-themes">
+  <title>Character Archive — Legio XII Fulminata · v5.13.12</title>
+  <link rel="stylesheet" href="styles-v511.css?v=5.13.12-exclusive-themes-v2">
 </head>
 <body data-theme="standard" data-mode="dark" data-palette="red" data-special="none">
+  <div id="exclusiveThemeBackdrop" class="exclusive-theme-backdrop" aria-hidden="true"></div>
   <main class="shell">
     <section class="archive-brandbar" aria-label="Identificação da ficha">
       <div class="archive-brand-copy">
@@ -30,7 +31,7 @@
       <div class="archive-toolbar-copy">
         <div id="coreStatus" class="core-status loading" title="Sincronizando regras"><i></i><span>CORE…</span></div>
         <span class="archive-save-note"><b>Salvamento local</b> · esta ficha fica neste navegador</span>
-        <span class="version-chip" title="Versão da ficha">v5.13.11</span>
+        <span class="version-chip" title="Versão da ficha">v5.13.12</span>
       </div>
       <div class="actions archive-actions">
         <button id="exportBtn" class="ghost small-btn" type="button">Exportar JSON</button>
@@ -47,7 +48,7 @@
     <section id="creationView" class="grid two"></section>
     <section id="sheetView" class="hidden"></section>
 
-    <footer><p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.13.11</p></footer>
+    <footer><p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.13.12</p></footer>
   </main>
 
   <dialog id="bannerCropDialog" class="banner-crop-dialog">
@@ -110,7 +111,7 @@
           <label class="primary exclusive-theme-upload">↑ Upar tema exclusivo<input id="exclusiveThemeInput" type="file" accept=".duodecima-theme,application/json" hidden></label>
           <button id="exclusiveThemeDeactivate" type="button" class="ghost">Usar tema padrão</button>
         </div>
-        <p class="muted compact exclusive-theme-help">O arquivo <b>.duodecima-theme</b> instala apenas CSS e imagens. O tema fica neste dispositivo; o JSON da personagem guarda somente qual tema está ativo.</p>
+        <p class="muted compact exclusive-theme-help">O arquivo <b>.duodecima-theme</b> instala CSS e imagens do tema. A v5.13.12 também oferece uma camada visual dedicada para fundos e ornamentos, evitando que a paleta padrão sobreponha o tema exclusivo. O tema fica neste dispositivo; o JSON da personagem guarda somente qual tema está ativo.</p>
         <div id="exclusiveThemeList" class="exclusive-theme-list" aria-live="polite"></div>
       </section>
       <div class="theme-dialog-foot"><span>Paletas e temas especiais acompanham o JSON. Temas exclusivos precisam estar instalados no dispositivo.</span><button value="cancel" class="primary">Concluir</button></div>
@@ -143,6 +144,6 @@
   <script src="roma-v55.js?v=5.5.0"></script>
   <script src="familiars-v55.js?v=5.5.0"></script>
   <script src="core-bridge-v511.js?v=5.11.0"></script>
-  <script src="bootstrap-v511.js?v=5.13.11-exclusive-themes"></script>
+  <script src="bootstrap-v511.js?v=5.13.12-exclusive-themes-v2"></script>
 </body>
 </html>

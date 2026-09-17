@@ -37,3 +37,16 @@ No CSS, use `{{asset:nome}}`:
 A ficha troca `{{scope}}` por `body[data-exclusive-theme="id-do-tema"]`, mantendo o visual isolado do tema padrão.
 
 O JSON da personagem salva somente `appearance.exclusiveThemeId`. Portanto, outro dispositivo precisa instalar o mesmo arquivo `.duodecima-theme` para reproduzir o visual.
+
+
+## v5.13.12 — fundo completo
+
+A ficha agora fornece `#exclusiveThemeBackdrop`, uma camada fixa atrás da interface. Temas completos devem preferir:
+
+```css
+{{scope}} #exclusiveThemeBackdrop {
+  background: url("{{asset:background}}") center/cover fixed no-repeat;
+}
+```
+
+O `{{scope}}` também é resolvido com especificidade maior que as regras `body[data-theme][data-palette]` da ficha padrão, evitando que a paleta sobrescreva background, orbes, tabs e cards do tema importado.

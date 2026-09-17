@@ -167,14 +167,28 @@
     return {format:'duodecima-theme',formatVersion:1,id,name,version:String(raw.version||'1.0.0').slice(0,30),author:String(raw.author||'').slice(0,80),description:String(raw.description||'').slice(0,240),icon:String(raw.icon||'✦').slice(0,4),preferredMode:raw.preferredMode==='light'?'light':'dark',css,assets,installedAt:new Date().toISOString()};
   }
   function resolvedExclusiveThemeCss(theme){
-    const scope=`body[data-exclusive-theme="${theme.id}"]`;let css=String(theme.css||'').replaceAll('{{scope}}',scope);return css.replace(/\{\{asset:([^}]+)\}\}/g,(_,key)=>theme.assets?.[key]||'');
+    // Scope forte de propósito: a ficha padrão possui regras como
+    // body[data-theme][data-palette] ... !important. O tema exclusivo precisa
+    // vencer essas regras sem exigir que o autor conheça a cascata interna.
+    const scope=`body[data-exclusive-theme="${theme.id}"][data-theme][data-palette]`;
+    let css=String(theme.css||'').replaceAll('{{scope}}',scope);
+    return css.replace(/\{\{asset:([^}]+)\}\}/g,(_,key)=>theme.assets?.[key]||'');
   }
   function applyExclusiveThemeNow(id){
-    const themeId=normalizeExclusiveThemeId(id),theme=exclusiveThemes.get(themeId)||null;if(exclusiveThemeStyle){exclusiveThemeStyle.remove();exclusiveThemeStyle=null}document.body.dataset.exclusiveTheme=theme?theme.id:'none';if(!theme)return false;const style=document.createElement('style');style.id='duodecima-exclusive-theme-style';style.dataset.themeId=theme.id;style.textContent=resolvedExclusiveThemeCss(theme);document.head.appendChild(style);exclusiveThemeStyle=style;return true;
+    const themeId=normalizeExclusiveThemeId(id),theme=exclusiveThemes.get(themeId)||null;
+    if(exclusiveThemeStyle){exclusiveThemeStyle.remove();exclusiveThemeStyle=null}
+    document.body.dataset.exclusiveTheme=theme?theme.id:'none';
+    const backdrop=document.getElementById('exclusiveThemeBackdrop');
+    if(backdrop){backdrop.dataset.themeId=theme?theme.id:'';backdrop.classList.toggle('active',!!theme)}
+    if(!theme)return false;
+    const style=document.createElement('style');
+    style.id='duodecima-exclusive-theme-style';style.dataset.themeId=theme.id;
+    style.textContent=resolvedExclusiveThemeCss(theme);
+    document.head.appendChild(style);exclusiveThemeStyle=style;return true;
   }
   async function initExclusiveThemes(){const themes=await listStoredExclusiveThemes();exclusiveThemes.clear();for(const raw of themes){try{const theme=validateExclusiveThemeBundle(raw);exclusiveThemes.set(theme.id,theme)}catch(_){}}}
   function renderExclusiveThemeList(){
-    const host=document.getElementById('exclusiveThemeList');if(!host)return;const activeId=normalizeExclusiveThemeId(state?.appearance?.exclusiveThemeId||''),themes=[...exclusiveThemes.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));const missing=activeId&&!exclusiveThemes.has(activeId)?`<div class="exclusive-theme-missing">O JSON desta personagem pede o tema exclusivo <b>${esc(activeId)}</b>, mas ele não está instalado neste dispositivo. Upe o arquivo do tema para restaurar o visual.</div>`:'';host.innerHTML=missing+(themes.length?themes.map(t=>`<article class="exclusive-theme-card ${activeId===t.id?'active':''}"><div class="exclusive-theme-icon">${esc(t.icon||'✦')}</div><div class="exclusive-theme-copy"><b>${esc(t.name)}</b><small>${esc(t.description||'Tema exclusivo da Duodécima')}</small><em>v${esc(t.version||'1.0.0')}${t.author?` · ${esc(t.author)}`:''}</em></div><div class="exclusive-theme-actions"><button type="button" class="${activeId===t.id?'ghost':'primary'}" data-exclusive-activate="${esc(t.id)}">${activeId===t.id?'Ativo':'Ativar'}</button><button type="button" class="ghost" data-exclusive-remove="${esc(t.id)}">Remover</button></div></article>`).join(''):`<div class="exclusive-theme-empty">Nenhum tema exclusivo instalado ainda.</div>`);
+    const host=document.getElementById('exclusiveThemeList');if(!host)return;const activeId=normalizeExclusiveThemeId(state?.appearance?.exclusiveThemeId||''),themes=[...exclusiveThemes.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));const missing=activeId&&!exclusiveThemes.has(activeId)?`<div class="exclusive-theme-missing">O JSON desta personagem pede o tema exclusivo <b>${esc(activeId)}</b>, mas ele não está instalado neste dispositivo. Upe o arquivo do tema para restaurar o visual.</div>`:'';host.innerHTML=missing+(themes.length?themes.map(t=>{const assetCount=Object.keys(t.assets||{}).length,assetBytes=Object.values(t.assets||{}).reduce((sum,v)=>sum+String(v||'').length,0),assetSize=assetBytes>1048576?`${(assetBytes/1048576).toFixed(1)} MB`:`${Math.max(1,Math.round(assetBytes/1024))} KB`;return `<article class="exclusive-theme-card ${activeId===t.id?'active':''}"><div class="exclusive-theme-icon">${esc(t.icon||'✦')}</div><div class="exclusive-theme-copy"><b>${esc(t.name)}</b><small>${esc(t.description||'Tema exclusivo da Duodécima')}</small><em>v${esc(t.version||'1.0.0')}${t.author?` · ${esc(t.author)}`:''} · ${assetCount} asset(s) · ${assetSize}</em></div><div class="exclusive-theme-actions"><button type="button" class="${activeId===t.id?'ghost':'primary'}" data-exclusive-activate="${esc(t.id)}">${activeId===t.id?'Ativo':'Ativar'}</button><button type="button" class="ghost" data-exclusive-remove="${esc(t.id)}">Remover</button></div></article>`}).join(''):`<div class="exclusive-theme-empty">Nenhum tema exclusivo instalado ainda.</div>`);
     host.querySelectorAll('[data-exclusive-activate]').forEach(btn=>btn.onclick=()=>{const id=normalizeExclusiveThemeId(btn.dataset.exclusiveActivate);if(!exclusiveThemes.has(id))return;state.appearance.exclusiveThemeId=id;state.appearance.special='none';save();syncShellChrome();notify(`Tema exclusivo ${exclusiveThemes.get(id).name} ativado.`)});
     host.querySelectorAll('[data-exclusive-remove]').forEach(btn=>btn.onclick=async()=>{const id=normalizeExclusiveThemeId(btn.dataset.exclusiveRemove),theme=exclusiveThemes.get(id);if(!theme)return;if(!confirm(`Remover o tema exclusivo “${theme.name}” deste dispositivo?`))return;await removeStoredExclusiveTheme(id);exclusiveThemes.delete(id);if(normalizeExclusiveThemeId(state.appearance?.exclusiveThemeId)===id){state.appearance.exclusiveThemeId='';save();syncShellChrome()}renderExclusiveThemeList();notify('Tema exclusivo removido deste dispositivo.')});
   }
