@@ -4587,3 +4587,21 @@ body[data-theme="light"] .inventory-import-card{
   .inventory-manual-row{grid-template-columns:1fr}
   .inventory-library-picker>summary{font-size:1rem;padding:12px 14px}
 }
+
+/* v5.13.11 — temas exclusivos importáveis */
+.exclusive-theme-manager{border:1px solid #3b3035;border-radius:14px;padding:14px;background:linear-gradient(180deg,rgba(255,255,255,.022),rgba(0,0,0,.12));margin-top:10px}
+.exclusive-theme-upload-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.exclusive-theme-upload{display:inline-flex;align-items:center;justify-content:center;min-height:42px;cursor:pointer;font-weight:800}
+.exclusive-theme-upload input{display:none!important}
+.exclusive-theme-help{margin:10px 0 0;line-height:1.55}
+.exclusive-theme-list{display:grid;gap:9px;margin-top:12px}
+.exclusive-theme-empty{border:1px dashed #44383d;border-radius:11px;padding:13px;color:var(--muted);font-size:12px;text-align:center}
+.exclusive-theme-card{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:11px;align-items:center;border:1px solid #40343a;border-radius:12px;padding:10px;background:rgba(7,6,7,.52)}
+.exclusive-theme-card.active{border-color:var(--accent,#d53645);box-shadow:0 0 0 1px color-mix(in srgb,var(--accent,#d53645) 28%,transparent),0 10px 26px rgba(0,0,0,.18)}
+.exclusive-theme-icon{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;border:1px solid #4a3c42;background:linear-gradient(145deg,#1d181b,#0a090a);font-size:20px;overflow:hidden}
+.exclusive-theme-copy{min-width:0}.exclusive-theme-copy b{display:block;font-size:13px}.exclusive-theme-copy small{display:block;color:var(--muted);font-size:10px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.exclusive-theme-copy em{display:block;color:#8e8287;font-size:9px;font-style:normal;margin-top:3px}
+.exclusive-theme-actions{display:flex;gap:6px;align-items:center}.exclusive-theme-actions button{min-height:34px;padding:7px 10px;font-size:10px}
+.exclusive-theme-missing{border:1px solid #7b5130;border-radius:11px;padding:10px 12px;background:rgba(146,83,32,.09);color:#dcbf9f;font-size:11px;line-height:1.45}
+body[data-theme="light"] .exclusive-theme-manager{background:#fffaf6;border-color:#dac8c2}.theme-dialog-card .exclusive-theme-card{color:inherit}
+body[data-theme="light"] .exclusive-theme-card{background:#fffdf9;border-color:#d9c6c0}.exclusive-theme-card.active{background:color-mix(in srgb,var(--accent,#d53645) 5%,#fffdf9 95%)}
+@media(max-width:600px){.exclusive-theme-card{grid-template-columns:40px minmax(0,1fr)}.exclusive-theme-actions{grid-column:1/-1;justify-content:flex-end}.exclusive-theme-upload-row>*{width:100%}}

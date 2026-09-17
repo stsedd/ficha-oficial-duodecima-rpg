@@ -1,4 +1,4 @@
-(() => {
+(async () => {
   'use strict';
 
   const SCHEMA_VERSION = 24;
@@ -120,6 +120,68 @@
     }
   })();
 
+  const EXCLUSIVE_THEME_DB = 'duodecima_exclusive_themes_v1';
+  const EXCLUSIVE_THEME_STORE = 'themes';
+  const EXCLUSIVE_THEME_FALLBACK_INDEX = 'duodecima_exclusive_theme_index_v1';
+  const exclusiveThemes = new Map();
+  let exclusiveThemeStyle = null;
+
+  function normalizeExclusiveThemeId(value=''){
+    return String(value||'').trim().toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,64);
+  }
+  function exclusiveThemeFallbackKey(id){return `duodecima_exclusive_theme_v1_${normalizeExclusiveThemeId(id)}`}
+  function openExclusiveThemeDb(){
+    return new Promise((resolve,reject)=>{
+      if(!window.indexedDB){reject(new Error('indexeddb-unavailable'));return}
+      const req=indexedDB.open(EXCLUSIVE_THEME_DB,1);
+      req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(EXCLUSIVE_THEME_STORE))db.createObjectStore(EXCLUSIVE_THEME_STORE,{keyPath:'id'})};
+      req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error('indexeddb-error'));
+    });
+  }
+  async function idbThemeAction(mode,payload){
+    const db=await openExclusiveThemeDb();
+    try{return await new Promise((resolve,reject)=>{const tx=db.transaction(EXCLUSIVE_THEME_STORE,mode==='list'?'readonly':'readwrite'),store=tx.objectStore(EXCLUSIVE_THEME_STORE);let req;if(mode==='list')req=store.getAll();else if(mode==='put')req=store.put(payload);else if(mode==='delete')req=store.delete(payload);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error('theme-store-error'))})}finally{db.close()}
+  }
+  function fallbackThemeIndex(){try{const data=JSON.parse(safeStorage.getItem(EXCLUSIVE_THEME_FALLBACK_INDEX)||'[]');return Array.isArray(data)?data:[]}catch(_){return []}}
+  function writeFallbackThemeIndex(ids){safeStorage.setItem(EXCLUSIVE_THEME_FALLBACK_INDEX,JSON.stringify([...new Set(ids)].filter(Boolean)))}
+  async function listStoredExclusiveThemes(){
+    try{return await idbThemeAction('list')}catch(_){return fallbackThemeIndex().map(id=>{try{return JSON.parse(safeStorage.getItem(exclusiveThemeFallbackKey(id))||'null')}catch(_e){return null}}).filter(Boolean)}
+  }
+  async function storeExclusiveTheme(theme){
+    try{await idbThemeAction('put',theme);return 'indexeddb'}catch(err){safeStorage.setItem(exclusiveThemeFallbackKey(theme.id),JSON.stringify(theme));writeFallbackThemeIndex([...fallbackThemeIndex(),theme.id]);return 'localStorage'}
+  }
+  async function removeStoredExclusiveTheme(id){
+    try{await idbThemeAction('delete',id)}catch(_){safeStorage.removeItem(exclusiveThemeFallbackKey(id));writeFallbackThemeIndex(fallbackThemeIndex().filter(x=>x!==id))}
+  }
+  function exclusiveThemeAssetOk(value){return typeof value==='string'&&/^data:image\/(?:png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=\s]+$/i.test(value)}
+  function validateExclusiveThemeBundle(raw){
+    if(!raw||typeof raw!=='object')throw new Error('Arquivo de tema inválido.');
+    if(raw.format!=='duodecima-theme'||Number(raw.formatVersion)!==1)throw new Error('Formato de tema não reconhecido.');
+    const id=normalizeExclusiveThemeId(raw.id),name=String(raw.name||'').trim().slice(0,80),css=String(raw.css||'');
+    if(!id||!name)throw new Error('O tema precisa de id e nome.');
+    if(!css||css.length>1500000)throw new Error('CSS do tema ausente ou grande demais.');
+    if(!css.includes('{{scope}}'))throw new Error('O CSS precisa usar {{scope}} para ficar isolado da ficha padrão.');
+    if(/@import\b|javascript\s*:|expression\s*\(|behavior\s*:|url\s*\(\s*["']?\s*(?:https?:|\/\/)/i.test(css))throw new Error('O tema contém CSS externo não permitido.');
+    const assets={};for(const [key,val] of Object.entries(raw.assets||{})){const safeKey=String(key).trim().replace(/[^a-zA-Z0-9_.-]+/g,'-').slice(0,80);if(!safeKey||!exclusiveThemeAssetOk(val))throw new Error(`Asset inválido: ${key}`);assets[safeKey]=String(val)}
+    for(const token of css.matchAll(/\{\{asset:([^}]+)\}\}/g)){if(!Object.prototype.hasOwnProperty.call(assets,token[1]))throw new Error(`Asset ausente: ${token[1]}`)}
+    return {format:'duodecima-theme',formatVersion:1,id,name,version:String(raw.version||'1.0.0').slice(0,30),author:String(raw.author||'').slice(0,80),description:String(raw.description||'').slice(0,240),icon:String(raw.icon||'✦').slice(0,4),preferredMode:raw.preferredMode==='light'?'light':'dark',css,assets,installedAt:new Date().toISOString()};
+  }
+  function resolvedExclusiveThemeCss(theme){
+    const scope=`body[data-exclusive-theme="${theme.id}"]`;let css=String(theme.css||'').replaceAll('{{scope}}',scope);return css.replace(/\{\{asset:([^}]+)\}\}/g,(_,key)=>theme.assets?.[key]||'');
+  }
+  function applyExclusiveThemeNow(id){
+    const themeId=normalizeExclusiveThemeId(id),theme=exclusiveThemes.get(themeId)||null;if(exclusiveThemeStyle){exclusiveThemeStyle.remove();exclusiveThemeStyle=null}document.body.dataset.exclusiveTheme=theme?theme.id:'none';if(!theme)return false;const style=document.createElement('style');style.id='duodecima-exclusive-theme-style';style.dataset.themeId=theme.id;style.textContent=resolvedExclusiveThemeCss(theme);document.head.appendChild(style);exclusiveThemeStyle=style;return true;
+  }
+  async function initExclusiveThemes(){const themes=await listStoredExclusiveThemes();exclusiveThemes.clear();for(const raw of themes){try{const theme=validateExclusiveThemeBundle(raw);exclusiveThemes.set(theme.id,theme)}catch(_){}}}
+  function renderExclusiveThemeList(){
+    const host=document.getElementById('exclusiveThemeList');if(!host)return;const activeId=normalizeExclusiveThemeId(state?.appearance?.exclusiveThemeId||''),themes=[...exclusiveThemes.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));const missing=activeId&&!exclusiveThemes.has(activeId)?`<div class="exclusive-theme-missing">O JSON desta personagem pede o tema exclusivo <b>${esc(activeId)}</b>, mas ele não está instalado neste dispositivo. Upe o arquivo do tema para restaurar o visual.</div>`:'';host.innerHTML=missing+(themes.length?themes.map(t=>`<article class="exclusive-theme-card ${activeId===t.id?'active':''}"><div class="exclusive-theme-icon">${esc(t.icon||'✦')}</div><div class="exclusive-theme-copy"><b>${esc(t.name)}</b><small>${esc(t.description||'Tema exclusivo da Duodécima')}</small><em>v${esc(t.version||'1.0.0')}${t.author?` · ${esc(t.author)}`:''}</em></div><div class="exclusive-theme-actions"><button type="button" class="${activeId===t.id?'ghost':'primary'}" data-exclusive-activate="${esc(t.id)}">${activeId===t.id?'Ativo':'Ativar'}</button><button type="button" class="ghost" data-exclusive-remove="${esc(t.id)}">Remover</button></div></article>`).join(''):`<div class="exclusive-theme-empty">Nenhum tema exclusivo instalado ainda.</div>`);
+    host.querySelectorAll('[data-exclusive-activate]').forEach(btn=>btn.onclick=()=>{const id=normalizeExclusiveThemeId(btn.dataset.exclusiveActivate);if(!exclusiveThemes.has(id))return;state.appearance.exclusiveThemeId=id;state.appearance.special='none';save();syncShellChrome();notify(`Tema exclusivo ${exclusiveThemes.get(id).name} ativado.`)});
+    host.querySelectorAll('[data-exclusive-remove]').forEach(btn=>btn.onclick=async()=>{const id=normalizeExclusiveThemeId(btn.dataset.exclusiveRemove),theme=exclusiveThemes.get(id);if(!theme)return;if(!confirm(`Remover o tema exclusivo “${theme.name}” deste dispositivo?`))return;await removeStoredExclusiveTheme(id);exclusiveThemes.delete(id);if(normalizeExclusiveThemeId(state.appearance?.exclusiveThemeId)===id){state.appearance.exclusiveThemeId='';save();syncShellChrome()}renderExclusiveThemeList();notify('Tema exclusivo removido deste dispositivo.')});
+  }
+  async function importExclusiveThemeFile(file){
+    if(!file)return null;let raw;try{raw=JSON.parse(await file.text())}catch(_){throw new Error('Não foi possível ler este arquivo de tema.')}const theme=validateExclusiveThemeBundle(raw);await storeExclusiveTheme(theme);exclusiveThemes.set(theme.id,theme);state.appearance.exclusiveThemeId=theme.id;state.appearance.special='none';save();syncShellChrome();return theme;
+  }
+
   const emptyAttrs = () => ({for:0,des:0,con:0,int:0,fe:0,car:0});
   const defaultDeath = () => ({successes:0,failures:0,stable:false,dead:false,atZero:false,lastRoll:null,returnCount:0});
   const defaultArmor = () => ({equipped:false,name:'Armadura',type:'nenhuma',material:'ferro-aco',resistanceCurrent:3,imageUrl:'',isHeritage:false,notes:''});
@@ -137,7 +199,7 @@
     currentHp:null,currentEnergy:null,currentSanity:100,resourceCurrent:0,resourceValues:{},targetResources:{},
     abilityStakes:{},abilityChoices:{},choiceDetails:{},abilityUses:{},conditions:[],exhaustion:0,death:defaultDeath(),tempMods:defaultTempMods(),
     skillTrainings:[],weapons:[],armor:defaultArmor(),shield:defaultShield(),lastRoll:null,
-    activeTab:'status',appearance:{mode:'dark',palette:'red',special:'none'},history:{summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',birth:'',residence:'',portraitUrl:'',bannerUrl:'',bannerSourceUrl:'',bannerPositionX:50,bannerPositionY:50,bannerScale:100},notes:'',
+    activeTab:'status',appearance:{mode:'dark',palette:'red',special:'none',exclusiveThemeId:''},history:{summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',birth:'',residence:'',portraitUrl:'',bannerUrl:'',bannerSourceUrl:'',bannerPositionX:50,bannerPositionY:50,bannerScale:100},notes:'',
     createdAt:null,updatedAt:null
   });
   let state = defaultState();
@@ -487,6 +549,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     out.appearance.mode=out.appearance.mode==='light'?'light':'dark';
     out.appearance.palette=THEME_PALETTES[out.appearance.palette]?out.appearance.palette:'red';
     out.appearance.special=['fire','snow'].includes(out.appearance.special)?out.appearance.special:'none';
+    out.appearance.exclusiveThemeId=normalizeExclusiveThemeId(out.appearance.exclusiveThemeId||'');
     out.history=Object.assign({summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',birth:'',residence:'',portraitUrl:'',bannerUrl:'',bannerSourceUrl:'',bannerPositionX:50,bannerPositionY:50,bannerScale:100},data?.history||{});
     if(!out.history.bannerSourceUrl&&out.history.bannerUrl)out.history.bannerSourceUrl=out.history.bannerUrl;
     out.history.bannerPositionX=clamp(Number(out.history.bannerPositionX)||50,0,100);
@@ -1484,14 +1547,14 @@ function longRest(){
   let bannerDraft=null;
   function syncShellChrome(){
     const h=state.history||{},src=String(h.bannerSourceUrl||h.bannerUrl||''),x=clamp(Number(h.bannerPositionX)||50,0,100),y=clamp(Number(h.bannerPositionY)||50,0,100),zoom=clamp(Number(h.bannerScale)||100,100,220);
-    const mode=state.appearance?.mode==='light'?'light':'dark',palette=THEME_PALETTES[state.appearance?.palette]?state.appearance.palette:'red',special=['fire','snow'].includes(state.appearance?.special)?state.appearance.special:'none',effectiveMode=special==='fire'?'dark':special==='snow'?'light':mode;
-    document.body.dataset.theme=effectiveMode==='light'?'light':'standard';document.body.dataset.mode=effectiveMode;document.body.dataset.palette=palette;document.body.dataset.special=special;document.documentElement.style.colorScheme=effectiveMode==='light'?'light':'dark';
+    const mode=state.appearance?.mode==='light'?'light':'dark',palette=THEME_PALETTES[state.appearance?.palette]?state.appearance.palette:'red',special=['fire','snow'].includes(state.appearance?.special)?state.appearance.special:'none',exclusiveId=normalizeExclusiveThemeId(state.appearance?.exclusiveThemeId||''),exclusiveTheme=exclusiveThemes.get(exclusiveId)||null,effectiveMode=exclusiveTheme?(exclusiveTheme.preferredMode||mode):(special==='fire'?'dark':special==='snow'?'light':mode);
+    document.body.dataset.theme=effectiveMode==='light'?'light':'standard';document.body.dataset.mode=effectiveMode;document.body.dataset.palette=palette;document.body.dataset.special=exclusiveTheme?'none':special;document.documentElement.style.colorScheme=effectiveMode==='light'?'light':'dark';applyExclusiveThemeNow(exclusiveId);
     const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=effectiveMode==='light'?'#f4eee8':'#050505';
     const modeBtn=byId('themeModeBtn'),paletteLabel=byId('themePaletteLabel'),paletteSwatch=byId('themePaletteSwatch'),specialLabel=byId('themeSpecialLabel'),specialSwatch=byId('themeSpecialSwatch');
-    if(modeBtn){modeBtn.classList.toggle('is-light',effectiveMode==='light');modeBtn.classList.toggle('special-overridden',special!=='none');modeBtn.setAttribute('aria-pressed',effectiveMode==='light'?'true':'false');const icon=modeBtn.querySelector('.theme-toggle-icon'),label=modeBtn.querySelector('.theme-toggle-copy b');if(icon)icon.textContent=effectiveMode==='light'?'☀':'☾';if(label)label.textContent=effectiveMode==='light'?'Light':'Dark'}
-    if(paletteLabel)paletteLabel.textContent=THEME_PALETTES[palette].label;if(paletteSwatch)paletteSwatch.dataset.palette=palette;if(specialLabel)specialLabel.textContent=special==='fire'?'Fogo':special==='snow'?'Neve':'Nenhum';if(specialSwatch){specialSwatch.textContent=special==='fire'?'🔥':special==='snow'?'❄':'✦';specialSwatch.dataset.special=special}
-    document.querySelectorAll('[data-palette-choice]').forEach(btn=>{const selected=special==='none'&&btn.dataset.paletteChoice===palette;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',selected?'true':'false')});
-    document.querySelectorAll('[data-special-choice]').forEach(btn=>{const selected=btn.dataset.specialChoice===special;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',selected?'true':'false')});
+    if(modeBtn){modeBtn.classList.toggle('is-light',effectiveMode==='light');modeBtn.classList.toggle('special-overridden',special!=='none'||!!exclusiveId);modeBtn.setAttribute('aria-pressed',effectiveMode==='light'?'true':'false');const icon=modeBtn.querySelector('.theme-toggle-icon'),label=modeBtn.querySelector('.theme-toggle-copy b');if(icon)icon.textContent=effectiveMode==='light'?'☀':'☾';if(label)label.textContent=effectiveMode==='light'?'Light':'Dark'}
+    if(paletteLabel)paletteLabel.textContent=THEME_PALETTES[palette].label;if(paletteSwatch)paletteSwatch.dataset.palette=palette;if(specialLabel)specialLabel.textContent=exclusiveTheme?exclusiveTheme.name:(exclusiveId?'Tema ausente':special==='fire'?'Fogo':special==='snow'?'Neve':'Nenhum');if(specialSwatch){specialSwatch.textContent=exclusiveTheme?(exclusiveTheme.icon||'✦'):(exclusiveId?'?':special==='fire'?'🔥':special==='snow'?'❄':'✦');specialSwatch.dataset.special=exclusiveTheme?'exclusive':special}
+    document.querySelectorAll('[data-palette-choice]').forEach(btn=>{const selected=!exclusiveId&&special==='none'&&btn.dataset.paletteChoice===palette;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',selected?'true':'false')});
+    document.querySelectorAll('[data-special-choice]').forEach(btn=>{const selected=!exclusiveId&&btn.dataset.specialChoice===special;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',selected?'true':'false')});renderExclusiveThemeList();
     const img=byId('siteBannerImage'),empty=byId('siteBannerEmpty'),edit=byId('editBannerBtn'),clear=byId('clearBannerBtn'),bannerBtn=byId('bannerBtn');
     if(img){if(src){img.src=src;img.classList.remove('hidden');img.style.objectPosition=`${x}% ${y}%`;img.style.transform=`scale(${zoom/100})`}else{img.removeAttribute('src');img.classList.add('hidden');img.style.transform='none'}}
     if(empty)empty.classList.toggle('hidden',!!src);if(edit)edit.classList.toggle('hidden',!src);if(clear)clear.classList.toggle('hidden',!src);if(bannerBtn)bannerBtn.textContent=src?'Trocar imagem':'Adicionar banner';
@@ -1500,12 +1563,14 @@ function longRest(){
   function openBannerCrop(source,x=50,y=50,scale=100){if(!source)return;bannerDraft={source,x:clamp(Number(x)||50,0,100),y:clamp(Number(y)||50,0,100),scale:clamp(Number(scale)||100,100,220)};const xi=byId('bannerCropX'),yi=byId('bannerCropY'),si=byId('bannerCropScale');if(xi)xi.value=String(bannerDraft.x);if(yi)yi.value=String(bannerDraft.y);if(si)si.value=String(bannerDraft.scale);const dialog=byId('bannerCropDialog');updateBannerCropPreview();if(dialog?.showModal)dialog.showModal()}
   function updateBannerCropPreview(){if(!bannerDraft)return;const img=byId('bannerCropPreview'),x=byId('bannerCropX'),y=byId('bannerCropY'),scale=byId('bannerCropScale');if(x)bannerDraft.x=clamp(Number(x.value)||bannerDraft.x,0,100);if(y)bannerDraft.y=clamp(Number(y.value)||bannerDraft.y,0,100);if(scale)bannerDraft.scale=clamp(Number(scale.value)||bannerDraft.scale,100,220);if(img){img.src=bannerDraft.source;img.style.objectPosition=`${bannerDraft.x}% ${bannerDraft.y}%`;img.style.transform=`scale(${bannerDraft.scale/100})`}if(x)x.value=bannerDraft.x;if(y)y.value=bannerDraft.y;if(scale)scale.value=bannerDraft.scale;const xv=byId('bannerCropXValue'),yv=byId('bannerCropYValue'),sv=byId('bannerCropScaleValue');if(xv)xv.textContent=`${bannerDraft.x}%`;if(yv)yv.textContent=`${bannerDraft.y}%`;if(sv)sv.textContent=`${bannerDraft.scale}%`}
   function bindShellChrome(){
-    const themeDialog=byId('themeDialog'),helpDialog=byId('helpDialog'),modeBtn=byId('themeModeBtn'),paletteBtn=byId('themePaletteBtn'),specialBtn=byId('themeSpecialBtn'),upload=byId('bannerUploadInput');
+    const themeDialog=byId('themeDialog'),helpDialog=byId('helpDialog'),modeBtn=byId('themeModeBtn'),paletteBtn=byId('themePaletteBtn'),specialBtn=byId('themeSpecialBtn'),upload=byId('bannerUploadInput'),exclusiveInput=byId('exclusiveThemeInput');
     if(byId('helpBtn'))byId('helpBtn').onclick=()=>helpDialog?.showModal?.();
-    if(modeBtn)modeBtn.onclick=()=>{state.appearance=state.appearance||{mode:'dark',palette:'red',special:'none'};if(state.appearance.special==='fire'){state.appearance.special='none';state.appearance.mode='light'}else if(state.appearance.special==='snow'){state.appearance.special='none';state.appearance.mode='dark'}else state.appearance.mode=state.appearance.mode==='light'?'dark':'light';save();syncShellChrome()};
+    if(modeBtn)modeBtn.onclick=()=>{state.appearance=state.appearance||{mode:'dark',palette:'red',special:'none',exclusiveThemeId:''};state.appearance.exclusiveThemeId='';if(state.appearance.special==='fire'){state.appearance.special='none';state.appearance.mode='light'}else if(state.appearance.special==='snow'){state.appearance.special='none';state.appearance.mode='dark'}else state.appearance.mode=state.appearance.mode==='light'?'dark':'light';save();syncShellChrome()};
     if(paletteBtn)paletteBtn.onclick=()=>{syncShellChrome();themeDialog?.showModal?.()};if(specialBtn)specialBtn.onclick=()=>{syncShellChrome();themeDialog?.showModal?.()};
-    document.querySelectorAll('[data-palette-choice]').forEach(btn=>btn.onclick=()=>{const palette=btn.dataset.paletteChoice;if(!THEME_PALETTES[palette])return;state.appearance.palette=palette;state.appearance.special='none';save();syncShellChrome();notify(`Tema ${THEME_PALETTES[palette].label} ativado.`)});
-    document.querySelectorAll('[data-special-choice]').forEach(btn=>btn.onclick=()=>{const c=btn.dataset.specialChoice;state.appearance.special=c==='fire'?'fire':c==='snow'?'snow':'none';save();syncShellChrome();notify(state.appearance.special==='fire'?'Tema Fogo ativado.':state.appearance.special==='snow'?'Tema Neve ativado.':'Tema especial desativado.')});
+    document.querySelectorAll('[data-palette-choice]').forEach(btn=>btn.onclick=()=>{const palette=btn.dataset.paletteChoice;if(!THEME_PALETTES[palette])return;state.appearance.palette=palette;state.appearance.special='none';state.appearance.exclusiveThemeId='';save();syncShellChrome();notify(`Tema ${THEME_PALETTES[palette].label} ativado.`)});
+    document.querySelectorAll('[data-special-choice]').forEach(btn=>btn.onclick=()=>{const c=btn.dataset.specialChoice;state.appearance.special=c==='fire'?'fire':c==='snow'?'snow':'none';state.appearance.exclusiveThemeId='';save();syncShellChrome();notify(state.appearance.special==='fire'?'Tema Fogo ativado.':state.appearance.special==='snow'?'Tema Neve ativado.':'Tema especial desativado.')});
+    if(exclusiveInput)exclusiveInput.onchange=async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;try{const theme=await importExclusiveThemeFile(file);renderExclusiveThemeList();notify(`Tema exclusivo ${theme.name} instalado e ativado.`)}catch(err){console.warn(err);notify(err?.message||'Não foi possível instalar este tema exclusivo.')}};
+    if(byId('exclusiveThemeDeactivate'))byId('exclusiveThemeDeactivate').onclick=()=>{state.appearance.exclusiveThemeId='';save();syncShellChrome();notify('Tema exclusivo desativado.')};
     if(byId('bannerBtn'))byId('bannerBtn').onclick=()=>upload?.click();
     if(upload)upload.onchange=e=>{const file=e.target.files?.[0];if(!file)return;readBannerImage(file,src=>openBannerCrop(src,50,50,100));e.target.value=''};
     if(byId('editBannerBtn'))byId('editBannerBtn').onclick=()=>{const h=state.history||{};openBannerCrop(h.bannerSourceUrl||h.bannerUrl,h.bannerPositionX,h.bannerPositionY,h.bannerScale)};
@@ -1524,6 +1589,7 @@ function longRest(){
   byId('resetBtn').onclick=()=>{if(!confirm('Apagar a ficha local desta versão?'))return;safeStorage.removeItem(STORAGE_KEY);LEGACY_KEYS.forEach(k=>safeStorage.removeItem(k));state=defaultState();render();notify('Ficha resetada.')};
 
   load();
+  await initExclusiveThemes();
   bindShellChrome();
   render();
 })();

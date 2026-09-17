@@ -1,0 +1,13 @@
+{
+  "format": "duodecima-theme",
+  "formatVersion": 1,
+  "id": "teste-exclusivo",
+  "name": "Teste Exclusivo",
+  "version": "1.0.0",
+  "author": "Duodécima",
+  "description": "Tema mínimo para testar o novo importador.",
+  "icon": "✦",
+  "preferredMode": "dark",
+  "css": "{{scope}} { --accent:#c8a96b; } {{scope}} .archive-brandbar, {{scope}} .card { border-color:#c8a96b!important; box-shadow:0 0 0 1px rgba(200,169,107,.12),0 0 18px rgba(200,169,107,.06)!important; } {{scope}} .eyebrow { color:#c8a96b!important; }",
+  "assets": {}
+}
