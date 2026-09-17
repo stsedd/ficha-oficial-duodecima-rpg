@@ -35,7 +35,7 @@
   // v5.14 — API visual estável para temas. Os slots ficam presentes mesmo
   // quando o tema padrão prefere escondê-los, permitindo que um tema exclusivo
   // troque ícones, frames e tipografia sem alterar a lógica da ficha.
-  const THEME_RESOURCE_ICONS = {hp:'♥',en:'ϟ',san:'◉',defense:'◆',dt:'◎',cast:'✦',divine:'ϟ'};
+  const THEME_RESOURCE_ICONS = {hp:'♥',en:'⚡',san:'🧠',defense:'🛡',dt:'⌖',cast:'✦',divine:'⚡'};
   function themeIconSlot(kind){return `<span class="theme-resource-icon" data-theme-icon="${esc(kind)}" aria-hidden="true">${THEME_RESOURCE_ICONS[kind]||'✦'}</span>`}
   function themeResourceAttrs(kind,id='',key=''){return `data-theme-component="resource" data-resource-kind="${esc(kind)}"${id?` data-resource-id="${esc(id)}"`:''}${key?` data-resource-key="${esc(key)}"`:''}`}
 
