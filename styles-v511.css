@@ -4588,7 +4588,23 @@ body[data-theme="light"] .inventory-import-card{
   .inventory-library-picker>summary{font-size:1rem;padding:12px 14px}
 }
 
-/* v5.13.11 — temas exclusivos importáveis */
+
+
+/* =========================================================
+   v5.14.0 — SELETOR DE TEMA SEM BOTÃO DARK/LIGHT
+   Cada paleta oferece suas duas variações diretamente.
+   ========================================================= */
+.theme-preset-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.theme-preset-card{display:grid;grid-template-columns:42px minmax(0,1fr);grid-template-areas:"swatch copy" "actions actions";gap:8px 10px;align-items:center;padding:10px;border:1px solid #3d3035;border-radius:11px;background:#0c0a0c;min-width:0;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+.theme-preset-card:hover{border-color:var(--choice);transform:translateY(-1px)}
+.theme-preset-card.active{border-color:var(--choice);box-shadow:inset 3px 0 0 var(--choice),0 0 0 1px color-mix(in srgb,var(--choice) 26%,transparent)}
+.theme-preset-swatch{grid-area:swatch;width:42px;height:42px;border-radius:9px;background:linear-gradient(135deg,var(--choice),var(--choice2));box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+.theme-preset-copy{grid-area:copy;display:flex;flex-direction:column;min-width:0}.theme-preset-copy b{font-size:12px}.theme-preset-copy small{font-size:8px;letter-spacing:.05em;text-transform:uppercase;color:#94878c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.theme-preset-actions{grid-area:actions;display:grid;grid-template-columns:1fr 1fr;gap:6px}.theme-preset-actions button{min-height:31px;padding:6px 8px;border-radius:8px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;background:#151216;border:1px solid #3c3035;color:#d9d1d4}.theme-preset-actions button:hover{border-color:var(--choice);color:#fff}.theme-preset-actions button.active{background:linear-gradient(180deg,var(--choice),var(--choice2));border-color:var(--choice);color:#fff;box-shadow:0 0 0 1px color-mix(in srgb,var(--choice) 28%,transparent)}
+body[data-theme="light"] .theme-preset-card{background:#fffaf4;border-color:#d8c7c2;color:#302528}body[data-theme="light"] .theme-preset-card.active{background:color-mix(in srgb,var(--choice) 5%,#fffaf4)}body[data-theme="light"] .theme-preset-copy small{color:#827479}body[data-theme="light"] .theme-preset-actions button{background:#fffdf9;border-color:#d7c6c0;color:#5c4b50}body[data-theme="light"] .theme-preset-actions button.active{color:var(--theme-accent-contrast)}
+@media(max-width:760px){.theme-preset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:470px){.theme-preset-grid{grid-template-columns:1fr}}
+/* v5.14.0 — temas exclusivos importáveis */
 .exclusive-theme-manager{border:1px solid #3b3035;border-radius:14px;padding:14px;background:linear-gradient(180deg,rgba(255,255,255,.022),rgba(0,0,0,.12));margin-top:10px}
 .exclusive-theme-upload-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .exclusive-theme-upload{display:inline-flex;align-items:center;justify-content:center;min-height:42px;cursor:pointer;font-weight:800}
@@ -4608,24 +4624,76 @@ body[data-theme="light"] .exclusive-theme-card{background:#fffdf9;border-color:#
 
 
 /* =========================================================
-   v5.13.12 — CAMADA DE TEMAS EXCLUSIVOS COMPLETOS
-   Fundo e ornamentos vivem fora da .shell para não serem
-   anulados pelas paletas e superfícies da ficha padrão.
+   v5.14.0 — THEME API / CONTRATO VISUAL ESTÁVEL
+   Os temas padrão continuam usando o CSS existente. Estes hooks
+   existem para temas exclusivos poderem redesenhar a ficha sem JS.
    ========================================================= */
-.exclusive-theme-backdrop{
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  overflow:hidden;
+body{
+  --theme-font-body:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --theme-font-display:var(--serif,Georgia,serif);
+  --theme-font-label:var(--theme-font-body);
+  --theme-page-bg:var(--bg);
+  --theme-card-bg:linear-gradient(180deg,var(--panel2),var(--panel));
+  --theme-card-border:var(--line);
+  --theme-card-radius:12px;
+  --theme-card-shadow:0 18px 40px rgba(0,0,0,.28);
+  --theme-card-glow:none;
+  --theme-frame-image:none;
+  --theme-frame-opacity:0;
+  --theme-frame-inset:-1px;
+  --theme-frame-radius:inherit;
+  --theme-resource-icon-display:none;
+  --theme-resource-icon-size:14px;
+  --theme-resource-icon-color:currentColor;
+  --theme-orb-content-y:-3px;
+  --theme-ability-bg:#090909;
+  --theme-equipment-bg:linear-gradient(160deg,#101011,#060607 78%);
 }
-body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .exclusive-theme-backdrop{display:block}
-body[data-exclusive-theme]:not([data-exclusive-theme="none"])>.shell{position:relative;z-index:2}
-body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .fire-embers,
-body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .fire-flame-bed,
-body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .fire-heat-haze,
-body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .snow-fall,
-body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .snow-fall-front,
-body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .snow-mist,
-body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .snow-drift{display:none!important}
+
+.theme-resource-icon{display:var(--theme-resource-icon-display);width:var(--theme-resource-icon-size);height:var(--theme-resource-icon-size);min-width:var(--theme-resource-icon-size);align-items:center;justify-content:center;color:var(--theme-resource-icon-color);font-family:var(--theme-font-label);font-style:normal;line-height:1;background-position:center;background-repeat:no-repeat;background-size:contain}
+.theme-resource-label{display:inline!important;color:inherit!important;font:inherit!important;letter-spacing:inherit!important;text-transform:inherit!important}
+[data-theme-frame]{position:relative;isolation:isolate}
+[data-theme-frame]::after{content:"";position:absolute;inset:var(--theme-frame-inset);z-index:8;pointer-events:none;border-radius:var(--theme-frame-radius);background-image:var(--theme-frame-image);background-repeat:no-repeat;background-position:center;background-size:100% 100%;opacity:var(--theme-frame-opacity)}
+
+/* Um tema exclusivo pode mudar somente variáveis e ainda assim atingir
+   os principais blocos. O CSS do próprio tema continua livre para usar
+   os seletores data-* abaixo para alterações específicas. */
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]){font-family:var(--theme-font-body)!important;background:var(--theme-page-bg)!important}
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) :is(h1,h2,h3,h4,h5,.big-name,.rail-identity h2,.equipment-card-title,.ability-title-row>b){font-family:var(--theme-font-display)!important}
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) :is(.eyebrow,.label,.rail-label,.core-stat-label,.theme-resource-label){font-family:var(--theme-font-label)!important}
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .card{background:var(--theme-card-bg)!important;border-color:var(--theme-card-border)!important;border-radius:var(--theme-card-radius)!important;box-shadow:var(--theme-card-shadow),var(--theme-card-glow)!important}
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) [data-theme-component="ability"]{background:var(--theme-ability-bg)!important}
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) [data-theme-component="equipment-card"]{background:var(--theme-equipment-bg)!important}
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .rail-orb>*{transform:translateY(var(--theme-orb-content-y))!important}
+
+/* Hooks semânticos estáveis para temas:
+   [data-theme-component="profile|tabs|resource-strip|combat-resource-dock|resource|ability|abilities|equipment-deck|equipment-card|orb"]
+   [data-resource-kind="hp|en|san|defense|dt|cast|divine"]
+   [data-resource-id="..."] [data-ability-id] [data-ability-type] [data-ability-source]
+   [data-equipment-kind] [data-equipment-key] [data-orb="level|bp"] [data-theme-tab]
+*/
+
+
+/* v5.14 — camadas ambientais para fundos, ruído, clima e overlays. */
+.theme-ambient-layer{position:fixed;inset:0;pointer-events:none;opacity:0;background:transparent center/cover no-repeat;transition:opacity .25s ease;z-index:0}
+.theme-ambient-back{z-index:0}.theme-ambient-front{z-index:90}
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .theme-ambient-layer{will-change:opacity,transform,filter}
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) .shell{position:relative;z-index:1}
+
+/* 9-slice opcional para molduras escaláveis, além do helper por PNG inteiro. */
+body{
+ --theme-border-image-source:none;
+ --theme-border-image-slice:1;
+ --theme-border-image-width:1;
+ --theme-border-image-outset:0;
+ --theme-border-image-repeat:stretch;
+}
+body[data-exclusive-theme]:not([data-exclusive-theme="none"]) [data-theme-frame]{
+ border-image-source:var(--theme-border-image-source)!important;
+ border-image-slice:var(--theme-border-image-slice)!important;
+ border-image-width:var(--theme-border-image-width)!important;
+ border-image-outset:var(--theme-border-image-outset)!important;
+ border-image-repeat:var(--theme-border-image-repeat)!important;
+}
+[data-theme-component="resource"]>span:first-child,
+[data-theme-component="resource"] .core-stat-label{display:flex;align-items:center;gap:6px}

@@ -1,1 +1,1 @@
-5.13.12 - importador de temas exclusivos completos
+5.14.0 — base preparada para temas: presets Dark/Light, hooks semânticos, ícones e Theme API

@@ -1,0 +1,13 @@
+{
+  "format": "duodecima-theme",
+  "formatVersion": 1,
+  "id": "template-v514",
+  "name": "Template v5.14",
+  "version": "1.0.0",
+  "author": "Duodécima",
+  "description": "Modelo base para criar um tema exclusivo usando a Theme API v5.14.",
+  "icon": "✦",
+  "preferredMode": "dark",
+  "assets": {},
+  "css": "{{scope}}{\n  --theme-page-bg:#080708;\n  --theme-font-body:Inter,system-ui,sans-serif;\n  --theme-font-display:Georgia,serif;\n  --theme-font-label:Inter,system-ui,sans-serif;\n  --theme-card-bg:linear-gradient(180deg,#151216,#090809);\n  --theme-card-border:#514046;\n  --theme-card-radius:10px;\n  --theme-card-shadow:0 18px 40px #0008;\n  --theme-card-glow:none;\n  --theme-ability-bg:#0b090a;\n  --theme-equipment-bg:linear-gradient(180deg,#120e10,#070607);\n  --theme-resource-icon-display:inline-flex;\n  --theme-orb-content-y:0px;\n}\n\n{{scope}} [data-resource-kind=\"hp\"] .theme-resource-icon{color:#d74b5b;}\n{{scope}} [data-resource-kind=\"en\"] .theme-resource-icon{color:#e3b95b;}\n{{scope}} [data-resource-kind=\"san\"] .theme-resource-icon{color:#b69bd8;}\n{{scope}} [data-resource-kind=\"defense\"] .theme-resource-icon{color:#d2d2d2;}\n\n{{scope}} [data-theme-component=\"equipment-card\"][data-theme-selected=\"true\"]{\n  box-shadow:0 22px 42px #0009,0 0 24px #d5364544!important;\n}\n\n/* Exemplos para assets:\n{{scope}} [data-theme-layer=\"back\"]{opacity:.4;background-image:url(\"ASSET_BACKGROUND_AQUI\");}\n{{scope}} [data-theme-frame=\"ability\"]{--theme-frame-image:url(\"ASSET_FRAME_AQUI\");--theme-frame-opacity:1;}\n*/"
+}
