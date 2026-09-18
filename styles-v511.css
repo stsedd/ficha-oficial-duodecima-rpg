@@ -4951,3 +4951,54 @@ body{
   --theme-slot-glow:0 0 22px rgba(var(--theme-accent-rgb,227,31,50),.12);
   --theme-slot-border:color-mix(in srgb,var(--theme-accent,#e31f32) 24%,var(--line) 76%);
 }
+
+
+/* =========================================================
+   v5.14.2 — ORB LAYOUT HOTFIX
+   Nível e BP ficam sempre centralizados acima do retrato,
+   sem sobrepor a imagem. Temas podem mudar apenas a aparência
+   dos medalhões, preservando esta geometria base.
+   ========================================================= */
+.rail-portrait-wrap{
+  position:relative!important;
+  padding-top:100px!important;
+}
+.rail-portrait-badges{
+  position:absolute!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  bottom:auto!important;
+  height:90px!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  gap:18px!important;
+  padding:0 8px!important;
+  box-sizing:border-box!important;
+  z-index:6!important;
+  pointer-events:none!important;
+}
+.rail-portrait-badges .rail-orb{
+  position:relative!important;
+  top:0!important;
+  left:auto!important;
+  right:auto!important;
+  flex:0 0 auto!important;
+  margin:0!important;
+  pointer-events:auto!important;
+}
+.rail-portrait-badges .rail-orb-level,
+.rail-portrait-badges .rail-orb-bp{
+  left:auto!important;
+  right:auto!important;
+}
+
+@media(max-width:700px){
+  .rail-portrait-wrap{padding-top:84px!important}
+  .rail-portrait-badges{height:76px!important;gap:12px!important;padding:0 5px!important}
+}
+@media(max-width:420px){
+  .rail-portrait-wrap{padding-top:78px!important}
+  .rail-portrait-badges{height:70px!important;gap:10px!important}
+}
