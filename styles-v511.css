@@ -5002,3 +5002,114 @@ body{
   .rail-portrait-wrap{padding-top:78px!important}
   .rail-portrait-badges{height:70px!important;gap:10px!important}
 }
+
+
+/* =========================================================
+   v5.14.3 — PROFILE BADGES + BANNER UPLOAD
+   Orbes visualmente conectados ao retrato, sem a faixa vazia grande.
+   ========================================================= */
+body{
+  --theme-orb-size:72px;
+  --theme-orb-row-height:58px;
+  --theme-orb-edge:12px;
+  --theme-orb-content-y:0px;
+}
+.rail-portrait-wrap{
+  position:relative!important;
+  padding-top:var(--theme-orb-row-height)!important;
+}
+.rail-portrait-badges{
+  position:absolute!important;
+  top:0!important;
+  left:var(--theme-orb-edge)!important;
+  right:var(--theme-orb-edge)!important;
+  bottom:auto!important;
+  height:var(--theme-orb-row-height)!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  z-index:7!important;
+  pointer-events:none!important;
+}
+.rail-portrait-badges::after{
+  content:""!important;
+  position:absolute!important;
+  left:calc(var(--theme-orb-size) - 3px)!important;
+  right:calc(var(--theme-orb-size) - 3px)!important;
+  top:calc(var(--theme-orb-size) / 2)!important;
+  height:1px!important;
+  background:linear-gradient(90deg,transparent,var(--line) 18%,var(--line) 82%,transparent)!important;
+  opacity:.72!important;
+  z-index:-1!important;
+  pointer-events:none!important;
+}
+.rail-portrait-badges .rail-orb{
+  position:relative!important;
+  top:-8px!important;
+  left:auto!important;
+  right:auto!important;
+  width:var(--theme-orb-size)!important;
+  height:var(--theme-orb-size)!important;
+  flex:0 0 var(--theme-orb-size)!important;
+  margin:0!important;
+  padding:0!important;
+  pointer-events:auto!important;
+  box-sizing:border-box!important;
+}
+.rail-portrait-badges .rail-orb-level,
+.rail-portrait-badges .rail-orb-bp{left:auto!important;right:auto!important}
+.rail-portrait-badges .rail-orb span{font-size:7.5px!important;line-height:1!important;margin:0 0 2px!important}
+.rail-portrait-badges .rail-orb strong,
+.rail-portrait-badges .rail-orb-level input,
+body .rail-portrait-badges .rail-orb-level input#levelOrbInput{
+  max-width:52px!important;
+  height:27px!important;
+  font-size:24px!important;
+  line-height:27px!important;
+}
+.rail-portrait{
+  position:relative!important;
+  z-index:2!important;
+}
+.rail-photo-button{position:relative!important;z-index:3!important}
+
+/* faz os medalhões parecerem ligados ao frame, sem cobrir o rosto */
+.rail-portrait-badges .rail-orb::after{
+  content:""!important;
+  position:absolute!important;
+  left:50%!important;
+  bottom:-7px!important;
+  width:18px!important;
+  height:8px!important;
+  transform:translateX(-50%)!important;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--theme-accent,#d53645) 55%,transparent),transparent)!important;
+  clip-path:polygon(50% 100%,0 0,100% 0)!important;
+  opacity:.55!important;
+  pointer-events:none!important;
+}
+
+.banner-upload-label{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  cursor:pointer!important;
+  user-select:none!important;
+}
+.banner-upload-label:focus-visible{
+  outline:2px solid var(--theme-accent-bright,#ff4b60)!important;
+  outline-offset:2px!important;
+}
+
+@media(max-width:700px){
+  body{--theme-orb-size:64px;--theme-orb-row-height:51px;--theme-orb-edge:8px}
+  .rail-portrait-badges .rail-orb{top:-7px!important}
+  .rail-portrait-badges .rail-orb strong,
+  .rail-portrait-badges .rail-orb-level input,
+  body .rail-portrait-badges .rail-orb-level input#levelOrbInput{font-size:21px!important;height:24px!important;line-height:24px!important;max-width:46px!important}
+}
+@media(max-width:420px){
+  body{--theme-orb-size:60px;--theme-orb-row-height:48px;--theme-orb-edge:5px}
+}

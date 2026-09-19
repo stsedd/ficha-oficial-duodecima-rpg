@@ -1573,7 +1573,34 @@ function longRest(){
     if(img){if(src){img.src=src;img.classList.remove('hidden');img.style.objectPosition=`${x}% ${y}%`;img.style.transform=`scale(${zoom/100})`}else{img.removeAttribute('src');img.classList.add('hidden');img.style.transform='none'}}
     if(empty)empty.classList.toggle('hidden',!!src);if(edit)edit.classList.toggle('hidden',!src);if(clear)clear.classList.toggle('hidden',!src);if(bannerBtn)bannerBtn.textContent=src?'Trocar imagem':'Adicionar banner';
   }
-  function readBannerImage(file,onReady){if(!file)return;const reader=new FileReader();reader.onload=()=>{const source=String(reader.result||''),img=new Image();img.onload=()=>{try{const max=2200,scale=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round((img.naturalWidth||img.width)*scale));canvas.height=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);onReady(canvas.toDataURL('image/webp',.88))}catch(_){onReady(source)}};img.onerror=()=>onReady(source);img.src=source};reader.readAsDataURL(file)}
+  function readBannerImage(file,onReady,onError){
+    if(!file)return;
+    if(!String(file.type||'').startsWith('image/')){onError?.('Selecione um arquivo de imagem válido.');return}
+    const reader=new FileReader();
+    reader.onerror=()=>onError?.('Não foi possível ler a imagem do banner.');
+    reader.onload=()=>{
+      const source=String(reader.result||''),img=new Image();
+      img.onload=()=>{
+        try{
+          let width=img.naturalWidth||img.width||1,height=img.naturalHeight||img.height||1;
+          const maxW=1800,maxH=900,scale=Math.min(1,maxW/width,maxH/height);
+          width=Math.max(1,Math.round(width*scale));height=Math.max(1,Math.round(height*scale));
+          const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+          const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)throw new Error('canvas');
+          ctx.drawImage(img,0,0,width,height);
+          let quality=.86,result=canvas.toDataURL('image/webp',quality);
+          while(result.length>1800000&&quality>.58){quality-=.07;result=canvas.toDataURL('image/webp',quality)}
+          if(result.length>2400000){
+            const shrink=Math.sqrt(2100000/result.length),w=Math.max(1,Math.round(width*shrink)),h=Math.max(1,Math.round(height*shrink)),c2=document.createElement('canvas');c2.width=w;c2.height=h;c2.getContext('2d',{alpha:false}).drawImage(canvas,0,0,w,h);result=c2.toDataURL('image/webp',.72)
+          }
+          onReady(result);
+        }catch(_){onReady(source)}
+      };
+      img.onerror=()=>onError?.('A imagem selecionada não pôde ser carregada.');
+      img.src=source;
+    };
+    reader.readAsDataURL(file)
+  }
   function openBannerCrop(source,x=50,y=50,scale=100){if(!source)return;bannerDraft={source,x:clamp(Number(x)||50,0,100),y:clamp(Number(y)||50,0,100),scale:clamp(Number(scale)||100,100,220)};const xi=byId('bannerCropX'),yi=byId('bannerCropY'),si=byId('bannerCropScale');if(xi)xi.value=String(bannerDraft.x);if(yi)yi.value=String(bannerDraft.y);if(si)si.value=String(bannerDraft.scale);const dialog=byId('bannerCropDialog');updateBannerCropPreview();if(dialog?.showModal)dialog.showModal()}
   function updateBannerCropPreview(){if(!bannerDraft)return;const img=byId('bannerCropPreview'),x=byId('bannerCropX'),y=byId('bannerCropY'),scale=byId('bannerCropScale');if(x)bannerDraft.x=clamp(Number(x.value)||bannerDraft.x,0,100);if(y)bannerDraft.y=clamp(Number(y.value)||bannerDraft.y,0,100);if(scale)bannerDraft.scale=clamp(Number(scale.value)||bannerDraft.scale,100,220);if(img){img.src=bannerDraft.source;img.style.objectPosition=`${bannerDraft.x}% ${bannerDraft.y}%`;img.style.transform=`scale(${bannerDraft.scale/100})`}if(x)x.value=bannerDraft.x;if(y)y.value=bannerDraft.y;if(scale)scale.value=bannerDraft.scale;const xv=byId('bannerCropXValue'),yv=byId('bannerCropYValue'),sv=byId('bannerCropScaleValue');if(xv)xv.textContent=`${bannerDraft.x}%`;if(yv)yv.textContent=`${bannerDraft.y}%`;if(sv)sv.textContent=`${bannerDraft.scale}%`}
   function bindShellChrome(){
@@ -1584,8 +1611,17 @@ function longRest(){
     document.querySelectorAll('[data-special-choice]').forEach(btn=>btn.onclick=()=>{const c=btn.dataset.specialChoice;state.appearance.special=c==='fire'?'fire':c==='snow'?'snow':'none';state.appearance.exclusiveThemeId='';save();syncShellChrome();notify(state.appearance.special==='fire'?'Tema Fogo ativado.':state.appearance.special==='snow'?'Tema Neve ativado.':'Tema especial desativado.')});
     if(exclusiveInput)exclusiveInput.onchange=async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;try{const theme=await importExclusiveThemeFile(file);renderExclusiveThemeList();notify(`Tema exclusivo ${theme.name} instalado e ativado.`)}catch(err){console.warn(err);notify(err?.message||'Não foi possível instalar este tema exclusivo.')}};
     if(byId('exclusiveThemeDeactivate'))byId('exclusiveThemeDeactivate').onclick=()=>{state.appearance.exclusiveThemeId='';save();syncShellChrome();notify('Tema exclusivo desativado.')};
-    if(byId('bannerBtn'))byId('bannerBtn').onclick=()=>upload?.click();
-    if(upload)upload.onchange=e=>{const file=e.target.files?.[0];if(!file)return;readBannerImage(file,src=>openBannerCrop(src,50,50,100));e.target.value=''};
+    const bannerControl=byId('bannerBtn');
+    if(bannerControl){
+      bannerControl.onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&upload){e.preventDefault();upload.value='';upload.click()}};
+    }
+    if(upload)upload.onchange=e=>{
+      const file=e.target.files?.[0];
+      e.target.value='';
+      if(!file)return;
+      notify('Preparando banner…');
+      readBannerImage(file,src=>openBannerCrop(src,50,50,100),msg=>notify(msg||'Não foi possível abrir o banner.'))
+    };
     if(byId('editBannerBtn'))byId('editBannerBtn').onclick=()=>{const h=state.history||{};openBannerCrop(h.bannerSourceUrl||h.bannerUrl,h.bannerPositionX,h.bannerPositionY,h.bannerScale)};
     if(byId('clearBannerBtn'))byId('clearBannerBtn').onclick=()=>{state.history.bannerUrl='';state.history.bannerSourceUrl='';state.history.bannerPositionX=50;state.history.bannerPositionY=50;state.history.bannerScale=100;save();syncShellChrome();notify('Banner removido.')};
     ['bannerCropX','bannerCropY','bannerCropScale'].forEach(id=>{const el=byId(id);if(el)el.oninput=updateBannerCropPreview});

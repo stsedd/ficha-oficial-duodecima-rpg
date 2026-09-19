@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Character Archive — Legio XII Fulminata · v5.14.0</title>
-  <link rel="stylesheet" href="styles-v511.css?v=5.14.2-orb-layout">
+  <title>Character Archive — Legio XII Fulminata · v5.14.3</title>
+  <link rel="stylesheet" href="styles-v511.css?v=5.14.3-profile-banner">
 </head>
 <body data-theme="standard" data-mode="dark" data-palette="red" data-special="none">
   <div class="theme-ambient-layer theme-ambient-back" data-theme-layer="back" aria-hidden="true"></div>
@@ -31,13 +31,13 @@
       <div class="archive-toolbar-copy">
         <div id="coreStatus" class="core-status loading" title="Sincronizando regras"><i></i><span>CORE…</span></div>
         <span class="archive-save-note"><b>Salvamento local</b> · esta ficha fica neste navegador</span>
-        <span class="version-chip" title="Versão da ficha">v5.14.0</span>
+        <span class="version-chip" title="Versão da ficha">v5.14.3</span>
       </div>
       <div class="actions archive-actions">
         <button id="exportBtn" class="ghost small-btn" type="button">Exportar JSON</button>
         <label class="ghost file-btn small-btn">Importar JSON<input id="importInput" type="file" accept="application/json"></label>
         <button id="helpBtn" class="ghost small-btn" type="button">Ajuda</button>
-        <button id="bannerBtn" class="primary small-btn" type="button">Adicionar banner</button>
+        <label id="bannerBtn" class="primary file-btn small-btn banner-upload-label" for="bannerUploadInput" role="button" tabindex="0">Adicionar banner</label>
         <button id="editBannerBtn" class="ghost small-btn hidden" type="button">Ajustar recorte</button>
         <button id="clearBannerBtn" class="ghost small-btn hidden" type="button">Remover banner</button>
         <button id="resetBtn" class="danger small-btn" type="button">Resetar</button>
@@ -48,7 +48,7 @@
     <section id="creationView" class="grid two"></section>
     <section id="sheetView" class="hidden"></section>
 
-    <footer><p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.14.0</p></footer>
+    <footer><p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.14.3</p></footer>
   </main>
 
   <dialog id="bannerCropDialog" class="banner-crop-dialog">
@@ -144,6 +144,6 @@
   <script src="roma-v55.js?v=5.5.0"></script>
   <script src="familiars-v55.js?v=5.5.0"></script>
   <script src="core-bridge-v511.js?v=5.11.0"></script>
-  <script src="bootstrap-v511.js?v=5.14.2-orb-layout"></script>
+  <script src="bootstrap-v511.js?v=5.14.3-profile-banner"></script>
 </body>
 </html>
