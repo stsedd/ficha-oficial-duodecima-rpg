@@ -7,6 +7,7 @@
 
   const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const uniq=arr=>[...new Set((arr||[]).filter(Boolean))];
+  const originKey=data=>`${data?.godId||''}|${data?.lineage?.secondaryGodId||''}`;
 
   function readState(){
     try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')}catch(_){return null}
@@ -57,9 +58,10 @@
     const plus2=attributeOptions(data.godId,data.lineage.secondaryGodId,2);
     const plus1=attributeOptions(data.godId,data.lineage.secondaryGodId,1);
     const skills=skillOptions(data.godId,data.lineage.secondaryGodId);
-    const pick2=data.lineage.compoundAttributePlus2||'';
-    const pick1=data.lineage.compoundAttributePlus1||'';
-    const pickSkill=data.lineage.compoundSkillChoice||'';
+    const sameOrigins=data.lineage.compoundChoiceOrigins===originKey(data);
+    const pick2=sameOrigins?(data.lineage.compoundAttributePlus2||''):'';
+    const pick1=sameOrigins?(data.lineage.compoundAttributePlus1||''):'';
+    const pickSkill=sameOrigins?(data.lineage.compoundSkillChoice||''):'';
 
     main.hpBase=Math.min(Number(a.hpBase)||0,Number(b.hpBase)||0);
     // O Core define o menor HP inicial; a progressão por década segue o deus principal.
@@ -134,8 +136,9 @@
     const main=godById(data.godId),sub=godById(data.lineage.secondaryGodId),a=original(data.godId),b=original(data.lineage.secondaryGodId);
     if(!main||!sub||!a||!b)return;
     const plus2=attributeOptions(data.godId,data.lineage.secondaryGodId,2),plus1=attributeOptions(data.godId,data.lineage.secondaryGodId,1),skills=skillOptions(data.godId,data.lineage.secondaryGodId);
-    const pick2=data.lineage.compoundAttributePlus2||'',pick1=data.lineage.compoundAttributePlus1||'',pickSkill=data.lineage.compoundSkillChoice||'';
-    const complete=isValid(pick2,plus2)&&isValid(pick1,plus1)&&isValid(pickSkill,skills);
+    const sameOrigins=data.lineage.compoundChoiceOrigins===originKey(data);
+    const pick2=sameOrigins?(data.lineage.compoundAttributePlus2||''):'',pick1=sameOrigins?(data.lineage.compoundAttributePlus1||''):'',pickSkill=sameOrigins?(data.lineage.compoundSkillChoice||''):'';
+    const complete=sameOrigins&&isValid(pick2,plus2)&&isValid(pick1,plus1)&&isValid(pickSkill,skills);
     const hp=Math.min(Number(a.hpBase)||0,Number(b.hpBase)||0);
     const signature=['compound',data.godId,data.lineage.secondaryGodId||'',pick2,pick1,pickSkill,complete?'1':'0'].join('|');
     const existing=box.querySelector('.lineage-core-creation');
@@ -160,7 +163,7 @@
       if(!isValid(v2,plus2)||!isValid(v1,plus1)||!isValid(vs,skills)){
         const status=panel.querySelector('.lineage-core-status');if(status)status.textContent='Selecione uma opção válida nos três campos.';return;
       }
-      now.lineage.compoundAttributePlus2=v2;now.lineage.compoundAttributePlus1=v1;now.lineage.compoundSkillChoice=vs;now.divineSkillChoice='';
+      now.lineage.compoundAttributePlus2=v2;now.lineage.compoundAttributePlus1=v1;now.lineage.compoundSkillChoice=vs;now.lineage.compoundChoiceOrigins=originKey(now);now.divineSkillChoice='';
       // Se a perícia antes escolhida como comum agora virou divina, libera a vaga correspondente.
       now.initialSkills=(now.initialSkills||[]).filter(s=>s!==vs);
       if(writeState(now))location.reload();
