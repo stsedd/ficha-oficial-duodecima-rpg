@@ -62,7 +62,7 @@
     const pickSkill=data.lineage.compoundSkillChoice||'';
 
     main.hpBase=Math.min(Number(a.hpBase)||0,Number(b.hpBase)||0);
-    // A regra do Core altera o HP inicial; a progressão por década permanece a do deus principal.
+    // O Core define o menor HP inicial; a progressão por década segue o deus principal.
     main.hpPerDecade=Number(a.hpPerDecade)||0;
     main.bonuses={};
     if(isValid(pick2,plus2))main.bonuses[pick2]=(main.bonuses[pick2]||0)+2;
@@ -103,21 +103,33 @@
 
   function optionsHTML(rows,current,placeholder){return `<option value="">${esc(placeholder)}</option>${rows.map(r=>`<option value="${esc(r.value)}" ${r.value===current?'selected':''}>${esc(r.label)}</option>`).join('')}`}
 
+  function disableFinishUntilComplete(view,complete){
+    const finish=view.querySelector('#finishBtn');
+    if(finish&&!complete){finish.disabled=true;finish.title='Defina o +2, o +1 e a perícia do Legado Composto.'}
+  }
+
   function decorateCreation(){
     const view=document.querySelector('#creationView');if(!view||view.classList.contains('hidden'))return;
     const data=readState();if(!data?.lineage)return;
     const box=view.querySelector('.legacy-creation-box');if(!box)return;
-    box.querySelector('.lineage-core-creation')?.remove();box.querySelector('.lineage-direct-core-note')?.remove();
 
-    if(data.lineage.type==='direct'){
+    const type=data.lineage.type||'normal';
+    if(type==='direct'){
+      box.querySelector('.lineage-core-creation')?.remove();
       const structure=view.querySelector('#creationStructureGod');
       if(structure){const label=structure.closest('label');if(label)label.style.display='none'}
-      const notice=document.createElement('div');notice.className='notice lineage-direct-core-note';
-      notice.innerHTML='<b>Bônus iniciais do Legado Direto:</b> HP inicial, bônus de atributos e perícia seguem sempre o <b>deus principal</b>. A segunda origem continua sendo usada para a composição do kit de habilidades.';
-      box.appendChild(notice);
+      const signature=`direct|${data.godId}|${data.lineage.secondaryGodId||''}`;
+      let note=box.querySelector('.lineage-direct-core-note');
+      if(note?.dataset.signature===signature)return;
+      note?.remove();
+      note=document.createElement('div');note.className='notice lineage-direct-core-note';note.dataset.signature=signature;
+      note.innerHTML='<b>Bônus iniciais do Legado Direto:</b> HP inicial, bônus de atributos e perícia seguem sempre o <b>deus principal</b>. A segunda origem continua sendo usada para a composição do kit de habilidades.';
+      box.appendChild(note);
       return;
     }
-    if(data.lineage.type!=='compound')return;
+
+    box.querySelector('.lineage-direct-core-note')?.remove();
+    if(type!=='compound'){box.querySelector('.lineage-core-creation')?.remove();return;}
 
     const main=godById(data.godId),sub=godById(data.lineage.secondaryGodId),a=original(data.godId),b=original(data.lineage.secondaryGodId);
     if(!main||!sub||!a||!b)return;
@@ -125,8 +137,12 @@
     const pick2=data.lineage.compoundAttributePlus2||'',pick1=data.lineage.compoundAttributePlus1||'',pickSkill=data.lineage.compoundSkillChoice||'';
     const complete=isValid(pick2,plus2)&&isValid(pick1,plus1)&&isValid(pickSkill,skills);
     const hp=Math.min(Number(a.hpBase)||0,Number(b.hpBase)||0);
+    const signature=['compound',data.godId,data.lineage.secondaryGodId||'',pick2,pick1,pickSkill,complete?'1':'0'].join('|');
+    const existing=box.querySelector('.lineage-core-creation');
+    if(existing?.dataset.signature===signature){disableFinishUntilComplete(view,complete);return;}
+    existing?.remove();
 
-    const panel=document.createElement('section');panel.className=`lineage-core-creation${complete?' is-complete':''}`;panel.innerHTML=`
+    const panel=document.createElement('section');panel.className=`lineage-core-creation${complete?' is-complete':''}`;panel.dataset.signature=signature;panel.innerHTML=`
       <div class="lineage-core-head"><div><span class="label">BÔNUS INICIAIS · CORE</span><h4>Escolhas do Legado Composto</h4></div><small>Não soma os dois kits</small></div>
       <div class="lineage-core-hp"><b>HP inicial:</b> ${hp} + CON — menor valor entre ${esc(main.name)} e ${esc(sub.name)}.</div>
       <div class="lineage-core-fields">
@@ -136,8 +152,8 @@
       </div>
       <div class="lineage-core-actions"><span class="lineage-core-status">${complete?'Escolhas aplicadas à ficha.':'Faça as três escolhas antes de concluir a criação.'}</span><button type="button" class="primary" id="applyCompoundCore">Aplicar escolhas</button></div>`;
     box.appendChild(panel);
+    disableFinishUntilComplete(view,complete);
 
-    const finish=view.querySelector('#finishBtn');if(finish&&!complete){finish.disabled=true;finish.title='Defina o +2, o +1 e a perícia do Legado Composto.'}
     panel.querySelector('#applyCompoundCore')?.addEventListener('click',()=>{
       const now=readState();if(!now?.lineage)return;
       const v2=panel.querySelector('#compoundPlus2Core')?.value||'',v1=panel.querySelector('#compoundPlus1Core')?.value||'',vs=panel.querySelector('#compoundSkillCore')?.value||'';
@@ -145,7 +161,7 @@
         const status=panel.querySelector('.lineage-core-status');if(status)status.textContent='Selecione uma opção válida nos três campos.';return;
       }
       now.lineage.compoundAttributePlus2=v2;now.lineage.compoundAttributePlus1=v1;now.lineage.compoundSkillChoice=vs;now.divineSkillChoice='';
-      // Se a perícia escolhida antes como perícia comum agora virou divina, libera a vaga.
+      // Se a perícia antes escolhida como comum agora virou divina, libera a vaga correspondente.
       now.initialSkills=(now.initialSkills||[]).filter(s=>s!==vs);
       if(writeState(now))location.reload();
     });
