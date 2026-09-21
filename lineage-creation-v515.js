@@ -25,6 +25,12 @@
     }]));
   }
 
+  function restoreGod(id){
+    const g=godById(id),src=original(id);if(!g||!src)return;
+    g.hpBase=src.hpBase;g.hpPerDecade=src.hpPerDecade;g.bonuses={...src.bonuses};g.grantedSkills=[...src.grantedSkills];g.skillChoice=[...src.skillChoice];
+  }
+  function restoreAllGods(){for(const id of originals.keys())restoreGod(id)}
+
   function attributeOptions(mainId,subId,value){
     const rows=[];
     for(const id of [mainId,subId]){
@@ -73,15 +79,18 @@
     main.skillChoice=[];
   }
 
+  function applyRuntimeLineage(data){
+    restoreAllGods();
+    if(data?.lineage?.type==='compound')applyCompoundData(data);
+  }
+
   function preboot(){
     captureOriginals();
     const data=readState();
     if(!data)return;
     let changed=normalizeDirectState(data);
-    if(data.lineage?.type==='compound'){
-      if(data.divineSkillChoice){data.divineSkillChoice='';changed=true}
-      applyCompoundData(data);
-    }
+    if(data.lineage?.type==='compound'&&data.divineSkillChoice){data.divineSkillChoice='';changed=true}
+    applyRuntimeLineage(data);
     if(changed)writeState(data);
   }
 
@@ -174,7 +183,15 @@
     installStyles();
     const view=document.querySelector('#creationView');if(!view)return;
     let queued=false;const run=()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;decorateCreation()})};
-    new MutationObserver(run).observe(view,{childList:true,subtree:true});run();
+    new MutationObserver(run).observe(view,{childList:true,subtree:true});
+    view.addEventListener('change',event=>{
+      const id=event.target?.id;
+      if(!['godSelect','creationLineageType','creationSecondaryGod'].includes(id))return;
+      // O app base salva a troca e re-renderiza de forma síncrona. Recarregar logo depois
+      // garante que HP, bônus e perícias sejam reconstruídos a partir das novas origens.
+      setTimeout(()=>location.reload(),0);
+    });
+    run();
   }
 
   async function init(){
