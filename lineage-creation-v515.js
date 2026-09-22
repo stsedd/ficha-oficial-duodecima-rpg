@@ -4,10 +4,22 @@
   const STORAGE_KEY='duodecima_universal_stage4_v24';
   const ATTR_LABEL={for:'Força',des:'Destreza',con:'Constituição',int:'Inteligência',fe:'Fé',car:'Carisma'};
   let originals=new Map();
+  let appliedRuntimeSignature='';
+  let reloadScheduled=false;
 
   const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const uniq=arr=>[...new Set((arr||[]).filter(Boolean))];
   const originKey=data=>`${data?.godId||''}|${data?.lineage?.secondaryGodId||''}`;
+  const runtimeSignature=data=>[
+    data?.lineage?.type||'normal',
+    data?.godId||'',
+    data?.lineage?.secondaryGodId||'',
+    data?.lineage?.structureGodId||'',
+    data?.lineage?.compoundChoiceOrigins||'',
+    data?.lineage?.compoundAttributePlus2||'',
+    data?.lineage?.compoundAttributePlus1||'',
+    data?.lineage?.compoundSkillChoice||''
+  ].join('|');
 
   function readState(){
     try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')}catch(_){return null}
@@ -82,16 +94,45 @@
   function applyRuntimeLineage(data){
     restoreAllGods();
     if(data?.lineage?.type==='compound')applyCompoundData(data);
+    appliedRuntimeSignature=runtimeSignature(data);
   }
 
   function preboot(){
     captureOriginals();
     const data=readState();
-    if(!data)return;
+    if(!data){appliedRuntimeSignature=runtimeSignature(null);return;}
     let changed=normalizeDirectState(data);
     if(data.lineage?.type==='compound'&&data.divineSkillChoice){data.divineSkillChoice='';changed=true}
     applyRuntimeLineage(data);
-    if(changed)writeState(data);
+    if(changed){writeState(data);appliedRuntimeSignature=runtimeSignature(data)}
+  }
+
+  function checkRuntimeSignature(){
+    if(reloadScheduled)return;
+    const current=runtimeSignature(readState());
+    if(current===appliedRuntimeSignature)return;
+    reloadScheduled=true;
+    // Importar, resetar ou substituir a origem pode trocar o personagem sem reiniciar a aba.
+    // Como o Legado Composto recompõe os dados canônicos do deus em memória, um reload curto
+    // garante que a nova ficha sempre parta dos valores originais do Core antes de aplicar seu Legado.
+    setTimeout(()=>location.reload(),0);
+  }
+
+  function observeRuntimeLifecycle(){
+    let queued=false;
+    const scheduleCheck=()=>{
+      if(queued||reloadScheduled)return;
+      queued=true;
+      queueMicrotask(()=>{queued=false;checkRuntimeSignature()});
+    };
+    const root=document.querySelector('main')||document.body;
+    if(root)new MutationObserver(scheduleCheck).observe(root,{childList:true,subtree:true});
+    document.addEventListener('change',event=>{
+      if(event.target?.id==='importInput')setTimeout(checkRuntimeSignature,0);
+    });
+    document.addEventListener('click',event=>{
+      if(event.target?.closest?.('#resetBtn'))setTimeout(checkRuntimeSignature,0);
+    });
   }
 
   function installStyles(){
@@ -197,6 +238,7 @@
   async function init(){
     try{await window.DUODECIMA_CORE_READY}catch(_){ }
     preboot();
+    observeRuntimeLifecycle();
     observeCreation();
   }
 
