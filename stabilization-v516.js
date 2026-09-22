@@ -76,14 +76,16 @@
     const raw=String(css||'').replace(/\/\*[\s\S]*?\*\//g,'');
     if(!raw.trim())return [];
     const issues=[];
+    const scopeToken='__DUODECIMA_SCOPE__';
     if(!raw.includes('{{scope}}'))issues.push('O CSS do tema não usa {{scope}}.');
-    const headers=[...raw.matchAll(/([^{}]+)\{/g)].map(m=>m[1].trim()).filter(Boolean);
+    const normalized=raw.replace(/\{\{scope\}\}/g,scopeToken);
+    const headers=[...normalized.matchAll(/([^{}]+)\{/g)].map(m=>m[1].trim()).filter(Boolean);
     for(const header of headers){
       if(header.startsWith('@'))continue;
       if(/^(from|to|\d+(?:\.\d+)?%)$/i.test(header))continue;
       const selectors=header.split(',').map(x=>x.trim()).filter(Boolean);
       for(const selector of selectors){
-        if(!selector.includes('{{scope}}')){issues.push(`Seletor fora do escopo: ${selector.slice(0,100)}`);break;}
+        if(!selector.includes(scopeToken)){issues.push(`Seletor fora do escopo: ${selector.slice(0,100)}`);break;}
       }
       if(issues.length>4)break;
     }
