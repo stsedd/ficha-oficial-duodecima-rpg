@@ -1,0 +1,65 @@
+name: Ficha UI smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.js'
+      - '*.css'
+      - '*.html'
+      - '*.duodecima-theme'
+      - 'scripts/**'
+      - '.github/workflows/ui-smoke.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Syntax check
+        run: |
+          node --check core-bridge-v511.js
+          node --check lineage-creation-v515.js
+          node --check bootstrap-v511.js
+          node --check stabilization-v516.js
+          node --check app-v511.js
+
+      - name: Validate exclusive themes
+        run: node scripts/validate-themes.mjs
+
+      - name: Install Playwright
+        run: npm install --no-save playwright@1.55.0
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start local site
+        run: |
+          python3 -m http.server 4173 > /tmp/duodecima-http.log 2>&1 &
+          echo $! > /tmp/duodecima-http.pid
+          sleep 2
+
+      - name: Run UI smoke
+        run: node scripts/ui-smoke.mjs
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ficha-ui-smoke
+          path: ui-artifacts
+          if-no-files-found: ignore
