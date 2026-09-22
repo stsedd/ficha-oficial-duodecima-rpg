@@ -1,0 +1,45 @@
+name: Sync app Core contract
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/patch-app-core-contract.mjs'
+      - '.github/workflows/sync-app-core-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Patch app canonical limits
+        run: node scripts/patch-app-core-contract.mjs
+
+      - name: Syntax check
+        run: node --check app-v511.js
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- app-v511.js; then
+            echo 'app-v511.js já está sincronizado.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app-v511.js
+          git commit -m 'chore: sync ficha canonical limits with Core'
+          git push
