@@ -5,7 +5,7 @@
   try {
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`lineage-creation-v515.js?v=5.15.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`lineage-creation-v515.js?v=5.15.1-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;
       patch.onerror=()=>reject(new Error('Falha ao carregar automação de Legados'));
       document.body.appendChild(patch);
@@ -16,7 +16,19 @@
   }
 
   const script = document.createElement('script');
-  script.src = `app-v511.js?v=5.15.0-lineage-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src = `app-v511.js?v=5.15.1-stabilization-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer = false;
+  script.onload=async()=>{
+    try{
+      await new Promise((resolve,reject)=>{
+        const patch=document.createElement('script');
+        patch.src=`stabilization-v516.js?v=5.15.1-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.onload=resolve;
+        patch.onerror=()=>reject(new Error('Falha ao carregar camada de estabilização'));
+        document.body.appendChild(patch);
+      });
+      try{await window.DUODECIMA_STABILIZATION_READY}catch(_){ }
+    }catch(err){console.warn('[Ficha] Camada de estabilização indisponível.',err)}
+  };
   document.body.appendChild(script);
 })();
