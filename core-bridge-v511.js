@@ -2,6 +2,7 @@
   'use strict';
 
   const DEFAULT_BASE = 'https://stsedd.github.io/duodecima-core/';
+  const SNAPSHOT_URL = './core-snapshot.json';
   const state = { status:'loading', source:'fallback', version:'—', error:null, base:DEFAULT_BASE };
   window.DUODECIMA_CORE_STATE = state;
 
@@ -9,8 +10,8 @@
   const coreBase = escBase(window.DUODECIMA_CORE_BASE || DEFAULT_BASE);
   state.base = coreBase;
 
-  async function getJson(url){
-    const response = await fetch(url, { cache:'no-store' });
+  async function getJson(url, cache='default'){
+    const response = await fetch(url, { cache });
     if(!response.ok) throw new Error(`${response.status} ${response.statusText} · ${url}`);
     return response.json();
   }
@@ -21,9 +22,9 @@
     if(!raw)return '';
     raw=raw.replace(/https?:\/\/cdn\.discordapp\.com\/emojis\/\S+/gi,'');
     raw=raw.replace(/\s*[ৎ౨꒰◝🤍💔🍒﹒ㄑ✦\[\],.\-–—]*\s*(?:cherry\s+bow|cherry\s+mae)\b[\s\S]*?(?:ícone\s+de\s+cargo|copão\s+de\s+600)[\s\S]*$/i,'');
-  raw=raw.replace(/\s*[^\n]{0,140}\[SPQR\]\s*,?\s*(?:ícone|icone)\s+de\s+cargo[\s\S]*$/i,'');
-  raw=raw.replace(/\s*[^\n]{0,140}(?:copão|copao)\s+de\s+600[\s\S]*$/i,'');
-  raw=raw.replace(/<@!?&?\d+>|<#\d+>/g,'');
+    raw=raw.replace(/\s*[^\n]{0,140}\[SPQR\]\s*,?\s*(?:ícone|icone)\s+de\s+cargo[\s\S]*$/i,'');
+    raw=raw.replace(/\s*[^\n]{0,140}(?:copão|copao)\s+de\s+600[\s\S]*$/i,'');
+    raw=raw.replace(/<@!?&?\d+>|<#\d+>/g,'');
     return raw.replace(/[ \t\f\v]+/g,' ').replace(/ *\n */g,'\n').replace(/\n{3,}/g,'\n\n').trim();
   }
   function cleanCoreNode(value){
@@ -33,7 +34,6 @@
     return value;
   }
 
-  function attrName(id, attrs){ return attrs.get(id)?.name || id; }
   function skillName(id, skills){ return skills.get(id)?.name || id; }
 
   function normalizeResource(r){
@@ -130,7 +130,7 @@
     return db;
   }
 
-  function mapTalents(core){
+  function mapTalents(core, policies){
     return (core.talents || []).map(t => ({
       id:t.id,
       name:t.name,
@@ -138,6 +138,7 @@
       description:t.description || '',
       repeatable:t.repeatable !== false,
       params:[...(t.params || [])],
+      stacking:policies?.policies?.[t.id] || null,
       automation:t.automation || undefined,
       manual:!!t.manual
     }));
@@ -156,8 +157,18 @@
     const sys = core.system || {};
     const equipment = core.equipment || {};
     return {
+      levels:{
+        min:Number(sys.levels?.min ?? 1),
+        max:Number(sys.levels?.max ?? 100)
+      },
+      attributes:{
+        startingPoints:Number(sys.attributes?.startingPoints ?? 8),
+        normalMax:Number(sys.attributes?.normalMax ?? 5),
+        increaseLevels:[...(sys.attributes?.increaseLevels || [20,40,60,80,100])]
+      },
       conditions:mapConditions(core),
       materials:[...(equipment.materials || [])],
+      craftingComponents:[...(equipment.craftingComponents || [])],
       armorTypes:[...(equipment.armorTypes || [])],
       weaponTypes:[...(equipment.weaponTypes || [])],
       proficiencyRanges:[...(sys.proficiency?.ranges || [])],
@@ -196,56 +207,75 @@
       el.title = 'Regras carregadas do Duodécima Core';
     } else if(state.status === 'fallback'){
       el.className = 'core-status fallback';
-      el.innerHTML = '<i></i><span>SNAPSHOT LOCAL</span>';
-      el.title = 'Core indisponível; usando a cópia local da ficha';
+      el.innerHTML = `<i></i><span>${state.source==='snapshot'?'SNAPSHOT '+state.version:'SNAPSHOT LOCAL'}</span>`;
+      el.title = state.source==='snapshot'?'Core remoto indisponível; usando o último snapshot canônico sincronizado.':'Core indisponível; usando a cópia local da ficha';
     } else {
       el.className = 'core-status loading';
       el.innerHTML = '<i></i><span>CORE…</span>';
     }
   }
 
+  async function loadRemoteCore(){
+    const manifest = await getJson(`${coreBase}manifest.json`, 'no-cache');
+    const q = encodeURIComponent(manifest.contentVersion || manifest.updatedAt || 'current');
+    const pairs = await Promise.all(Object.entries(manifest.files || {}).map(async ([key,file]) => [key,await getJson(`${coreBase}${file}?v=${q}`,'default')]));
+    return { manifest, ...Object.fromEntries(pairs) };
+  }
+
+  async function loadSnapshot(){
+    const snapshot=await getJson(`${SNAPSHOT_URL}?v=1`,'no-cache');
+    if(!snapshot?.manifest||!snapshot?.gods||!snapshot?.skills||!snapshot?.system)throw new Error('Snapshot local incompleto.');
+    return snapshot;
+  }
+
+  function installCore(bundle, source){
+    const {manifest,attributes,skills,talents,talentPolicies,conditions,gods,system,equipment,aliases,origins}=bundle;
+    if(!manifest||!attributes||!skills||!talents||!conditions||!gods||!system||!equipment)throw new Error('Pacote do Core incompleto.');
+    state.version = manifest.contentVersion || manifest.updatedAt || 'online';
+    const skillMap = byId(skills.skills || []);
+    const deityList = (gods.deities || []).filter(d => d.kitAvailable && d.selectable !== false);
+    window.DUODECIMA_SKILLS = (skills.skills || []).map(s => ({ name:s.name, attr:s.attribute, id:s.id, description:s.description || '' }));
+    window.DUODECIMA_TALENTS = mapTalents(talents,talentPolicies);
+    window.DUODECIMA_GODS = deityList.map(d => mapGod(d,skillMap));
+    window.DUODECIMA_EXCLUDED_GODS = (gods.deities || []).filter(d => !d.kitAvailable || d.selectable === false).map(d => ({id:d.id,name:d.name,group:d.groupLabel || d.group}));
+    window.DUODECIMA_ABILITIES = mapAbilities(deityList);
+    window.DUODECIMA_SYSTEM = mapSystem({conditions:conditions.conditions || [], system, equipment});
+    window.DUODECIMA_LINEAGE = system.lineage || {};
+    window.DUODECIMA_ORIGINS = origins || {};
+    const magicCore = system.magicAwakening || {};
+    if(window.DUODECIMA_MAGIC){
+      window.DUODECIMA_MAGIC = {
+        ...window.DUODECIMA_MAGIC,
+        maxSacrifices:Number(magicCore.maxSacrifices ?? window.DUODECIMA_MAGIC.maxSacrifices ?? 3),
+        sacrificeEnergyEach:Number(magicCore.sacrificeEnergyEach ?? window.DUODECIMA_MAGIC.sacrificeEnergyEach ?? 25),
+        sacrificeCanGoBelowZero:magicCore.canReduceBelowZero !== false,
+        divineBonusesSacrificable:magicCore.divineBonusesSacrificable === true,
+        sacrificialAttributes:[...(magicCore.sacrificialAttributes || ['for','des','con'])]
+      };
+    }
+    window.DUODECIMA_CORE_DATA = {manifest,attributes,skills,talents,talentPolicies,conditions,gods,system,equipment,aliases,origins};
+    state.manifest=manifest;
+    state.source=source;
+    state.status=source==='core'?'online':'fallback';
+  }
+
   async function init(){
     updateStatus();
     try{
-      const manifest = await getJson(`${coreBase}manifest.json?t=${Date.now()}`);
-      state.version = manifest.contentVersion || manifest.updatedAt || 'online';
-      const q = encodeURIComponent(state.version);
-      const file = key => manifest.files?.[key] || `data/${key}.json`;
-      const [attributes,skills,talents,conditions,gods,system,equipment,aliases] = await Promise.all([
-        getJson(`${coreBase}${file('attributes')}?v=${q}`),
-        getJson(`${coreBase}${file('skills')}?v=${q}`),
-        getJson(`${coreBase}${file('talents')}?v=${q}`),
-        getJson(`${coreBase}${file('conditions')}?v=${q}`),
-        getJson(`${coreBase}${file('gods')}?v=${q}`),
-        getJson(`${coreBase}${file('system')}?v=${q}`),
-        getJson(`${coreBase}${file('equipment')}?v=${q}`),
-        getJson(`${coreBase}${file('aliases')}?v=${q}`)
-      ]);
-      const skillMap = byId(skills.skills || []);
-      const deityList = (gods.deities || []).filter(d => d.kitAvailable && d.selectable !== false);
-      window.DUODECIMA_SKILLS = (skills.skills || []).map(s => ({ name:s.name, attr:s.attribute, id:s.id, description:s.description || '' }));
-      window.DUODECIMA_TALENTS = mapTalents(talents);
-      window.DUODECIMA_GODS = deityList.map(d => mapGod(d,skillMap));
-      window.DUODECIMA_EXCLUDED_GODS = (gods.deities || []).filter(d => !d.kitAvailable || d.selectable === false).map(d => ({id:d.id,name:d.name,group:d.groupLabel || d.group}));
-      window.DUODECIMA_ABILITIES = mapAbilities(deityList);
-      window.DUODECIMA_SYSTEM = mapSystem({conditions:conditions.conditions || [], system, equipment});
-      window.DUODECIMA_LINEAGE = system.lineage || {};
-      const magicCore = system.magicAwakening || {};
-      if(window.DUODECIMA_MAGIC){
-        window.DUODECIMA_MAGIC = {
-          ...window.DUODECIMA_MAGIC,
-          maxSacrifices:Number(magicCore.maxSacrifices ?? window.DUODECIMA_MAGIC.maxSacrifices ?? 3),
-          sacrificeEnergyEach:Number(magicCore.sacrificeEnergyEach ?? window.DUODECIMA_MAGIC.sacrificeEnergyEach ?? 25),
-          sacrificeCanGoBelowZero:magicCore.canReduceBelowZero !== false,
-          divineBonusesSacrificable:magicCore.divineBonusesSacrificable === true,
-          sacrificialAttributes:[...(magicCore.sacrificialAttributes || ['for','des','con'])]
-        };
+      const core=await loadRemoteCore();
+      installCore(core,'core');
+    }catch(remoteErr){
+      console.warn('[Ficha · Duodécima Core] Falha no Core remoto; tentando snapshot local.',remoteErr);
+      try{
+        const snapshot=await loadSnapshot();
+        installCore(snapshot,'snapshot');
+        state.error=String(remoteErr?.message||remoteErr);
+      }catch(snapshotErr){
+        console.warn('[Ficha · Duodécima Core] Snapshot indisponível; usando dados legados empacotados.',snapshotErr);
+        state.status='fallback';
+        state.source='local';
+        state.error=`${String(remoteErr?.message||remoteErr)} | snapshot: ${String(snapshotErr?.message||snapshotErr)}`;
       }
-      window.DUODECIMA_CORE_DATA = {manifest,attributes,skills,talents,conditions,gods,system,equipment,aliases};
-      state.status='online'; state.source='core'; state.manifest=manifest;
-    }catch(err){
-      console.warn('[Ficha · Duodécima Core] Falha ao carregar Core; usando snapshot local.',err);
-      state.status='fallback'; state.source='local'; state.error=String(err?.message || err);
     }
     updateStatus();
     return state;
