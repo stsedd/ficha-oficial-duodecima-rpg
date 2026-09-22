@@ -4,16 +4,18 @@ import path from 'node:path';
 const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..');
 const files=fs.readdirSync(root).filter(x=>x.endsWith('.duodecima-theme'));
 const errors=[];
+const SCOPE='__DUODECIMA_SCOPE__';
 
 function issues(css){
   const raw=String(css||'').replace(/\/\*[\s\S]*?\*\//g,'');
   const out=[];
   if(raw.trim()&&!raw.includes('{{scope}}'))out.push('CSS sem {{scope}}');
-  const headers=[...raw.matchAll(/([^{}]+)\{/g)].map(m=>m[1].trim()).filter(Boolean);
+  const normalized=raw.replace(/\{\{scope\}\}/g,SCOPE);
+  const headers=[...normalized.matchAll(/([^{}]+)\{/g)].map(m=>m[1].trim()).filter(Boolean);
   for(const header of headers){
     if(header.startsWith('@')||/^(from|to|\d+(?:\.\d+)?%)$/i.test(header))continue;
     for(const selector of header.split(',').map(x=>x.trim()).filter(Boolean)){
-      if(!selector.includes('{{scope}}'))out.push(`seletor fora do escopo: ${selector.slice(0,120)}`);
+      if(!selector.includes(SCOPE))out.push(`seletor fora do escopo: ${selector.slice(0,120)}`);
     }
   }
   return out;
