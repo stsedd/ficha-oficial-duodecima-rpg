@@ -1,6 +1,6 @@
 # Runtime ativo da Ficha
 
-Este arquivo existe para impedir alterações acidentais em cópias históricas mantidas no repositório.
+Este arquivo existe para impedir alterações acidentais em arquivos históricos e para manter o `main` focado no runtime publicado.
 
 ## Entrada publicada
 
@@ -15,7 +15,7 @@ Este arquivo existe para impedir alterações acidentais em cópias históricas 
 - `stabilization-v516.js` carregado após o app
 - `core-snapshot.json` quando gerado pelo workflow de sincronização
 
-Arquivos `v54`, `v55`, `v56`, `v57`, `v58`, `v59*`, pastas de entregas anteriores e previews antigos são históricos e **não devem receber correções do runtime atual**. O histórico continua preservado pelo Git; novas alterações devem mirar apenas a lista acima.
+Pastas completas de entregas antigas foram retiradas do `main`; o histórico continua preservado pelos commits do Git. Arquivos versionados antigos que ainda permanecerem são apenas referência histórica e **não devem receber correções do runtime atual**.
 
 ## Regra de manutenção
 
