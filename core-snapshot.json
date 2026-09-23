@@ -2,7 +2,7 @@
   "manifest": {
     "core": "Duodécima Core",
     "schemaVersion": 2,
-    "contentVersion": "2026.09.22.1",
+    "contentVersion": "2026.09.22.2",
     "updatedAt": "2026-09-22",
     "status": "canonical-phase-2",
     "counts": {
@@ -23,7 +23,8 @@
       "gods": "data/deuses.json",
       "system": "data/sistema.json",
       "equipment": "data/equipamentos.json",
-      "aliases": "data/aliases.json"
+      "aliases": "data/aliases.json",
+      "magic": "data/magia.json"
     },
     "notes": [
       "Fase 2 adiciona resources[] compatível com resource legado, incluindo recursos pessoais, coletivos, por alvo e locais de habilidade.",
@@ -41,7 +42,9 @@
       "Bronze Celestial não afeta criaturas mortais; restrições de alvo dos materiais estão estruturadas em data/equipamentos.json.",
       "Pó de Monstro é material de procedência mitológica ligado ao ciclo do Tártaro; criaturas comuns ou mortais não o geram.",
       "Estratégia e Enganação agora possuem descrições canônicas completas.",
-      "A política de repetição e acumulação de todos os talentos está explicitada em data/talento-acumulo.json."
+      "A política de repetição e acumulação de todos os talentos está explicitada em data/talento-acumulo.json.",
+      "Magia passa a ter fonte estruturada em data/magia.json. Custos finais por círculo: 20, 45, 70, 95, 120, 150, 185, 225 e 270 Energia; truques custam 0.",
+      "No despertar mágico, cada −1 em FOR, DES ou CON concede +25 Energia máxima, até 3 pontos no total; bônus divinos não são sacrificáveis."
     ]
   },
   "attributes": {
@@ -57313,5 +57316,105 @@
       "surpreendido": "surpreendido"
     }
   },
-  "generatedAt": "2026-09-22T22:42:02.842Z"
+  "magic": {
+    "schemaVersion": 1,
+    "circles": [
+      {
+        "circle": 1,
+        "minLevel": 1,
+        "cost": 20
+      },
+      {
+        "circle": 2,
+        "minLevel": 10,
+        "cost": 45
+      },
+      {
+        "circle": 3,
+        "minLevel": 20,
+        "cost": 70
+      },
+      {
+        "circle": 4,
+        "minLevel": 30,
+        "cost": 95
+      },
+      {
+        "circle": 5,
+        "minLevel": 40,
+        "cost": 120
+      },
+      {
+        "circle": 6,
+        "minLevel": 50,
+        "cost": 150,
+        "uses": 2
+      },
+      {
+        "circle": 7,
+        "minLevel": 60,
+        "cost": 185,
+        "uses": 2
+      },
+      {
+        "circle": 8,
+        "minLevel": 75,
+        "cost": 225,
+        "uses": 1
+      },
+      {
+        "circle": 9,
+        "minLevel": 90,
+        "cost": 270,
+        "uses": 1
+      }
+    ],
+    "cantripCost": 0,
+    "ritualMinutes": 10,
+    "startingCantrips": 2,
+    "startingSpells": 3,
+    "castingAttributes": [
+      "int",
+      "fe",
+      "car"
+    ],
+    "awakening": {
+      "sacrificialAttributes": [
+        "for",
+        "des",
+        "con"
+      ],
+      "maxSacrifices": 3,
+      "sacrificeEnergyEach": 25,
+      "canReduceBelowZero": true,
+      "divineBonusesSacrificable": false,
+      "hpProgressionPenalty": 2
+    },
+    "highCircleUses": {
+      "6": 2,
+      "7": 2,
+      "8": 1,
+      "9": 1
+    },
+    "combat": {
+      "circleSpellsPerTurn": 1,
+      "defaultActions": 1,
+      "fullTurnActions": 2,
+      "fullTurnSpells": [
+        "Fireball",
+        "Lightning Bolt"
+      ]
+    },
+    "durationGuidance": {
+      "defaultFormerOneMinuteTurns": 3,
+      "strongControlTurns": 2
+    },
+    "notes": [
+      "O custo é definido pelo círculo utilizado; truques custam 0 Energia.",
+      "Fireball e Lightning Bolt usam o turno completo quando conjurados.",
+      "Efeitos anteriormente descritos como 1 minuto passam, em regra, a 3 turnos; controles fortes podem usar 2 turnos.",
+      "No despertar, cada ponto retirado de FOR, DES ou CON concede +25 de Energia máxima, até 3 pontos no total."
+    ]
+  },
+  "generatedAt": "2026-09-23T09:59:34.052Z"
 }
