@@ -13,6 +13,16 @@
       .core-material-rule b{display:block;margin-bottom:2px}
       .talent-stacking-hint{display:block;margin-top:6px;color:var(--muted);font-size:11px;line-height:1.35}
       .stabilization-toast{position:fixed;z-index:99999;right:18px;bottom:18px;max-width:min(440px,calc(100vw - 36px));padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel,#111);color:var(--text,#fff);box-shadow:0 18px 50px #0008;font:600 12px/1.45 system-ui,sans-serif}
+
+      .magic-sac-row.magic-sacrifice-ux{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:13px 14px;border-color:color-mix(in srgb,var(--accent) 24%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 5%,transparent),transparent 62%)}
+      .magic-sac-row.magic-sacrifice-ux>.row{display:grid;grid-template-columns:34px minmax(42px,auto) 34px;align-items:center;gap:6px}
+      .magic-sac-row.magic-sacrifice-ux>.row button{width:34px;height:34px;padding:0;display:grid;place-items:center;border-radius:9px;font-size:20px;font-weight:800;line-height:1}
+      .magic-sac-row.magic-sacrifice-ux>.row button:first-child:not(:disabled){border-color:color-mix(in srgb,var(--accent) 66%,var(--line));background:color-mix(in srgb,var(--accent) 13%,transparent)}
+      .magic-sac-row.magic-sacrifice-ux>.row strong{min-width:42px;text-align:center;font-size:20px;line-height:1;position:relative;padding-bottom:11px}
+      .magic-sac-row.magic-sacrifice-ux>.row strong:after{content:'FINAL';position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:7px;letter-spacing:.12em;color:var(--muted);font-weight:800}
+      .magic-sacrifice-help{margin-top:10px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--accent) 22%,var(--line));border-radius:9px;background:color-mix(in srgb,var(--accent) 5%,transparent);font-size:11px;line-height:1.45;color:var(--muted)}
+      .magic-sacrifice-help b{color:var(--text)}
+      @media(max-width:640px){.magic-sac-row.magic-sacrifice-ux{grid-template-columns:1fr}.magic-sac-row.magic-sacrifice-ux>.row{justify-self:start}}
     `;
     document.head.appendChild(style);
   }
@@ -66,6 +76,58 @@
         if(card.querySelector(':scope > .talent-stacking-hint'))return;
         const hint=document.createElement('small');hint.className='talent-stacking-hint';hint.textContent=stackingLabel(mode);card.appendChild(hint);
       });
+    }
+  }
+
+  function sacrificeRowState(row){
+    const text=row.querySelector('small')?.textContent||'';
+    const spent=text.match(/sacrif[ií]cio\s*[−-]\s*(\d+)/i);
+    const final=text.match(/final\s*([−-]?\d+)/i);
+    return {spent:Number(spent?.[1]||0),final:final?Number(final[1].replace('−','-')):null};
+  }
+  function refreshMagicSacrificeUX(){
+    const rows=[...document.querySelectorAll('.magic-sac-row')];
+    if(!rows.length)return;
+    const max=Math.max(1,Number(window.DUODECIMA_MAGIC?.maxSacrifices||3));
+    const energy=Math.max(0,Number(window.DUODECIMA_MAGIC?.sacrificeEnergyEach||25));
+    const states=rows.map(row=>[row,sacrificeRowState(row)]);
+    const total=states.reduce((sum,[,s])=>sum+s.spent,0);
+
+    for(const [row,s] of states){
+      row.classList.add('magic-sacrifice-ux');
+      const buttons=[...row.querySelectorAll('button[data-magic-sac]')];
+      const reduce=buttons.find(b=>/:1$/.test(b.dataset.magicSac||''));
+      const restore=buttons.find(b=>/:-1$/.test(b.dataset.magicSac||''));
+      const controls=reduce?.parentElement||restore?.parentElement;
+      if(!reduce||!restore||!controls)continue;
+      if(controls.firstElementChild!==reduce){
+        controls.insertBefore(reduce,controls.firstElementChild);
+        controls.appendChild(restore);
+      }
+      if(reduce.textContent!=='−')reduce.textContent='−';
+      if(restore.textContent!=='+')restore.textContent='+';
+      reduce.disabled=total>=max||s.spent>=max;
+      restore.disabled=s.spent<=0;
+      const attr=row.querySelector('b')?.textContent?.trim()||'atributo';
+      reduce.title=`Retirar 1 ponto de ${attr} e ganhar +${energy} Energia máxima`;
+      restore.title=`Restaurar 1 ponto de ${attr} e remover ${energy} Energia máxima`;
+      reduce.setAttribute('aria-label',`Diminuir ${attr} em 1 para ganhar Energia`);
+      restore.setAttribute('aria-label',`Aumentar ${attr} em 1, desfazendo o sacrifício`);
+      const value=controls.querySelector('strong');
+      if(value&&s.final!==null&&value.textContent!==String(s.final))value.textContent=String(s.final);
+    }
+
+    const card=rows[0].closest('.card');
+    if(!card)return;
+    const eyebrow=card.querySelector('.eyebrow');if(eyebrow&&eyebrow.textContent!=='CONVERSÃO NO DESPERTAR')eyebrow.textContent='CONVERSÃO NO DESPERTAR';
+    const title=card.querySelector('h2');if(title&&title.textContent!=='Atributos físicos → Energia')title.textContent='Atributos físicos → Energia';
+    const desc=card.querySelector('p.muted.compact');
+    const copy=`Use <b>−</b> para retirar um ponto de FOR, DES ou CON e receber <b>+${energy} de Energia máxima</b>. Use <b>+</b> para desfazer a troca. São até ${max} pontos no total; o atributo pode ficar negativo e bônus divinos não entram nessa conversão.`;
+    if(desc&&desc.dataset.magicSacCopy!=='1'){desc.innerHTML=copy;desc.dataset.magicSacCopy='1';}
+    if(!card.querySelector('.magic-sacrifice-help')){
+      const help=document.createElement('div');help.className='magic-sacrifice-help';
+      help.innerHTML='<b>Leitura dos controles:</b> o número no centro é o atributo final. O botão − reduz o atributo e aumenta a Energia; o botão + restaura o atributo.';
+      rows.at(-1)?.after(help);
     }
   }
 
@@ -128,7 +190,7 @@
     };
   }
 
-  function refresh(){syncDisplayedVersion();refreshMaterialRules();refreshTalentHints();wrapThemeImporter();contractCheck()}
+  function refresh(){syncDisplayedVersion();refreshMaterialRules();refreshTalentHints();refreshMagicSacrificeUX();wrapThemeImporter();contractCheck()}
 
   async function init(){
     installStyles();refresh();
