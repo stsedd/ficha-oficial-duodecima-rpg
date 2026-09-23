@@ -36,6 +36,7 @@ jobs:
           node --check lineage-creation-v515.js
           node --check bootstrap-v511.js
           node --check stabilization-v516.js
+          node --check magic-sacrifice-sync-v5153.js
           node --check app-v511.js
 
       - name: Validate exclusive themes
