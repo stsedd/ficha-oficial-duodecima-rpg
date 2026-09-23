@@ -42,7 +42,7 @@
   try {
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`lineage-creation-v515.js?v=5.15.2-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`lineage-creation-v515.js?v=5.15.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;
       patch.onerror=()=>reject(new Error('Falha ao carregar automação de Legados'));
       document.body.appendChild(patch);
@@ -53,13 +53,23 @@
   }
 
   const script = document.createElement('script');
-  script.src = `app-v511.js?v=5.15.2-polish-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src = `app-v511.js?v=5.15.3-magic-sacrifice-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer = false;
   script.onload=async()=>{
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src=`stabilization-v516.js?v=5.15.2-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.src=`magic-sacrifice-sync-v5153.js?v=5.15.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.onload=resolve;
+        patch.onerror=()=>reject(new Error('Falha ao carregar sincronização do sacrifício mágico'));
+        document.body.appendChild(patch);
+      });
+    }catch(err){console.warn('[Ficha] Sincronização visual do sacrifício mágico indisponível.',err)}
+
+    try{
+      await new Promise((resolve,reject)=>{
+        const patch=document.createElement('script');
+        patch.src=`stabilization-v516.js?v=5.15.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
         patch.onload=resolve;
         patch.onerror=()=>reject(new Error('Falha ao carregar camada de estabilização'));
         document.body.appendChild(patch);
