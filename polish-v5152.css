@@ -1,0 +1,232 @@
+/* Ficha Oficial da Duodécima · v5.15.2
+   Passe de legibilidade para habilidades, progressão por estacas e blocos mecânicos.
+   Não altera regras, apenas hierarquia visual e leitura.
+*/
+
+/* HABILIDADES · menos densas e com leitura em blocos */
+.ability-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+.ability-card{
+  padding:13px 14px 14px!important;
+  border-radius:11px!important;
+  background:linear-gradient(180deg,#0b090b,#060606)!important;
+}
+.ability-card.ability-complex{grid-column:1/-1}
+.ability-title-row{align-items:center!important;gap:7px!important}
+.ability-head b{font-size:16px!important;line-height:1.12!important}
+.ability-meta{gap:5px!important;margin-top:6px!important}
+.ability-meta span{
+  padding:3px 6px!important;
+  border-radius:999px!important;
+  font-size:7.5px!important;
+  letter-spacing:.04em!important;
+}
+.ability-summary{
+  margin:9px 0 11px!important;
+  padding:0 1px!important;
+  color:#c4b9bd!important;
+  font-size:10.5px!important;
+  line-height:1.55!important;
+}
+.ability-summary p{margin:.38em 0!important;line-height:1.55!important}
+
+/* Textos estruturados: cada subtópico respira antes do próximo. */
+.structured-heading{
+  margin:12px 0 6px!important;
+  padding-top:9px!important;
+  border-top:1px solid color-mix(in srgb,var(--theme-accent,#d53645) 28%,var(--line) 72%)!important;
+  color:color-mix(in srgb,var(--theme-accent-bright,#ef5665) 72%,var(--text) 28%)!important;
+  font-size:8.5px!important;
+  line-height:1.2!important;
+  letter-spacing:.13em!important;
+}
+.structured-heading:first-child{margin-top:2px!important;padding-top:0!important;border-top:0!important}
+.ability-tier-copy p,.core-subtier-copy p,.core-note p,.core-description p,.ability-notes p{
+  margin:.38em 0!important;
+  font-size:10px!important;
+  line-height:1.52!important;
+  color:#c2b7bb!important;
+}
+
+/* PROGRESSÃO POR ESTACAS · deixa claro o que é descrição e o que é faixa mecânica. */
+.ability-tier-list{
+  position:relative!important;
+  gap:6px!important;
+  margin-top:12px!important;
+  padding-top:22px!important;
+}
+.ability-tier-list::before{
+  content:'PROGRESSÃO POR ESTACAS';
+  position:absolute;
+  left:1px;
+  top:0;
+  color:#897c81;
+  font-size:7.5px;
+  font-weight:900;
+  letter-spacing:.14em;
+}
+.ability-tier{
+  position:relative!important;
+  grid-template-columns:58px minmax(0,1fr)!important;
+  gap:11px!important;
+  padding:9px 10px!important;
+  border-radius:8px!important;
+  border-color:#34292c!important;
+  background:#070607!important;
+}
+.ability-tier>b{
+  align-self:start;
+  padding-top:1px;
+  color:#97898e!important;
+  font-size:9px!important;
+  line-height:1.35!important;
+}
+.ability-tier.current{
+  border-color:color-mix(in srgb,var(--theme-accent,#d53645) 62%,#49323a)!important;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--theme-accent,#d53645) 11%,#090708),#080708 70%)!important;
+  box-shadow:inset 3px 0 0 var(--theme-accent,var(--red))!important;
+}
+.ability-tier.current::after{
+  content:'ATUAL';
+  position:absolute;
+  right:8px;
+  top:7px;
+  padding:2px 5px;
+  border:1px solid color-mix(in srgb,var(--theme-accent,#d53645) 36%,#413137);
+  border-radius:999px;
+  color:color-mix(in srgb,var(--theme-accent-bright,#ef5665) 74%,#fff);
+  background:#090708;
+  font-size:6px;
+  font-weight:900;
+  letter-spacing:.11em;
+}
+.ability-tier.current .ability-tier-copy{padding-right:36px}
+
+/* Controle de Estacas vira um bloco próprio. */
+.stake-compact{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:7px 10px!important;
+  margin-top:10px!important;
+  padding:24px 10px 10px!important;
+  border:1px solid #33272b!important;
+  border-radius:9px!important;
+  background:linear-gradient(180deg,#0b080a,#070607)!important;
+}
+.stake-compact::before{
+  content:'ESTACAS DA HABILIDADE';
+  position:absolute;
+  left:10px;
+  top:8px;
+  color:#8e8185;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.13em;
+}
+.stake-compact>.row{grid-column:1/-1;font-size:9px!important}
+.stake-compact>.row span{color:#a89ca0;font-weight:700}
+.stake-compact>.row b{font-size:10px;color:#ece2e5}
+.stake-compact input[type=range]{
+  grid-column:1;
+  height:20px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+}
+.stake-compact>.stake-quick{
+  grid-column:2;
+  align-self:center;
+  display:flex!important;
+  gap:4px!important;
+}
+.stake-compact>.stake-quick button{
+  min-width:31px;
+  min-height:26px;
+  padding:4px 7px!important;
+  border-radius:6px!important;
+  font-size:8px!important;
+}
+
+/* Blocos do Core que também usam progressão por estacas. */
+.core-subtiers{display:flex!important;flex-direction:column!important;gap:6px!important;margin-top:10px!important}
+.core-subtier{
+  position:relative!important;
+  grid-template-columns:64px minmax(0,1fr)!important;
+  gap:11px!important;
+  padding:9px 10px!important;
+  border-radius:8px!important;
+}
+.core-subtier>b{font-size:9px!important;line-height:1.35!important}
+.core-subtier.current{
+  border-color:color-mix(in srgb,var(--theme-accent,#d53645) 56%,var(--line))!important;
+  box-shadow:inset 3px 0 0 var(--theme-accent,var(--red))!important;
+}
+.core-substake{
+  margin-top:8px!important;
+  padding:9px 10px!important;
+  border-radius:8px!important;
+  background:#080708!important;
+  border-color:#34282c!important;
+}
+.core-substake .stake-quick button{min-width:31px;min-height:25px;font-size:8px!important}
+
+/* Escolhas, recursos e observações dentro da habilidade deixam de parecer um bloco de texto único. */
+.ability-choice-panel,.ability-resource-panel,.core-note,.core-description,.core-variant,.core-subability{
+  margin-top:9px!important;
+  border-radius:8px!important;
+}
+.ability-notes{
+  margin-top:9px!important;
+  padding-top:7px!important;
+  border-top:1px solid #302629!important;
+}
+.ability-notes summary,.ability-lore summary{
+  padding:3px 0!important;
+  color:#a99ca1!important;
+  font-size:9px!important;
+  font-weight:800!important;
+}
+
+/* Ações ativas bem separadas do texto explicativo. */
+.ability-actions{
+  margin-top:10px!important;
+  padding-top:9px!important;
+}
+.ability-actions button{min-height:31px!important;padding:6px 9px!important;font-size:9px!important}
+.ability-actions small{font-size:8px!important}
+
+/* Light mode */
+body[data-theme="light"] .ability-card,
+body[data-theme="light"] .ability-tier,
+body[data-theme="light"] .stake-compact,
+body[data-theme="light"] .core-substake{
+  background:linear-gradient(180deg,#fffdf9,#f6eee6)!important;
+  border-color:#d9c8c3!important;
+}
+body[data-theme="light"] .ability-summary,
+body[data-theme="light"] .ability-tier-copy p,
+body[data-theme="light"] .core-subtier-copy p,
+body[data-theme="light"] .core-note p,
+body[data-theme="light"] .core-description p,
+body[data-theme="light"] .ability-notes p{color:#5f5155!important}
+body[data-theme="light"] .ability-tier.current{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--theme-accent,#c92e43) 8%,#fffaf5),#fffaf5 72%)!important;
+}
+body[data-theme="light"] .ability-tier.current::after{background:#fffaf4!important}
+body[data-theme="light"] .stake-compact>.row b{color:#3b2f33!important}
+
+/* Responsividade: nunca comprimir texto de habilidade em colunas minúsculas. */
+@media(min-width:1680px){.ability-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:1180px){.ability-grid{grid-template-columns:1fr!important}.ability-card.ability-complex{grid-column:auto}}
+@media(max-width:620px){
+  .ability-card{padding:11px!important}
+  .ability-tier{grid-template-columns:52px minmax(0,1fr)!important;padding:8px!important}
+  .ability-tier.current .ability-tier-copy{padding-right:0}
+  .ability-tier.current::after{position:static;grid-column:1;justify-self:start;margin-top:4px}
+  .stake-compact{grid-template-columns:1fr!important}
+  .stake-compact input[type=range],.stake-compact>.stake-quick{grid-column:1!important}
+  .stake-compact>.stake-quick{justify-content:flex-start}
+}
