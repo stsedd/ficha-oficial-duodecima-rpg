@@ -1,11 +1,17 @@
 import fs from 'node:fs/promises';
 
-const file=new URL('../index.html',import.meta.url);
-let html=await fs.readFile(file,'utf8');
+const indexFile=new URL('../index.html',import.meta.url);
+const versionFile=new URL('../VERSION.txt',import.meta.url);
+const version=(await fs.readFile(versionFile,'utf8')).trim();
+let html=await fs.readFile(indexFile,'utf8');
+
 html=html
-  .replaceAll('v5.14.3','v5.15.1-stabilization')
-  .replace('styles-v511.css?v=5.14.3-profile-banner','styles-v511.css?v=5.15.1-stabilization')
-  .replace('core-bridge-v511.js?v=5.11.0','core-bridge-v511.js?v=5.15.1-core-contract')
-  .replace('bootstrap-v511.js?v=5.14.3-profile-banner','bootstrap-v511.js?v=5.15.1-stabilization');
-await fs.writeFile(file,html,'utf8');
-console.log('index.html sincronizado com v5.15.1-stabilization');
+  .replace(/(<title>[^<]*?·\s*)v[^<]+(<\/title>)/,`$1${version}$2`)
+  .replace(/(<span class="version-chip"[^>]*>)v[^<]+(<\/span>)/,`$1${version}$2`)
+  .replace(/(SCUTUM · Ficha Universal da Legio XII Fulminata · )v[^<]+(<\/p>)/,`$1${version}$2`)
+  .replace(/styles-v511\.css\?v=[^"']+/g,`styles-v511.css?v=${version}`)
+  .replace(/core-bridge-v511\.js\?v=[^"']+/g,`core-bridge-v511.js?v=${version}-core`)
+  .replace(/bootstrap-v511\.js\?v=[^"']+/g,`bootstrap-v511.js?v=${version}`);
+
+await fs.writeFile(indexFile,html,'utf8');
+console.log(`index.html sincronizado com ${version}`);
