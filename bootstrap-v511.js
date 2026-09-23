@@ -2,6 +2,33 @@
   'use strict';
   try { await window.DUODECIMA_CORE_READY; } catch (_) {}
 
+  async function syncMagicRules(){
+    const fallback=window.DUODECIMA_MAGIC||{};
+    const state=window.DUODECIMA_CORE_STATE||{};
+    const base=String(state.base||'https://stsedd.github.io/duodecima-core/').replace(/\/+$/,'')+'/';
+    const version=encodeURIComponent(state.version||'current');
+    try{
+      const response=await fetch(`${base}data/magia.json?v=${version}`,{cache:'default'});
+      if(!response.ok)throw new Error(`${response.status} ${response.statusText}`);
+      const magic=await response.json();
+      const awakening=magic.awakening||{};
+      window.DUODECIMA_MAGIC={
+        ...fallback,
+        ...magic,
+        sacrificeEnergyEach:Number(awakening.sacrificeEnergyEach??fallback.sacrificeEnergyEach??25),
+        maxSacrifices:Number(awakening.maxSacrifices??fallback.maxSacrifices??3),
+        sacrificialAttributes:[...(awakening.sacrificialAttributes||fallback.sacrificialAttributes||['for','des','con'])],
+        sacrificeCanGoBelowZero:awakening.canReduceBelowZero!==false,
+        divineBonusesSacrificable:awakening.divineBonusesSacrificable===true,
+        hpProgressionPenalty:Number(awakening.hpProgressionPenalty??fallback.hpProgressionPenalty??2),
+        highCircleUses:{...(fallback.highCircleUses||{}),...(magic.highCircleUses||{})}
+      };
+    }catch(err){
+      console.warn('[Ficha] Regras estruturadas de Magia indisponíveis; mantendo cópia local sincronizada.',err);
+    }
+  }
+  await syncMagicRules();
+
   try {
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
