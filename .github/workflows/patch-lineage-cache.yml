@@ -1,0 +1,59 @@
+name: Patch Lineage Cache Keys
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-lineage-cache.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Invalidate lineage runtime caches
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('bootstrap-v511.js')
+          s=p.read_text(encoding='utf-8')
+          replacements={
+            "lineage-creation-v515.js?v=5.15.3-":"lineage-creation-v515.js?v=v5.15.9-lineage-structure-",
+            "app-v511.js?v=v5.15.7-image-storage-":"app-v511.js?v=v5.15.9-lineage-structure-"
+          }
+          for old,new in replacements.items():
+              if s.count(old)!=1: raise SystemExit(f'expected exactly one {old!r}, found {s.count(old)}')
+              s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+
+          q=Path('scripts/validate-lineage-structure.mjs')
+          t=q.read_text(encoding='utf-8')
+          marker="const lineage=fs.readFileSync('lineage-creation-v515.js','utf8');\n"
+          insert=marker+"const bootstrap=fs.readFileSync('bootstrap-v511.js','utf8');\n"
+          if marker not in t: raise SystemExit('validator marker missing')
+          t=t.replace(marker,insert,1)
+          marker2="if(!lineage.includes('HP inicial e progressão, conjuração, bônus de atributos, perícia divina e recursos seguem sempre o <b>deus principal</b>'))fail.push('texto de regra do Direto não reflete a regra canônica');\n"
+          add=marker2+"if(!bootstrap.includes('app-v511.js?v=v5.15.9-lineage-structure-'))fail.push('cache key do app não foi invalidada');\nif(!bootstrap.includes('lineage-creation-v515.js?v=v5.15.9-lineage-structure-'))fail.push('cache key da automação de legado não foi invalidada');\n"
+          if marker2 not in t: raise SystemExit('validator rule marker missing')
+          t=t.replace(marker2,add,1)
+          q.write_text(t,encoding='utf-8')
+          PY
+
+      - name: Validate
+        run: |
+          node --check bootstrap-v511.js
+          node scripts/validate-lineage-structure.mjs
+
+      - name: Commit cache fix
+        run: |
+          git config user.name 'duodecima-maintenance'
+          git config user.email 'actions@users.noreply.github.com'
+          git add bootstrap-v511.js scripts/validate-lineage-structure.mjs
+          git commit -m 'Invalidate direct lineage runtime cache'
+          git push
