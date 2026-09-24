@@ -119,17 +119,6 @@ if 'v5.15.6-banner-ratio' not in html:
 html=html.replace('v5.15.6-banner-ratio',VERSION)
 index.write_text(html,encoding='utf-8')
 
-sync_path=Path('.github/workflows/sync-index-version.yml')
-sync=sync_path.read_text(encoding='utf-8')
-if "      - 'VERSION.txt'" not in sync:
-    sync=replace_once(
-        sync,
-        "      - 'scripts/patch-index-version.mjs'\n",
-        "      - 'scripts/patch-index-version.mjs'\n      - 'VERSION.txt'\n",
-        'VERSION trigger'
-    )
-sync_path.write_text(sync,encoding='utf-8')
-
 manifest=Path('RUNTIME-MANIFEST.md')
 m=manifest.read_text(encoding='utf-8')
 note='- `v5.15.7-image-storage`: impede a camada de estabilização de regredir o número de versão e compacta imagens de armamentos antes de salvá-las, incluindo compactação automática das imagens antigas e tratamento de limite do armazenamento local.\n'
