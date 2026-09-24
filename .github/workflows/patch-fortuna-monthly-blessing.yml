@@ -1,0 +1,109 @@
+name: Patch Fortuna Monthly Blessing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-fortuna-monthly-blessing.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add Fortuna blessing toggle
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          app_path=Path('app-v511.js')
+          s=app_path.read_text(encoding='utf-8')
+
+          def replace_once(old,new,label):
+              global s
+              count=s.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected exactly 1 match, found {count}')
+              s=s.replace(old,new,1)
+
+          replace_once(
+              "abilityStakes:{},abilityChoices:{},choiceDetails:{},abilityUses:{},conditions:[],exhaustion:0,death:defaultDeath(),tempMods:defaultTempMods(),",
+              "abilityStakes:{},abilityChoices:{},choiceDetails:{},abilityUses:{},conditions:[],exhaustion:0,death:defaultDeath(),tempMods:defaultTempMods(),fortunaBlessing:false,",
+              'default state'
+          )
+
+          replace_once(
+              "out.schemaVersion=SCHEMA_VERSION;",
+              "out.schemaVersion=SCHEMA_VERSION;\n    out.fortunaBlessing=out.fortunaBlessing===true;",
+              'migration normalization'
+          )
+
+          replace_once(
+              "function rawHpMax(){const g=god(),con=structuralAttr('con'),dec=Math.floor(state.level/10),fragility=state.magic?.enabled?(Number(magicRules.hpProgressionPenalty)||2):0,perDec=Math.max(0,g.hpPerDecade-fragility);return g.hpBase+con+dec*(perDec+con)+(talentCount('duravel')*con*(1+dec))}",
+              "function rawHpMax(){const g=god(),con=structuralAttr('con'),dec=Math.floor(state.level/10),fragility=state.magic?.enabled?(Number(magicRules.hpProgressionPenalty)||2):0,perDec=Math.max(0,g.hpPerDecade-fragility),fortunaBonus=state.fortunaBlessing?10:0;return g.hpBase+con+dec*(perDec+con)+(talentCount('duravel')*con*(1+dec))+fortunaBonus}",
+              'HP formula'
+          )
+
+          replace_once(
+              "      ${renderMiniDeath()}",
+              "      <button id=\"fortunaBlessingToggle\" class=\"${state.fortunaBlessing?'primary':'ghost'} small-btn wide-button\" type=\"button\" aria-pressed=\"${state.fortunaBlessing?'true':'false'}\" title=\"Bênção mensal de Fortuna: +10 no HP máximo enquanto estiver ativa\">${state.fortunaBlessing?'✓ Bênção de Fortuna ativa · +10 HP máximo':'Bênção de Fortuna · +10 HP máximo'}</button>\n      ${renderMiniDeath()}",
+              'visible toggle'
+          )
+
+          replace_once(
+              "    const railDef=byId('railDefenseAdjust');if(railDef)railDef.onchange=e=>{state.tempMods.defense=Number(e.target.value)||0;save();renderSheet()};",
+              "    const railDef=byId('railDefenseAdjust');if(railDef)railDef.onchange=e=>{state.tempMods.defense=Number(e.target.value)||0;save();renderSheet()};\n    const fortunaBlessingToggle=byId('fortunaBlessingToggle');if(fortunaBlessingToggle)fortunaBlessingToggle.onclick=()=>{state.fortunaBlessing=!state.fortunaBlessing;syncCurrentCaps();save();renderSheet();notify(state.fortunaBlessing?'Bênção de Fortuna ativa: +10 no HP máximo.':'Bênção de Fortuna removida: HP máximo normal restaurado.')};",
+              'toggle handler'
+          )
+
+          app_path.write_text(s,encoding='utf-8')
+
+          bootstrap=Path('bootstrap-v511.js')
+          b=bootstrap.read_text(encoding='utf-8')
+          old="script.src = `app-v511.js?v=5.15.3-magic-sacrifice-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;"
+          new="script.src = `app-v511.js?v=5.15.4-fortuna-blessing-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;"
+          if b.count(old)!=1:
+              raise SystemExit(f'bootstrap cache key: expected 1 match, found {b.count(old)}')
+          bootstrap.write_text(b.replace(old,new,1),encoding='utf-8')
+
+          index=Path('index.html')
+          i=index.read_text(encoding='utf-8')
+          count=i.count('v5.15.3-magic-sacrifice')
+          if count < 4:
+              raise SystemExit(f'index version: expected at least 4 matches, found {count}')
+          i=i.replace('v5.15.3-magic-sacrifice','v5.15.4-fortuna-blessing')
+          index.write_text(i,encoding='utf-8')
+
+          manifest=Path('RUNTIME-MANIFEST.md')
+          m=manifest.read_text(encoding='utf-8')
+          note='- `v5.15.4-fortuna-blessing`: adiciona o toggle persistente de Bênção de Fortuna (+10 HP máximo enquanto ativo).\n'
+          anchor='## Regra de manutenção\n'
+          if note not in m:
+              if anchor not in m:
+                  raise SystemExit('runtime manifest anchor not found')
+              m=m.replace(anchor,note+'\n'+anchor,1)
+          manifest.write_text(m,encoding='utf-8')
+          PY
+
+      - name: Syntax checks
+        run: |
+          node --check app-v511.js
+          node --check bootstrap-v511.js
+          grep -q 'fortunaBlessingToggle' app-v511.js
+          grep -q 'fortunaBonus=state.fortunaBlessing?10:0' app-v511.js
+          grep -q 'v5.15.4-fortuna-blessing' index.html
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          git config user.name 'duodecima-maintenance'
+          git config user.email 'actions@users.noreply.github.com'
+          git add app-v511.js bootstrap-v511.js index.html RUNTIME-MANIFEST.md
+          git commit -m 'Add Fortuna blessing HP toggle'
+          git push
