@@ -175,7 +175,7 @@
       if(note?.dataset.signature===signature)return;
       note?.remove();
       note=document.createElement('div');note.className='notice lineage-direct-core-note';note.dataset.signature=signature;
-      note.innerHTML='<b>Bônus iniciais do Legado Direto:</b> HP inicial, bônus de atributos e perícia seguem sempre o <b>deus principal</b>. A segunda origem continua sendo usada para a composição do kit de habilidades.';
+      note.innerHTML='<b>Estrutura do Legado Direto:</b> HP inicial e progressão, conjuração, bônus de atributos, perícia divina e recursos seguem sempre o <b>deus principal</b>. A segunda origem continua sendo usada apenas na composição prevista do kit de habilidades.';
       box.appendChild(note);
       return;
     }
