@@ -1,1 +1,1 @@
-v5.15.7-image-storage
+v5.15.8-banner-fit

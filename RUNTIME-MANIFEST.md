@@ -25,6 +25,8 @@ Pastas completas de entregas antigas foram retiradas do `main`; o histórico con
 
 - `v5.15.7-image-storage`: impede a camada de estabilização de regredir o número de versão e compacta imagens de armamentos antes de salvá-las, incluindo compactação automática das imagens antigas e tratamento de limite do armazenamento local.
 
+- `v5.15.8-banner-fit`: remove o limite de 260 px que achatava a capa em telas largas; a área publicada permanece 4,5:1 e o banner em 100% usa `contain`, mostrando a imagem inteira sem crop. O smoke test valida um banner 1800×400 em desktop e mobile.
+
 ## Regra de manutenção
 
 Ao trocar qualquer arquivo ativo, atualize este manifesto e a chave de cache correspondente em `index.html` ou `bootstrap-v511.js`. A camada automática de snapshot mantém a última versão canônica do Core disponível caso o endpoint remoto falhe.
