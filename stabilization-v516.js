@@ -1,7 +1,7 @@
 (()=>{
   'use strict';
 
-  const DISPLAY_VERSION='v5.15.1-stabilization';
+  const DISPLAY_VERSION='v5.15.3-magic-sacrifice';
   const materialRules=()=>new Map((window.DUODECIMA_SYSTEM?.materials||[]).map(x=>[x.id,x.targeting?.ruleText||'']));
 
   function installStyles(){
@@ -13,7 +13,6 @@
       .core-material-rule b{display:block;margin-bottom:2px}
       .talent-stacking-hint{display:block;margin-top:6px;color:var(--muted);font-size:11px;line-height:1.35}
       .stabilization-toast{position:fixed;z-index:99999;right:18px;bottom:18px;max-width:min(440px,calc(100vw - 36px));padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel,#111);color:var(--text,#fff);box-shadow:0 18px 50px #0008;font:600 12px/1.45 system-ui,sans-serif}
-
       .magic-sac-row.magic-sacrifice-ux{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:13px 14px;border-color:color-mix(in srgb,var(--accent) 24%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 5%,transparent),transparent 62%)}
       .magic-sac-row.magic-sacrifice-ux>.row{display:grid;grid-template-columns:34px minmax(42px,auto) 34px;align-items:center;gap:6px}
       .magic-sac-row.magic-sacrifice-ux>.row button{width:34px;height:34px;padding:0;display:grid;place-items:center;border-radius:9px;font-size:20px;font-weight:800;line-height:1}
@@ -92,7 +91,6 @@
     const energy=Math.max(0,Number(window.DUODECIMA_MAGIC?.sacrificeEnergyEach||25));
     const states=rows.map(row=>[row,sacrificeRowState(row)]);
     const total=states.reduce((sum,[,s])=>sum+s.spent,0);
-
     for(const [row,s] of states){
       row.classList.add('magic-sacrifice-ux');
       const buttons=[...row.querySelectorAll('button[data-magic-sac]')];
@@ -100,10 +98,7 @@
       const restore=buttons.find(b=>/:-1$/.test(b.dataset.magicSac||''));
       const controls=reduce?.parentElement||restore?.parentElement;
       if(!reduce||!restore||!controls)continue;
-      if(controls.firstElementChild!==reduce){
-        controls.insertBefore(reduce,controls.firstElementChild);
-        controls.appendChild(restore);
-      }
+      if(controls.firstElementChild!==reduce){controls.insertBefore(reduce,controls.firstElementChild);controls.appendChild(restore);}
       if(reduce.textContent!=='−')reduce.textContent='−';
       if(restore.textContent!=='+')restore.textContent='+';
       reduce.disabled=total>=max||s.spent>=max;
@@ -116,7 +111,6 @@
       const value=controls.querySelector('strong');
       if(value&&s.final!==null&&value.textContent!==String(s.final))value.textContent=String(s.final);
     }
-
     const card=rows[0].closest('.card');
     if(!card)return;
     const eyebrow=card.querySelector('.eyebrow');if(eyebrow&&eyebrow.textContent!=='CONVERSÃO NO DESPERTAR')eyebrow.textContent='CONVERSÃO NO DESPERTAR';
@@ -146,9 +140,7 @@
       if(header.startsWith('@'))continue;
       if(/^(from|to|\d+(?:\.\d+)?%)$/i.test(header))continue;
       const selectors=header.split(',').map(x=>x.trim()).filter(Boolean);
-      for(const selector of selectors){
-        if(!selector.includes(scopeToken)){issues.push(`Seletor fora do escopo: ${selector.slice(0,100)}`);break;}
-      }
+      for(const selector of selectors){if(!selector.includes(scopeToken)){issues.push(`Seletor fora do escopo: ${selector.slice(0,100)}`);break;}}
       if(issues.length>4)break;
     }
     return issues;
@@ -171,9 +163,7 @@
           showNotice(`Tema não instalado: o CSS precisa permanecer dentro de {{scope}}. ${issues[0]}`);
           return;
         }
-      }catch(_){
-        // O importador oficial continua responsável pelas demais validações e mensagens de formato.
-      }
+      }catch(_){ }
       return original.call(input,event);
     };
   }
