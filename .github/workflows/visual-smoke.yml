@@ -8,6 +8,7 @@ on:
       - 'app-v511.js'
       - 'styles-v511.css'
       - 'bootstrap-v511.js'
+      - 'contract-guard-v516.js'
       - 'lineage-creation-v515.js'
       - 'stabilization-v516.js'
       - 'magic-sacrifice-sync-v5153.js'
@@ -54,7 +55,7 @@ jobs:
             });
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
             await page.screenshot({path:`visual-artifacts/${label}-overview.png`,fullPage:true});
-            const tabs=['Combate','Inventário','Poderes','Magia'];
+            const tabs=['Combate & Poderes','Inventário','Magia'];
             for(const tab of tabs){
               const button=page.getByRole('button',{name:tab,exact:true}).first();
               if(await button.count()){
