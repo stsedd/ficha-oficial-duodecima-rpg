@@ -61,6 +61,28 @@
   }
   function isValid(value,rows){return !!value&&rows.some(r=>r.value===value)}
 
+  function migrateLineageNaming(data){
+  if(!data?.lineage||Number(data.lineage.namingVersion||0)>=2)return false;
+  if(data.lineage.type==='compound')data.lineage.type='direct';
+  else if(data.lineage.type==='direct')data.lineage.type='compound';
+  data.lineage.namingVersion=2;
+  return true;
+}
+
+function seedMigratedCompoundChoices(data){
+  if(!data?.lineage||data.lineage.type!=='compound')return false;
+  const plus2=attributeOptions(data.godId,data.lineage.secondaryGodId,2);
+  const plus1=attributeOptions(data.godId,data.lineage.secondaryGodId,1);
+  const skills=skillOptions(data.godId,data.lineage.secondaryGodId);
+  let changed=false;
+  if(!isValid(data.lineage.compoundAttributePlus2,plus2)&&plus2[0]){data.lineage.compoundAttributePlus2=plus2[0].value;changed=true}
+  if(!isValid(data.lineage.compoundAttributePlus1,plus1)&&plus1[0]){data.lineage.compoundAttributePlus1=plus1[0].value;changed=true}
+  if(!isValid(data.lineage.compoundSkillChoice,skills)&&skills[0]){data.lineage.compoundSkillChoice=skills[0].value;changed=true}
+  const origins=originKey(data);
+  if(data.lineage.compoundChoiceOrigins!==origins){data.lineage.compoundChoiceOrigins=origins;changed=true}
+  return changed;
+}
+
   function normalizeDirectState(data){
     if(!data?.lineage||data.lineage.type!=='direct')return false;
     if(data.lineage.structureGodId===data.godId)return false;
@@ -101,7 +123,10 @@
     captureOriginals();
     const data=readState();
     if(!data){appliedRuntimeSignature=runtimeSignature(null);return;}
-    let changed=normalizeDirectState(data);
+    const namingMigrated=migrateLineageNaming(data);
+    let changed=namingMigrated;
+    if(namingMigrated&&seedMigratedCompoundChoices(data))changed=true;
+    if(normalizeDirectState(data))changed=true;
     if(data.lineage?.type==='compound'&&data.divineSkillChoice){data.divineSkillChoice='';changed=true}
     applyRuntimeLineage(data);
     if(changed){writeState(data);appliedRuntimeSignature=runtimeSignature(data)}

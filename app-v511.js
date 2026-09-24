@@ -194,7 +194,7 @@
   const defaultArmor = () => ({equipped:false,name:'Armadura',type:'nenhuma',material:'ferro-aco',resistanceCurrent:3,imageUrl:'',isHeritage:false,notes:''});
   const defaultShield = () => ({equipped:false,name:'Escudo',material:'ferro-aco',stakes:0,resistanceCurrent:3,masterTalent:false,imageUrl:'',isHeritage:false,notes:''});
   const defaultTempMods = () => ({rolls:0,defense:0,damageReduction:0});
-  const defaultLineage = () => ({type:'normal',secondaryGodId:'',structureGodId:'',compoundPassiveReplacements:[],compoundActiveReplacements:[],compoundActiveSlots:[],directPrimaryPassives:[],directSecondaryPassives:[]});
+  const defaultLineage = () => ({type:'normal',namingVersion:2,secondaryGodId:'',structureGodId:'',compoundPassiveReplacements:[],compoundActiveReplacements:[],compoundActiveSlots:[],directPrimaryPassives:[],directSecondaryPassives:[]});
   const defaultMagic = () => ({enabled:false,castingAttr:'fe',circle:1,sacrifices:{for:0,des:0,con:0},spells:[],concentrationSpellId:'',concentrationDamage:0,highCircleUsed:{6:0,7:0,8:0,9:0},notes:''});
   const defaultInventory = () => ({aureus:0,denarius:0,items:[],notes:''});
   const defaultFamiliar = (type='auxiliar') => ({id:uid('fam'),name:'Novo familiar',type,active:false,currentHp:null,attributes:emptyAttrs(),skills:[],knownVip:false,staffApproved:false,legendaryHpMax:0,legendaryUsed:false,legendaryOccasion:'',notes:''});
@@ -493,7 +493,13 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     if(data?.skillMeta&&typeof data.skillMeta==='object')for(const [name,meta] of Object.entries(data.skillMeta))out.skillMeta[name]=Object.assign({proficient:false,expertise:false,source:'extras',detail:''},meta||{});
     for(const n of [20,40]){const name=data?.levelSkillChoices?.[n];if(name){out.skillMeta[name]=Object.assign({proficient:true,expertise:false,source:`nivel-${n}`,detail:''},out.skillMeta[name]||{}, {proficient:true,source:`nivel-${n}`})}}
     out.levelSkillChoices={20:'',40:''};
+    const legacyLineageNaming=!!data?.lineage&&Number(data.lineage.namingVersion||0)<2;
     out.lineage=Object.assign(defaultLineage(),data?.lineage||{});
+    if(legacyLineageNaming){
+      if(out.lineage.type==='compound')out.lineage.type='direct';
+      else if(out.lineage.type==='direct')out.lineage.type='compound';
+    }
+    out.lineage.namingVersion=2;
     out.lineage.compoundPassiveReplacements=Array.isArray(data?.lineage?.compoundPassiveReplacements)?data.lineage.compoundPassiveReplacements:[];
     out.lineage.compoundActiveSlots=Array.isArray(data?.lineage?.compoundActiveSlots)?data.lineage.compoundActiveSlots.map(Number).filter(n=>n>=1&&n<=5).slice(0,2):[];
     out.lineage.compoundActiveReplacements=Array.isArray(data?.lineage?.compoundActiveReplacements)?data.lineage.compoundActiveReplacements.slice(0,2):[];
@@ -608,13 +614,13 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
 
   function secondaryGod(){return godById(state.lineage?.secondaryGodId)}
   function eligibleLegacyGods(){return gods.filter(g=>g.id!==state.godId&&!isTriumvir(g.id))}
-  function resetLineage(type='normal'){state.lineage=defaultLineage();state.lineage.type=type;if(type!=='normal'&&eligibleLegacyGods()[0])state.lineage.secondaryGodId=eligibleLegacyGods()[0].id;if(type==='direct'){state.lineage.structureGodId=state.godId;initializeDirectSelections()}}
+  function resetLineage(type='normal'){state.lineage=defaultLineage();state.lineage.type=type;if(type!=='normal'&&eligibleLegacyGods()[0])state.lineage.secondaryGodId=eligibleLegacyGods()[0].id;if(type==='direct')state.lineage.structureGodId=state.godId;if(type==='compound')initializeDirectSelections()}
   function initializeDirectSelections(){const a=baseAbilitySet(state.godId),b=baseAbilitySet(state.lineage?.secondaryGodId);if(a)state.lineage.directPrimaryPassives=a.passives.slice(0,4).map(x=>x.id);if(b)state.lineage.directSecondaryPassives=b.passives.slice(0,3).map(x=>x.id)}
   function effectiveAbilitySet(){
     const main=baseAbilitySet(state.godId);if(!main)return null;
     const type=state.lineage?.type||'normal';if(type==='normal'||isTriumvir(state.godId))return {passives:main.passives.map(a=>({...a,sourceGodId:state.godId})),actives:main.actives.map(a=>({...a,sourceGodId:state.godId}))};
     const sid=state.lineage?.secondaryGodId,sub=baseAbilitySet(sid);if(!sub)return {passives:main.passives.map(a=>({...a,sourceGodId:state.godId})),actives:main.actives.map(a=>({...a,sourceGodId:state.godId}))};
-    if(type==='compound'){
+    if(type==='direct'){
       const passives=main.passives.map(a=>({...a,sourceGodId:state.godId}));
       (state.lineage.compoundPassiveReplacements||[]).slice(0,3).forEach(r=>{const idx=Number(r.primaryIndex),rep=sub.passives.find(x=>x.id===r.secondaryId);if(Number.isInteger(idx)&&idx>=0&&idx<passives.length&&rep)passives[idx]={...rep,sourceGodId:sid,legacyFrom:sid}});
       const actives=main.actives.map(a=>({...a,sourceGodId:state.godId}));
@@ -624,7 +630,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
       });
       return {passives,actives};
     }
-    if(type==='direct'){
+    if(type==='compound'){
       const pa=new Set(state.lineage.directPrimaryPassives||[]),pb=new Set(state.lineage.directSecondaryPassives||[]);
       return {passives:[...main.passives.filter(a=>pa.has(a.id)).map(a=>({...a,sourceGodId:state.godId})),...sub.passives.filter(a=>pb.has(a.id)).map(a=>({...a,sourceGodId:sid}))],actives:[...main.actives.slice(0,5).map(a=>({...a,sourceGodId:state.godId})),...sub.actives.slice(0,5).map(a=>({...a,sourceGodId:sid}))]};
     }
@@ -654,7 +660,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
         <div class="subcard lineage-definition ${type==='direct'?'selected':''}"><span class="label">${esc(directRule.formula||'LEGADO + LEGADO')}</span><b>${esc(directRule.label||'Legado Direto')}</b><p>${esc(directRule.description||'É filho de semideuses e carrega duas heranças divinas próximas.')}</p></div>
       </div>
       <div class="grid two">
-        <label><span class="label">Tipo de linhagem</span><select id="creationLineageType"><option value="normal" ${type==='normal'?'selected':''}>Prole direta · um deus</option><option value="compound" ${type==='compound'?'selected':''}>DEUS + LEGADO · Legado Composto</option><option value="direct" ${type==='direct'?'selected':''}>LEGADO + LEGADO · Legado Direto</option></select></label>
+        <label><span class="label">Tipo de linhagem</span><select id="creationLineageType"><option value="normal" ${type==='normal'?'selected':''}>Prole direta · um deus</option><option value="compound" ${type==='compound'?'selected':''}>LEGADO + LEGADO · Legado Composto</option><option value="direct" ${type==='direct'?'selected':''}>DEUS + LEGADO · Legado Direto</option></select></label>
         ${type!=='normal'?`<label><span class="label">Segunda origem divina</span><select id="creationSecondaryGod">${groupedGodOptions(state.lineage.secondaryGodId,eligible)}</select></label>`:`<div class="subcard compact"><b>${esc(normalRule.label||'Sem Legado')}</b><br><span class="muted">${esc(normalRule.description||'A ficha usa somente o kit da divindade principal.')}</span></div>`}
       </div>
       ${type!=='normal'&&sub?`<div class="legacy-pair-preview"><div><span class="label">Origem principal</span><b>${primaryGod().name}</b><small>${GROUP_LABEL[primaryGod().group]||primaryGod().group}</small></div><span class="legacy-plus">+</span><div><span class="label">Segunda origem</span><b>${sub.name}</b><small>${GROUP_LABEL[sub.group]||sub.group}</small></div></div>`:''}
@@ -687,7 +693,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     byId('godSelect').onchange=e=>{state.godId=e.target.value;state.divineSkillChoice='';state.initialSkills=[];state.resourceCurrent=0;state.resourceValues={};state.targetResources={};state.abilityChoices={};state.choiceDetails={};state.abilityUses={};if(isTriumvir(state.godId))resetLineage('normal');else if(state.lineage?.type!=='normal'&&state.lineage.secondaryGodId===state.godId)resetLineage(state.lineage.type);else if(state.lineage?.type==='direct')state.lineage.structureGodId=state.godId;save();renderCreation()};
 
     const lineageType=byId('creationLineageType');if(lineageType)lineageType.onchange=e=>{const type=e.target.value;if(type!=='normal'&&isTriumvir(state.godId)){notify('Triúnviros não participam da mistura de kits por Legado.');resetLineage('normal')}else resetLineage(type);state.divineSkillChoice='';state.initialSkills=[];save();renderCreation()};
-    const lineageSecondary=byId('creationSecondaryGod');if(lineageSecondary)lineageSecondary.onchange=e=>{state.lineage.secondaryGodId=e.target.value;if(state.lineage.type==='direct'){state.lineage.structureGodId=state.godId;initializeDirectSelections()}state.divineSkillChoice='';state.initialSkills=[];save();renderCreation()};
+    const lineageSecondary=byId('creationSecondaryGod');if(lineageSecondary)lineageSecondary.onchange=e=>{state.lineage.secondaryGodId=e.target.value;if(state.lineage.type==='direct')state.lineage.structureGodId=state.godId;if(state.lineage.type==='compound')initializeDirectSelections();state.divineSkillChoice='';state.initialSkills=[];save();renderCreation()};
     const d=byId('divineSkillChoice');if(d)d.onchange=e=>{state.divineSkillChoice=e.target.value;state.initialSkills=state.initialSkills.filter(s=>s!==e.target.value);save();renderCreation()};
     document.querySelectorAll('[data-base-inc]').forEach(b=>b.onclick=()=>changeBase(b.dataset.baseInc,1));document.querySelectorAll('[data-base-dec]').forEach(b=>b.onclick=()=>changeBase(b.dataset.baseDec,-1));document.querySelectorAll('[data-skill]').forEach(c=>c.onchange=()=>toggleInitialSkill(c.dataset.skill,c.checked));byId('finishBtn').onclick=finishCreation;
   }
@@ -788,15 +794,15 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     const l=state.lineage||defaultLineage();
     if(l.type!=='normal'&&(!l.secondaryGodId||l.secondaryGodId===state.godId))add('error','Legado precisa de dois deuses diferentes.');
     if(l.type!=='normal'&&(isTriumvir(state.godId)||isTriumvir(l.secondaryGodId)))add('error','Triúnviros não participam da mistura de kits por Legado.');
-    if(l.type==='compound'){
-      if((l.compoundPassiveReplacements||[]).length>3)add('error','Legado Composto excedeu 3 trocas de passivas.');
-      if((l.compoundActiveReplacements||[]).length>2)add('error','Legado Composto excedeu 2 trocas de ativas.');
+    if(l.type==='direct'){
+      if((l.compoundPassiveReplacements||[]).length>3)add('error','Legado Direto excedeu 3 trocas de passivas.');
+      if((l.compoundActiveReplacements||[]).length>2)add('error','Legado Direto excedeu 2 trocas de ativas.');
       const main=abilitiesDb[state.godId],sub=abilitiesDb[l.secondaryGodId];
       for(const r of l.compoundActiveReplacements||[]){const a=main?.actives?.[Number(r.primaryIndex)],b=sub?.actives?.find(x=>x.id===r.secondaryId);if(a&&b&&Number(b.level)>Number(a.level))add('error',`Troca de Legado inválida: ${b.name} exige nível maior que ${a.name}.`)}
     }
-    if(l.type==='direct'){
-      if((l.directPrimaryPassives||[]).length!==4)add('warn','Legado Direto deve selecionar 4 passivas da primeira origem.');
-      if((l.directSecondaryPassives||[]).length!==3)add('warn','Legado Direto deve selecionar 3 passivas da segunda origem.');
+    if(l.type==='compound'){
+      if((l.directPrimaryPassives||[]).length!==4)add('warn','Legado Composto deve selecionar 4 passivas da primeira origem.');
+      if((l.directSecondaryPassives||[]).length!==3)add('warn','Legado Composto deve selecionar 3 passivas da segunda origem.');
     }
     const common=familiarActiveCommons();
     if(common.length>2)add('error','Mais de 2 familiares comuns estão ativos na missão.');
@@ -1189,11 +1195,11 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     const type=state.lineage?.type||'normal',main=primaryGod(),sub=secondaryGod();
     if(isTriumvir(state.godId))return `<section class="mechanics-section"><article class="card"><p class="eyebrow">LEGADO</p><h2>Kit Triunviral</h2><div class="notice">Triúnviros não participam do sistema de mistura de kits por Legado. O kit permanece integral.</div></article></section>`;
     const eligible=eligibleLegacyGods();
-    let controls=`<div class="grid two"><label><span class="label">Tipo</span><select id="lineageType"><option value="normal" ${type==='normal'?'selected':''}>Prole direta · um deus</option><option value="compound" ${type==='compound'?'selected':''}>DEUS + LEGADO · Legado Composto</option><option value="direct" ${type==='direct'?'selected':''}>LEGADO + LEGADO · Legado Direto</option></select></label>${type!=='normal'?`<label><span class="label">Segundo deus</span><select id="secondaryGodSelect">${eligible.map(g=>`<option value="${g.id}" ${state.lineage.secondaryGodId===g.id?'selected':''}>${g.name}</option>`).join('')}</select></label>`:''}</div>`;
+    let controls=`<div class="grid two"><label><span class="label">Tipo</span><select id="lineageType"><option value="normal" ${type==='normal'?'selected':''}>Prole direta · um deus</option><option value="compound" ${type==='compound'?'selected':''}>LEGADO + LEGADO · Legado Composto</option><option value="direct" ${type==='direct'?'selected':''}>DEUS + LEGADO · Legado Direto</option></select></label>${type!=='normal'?`<label><span class="label">Segundo deus</span><select id="secondaryGodSelect">${eligible.map(g=>`<option value="${g.id}" ${state.lineage.secondaryGodId===g.id?'selected':''}>${g.name}</option>`).join('')}</select></label>`:''}</div>`;
     if(type==='normal')return `<section class="mechanics-section"><article class="card"><p class="eyebrow">LEGADO</p><h2>Linhagem</h2>${controls}<p class="muted">Nenhuma mistura de kits ativa.</p></article></section>`;
     if(!sub)return `<section class="mechanics-section"><article class="card"><p class="eyebrow">LEGADO</p><h2>Linhagem</h2>${controls}<div class="notice">Escolha um segundo deus para configurar o Legado.</div></article></section>`;
     const a=baseAbilitySet(state.godId),b=baseAbilitySet(sub.id);
-    if(type==='compound'){
+    if(type==='direct'){
       const reps=state.lineage.compoundPassiveReplacements||[];
       const activeReps=state.lineage.compoundActiveReplacements||[];
       const activeRows=[0,1].map(row=>{
@@ -1201,10 +1207,10 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
         const candidates=target?b.actives.filter(x=>Number(x.level)<=Number(target.level)):[];
         return `<div class="subcard"><b>Substituição ativa ${row+1}</b><p class="muted compact">Escolha primeiro qual habilidade do kit principal será trocada. Depois, escolha uma habilidade da segunda origem de <b>mesmo nível ou menor</b>.</p><label><span class="label">Ativa do kit principal</span><select data-legacy-active-row="${row}:primaryIndex"><option value="">Nenhuma</option>${a.actives.slice(0,5).map((x,i)=>`<option value="${i}" ${primaryIndex===i?'selected':''}>Nv ${x.level} · ${x.name}</option>`).join('')}</select></label><label><span class="label">Ativa do legado</span><select data-legacy-active-row="${row}:secondaryId" ${target?'':'disabled'}><option value="">${target?'Selecione…':'Escolha a ativa principal primeiro'}</option>${candidates.map(x=>`<option value="${x.id}" ${r.secondaryId===x.id?'selected':''}>Nv ${x.level} · ${x.name}</option>`).join('')}</select></label>${target?`<small class="muted">Pode escolher qualquer ativa de ${sub.name} até o nível ${target.level}.</small>`:''}</div>`;
       }).join('');
-      return `<section class="mechanics-section"><article class="card"><p class="eyebrow">CONFIGURAÇÃO DE LEGADO · DEUS + LEGADO</p><h2>${main.name} + ${sub.name}</h2>${controls}<div class="notice lineage-rule-note"><b>DEUS + LEGADO · Legado Composto.</b> É filho direto de um deus, mas também carrega uma herança divina secundária. Mantém o kit principal e, logo abaixo, você escolhe exatamente quais passivas e ativas serão trocadas pelas da segunda origem.</div><div class="grid three legacy-grid">${[0,1,2].map(row=>{const r=reps[row]||{};return `<div class="subcard"><b>Substituição passiva ${row+1}</b><label><span class="label">Passiva do kit principal</span><select data-legacy-passive-row="${row}:primaryIndex"><option value="">Nenhuma</option>${a.passives.map((x,i)=>`<option value="${i}" ${Number(r.primaryIndex)===i?'selected':''}>${i+1}. ${x.name}</option>`).join('')}</select></label><label><span class="label">Passiva do legado</span><select data-legacy-passive-row="${row}:secondaryId"><option value="">Selecione…</option>${b.passives.map(x=>`<option value="${x.id}" ${r.secondaryId===x.id?'selected':''}>${x.name}</option>`).join('')}</select></label></div>`}).join('')}</div><div class="grid two legacy-active-grid" style="margin-top:12px">${activeRows}</div></article></section>`;
+      return `<section class="mechanics-section"><article class="card"><p class="eyebrow">CONFIGURAÇÃO DE LEGADO · DEUS + LEGADO</p><h2>${main.name} + ${sub.name}</h2>${controls}<div class="notice lineage-rule-note"><b>DEUS + LEGADO · Legado Direto.</b> É filho direto de um deus, mas também carrega uma herança divina secundária. Mantém o kit principal e, logo abaixo, você escolhe exatamente quais passivas e ativas serão trocadas pelas da segunda origem.</div><div class="grid three legacy-grid">${[0,1,2].map(row=>{const r=reps[row]||{};return `<div class="subcard"><b>Substituição passiva ${row+1}</b><label><span class="label">Passiva do kit principal</span><select data-legacy-passive-row="${row}:primaryIndex"><option value="">Nenhuma</option>${a.passives.map((x,i)=>`<option value="${i}" ${Number(r.primaryIndex)===i?'selected':''}>${i+1}. ${x.name}</option>`).join('')}</select></label><label><span class="label">Passiva do legado</span><select data-legacy-passive-row="${row}:secondaryId"><option value="">Selecione…</option>${b.passives.map(x=>`<option value="${x.id}" ${r.secondaryId===x.id?'selected':''}>${x.name}</option>`).join('')}</select></label></div>`}).join('')}</div><div class="grid two legacy-active-grid" style="margin-top:12px">${activeRows}</div></article></section>`;
     }
     const pa=new Set(state.lineage.directPrimaryPassives||[]),pb=new Set(state.lineage.directSecondaryPassives||[]);
-    return `<section class="mechanics-section"><article class="card"><p class="eyebrow">CONFIGURAÇÃO DE LEGADO · LEGADO + LEGADO</p><h2>${main.name} + ${sub.name}</h2>${controls}<div class="notice lineage-rule-note"><b>LEGADO + LEGADO · Legado Direto.</b> É filho de semideuses e carrega duas heranças divinas próximas. Regra automatizada: 4 passivas de uma origem + 3 da outra; as primeiras 5 ativas dos dois kits; nenhuma habilidade 6+.</div><div class="notice"><b>Estrutura do Legado Direto:</b> HP, progressão de HP, conjuração, bônus de atributos, perícia divina e recursos usam sempre <b>${main.name}</b>, o deus principal. A segunda origem participa apenas da composição prevista das habilidades.</div><div class="grid two" style="margin-top:12px"><div class="subcard"><b>${main.name} · escolha 4 (${pa.size}/4)</b><div class="stack" style="margin-top:8px">${a.passives.map(x=>`<label class="skill-check"><input type="checkbox" data-direct-passive="primary:${x.id}" ${pa.has(x.id)?'checked':''}><span>${x.name}</span></label>`).join('')}</div></div><div class="subcard"><b>${sub.name} · escolha 3 (${pb.size}/3)</b><div class="stack" style="margin-top:8px">${b.passives.map(x=>`<label class="skill-check"><input type="checkbox" data-direct-passive="secondary:${x.id}" ${pb.has(x.id)?'checked':''}><span>${x.name}</span></label>`).join('')}</div></div></div><p class="muted compact" style="margin-top:12px">As ativas 1–5 de ambos os kits entram automaticamente na aba Habilidades.</p></article></section>`;
+    return `<section class="mechanics-section"><article class="card"><p class="eyebrow">CONFIGURAÇÃO DE LEGADO · LEGADO + LEGADO</p><h2>${main.name} + ${sub.name}</h2>${controls}<div class="notice lineage-rule-note"><b>LEGADO + LEGADO · Legado Composto.</b> É filho de semideuses e carrega duas heranças divinas próximas. Regra automatizada: 4 passivas de uma origem + 3 da outra; as primeiras 5 ativas dos dois kits; nenhuma habilidade 6+.</div><div class="notice"><b>Estrutura do Legado Composto:</b> o HP inicial usa o menor valor entre as duas origens; o +2, o +1 e a perícia divina são escolhidos entre ambas. As habilidades seguem a composição 4 + 3 passivas e as cinco primeiras ativas dos dois kits, sem habilidades 6+.</div><div class="grid two" style="margin-top:12px"><div class="subcard"><b>${main.name} · escolha 4 (${pa.size}/4)</b><div class="stack" style="margin-top:8px">${a.passives.map(x=>`<label class="skill-check"><input type="checkbox" data-direct-passive="primary:${x.id}" ${pa.has(x.id)?'checked':''}><span>${x.name}</span></label>`).join('')}</div></div><div class="subcard"><b>${sub.name} · escolha 3 (${pb.size}/3)</b><div class="stack" style="margin-top:8px">${b.passives.map(x=>`<label class="skill-check"><input type="checkbox" data-direct-passive="secondary:${x.id}" ${pb.has(x.id)?'checked':''}><span>${x.name}</span></label>`).join('')}</div></div></div><p class="muted compact" style="margin-top:12px">As ativas 1–5 de ambos os kits entram automaticamente na aba Habilidades.</p></article></section>`;
   }
 
   function bindTalents(){
@@ -1216,7 +1222,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     const t=byId('lineageType');
     if(t)t.onchange=e=>{const type=e.target.value;if(type!=='normal'&&isTriumvir(state.godId)){notify('Triúnviros não participam da mistura por Legado.');return}resetLineage(type);save();renderSheet()};
     const s=byId('secondaryGodSelect');
-    if(s)s.onchange=e=>{state.lineage.secondaryGodId=e.target.value;state.lineage.compoundPassiveReplacements=[];state.lineage.compoundActiveReplacements=[];state.lineage.compoundActiveSlots=[];if(state.lineage.type==='direct')initializeDirectSelections();save();renderSheet()};
+    if(s)s.onchange=e=>{state.lineage.secondaryGodId=e.target.value;state.lineage.compoundPassiveReplacements=[];state.lineage.compoundActiveReplacements=[];state.lineage.compoundActiveSlots=[];if(state.lineage.type==='compound')initializeDirectSelections();save();renderSheet()};
     document.querySelectorAll('[data-legacy-passive-row]').forEach(el=>el.onchange=()=>{const [rowS,field]=el.dataset.legacyPassiveRow.split(':'),row=Number(rowS);while(state.lineage.compoundPassiveReplacements.length<3)state.lineage.compoundPassiveReplacements.push({primaryIndex:'',secondaryId:''});state.lineage.compoundPassiveReplacements[row][field]=field==='primaryIndex'&&el.value!==''?Number(el.value):el.value;save();renderSheet()});
     document.querySelectorAll('[data-legacy-active-row]').forEach(el=>el.onchange=()=>{
       const [rowS,field]=el.dataset.legacyActiveRow.split(':'),row=Number(rowS);
