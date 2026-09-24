@@ -1,0 +1,79 @@
+name: Visual smoke · Ficha
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'app-v511.js'
+      - 'styles-v511.css'
+      - 'bootstrap-v511.js'
+      - 'lineage-creation-v515.js'
+      - 'stabilization-v516.js'
+      - 'magic-sacrifice-sync-v5153.js'
+      - 'polish-v5152.css'
+      - '.github/workflows/visual-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Start local site
+        run: |
+          python3 -m http.server 4173 >/tmp/duodecima-http.log 2>&1 &
+          sleep 2
+      - name: Capture desktop and mobile states
+        run: |
+          mkdir -p visual-artifacts
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+          const browser=await chromium.launch({headless:true});
+          const errors=[];
+          const capture=async(viewport,label,mobile=false)=>{
+            const context=await browser.newContext({viewport,isMobile:mobile});
+            const page=await context.newPage();
+            page.on('pageerror',e=>errors.push(`${label}: ${e.message}`));
+            page.on('console',m=>{if(m.type()==='error')errors.push(`${label} console: ${m.text()}`)});
+            await page.addInitScript(()=>{
+              const key='duodecima_universal_stage4_v24';
+              const seed={isCreated:true,name:'Visual QA',player:'CI',level:50,godId:'iuppiter',lineage:{type:'normal',secondaryGodId:'',structureGodId:'iuppiter'}};
+              localStorage.setItem(key,JSON.stringify(seed));
+            });
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+            await page.screenshot({path:`visual-artifacts/${label}-overview.png`,fullPage:true});
+            const tabs=['Combate','Inventário','Poderes','Magia'];
+            for(const tab of tabs){
+              const button=page.getByRole('button',{name:tab,exact:true}).first();
+              if(await button.count()){
+                await button.click();
+                await page.waitForTimeout(150);
+                await page.screenshot({path:`visual-artifacts/${label}-${tab.toLowerCase().normalize('NFD').replace(/[^a-z]/g,'')}.png`,fullPage:true});
+              }
+            }
+            await context.close();
+          };
+          await capture({width:1440,height:1100},'desktop');
+          await capture({width:390,height:844},'mobile',true);
+          await browser.close();
+          if(errors.length){console.error(errors.join('\n'));process.exit(1)}
+          NODE
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ficha-visual-smoke
+          path: visual-artifacts
+          if-no-files-found: error
