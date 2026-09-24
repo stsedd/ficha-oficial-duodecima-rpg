@@ -29,7 +29,7 @@ Pastas completas de entregas antigas foram retiradas do `main`; o histórico con
 
 - `v5.15.9-lineage-structure`: corrige o Legado Direto para usar sempre HP/progressão, conjuração, bônus, perícia divina e recursos do deus principal; remove os seletores estruturais antigos. A regra de menor HP fica exclusiva do Legado Composto.
 
-- `v5.15.10-lineage-semantics`: corrige a nomenclatura canônica dos Legados. Direto = DEUS + LEGADO (até 3 trocas de passivas e 2 trocas entre as cinco primeiras ativas; HP, atributos e perícia inicial do deus principal). Composto = LEGADO + LEGADO (4 + 3 passivas, cinco primeiras ativas de ambos, sem habilidades 6+, menor HP inicial e escolhas de +2/+1/perícia entre as duas origens). Fichas salvas com a nomenclatura anterior são migradas automaticamente.
+- `v5.15.11-lineage-semantics`: corrige a nomenclatura canônica dos Legados. Direto = DEUS + LEGADO (até 3 trocas de passivas e 2 trocas entre as cinco primeiras ativas; HP, atributos e perícia inicial do deus principal). Composto = LEGADO + LEGADO (4 + 3 passivas, cinco primeiras ativas de ambos, sem habilidades 6+, menor HP inicial e escolhas de +2/+1/perícia entre as duas origens). Fichas salvas com a nomenclatura anterior são migradas automaticamente.
 
 ## Regra de manutenção
 
