@@ -1,0 +1,36 @@
+name: Patch Direct Lineage Structure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-direct-lineage-structure.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply patch
+        run: python scripts/tmp-fix-direct-lineage-structure.py
+
+      - name: Validate syntax and lineage regression
+        run: |
+          node --check app-v511.js
+          node --check lineage-creation-v515.js
+          node scripts/validate-lineage-structure.mjs
+          grep -q 'v5.15.9-lineage-structure' VERSION.txt
+
+      - name: Commit fix
+        run: |
+          git config user.name 'duodecima-maintenance'
+          git config user.email 'actions@users.noreply.github.com'
+          git add VERSION.txt app-v511.js lineage-creation-v515.js scripts/validate-lineage-structure.mjs RUNTIME-MANIFEST.md
+          git commit -m 'Fix direct lineage structural rules'
+          git push
