@@ -66,7 +66,7 @@
   }
 
   const script = document.createElement('script');
-  script.src = `app-v511.js?v=5.15.3-magic-sacrifice-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src = `app-v511.js?v=5.15.4-fortuna-blessing-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer = false;
   script.onload=async()=>{
     try{

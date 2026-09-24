@@ -204,7 +204,7 @@
     schemaVersion:SCHEMA_VERSION,isCreated:false,name:'',player:'',level:1,godId:'iuppiter',
     baseAttributes:emptyAttrs(),levelAttributes:emptyAttrs(),attributeExtras:emptyAttrs(),divineSkillChoice:'',initialSkills:[],levelSkillChoices:{20:'',40:''},skillMeta:{},lineage:defaultLineage(),talents:[],talentDraftId:'',magic:defaultMagic(),inventory:defaultInventory(),familiars:defaultFamiliars(),roma:defaultRoma(),
     currentHp:null,currentEnergy:null,currentSanity:100,resourceCurrent:0,resourceValues:{},targetResources:{},
-    abilityStakes:{},abilityChoices:{},choiceDetails:{},abilityUses:{},conditions:[],exhaustion:0,death:defaultDeath(),tempMods:defaultTempMods(),
+    abilityStakes:{},abilityChoices:{},choiceDetails:{},abilityUses:{},conditions:[],exhaustion:0,death:defaultDeath(),tempMods:defaultTempMods(),fortunaBlessing:false,
     skillTrainings:[],weapons:[],armor:defaultArmor(),shield:defaultShield(),lastRoll:null,
     activeTab:'status',appearance:{mode:'dark',palette:'red',special:'none',exclusiveThemeId:''},history:{summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',birth:'',residence:'',portraitUrl:'',bannerUrl:'',bannerSourceUrl:'',bannerPositionX:50,bannerPositionY:50,bannerScale:100},notes:'',
     createdAt:null,updatedAt:null
@@ -244,7 +244,7 @@
   function spentLevelPoints(){return sum(state.levelAttributes)}
   function remainingLevelPoints(){return Math.max(0,earnedLevelPoints()-spentLevelPoints())}
   function bp(){const l=state.level,ranges=system.proficiencyRanges||[];if(ranges.length){const row=ranges.find(r=>l>=Number(r.min||0)&&(r.max==null||l<=Number(r.max)));if(row)return Number(row.bonus)||0}if(l<=20)return 1;if(l<=40)return 2;if(l<=60)return 3;if(l<=80)return 4;if(l<=99)return 5;return 6}
-  function rawHpMax(){const g=god(),con=structuralAttr('con'),dec=Math.floor(state.level/10),fragility=state.magic?.enabled?(Number(magicRules.hpProgressionPenalty)||2):0,perDec=Math.max(0,g.hpPerDecade-fragility);return g.hpBase+con+dec*(perDec+con)+(talentCount('duravel')*con*(1+dec))}
+  function rawHpMax(){const g=god(),con=structuralAttr('con'),dec=Math.floor(state.level/10),fragility=state.magic?.enabled?(Number(magicRules.hpProgressionPenalty)||2):0,perDec=Math.max(0,g.hpPerDecade-fragility),fortunaBonus=state.fortunaBlessing?10:0;return g.hpBase+con+dec*(perDec+con)+(talentCount('duravel')*con*(1+dec))+fortunaBonus}
   function magicSacrificeTotal(){return ['for','des','con'].reduce((t,k)=>t+magicSacrifice(k),0)}
   function rawEnergyMax(){const e=system.energy||{},base=Number(e.base??100),every=Math.max(1,Number(e.everyLevels??5)),inc=Number(e.increment??25);return base+Math.floor(state.level/every)*inc+(state.magic?.enabled?magicSacrificeTotal()*(Number(magicRules.sacrificeEnergyEach)||25):0)}
   function hpMax(){return state.exhaustion>=5?Math.max(1,Math.floor(rawHpMax()/2)):rawHpMax()}
@@ -475,6 +475,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function migrate(data){
     const out=Object.assign(defaultState(),data||{});
     out.schemaVersion=SCHEMA_VERSION;
+    out.fortunaBlessing=out.fortunaBlessing===true;
     const normalizeAttrLayer=(src)=>{const outAttrs=emptyAttrs();for(const k of Object.keys(outAttrs)){const n=Number(src?.[k]);outAttrs[k]=clamp(Number.isFinite(n)?Math.abs(n):0,0,5)}return outAttrs};
     // Atributos-base e pontos de nível nunca são negativos. Versões antigas puderam persistir o sinal invertido em alguns saves;
     // normalizamos o valor absoluto aqui para que, por exemplo, -5 volte a ser +5 em vez de contaminar a ficha.
@@ -820,6 +821,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
       <div class="rail-identity"><p class="eyebrow">${esc(g.name)}${state.lineage?.type!=='normal'?' · LEGADO':''}</p><h2>${esc(state.name||'Sem nome')}</h2>${h.tagline?`<p class="rail-tagline">${esc(h.tagline)}</p>`:''}<div class="rail-meta">${profileBits.length?profileBits.map(x=>`<span>${x}</span>`).join(''):'<span>Perfil sem detalhes adicionais</span>'}</div></div>
       <div class="rail-level-row" data-theme-component="profile-stats"><div class="rail-defense-stat" ${themeResourceAttrs('defense')}><span>${themeIconSlot('defense')}<span class="theme-resource-label">Defesa</span></span><strong>${signed(defenseBonus())}</strong><label class="rail-defense-adjust" title="Bônus ou penalidade manual de Defesa">manual <input id="railDefenseAdjust" type="number" value="${Number(state.tempMods.defense)||0}"></label></div><div ${themeResourceAttrs('dt')}><span>${themeIconSlot('dt')}<span class="theme-resource-label">DT</span></span><strong>${castDT()}</strong></div></div>
       <div class="rail-vitals" data-theme-component="profile-vitals"><div ${themeResourceAttrs('hp')}><span>${themeIconSlot('hp')}<span class="theme-resource-label">HP</span></span><b>${state.currentHp}/${hpMax()}</b></div><div ${themeResourceAttrs('en')}><span>${themeIconSlot('en')}<span class="theme-resource-label">EN</span></span><b>${state.currentEnergy}/${energyMax()}</b><small>${energy.name}</small></div><div ${themeResourceAttrs('san')}><span>${themeIconSlot('san')}<span class="theme-resource-label">SAN</span></span><b>${state.currentSanity}/100</b><small>${band.name}</small></div>${hudResources().slice(0,2).map(r=>{const key=resourceKey(r);return `<div ${themeResourceAttrs('divine',r.id||'',key)}><span>${themeIconSlot('divine')}<span class="theme-resource-label">${esc(r.name)}</span>${r.scope==='collective'?'<small>COLETIVO</small>':''}</span><b>${resourceValue(r)}/${resourceMaxFor(r)}</b></div>`}).join('')}</div>
+      <button id="fortunaBlessingToggle" class="${state.fortunaBlessing?'primary':'ghost'} small-btn wide-button" type="button" aria-pressed="${state.fortunaBlessing?'true':'false'}" title="Bênção mensal de Fortuna: +10 no HP máximo enquanto estiver ativa">${state.fortunaBlessing?'✓ Bênção de Fortuna ativa · +10 HP máximo':'Bênção de Fortuna · +10 HP máximo'}</button>
       ${renderMiniDeath()}
       <details class="rail-editor"><summary>Editar perfil</summary><div class="stack">
         <label><span class="label">Personagem</span><input id="sheetNameInput" value="${esc(state.name)}"></label>
@@ -1455,6 +1457,7 @@ document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{
 
     const td=byId('tempDefense');if(td)td.onchange=e=>{state.tempMods.defense=Number(e.target.value)||0;save();renderSheet()};
     const railDef=byId('railDefenseAdjust');if(railDef)railDef.onchange=e=>{state.tempMods.defense=Number(e.target.value)||0;save();renderSheet()};
+    const fortunaBlessingToggle=byId('fortunaBlessingToggle');if(fortunaBlessingToggle)fortunaBlessingToggle.onclick=()=>{state.fortunaBlessing=!state.fortunaBlessing;syncCurrentCaps();save();renderSheet();notify(state.fortunaBlessing?'Bênção de Fortuna ativa: +10 no HP máximo.':'Bênção de Fortuna removida: HP máximo normal restaurado.')};
     const tdr=byId('tempReduction');if(tdr)tdr.onchange=e=>{state.tempMods.damageReduction=Number(e.target.value)||0;save();renderSheet()};
     const pBtn=byId('uploadPortraitBtn'); const pInput=byId('portraitUploadInput'); if(pBtn&&pInput){pBtn.onclick=()=>pInput.click(); pInput.onchange=e=>readImageToHistory(e.target.files?.[0],'portraitUrl')}
     const bBtn=byId('uploadBannerBtn'); const bInput=byId('bannerUploadInput'); if(bBtn&&bInput){bBtn.onclick=()=>bInput.click(); bInput.onchange=e=>readImageToHistory(e.target.files?.[0],'bannerUrl')}

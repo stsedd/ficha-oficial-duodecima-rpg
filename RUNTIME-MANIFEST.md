@@ -17,6 +17,8 @@ Este arquivo existe para impedir alterações acidentais em arquivos históricos
 
 Pastas completas de entregas antigas foram retiradas do `main`; o histórico continua preservado pelos commits do Git. Arquivos versionados antigos que ainda permanecerem são apenas referência histórica e **não devem receber correções do runtime atual**.
 
+- `v5.15.4-fortuna-blessing`: adiciona o toggle persistente de Bênção de Fortuna (+10 HP máximo enquanto ativo).
+
 ## Regra de manutenção
 
 Ao trocar qualquer arquivo ativo, atualize este manifesto e a chave de cache correspondente em `index.html` ou `bootstrap-v511.js`. A camada automática de snapshot mantém a última versão canônica do Core disponível caso o endpoint remoto falhe.
