@@ -19,6 +19,8 @@ Pastas completas de entregas antigas foram retiradas do `main`; o histórico con
 
 - `v5.15.4-fortuna-blessing`: adiciona o toggle persistente de Bênção de Fortuna (+10 HP máximo enquanto ativo).
 
+- `v5.15.5-fortuna-month-reset`: a Bênção de Fortuna continua dando +10 HP máximo enquanto marcada e agora desativa automaticamente quando o mês muda.
+
 ## Regra de manutenção
 
 Ao trocar qualquer arquivo ativo, atualize este manifesto e a chave de cache correspondente em `index.html` ou `bootstrap-v511.js`. A camada automática de snapshot mantém a última versão canônica do Core disponível caso o endpoint remoto falhe.
