@@ -2,8 +2,8 @@
   "manifest": {
     "core": "Duodécima Core",
     "schemaVersion": 2,
-    "contentVersion": "2026.09.22.2",
-    "updatedAt": "2026-09-22",
+    "contentVersion": "2026.09.24.2",
+    "updatedAt": "2026-09-24",
     "status": "canonical-phase-2",
     "counts": {
       "deities": 52,
@@ -44,7 +44,9 @@
       "Estratégia e Enganação agora possuem descrições canônicas completas.",
       "A política de repetição e acumulação de todos os talentos está explicitada em data/talento-acumulo.json.",
       "Magia passa a ter fonte estruturada em data/magia.json. Custos finais por círculo: 20, 45, 70, 95, 120, 150, 185, 225 e 270 Energia; truques custam 0.",
-      "No despertar mágico, cada −1 em FOR, DES ou CON concede +25 Energia máxima, até 3 pontos no total; bônus divinos não são sacrificáveis."
+      "No despertar mágico, cada −1 em FOR, DES ou CON concede +25 Energia máxima, até 3 pontos no total; bônus divinos não são sacrificáveis.",
+      "Vis: HP inicial 30 + Constituição; a cada 10 níveis, +5 + Constituição no HP máximo.",
+      "Fortuna: Bênção da Boa Hora dura 2 rodadas em 0–15 e 3 rodadas em 16–29/30+, afetando 1/2/3 criaturas e concedendo +1d4 em ataques e resistências; incompatível com Mau Agouro."
     ]
   },
   "attributes": {
@@ -47512,25 +47514,22 @@
                 "id": "0-15",
                 "min": 0,
                 "max": 15,
-                "label": "0–15",
-                "text": "abençoa 1 criatura por 2 rodadas. Sempre que fizer ataque ou resistência, pode somar 1d4 ao resultado."
+                "text": "Abençoa 1 criatura por 2 rodadas. Sempre que fizer uma rolagem de ataque ou resistência, pode somar 1d4 ao resultado."
               },
               {
                 "id": "16-29",
                 "min": 16,
                 "max": 29,
-                "label": "16–29",
-                "text": "afeta até 2 criaturas por 3 rodadas."
+                "text": "Pode abençoar até 2 criaturas por 3 rodadas. Sempre que fizerem uma rolagem de ataque ou resistência, podem somar 1d4 ao resultado."
               },
               {
                 "id": "30+",
                 "min": 30,
                 "max": null,
-                "label": "30+",
-                "text": "afeta até 3 criaturas por 3 rodadas. Não pode estar ativa ao mesmo tempo que Mau Agouro."
+                "text": "Pode abençoar até 3 criaturas por 3 rodadas. Sempre que fizerem uma rolagem de ataque ou resistência, podem somar 1d4 ao resultado."
               }
             ],
-            "note": "",
+            "note": "Bênção da Boa Hora não pode estar ativa ao mesmo tempo que Mau Agouro.",
             "blocks": [
               {
                 "type": "description",
@@ -57416,5 +57415,5 @@
       "No despertar, cada ponto retirado de FOR, DES ou CON concede +25 de Energia máxima, até 3 pontos no total."
     ]
   },
-  "generatedAt": "2026-09-24T04:10:35.938Z"
+  "generatedAt": "2026-09-24T10:01:54.411Z"
 }
