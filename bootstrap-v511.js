@@ -66,7 +66,7 @@
   }
 
   const script = document.createElement('script');
-  script.src = `app-v511.js?v=5.15.5-fortuna-month-reset-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src = `app-v511.js?v=v5.15.7-image-storage-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer = false;
   script.onload=async()=>{
     try{
@@ -82,7 +82,7 @@
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src=`stabilization-v516.js?v=5.15.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.src=`stabilization-v516.js?v=v5.15.7-image-storage-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
         patch.onload=resolve;
         patch.onerror=()=>reject(new Error('Falha ao carregar camada de estabilização'));
         document.body.appendChild(patch);

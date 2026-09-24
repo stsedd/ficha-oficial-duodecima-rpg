@@ -472,7 +472,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     return {name:'Energia estável',cls:'good-text',text:'Sem penalidade por Energia.'};
   }
   function notify(msg){toast.textContent=msg;toast.classList.remove('hidden');clearTimeout(notify.t);notify.t=setTimeout(()=>toast.classList.add('hidden'),2800)}
-  function save(){state.schemaVersion=SCHEMA_VERSION;state.updatedAt=new Date().toISOString();safeStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+  function save(){state.schemaVersion=SCHEMA_VERSION;state.updatedAt=new Date().toISOString();try{safeStorage.setItem(STORAGE_KEY,JSON.stringify(state));return true}catch(err){console.error('[Ficha] Falha ao salvar a ficha localmente.',err);notify('A ficha atingiu o limite de armazenamento deste navegador. Remova imagens antigas ou exporte o JSON antes de continuar.');return false}}
   function uid(prefix='id'){return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`}
   function migrate(data){
     const out=Object.assign(defaultState(),data||{});
@@ -1061,7 +1061,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     document.querySelectorAll('[data-item-field]').forEach(el=>{const handler=()=>{const [id,field]=el.dataset.itemField.split(':'),it=inv.items.find(x=>x.id===id);if(!it)return;let value=el.value;if(field==='qty')value=Math.max(0,Number(value)||0);if(field==='attackBonus')value=Number(value)||0;if(field==='category')value=normalizeInventoryCategory(value);it[field]=value;if(field==='effect')it.rune=value;save();if(['category','qty'].includes(field))renderSheet()};el.onchange=handler;if(el.tagName==='TEXTAREA'||['name','material','effect','notes','damage','range'].includes((el.dataset.itemField||'').split(':')[1]))el.oninput=handler});
     document.querySelectorAll('[data-item-check]').forEach(el=>el.onchange=()=>{const [id,field]=el.dataset.itemCheck.split(':'),it=inv.items.find(x=>x.id===id);if(!it)return;it[field]=el.checked;save();renderSheet()});
     document.querySelectorAll('[data-item-deck]').forEach(el=>el.onchange=()=>{const it=inv.items.find(x=>x.id===el.dataset.itemDeck);if(!it)return;it.showInDeck=el.checked;save();renderSheet()});
-    document.querySelectorAll('[data-upload-item-image]').forEach(b=>b.onclick=()=>{const it=inv.items.find(x=>x.id===b.dataset.uploadItemImage);if(!it)return;chooseStoredImage(url=>{it.imageUrl=url;save();renderSheet();notify('Imagem do item atualizada.')})});
+    document.querySelectorAll('[data-upload-item-image]').forEach(b=>b.onclick=()=>{const it=inv.items.find(x=>x.id===b.dataset.uploadItemImage);if(!it)return;chooseStoredImage(url=>{const previous=it.imageUrl;it.imageUrl=url;if(!save()){it.imageUrl=previous;return}renderSheet();notify('Imagem do item atualizada.')})});
     document.querySelectorAll('[data-clear-item-image]').forEach(b=>b.onclick=()=>{const it=inv.items.find(x=>x.id===b.dataset.clearItemImage);if(!it)return;it.imageUrl='';save();renderSheet()});
     const libraryBtn=byId('addInventoryFromLibrary');if(libraryBtn)libraryBtn.onclick=()=>{const tpl=libraryItemById(byId('inventoryLibrarySelect')?.value||'');if(!tpl){notify('Escolha um modelo da biblioteca.');return;}applyLibraryTemplate(tpl);save();renderSheet();notify(`Modelo importado: ${tpl.name}.`)};
     const search=byId('inventorySearch'),filter=byId('inventoryFilter');const applyFilter=()=>{const q=String(search?.value||'').trim().toLowerCase(),f=filter?.value||'all';document.querySelectorAll('[data-item-card]').forEach(card=>{const item=inv.items.find(x=>x.id===card.dataset.itemCard),name=String(item?.name||'').toLowerCase();const typeOk=f==='all'||f===item?.category||(f==='heritage'&&item?.isHeritage);card.classList.toggle('hidden',!(typeOk&&(!q||name.includes(q))))});const weaponSection=document.querySelector('[data-inventory-kind="weapons"]');if(weaponSection)weaponSection.classList.toggle('hidden',!(f==='all'||f==='weapons'||f==='heritage'));document.querySelectorAll('[data-weapon-card]').forEach(card=>{const w=state.weapons.find(x=>x.id===card.dataset.weaponCard),name=String(w?.name||'').toLowerCase(),ok=(f==='all'||f==='weapons'||(f==='heritage'&&w?.isHeritage))&&(!q||name.includes(q));card.classList.toggle('hidden',!ok)})};if(search)search.oninput=applyFilter;if(filter)filter.onchange=applyFilter;
@@ -1490,7 +1490,7 @@ document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{
     byId('armorName').onchange=e=>{state.armor.name=e.target.value;save()};
     byId('armorType').onchange=e=>{state.armor.type=e.target.value;save();renderSheet()};
     byId('armorMaterial').onchange=e=>{state.armor.material=e.target.value;const m=material(e.target.value);state.armor.resistanceCurrent=m.unbreakable?null:m.resistance;save();renderSheet()};
-    const upload=byId('uploadArmorImage');if(upload)upload.onclick=()=>chooseStoredImage(url=>{state.armor.imageUrl=url;save();renderSheet();notify('Imagem da armadura atualizada.')});
+    const upload=byId('uploadArmorImage');if(upload)upload.onclick=()=>chooseStoredImage(url=>{const previous=state.armor.imageUrl;state.armor.imageUrl=url;if(!save()){state.armor.imageUrl=previous;return}renderSheet();notify('Imagem da armadura atualizada.')});
     const clear=byId('clearArmorImage');if(clear)clear.onclick=()=>{state.armor.imageUrl='';save();renderSheet()};
     document.querySelectorAll('[data-armor-res]').forEach(b=>b.onclick=()=>{const m=material(state.armor.material);if(m.unbreakable)return;state.armor.resistanceCurrent=clamp((Number(state.armor.resistanceCurrent)||0)+Number(b.dataset.armorRes),0,m.resistance);save();renderSheet()});
   }
@@ -1499,7 +1499,7 @@ document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{
     byId('shieldName').onchange=e=>{state.shield.name=e.target.value;save()};
     byId('shieldMaterial').onchange=e=>{state.shield.material=e.target.value;const m=material(e.target.value);state.shield.resistanceCurrent=m.unbreakable?null:m.resistance;save();renderSheet()};
     byId('shieldStakes').onchange=e=>{state.shield.stakes=clamp(Number(e.target.value),0,30);save();renderSheet()};
-    const upload=byId('uploadShieldImage');if(upload)upload.onclick=()=>chooseStoredImage(url=>{state.shield.imageUrl=url;save();renderSheet();notify('Imagem do escudo atualizada.')});
+    const upload=byId('uploadShieldImage');if(upload)upload.onclick=()=>chooseStoredImage(url=>{const previous=state.shield.imageUrl;state.shield.imageUrl=url;if(!save()){state.shield.imageUrl=previous;return}renderSheet();notify('Imagem do escudo atualizada.')});
     const clear=byId('clearShieldImage');if(clear)clear.onclick=()=>{state.shield.imageUrl='';save();renderSheet()};
     document.querySelectorAll('[data-shield-res]').forEach(b=>b.onclick=()=>{const m=material(state.shield.material);if(m.unbreakable)return;state.shield.resistanceCurrent=clamp((Number(state.shield.resistanceCurrent)||0)+Number(b.dataset.shieldRes),0,m.resistance);save();renderSheet()});
   }
@@ -1509,7 +1509,7 @@ document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{
     document.querySelectorAll('[data-weapon-equipped]').forEach(el=>el.onchange=()=>{const w=state.weapons.find(x=>x.id===el.dataset.weaponEquipped);if(!w)return;w.equipped=el.checked;save();renderSheet()});
     document.querySelectorAll('[data-weapon-heritage]').forEach(el=>el.onchange=()=>{const w=state.weapons.find(x=>x.id===el.dataset.weaponHeritage);if(!w)return;w.isHeritage=el.checked;save();renderSheet()});
     document.querySelectorAll('[data-weapon-field]').forEach(el=>{const handler=()=>{const [id,field]=el.dataset.weaponField.split(':'),w=state.weapons.find(x=>x.id===id);if(!w)return;let value=el.value;if(['stakes','attackExtra','damageExtra'].includes(field))value=Number(value)||0;if(field==='stakes')value=clamp(value,0,30);w[field]=value;if(field==='material'){const m=material(value);w.resistanceCurrent=m.unbreakable?null:m.resistance}save();if(field!=='notes'&&field!=='name')renderSheet()};el.onchange=handler;if(el.tagName==='TEXTAREA'||(el.dataset.weaponField||'').endsWith(':name'))el.oninput=handler});
-    document.querySelectorAll('[data-upload-weapon-image]').forEach(b=>b.onclick=()=>{const w=state.weapons.find(x=>x.id===b.dataset.uploadWeaponImage);if(!w)return;chooseStoredImage(url=>{w.imageUrl=url;save();renderSheet();notify('Imagem da arma atualizada.')})});
+    document.querySelectorAll('[data-upload-weapon-image]').forEach(b=>b.onclick=()=>{const w=state.weapons.find(x=>x.id===b.dataset.uploadWeaponImage);if(!w)return;chooseStoredImage(url=>{const previous=w.imageUrl;w.imageUrl=url;if(!save()){w.imageUrl=previous;return}renderSheet();notify('Imagem da arma atualizada.')})});
     document.querySelectorAll('[data-clear-weapon-image]').forEach(b=>b.onclick=()=>{const w=state.weapons.find(x=>x.id===b.dataset.clearWeaponImage);if(!w)return;w.imageUrl='';save();renderSheet()});
     document.querySelectorAll('[data-weapon-res]').forEach(b=>b.onclick=()=>{const idx=b.dataset.weaponRes.lastIndexOf(':'),id=b.dataset.weaponRes.slice(0,idx),delta=Number(b.dataset.weaponRes.slice(idx+1)),w=state.weapons.find(x=>x.id===id);if(!w)return;const m=material(w.material);if(m.unbreakable)return;w.resistanceCurrent=clamp((Number(w.resistanceCurrent)||0)+delta,0,m.resistance);save();renderSheet()});
   }
@@ -1543,10 +1543,19 @@ function useAbility(key,cost){
   setEnergy(state.currentEnergy-cost);if(rule)state.abilityUses[abilityUsageKey(a)]=abilityUses(a)+1;save();renderSheet();notify(`Habilidade usada: −${cost} EN${rule?` · ${abilityUses(a)}/${rule.max} uso(s)`:''}.`)
 }
   function changeLevelAttr(k,d){if(d>0){if(remainingLevelPoints()<=0||ordinaryAttrRaw(k)>=5)return;state.levelAttributes[k]++}else{if(state.levelAttributes[k]<=0)return;state.levelAttributes[k]--}syncCurrentCaps();save();renderSheet()}
-  function readImageToHistory(file,key){if(!file)return;const reader=new FileReader();reader.onload=()=>{state.history[key]=String(reader.result||'');save();renderSheet();notify(key==='portraitUrl'?'Retrato atualizado.':'Banner atualizado.')};reader.readAsDataURL(file)}
+  function compactDataImage(source,maxDimension=480,targetLength=150000){
+    return new Promise(resolve=>{const src=String(source||'');if(!/^data:image\//i.test(src)){resolve(src);return}const img=new Image();img.onload=()=>{try{let width=img.naturalWidth||img.width||1,height=img.naturalHeight||img.height||1,scale=Math.min(1,maxDimension/Math.max(width,height));width=Math.max(1,Math.round(width*scale));height=Math.max(1,Math.round(height*scale));const encode=(w,h,q)=>{const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('canvas');ctx.drawImage(img,0,0,w,h);return canvas.toDataURL('image/webp',q)};let quality=.78,result=encode(width,height,quality);while(result.length>targetLength&&quality>.46){quality-=.08;result=encode(width,height,quality)}if(result.length>targetLength){const shrink=Math.max(.45,Math.min(.92,Math.sqrt(targetLength/result.length)*.92));width=Math.max(1,Math.round(width*shrink));height=Math.max(1,Math.round(height*shrink));result=encode(width,height,.68)}resolve(result&&result!=='data:,'?result:src)}catch(err){console.warn('[Ficha] Não foi possível compactar a imagem.',err);resolve(src)}};img.onerror=()=>resolve(src);img.src=src})
+  }
+  function readImageToHistory(file,key){if(!file)return;const reader=new FileReader();reader.onload=async()=>{const src=String(reader.result||''),isPortrait=key==='portraitUrl',compact=await compactDataImage(src,isPortrait?900:1400,isPortrait?420000:900000),previous=state.history[key];state.history[key]=compact;if(!save()){state.history[key]=previous;return}renderSheet();notify(isPortrait?'Retrato atualizado.':'Banner atualizado.')};reader.readAsDataURL(file)}
   function chooseStoredImage(onReady){
     const input=document.createElement('input');input.type='file';input.accept='image/*';
-    input.onchange=()=>{const file=input.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{const src=String(reader.result||'');const img=new Image();img.onload=()=>{try{const max=1000,scale=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round((img.naturalWidth||img.width)*scale));canvas.height=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);const compact=canvas.toDataURL('image/webp',.82);onReady(compact&&compact!=='data:,'?compact:src)}catch(err){onReady(src)}};img.onerror=()=>onReady(src);img.src=src};reader.readAsDataURL(file)};input.click();
+    input.onchange=()=>{const file=input.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=async()=>{const src=String(reader.result||''),compact=await compactDataImage(src,480,150000);onReady(compact)};reader.onerror=()=>notify('Não foi possível ler essa imagem.');reader.readAsDataURL(file)};input.click();
+  }
+  async function compactStoredEquipmentImages(){
+    const refs=[state.armor,state.shield,...(state.weapons||[]),...(state.inventory?.items||[])].filter(Boolean);let changed=false;
+    for(const ref of refs){const src=String(ref.imageUrl||'');if(!/^data:image\//i.test(src)||src.length<=180000)continue;const compact=await compactDataImage(src,480,150000);if(compact&&compact.length<src.length){ref.imageUrl=compact;changed=true}}
+    const portrait=String(state.history?.portraitUrl||'');if(/^data:image\//i.test(portrait)&&portrait.length>520000){const compact=await compactDataImage(portrait,900,420000);if(compact&&compact.length<portrait.length){state.history.portraitUrl=compact;changed=true}}
+    if(changed){console.info('[Ficha] Imagens antigas compactadas para reduzir o uso de armazenamento local.');save()}
   }
   function toggleCondition(name,on){if(on&&!state.conditions.includes(name))state.conditions.push(name);if(!on)state.conditions=state.conditions.filter(x=>x!==name);save();renderSheet()}
 
@@ -1649,6 +1658,7 @@ function longRest(){
   byId('resetBtn').onclick=()=>{if(!confirm('Apagar a ficha local desta versão?'))return;safeStorage.removeItem(STORAGE_KEY);LEGACY_KEYS.forEach(k=>safeStorage.removeItem(k));state=defaultState();render();notify('Ficha resetada.')};
 
   load();
+  await compactStoredEquipmentImages();
   await initExclusiveThemes();
   bindShellChrome();
   render();

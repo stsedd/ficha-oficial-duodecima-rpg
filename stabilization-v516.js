@@ -1,7 +1,7 @@
 (()=>{
   'use strict';
 
-  const DISPLAY_VERSION='v5.15.3-magic-sacrifice';
+  const DISPLAY_VERSION=(()=>{const chip=document.querySelector('.version-chip'),current=chip?.textContent?.trim()||'';return /^v\d+\.\d+(?:\.\d+)?(?:[-\w.]*)?$/i.test(current)?current:'v5.15.7-image-storage'})();
   const materialRules=()=>new Map((window.DUODECIMA_SYSTEM?.materials||[]).map(x=>[x.id,x.targeting?.ruleText||'']));
 
   function installStyles(){
