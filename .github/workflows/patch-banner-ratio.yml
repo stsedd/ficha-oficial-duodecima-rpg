@@ -1,0 +1,87 @@
+name: Patch Banner Ratio
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-banner-ratio.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fix banner ratio and unwanted crop
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          css_path=Path('styles-v511.css')
+          s=css_path.read_text(encoding='utf-8')
+
+          def replace_exact(old,new,label,expected=1):
+              global s
+              count=s.count(old)
+              if count != expected:
+                  raise SystemExit(f'{label}: expected {expected} match(es), found {count}')
+              s=s.replace(old,new,expected)
+
+          replace_exact(
+              'aspect-ratio:5.4/1!important;min-height:150px!important;max-height:260px!important;',
+              'aspect-ratio:4.5/1!important;min-height:0!important;max-height:260px!important;',
+              'published banner ratio'
+          )
+          replace_exact(
+              '.banner-crop-viewport{position:relative;width:100%;aspect-ratio:5.4/1;min-height:150px;overflow:hidden;',
+              '.banner-crop-viewport{position:relative;width:100%;aspect-ratio:4.5/1;min-height:0;overflow:hidden;',
+              'crop editor ratio'
+          )
+          replace_exact(
+              '@media(max-width:760px){.banner-crop-controls{grid-template-columns:1fr}.profile-cover-pure{aspect-ratio:3.2/1!important;min-height:145px!important}.banner-crop-viewport{aspect-ratio:3.2/1;min-height:145px}}',
+              '@media(max-width:760px){.banner-crop-controls{grid-template-columns:1fr}.profile-cover-pure{aspect-ratio:4.5/1!important;min-height:0!important}.banner-crop-viewport{aspect-ratio:4.5/1;min-height:0}}',
+              'mobile banner ratio'
+          )
+
+          css_path.write_text(s,encoding='utf-8')
+
+          index=Path('index.html')
+          i=index.read_text(encoding='utf-8')
+          if 'v5.15.5-fortuna-month-reset' not in i:
+              raise SystemExit('current index version not found')
+          i=i.replace('v5.15.5-fortuna-month-reset','v5.15.6-banner-ratio')
+          index.write_text(i,encoding='utf-8')
+
+          manifest=Path('RUNTIME-MANIFEST.md')
+          m=manifest.read_text(encoding='utf-8')
+          note='- `v5.15.6-banner-ratio`: corrige a capa para a proporção canônica 1800×400 (4,5:1) no desktop, mobile e editor de recorte, removendo o crop/zoom automático causado pela antiga proporção 5,4:1.\n'
+          anchor='## Regra de manutenção\n'
+          if note not in m:
+              if anchor not in m:
+                  raise SystemExit('runtime manifest anchor not found')
+              m=m.replace(anchor,note+'\n'+anchor,1)
+          manifest.write_text(m,encoding='utf-8')
+          PY
+
+      - name: Checks
+        run: |
+          grep -q 'aspect-ratio:4.5/1!important;min-height:0!important;max-height:260px!important' styles-v511.css
+          grep -q 'banner-crop-viewport{position:relative;width:100%;aspect-ratio:4.5/1;min-height:0' styles-v511.css
+          grep -q 'profile-cover-pure{aspect-ratio:4.5/1!important;min-height:0!important}' styles-v511.css
+          ! grep -q 'aspect-ratio:5.4/1' styles-v511.css
+          ! grep -q 'aspect-ratio:3.2/1' styles-v511.css
+          grep -q 'v5.15.6-banner-ratio' index.html
+
+      - name: Commit fix
+        shell: bash
+        run: |
+          git config user.name 'duodecima-maintenance'
+          git config user.email 'actions@users.noreply.github.com'
+          git add styles-v511.css index.html RUNTIME-MANIFEST.md
+          git commit -m 'Fix banner aspect ratio'
+          git push
