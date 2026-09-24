@@ -39,6 +39,19 @@
   }
   await syncMagicRules();
 
+  try{
+    await new Promise((resolve,reject)=>{
+      const guard=document.createElement('script');
+      guard.src=`contract-guard-v516.js?v=5.15.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      guard.onload=resolve;
+      guard.onerror=()=>reject(new Error('Falha ao carregar guarda de contrato do Core'));
+      document.body.appendChild(guard);
+    });
+    try{await window.DUODECIMA_CONTRACT_GUARD_READY}catch(_){ }
+  }catch(err){
+    console.warn('[Ficha] Guarda de contrato do Core indisponível; seguindo com as regras empacotadas.',err);
+  }
+
   try {
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
