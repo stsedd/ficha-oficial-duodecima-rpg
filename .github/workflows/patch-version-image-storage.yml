@@ -31,12 +31,11 @@ jobs:
           grep -q 'compactStoredEquipmentImages' app-v511.js
           grep -q 'targetLength=150000' app-v511.js
           ! grep -q "const DISPLAY_VERSION='v5.15.3-magic-sacrifice'" stabilization-v516.js
-          grep -q "'VERSION.txt'" .github/workflows/sync-index-version.yml
 
       - name: Commit fix
         run: |
           git config user.name 'duodecima-maintenance'
           git config user.email 'actions@users.noreply.github.com'
-          git add VERSION.txt index.html app-v511.js bootstrap-v511.js stabilization-v516.js RUNTIME-MANIFEST.md .github/workflows/sync-index-version.yml
+          git add VERSION.txt index.html app-v511.js bootstrap-v511.js stabilization-v516.js RUNTIME-MANIFEST.md
           git commit -m 'Fix version drift and equipment image storage'
           git push
