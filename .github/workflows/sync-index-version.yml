@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/patch-index-version.mjs'
+      - 'VERSION.txt'
       - '.github/workflows/sync-index-version.yml'
   workflow_dispatch:
 
