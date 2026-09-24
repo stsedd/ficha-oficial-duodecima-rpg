@@ -21,6 +21,8 @@ Pastas completas de entregas antigas foram retiradas do `main`; o histórico con
 
 - `v5.15.5-fortuna-month-reset`: a Bênção de Fortuna continua dando +10 HP máximo enquanto marcada e agora desativa automaticamente quando o mês muda.
 
+- `v5.15.6-banner-ratio`: corrige a capa para a proporção canônica 1800×400 (4,5:1) no desktop, mobile e editor de recorte, removendo o crop/zoom automático causado pela antiga proporção 5,4:1.
+
 ## Regra de manutenção
 
 Ao trocar qualquer arquivo ativo, atualize este manifesto e a chave de cache correspondente em `index.html` ou `bootstrap-v511.js`. A camada automática de snapshot mantém a última versão canônica do Core disponível caso o endpoint remoto falhe.

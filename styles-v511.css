@@ -3709,7 +3709,7 @@ body[data-special="fire"] :is(.character-rail,.ability-card)::after{
 /* O banner é deliberadamente só a imagem. Nada é sobreposto. */
 .profile-cover-pure{
   position:relative!important;display:block!important;width:100%!important;
-  aspect-ratio:5.4/1!important;min-height:150px!important;max-height:260px!important;
+  aspect-ratio:4.5/1!important;min-height:0!important;max-height:260px!important;
   margin:0 0 10px!important;padding:0!important;overflow:hidden!important;
   border:1px solid var(--theme-line,#493037)!important;border-radius:14px!important;
   background:#090708!important;box-shadow:0 16px 38px rgba(0,0,0,.28)!important
@@ -3731,7 +3731,7 @@ body[data-special="fire"] .profile-cover-pure::before,body[data-special="fire"] 
 .banner-crop-dialog::backdrop{background:rgba(0,0,0,.78);backdrop-filter:blur(5px)}
 .banner-crop-card{padding:18px;background:linear-gradient(180deg,#140d10,#090708);border-radius:inherit}
 .banner-crop-head{align-items:flex-start;margin-bottom:13px}.banner-crop-head h2{font-family:var(--serif);margin-bottom:5px}
-.banner-crop-viewport{position:relative;width:100%;aspect-ratio:5.4/1;min-height:150px;overflow:hidden;border:1px solid #60404a;border-radius:10px;background:#050505;box-shadow:inset 0 0 0 1px rgba(255,255,255,.025)}
+.banner-crop-viewport{position:relative;width:100%;aspect-ratio:4.5/1;min-height:0;overflow:hidden;border:1px solid #60404a;border-radius:10px;background:#050505;box-shadow:inset 0 0 0 1px rgba(255,255,255,.025)}
 .banner-crop-viewport img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:center center;display:block}
 .banner-crop-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:13px}
 .banner-crop-controls label{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:9px;border:1px solid #3d2c31;border-radius:8px;background:#0b0809}
@@ -3739,7 +3739,7 @@ body[data-special="fire"] .profile-cover-pure::before,body[data-special="fire"] 
 .banner-crop-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:13px}
 body[data-theme="light"] .banner-crop-dialog{background:#f7efe8;color:#2f2427;border-color:#c9aeb4}.banner-crop-dialog::backdrop{background:rgba(30,20,23,.62)}
 body[data-theme="light"] .banner-crop-card{background:linear-gradient(180deg,#fffaf5,#f3e8df)}body[data-theme="light"] .banner-crop-controls label{background:#fffaf4;border-color:#d7c4bf}body[data-theme="light"] .banner-crop-controls span{color:#76676b}
-@media(max-width:760px){.banner-crop-controls{grid-template-columns:1fr}.profile-cover-pure{aspect-ratio:3.2/1!important;min-height:145px!important}.banner-crop-viewport{aspect-ratio:3.2/1;min-height:145px}}
+@media(max-width:760px){.banner-crop-controls{grid-template-columns:1fr}.profile-cover-pure{aspect-ratio:4.5/1!important;min-height:0!important}.banner-crop-viewport{aspect-ratio:4.5/1;min-height:0}}
 
 /* Baralho: versão aprovada v5.9.6, sem slots falsos. */
 .upgraded-equipment-deck,.equipment-deck{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))!important;gap:14px!important;align-items:stretch!important}
