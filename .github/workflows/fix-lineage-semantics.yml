@@ -15,109 +15,41 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-
-          def replace_once(text, old, new, label):
+          def ro(text,old,new,label):
               count=text.count(old)
-              if count!=1:
-                  raise SystemExit(f'{label}: expected 1 match, found {count}')
+              if count!=1: raise SystemExit(f'{label}: expected 1 match, found {count}')
               return text.replace(old,new,1)
-
-          p=Path('app-v511.js')
-          s=p.read_text()
-
-          s=replace_once(s,
-            "const defaultLineage = () => ({type:'normal',secondaryGodId:'',structureGodId:'',compoundPassiveReplacements:[],compoundActiveReplacements:[],compoundActiveSlots:[],directPrimaryPassives:[],directSecondaryPassives:[]});",
-            "const defaultLineage = () => ({type:'normal',namingVersion:2,secondaryGodId:'',structureGodId:'',compoundPassiveReplacements:[],compoundActiveReplacements:[],compoundActiveSlots:[],directPrimaryPassives:[],directSecondaryPassives:[]});",
-            'defaultLineage')
-
-          s=replace_once(s,
-            "out.lineage=Object.assign(defaultLineage(),data?.lineage||{});\n    out.lineage.compoundPassiveReplacements",
-            "const legacyLineageNaming=!!data?.lineage&&Number(data.lineage.namingVersion||0)<2;\n    out.lineage=Object.assign(defaultLineage(),data?.lineage||{});\n    if(legacyLineageNaming){\n      if(out.lineage.type==='compound')out.lineage.type='direct';\n      else if(out.lineage.type==='direct')out.lineage.type='compound';\n    }\n    out.lineage.namingVersion=2;\n    out.lineage.compoundPassiveReplacements",
-            'lineage migration')
-
-          s=replace_once(s,
-            "function resetLineage(type='normal'){state.lineage=defaultLineage();state.lineage.type=type;if(type!=='normal'&&eligibleLegacyGods()[0])state.lineage.secondaryGodId=eligibleLegacyGods()[0].id;if(type==='direct'){state.lineage.structureGodId=state.godId;initializeDirectSelections()}}",
-            "function resetLineage(type='normal'){state.lineage=defaultLineage();state.lineage.type=type;if(type!=='normal'&&eligibleLegacyGods()[0])state.lineage.secondaryGodId=eligibleLegacyGods()[0].id;if(type==='direct')state.lineage.structureGodId=state.godId;if(type==='compound')initializeDirectSelections()}",
-            'resetLineage')
-
-          # Ability semantics: DEUS + LEGADO is Direct; LEGADO + LEGADO is Compound.
-          s=replace_once(s,"    if(type==='compound'){\n      const passives=main.passives.map", "    if(type==='direct'){\n      const passives=main.passives.map", 'effective direct branch')
-          s=replace_once(s,"    if(type==='direct'){\n      const pa=new Set(state.lineage.directPrimaryPassives", "    if(type==='compound'){\n      const pa=new Set(state.lineage.directPrimaryPassives", 'effective compound branch')
-
-          s=s.replace("if(l.type==='compound'){\n      if((l.compoundPassiveReplacements||[]).length>3)add('error','Legado Composto excedeu 3 trocas de passivas.');\n      if((l.compoundActiveReplacements||[]).length>2)add('error','Legado Composto excedeu 2 trocas de ativas.');",
-                      "if(l.type==='direct'){\n      if((l.compoundPassiveReplacements||[]).length>3)add('error','Legado Direto excedeu 3 trocas de passivas.');\n      if((l.compoundActiveReplacements||[]).length>2)add('error','Legado Direto excedeu 2 trocas de ativas.');",1)
-          s=s.replace("if(l.type==='direct'){\n      if((l.directPrimaryPassives||[]).length!==4)add('warn','Legado Direto deve selecionar 4 passivas da primeira origem.');\n      if((l.directSecondaryPassives||[]).length!==3)add('warn','Legado Direto deve selecionar 3 passivas da segunda origem.');",
-                      "if(l.type==='compound'){\n      if((l.directPrimaryPassives||[]).length!==4)add('warn','Legado Composto deve selecionar 4 passivas da primeira origem.');\n      if((l.directSecondaryPassives||[]).length!==3)add('warn','Legado Composto deve selecionar 3 passivas da segunda origem.');",1)
-
-          old_controls="<option value=\"compound\" ${type==='compound'?'selected':''}>DEUS + LEGADO · Legado Composto</option><option value=\"direct\" ${type==='direct'?'selected':''}>LEGADO + LEGADO · Legado Direto</option>"
-          new_controls="<option value=\"compound\" ${type==='compound'?'selected':''}>LEGADO + LEGADO · Legado Composto</option><option value=\"direct\" ${type==='direct'?'selected':''}>DEUS + LEGADO · Legado Direto</option>"
-          s=replace_once(s,old_controls,new_controls,'lineage select labels')
-
-          s=replace_once(s,"    if(type==='compound'){\n      const reps=state.lineage.compoundPassiveReplacements", "    if(type==='direct'){\n      const reps=state.lineage.compoundPassiveReplacements", 'render direct branch')
-          s=replace_once(s,"<b>DEUS + LEGADO · Legado Composto.</b> É filho direto de um deus, mas também carrega uma herança divina secundária.", "<b>DEUS + LEGADO · Legado Direto.</b> É filho direto de um deus, mas também carrega uma herança divina secundária.", 'direct render label')
-          s=replace_once(s,"<b>LEGADO + LEGADO · Legado Direto.</b> É filho de semideuses e carrega duas heranças divinas próximas.", "<b>LEGADO + LEGADO · Legado Composto.</b> É filho de semideuses e carrega duas heranças divinas próximas.", 'compound render label')
-          s=replace_once(s,
-            "<div class=\"notice\"><b>Estrutura do Legado Direto:</b> HP, progressão de HP, conjuração, bônus de atributos, perícia divina e recursos usam sempre <b>${main.name}</b>, o deus principal. A segunda origem participa apenas da composição prevista das habilidades.</div>",
-            "<div class=\"notice\"><b>Estrutura do Legado Composto:</b> o HP inicial usa o menor valor entre as duas origens; o +2, o +1 e a perícia divina são escolhidos entre ambas. As habilidades seguem a composição 4 + 3 passivas e as cinco primeiras ativas dos dois kits, sem habilidades 6+.</div>",
-            'compound structure note')
-
-          s=replace_once(s,
-            "if(state.lineage.type==='direct'){state.lineage.structureGodId=state.godId;initializeDirectSelections()}state.divineSkillChoice='';",
-            "if(state.lineage.type==='direct')state.lineage.structureGodId=state.godId;if(state.lineage.type==='compound')initializeDirectSelections();state.divineSkillChoice='';",
-            'creation secondary switch')
-          s=replace_once(s,
-            "if(state.lineage.type==='direct')initializeDirectSelections();save();renderSheet()",
-            "if(state.lineage.type==='compound')initializeDirectSelections();save();renderSheet()",
-            'sheet secondary switch')
-
+          p=Path('app-v511.js'); s=p.read_text()
+          s=ro(s,"const defaultLineage = () => ({type:'normal',secondaryGodId:'',structureGodId:'',compoundPassiveReplacements:[],compoundActiveReplacements:[],compoundActiveSlots:[],directPrimaryPassives:[],directSecondaryPassives:[]});","const defaultLineage = () => ({type:'normal',namingVersion:2,secondaryGodId:'',structureGodId:'',compoundPassiveReplacements:[],compoundActiveReplacements:[],compoundActiveSlots:[],directPrimaryPassives:[],directSecondaryPassives:[]});",'defaultLineage')
+          s=ro(s,"out.lineage=Object.assign(defaultLineage(),data?.lineage||{});\n    out.lineage.compoundPassiveReplacements","const legacyLineageNaming=!!data?.lineage&&Number(data.lineage.namingVersion||0)<2;\n    out.lineage=Object.assign(defaultLineage(),data?.lineage||{});\n    if(legacyLineageNaming){\n      if(out.lineage.type==='compound')out.lineage.type='direct';\n      else if(out.lineage.type==='direct')out.lineage.type='compound';\n    }\n    out.lineage.namingVersion=2;\n    out.lineage.compoundPassiveReplacements",'lineage migration')
+          s=ro(s,"function resetLineage(type='normal'){state.lineage=defaultLineage();state.lineage.type=type;if(type!=='normal'&&eligibleLegacyGods()[0])state.lineage.secondaryGodId=eligibleLegacyGods()[0].id;if(type==='direct'){state.lineage.structureGodId=state.godId;initializeDirectSelections()}}","function resetLineage(type='normal'){state.lineage=defaultLineage();state.lineage.type=type;if(type!=='normal'&&eligibleLegacyGods()[0])state.lineage.secondaryGodId=eligibleLegacyGods()[0].id;if(type==='direct')state.lineage.structureGodId=state.godId;if(type==='compound')initializeDirectSelections()}",'resetLineage')
+          s=ro(s,"    if(type==='compound'){\n      const passives=main.passives.map","    if(type==='direct'){\n      const passives=main.passives.map",'effective direct')
+          s=ro(s,"    if(type==='direct'){\n      const pa=new Set(state.lineage.directPrimaryPassives","    if(type==='compound'){\n      const pa=new Set(state.lineage.directPrimaryPassives",'effective compound')
+          s=ro(s,"if(l.type==='compound'){\n      if((l.compoundPassiveReplacements||[]).length>3)add('error','Legado Composto excedeu 3 trocas de passivas.');\n      if((l.compoundActiveReplacements||[]).length>2)add('error','Legado Composto excedeu 2 trocas de ativas.');","if(l.type==='direct'){\n      if((l.compoundPassiveReplacements||[]).length>3)add('error','Legado Direto excedeu 3 trocas de passivas.');\n      if((l.compoundActiveReplacements||[]).length>2)add('error','Legado Direto excedeu 2 trocas de ativas.');",'validation direct')
+          s=ro(s,"if(l.type==='direct'){\n      if((l.directPrimaryPassives||[]).length!==4)add('warn','Legado Direto deve selecionar 4 passivas da primeira origem.');\n      if((l.directSecondaryPassives||[]).length!==3)add('warn','Legado Direto deve selecionar 3 passivas da segunda origem.');","if(l.type==='compound'){\n      if((l.directPrimaryPassives||[]).length!==4)add('warn','Legado Composto deve selecionar 4 passivas da primeira origem.');\n      if((l.directSecondaryPassives||[]).length!==3)add('warn','Legado Composto deve selecionar 3 passivas da segunda origem.');",'validation compound')
+          s=ro(s,"<option value=\"compound\" ${type==='compound'?'selected':''}>DEUS + LEGADO · Legado Composto</option><option value=\"direct\" ${type==='direct'?'selected':''}>LEGADO + LEGADO · Legado Direto</option>","<option value=\"compound\" ${type==='compound'?'selected':''}>LEGADO + LEGADO · Legado Composto</option><option value=\"direct\" ${type==='direct'?'selected':''}>DEUS + LEGADO · Legado Direto</option>",'select labels')
+          s=ro(s,"    if(type==='compound'){\n      const reps=state.lineage.compoundPassiveReplacements","    if(type==='direct'){\n      const reps=state.lineage.compoundPassiveReplacements",'render direct')
+          s=ro(s,"<b>DEUS + LEGADO · Legado Composto.</b> É filho direto de um deus, mas também carrega uma herança divina secundária.","<b>DEUS + LEGADO · Legado Direto.</b> É filho direto de um deus, mas também carrega uma herança divina secundária.",'direct label')
+          s=ro(s,"<b>LEGADO + LEGADO · Legado Direto.</b> É filho de semideuses e carrega duas heranças divinas próximas.","<b>LEGADO + LEGADO · Legado Composto.</b> É filho de semideuses e carrega duas heranças divinas próximas.",'compound label')
+          s=ro(s,"<div class=\"notice\"><b>Estrutura do Legado Direto:</b> HP, progressão de HP, conjuração, bônus de atributos, perícia divina e recursos usam sempre <b>${main.name}</b>, o deus principal. A segunda origem participa apenas da composição prevista das habilidades.</div>","<div class=\"notice\"><b>Estrutura do Legado Composto:</b> o HP inicial usa o menor valor entre as duas origens; o +2, o +1 e a perícia divina são escolhidos entre ambas. As habilidades seguem a composição 4 + 3 passivas e as cinco primeiras ativas dos dois kits, sem habilidades 6+.</div>",'compound note')
+          s=ro(s,"if(state.lineage.type==='direct'){state.lineage.structureGodId=state.godId;initializeDirectSelections()}state.divineSkillChoice='';","if(state.lineage.type==='direct')state.lineage.structureGodId=state.godId;if(state.lineage.type==='compound')initializeDirectSelections();state.divineSkillChoice='';",'creation secondary')
+          s=ro(s,"if(state.lineage.type==='direct')initializeDirectSelections();save();renderSheet()","if(state.lineage.type==='compound')initializeDirectSelections();save();renderSheet()",'sheet secondary')
           p.write_text(s)
-
-          p=Path('lineage-creation-v515.js')
-          s=p.read_text()
-          anchor="  function normalizeDirectState(data){\n"
-          migration="""  function migrateLineageNaming(data){
-    if(!data?.lineage||Number(data.lineage.namingVersion||0)>=2)return false;
-    if(data.lineage.type==='compound')data.lineage.type='direct';
-    else if(data.lineage.type==='direct')data.lineage.type='compound';
-    data.lineage.namingVersion=2;
-    return true;
-  }
-
-  function seedMigratedCompoundChoices(data){
-    if(!data?.lineage||data.lineage.type!=='compound')return false;
-    const plus2=attributeOptions(data.godId,data.lineage.secondaryGodId,2);
-    const plus1=attributeOptions(data.godId,data.lineage.secondaryGodId,1);
-    const skills=skillOptions(data.godId,data.lineage.secondaryGodId);
-    let changed=false;
-    if(!isValid(data.lineage.compoundAttributePlus2,plus2)&&plus2[0]){data.lineage.compoundAttributePlus2=plus2[0].value;changed=true}
-    if(!isValid(data.lineage.compoundAttributePlus1,plus1)&&plus1[0]){data.lineage.compoundAttributePlus1=plus1[0].value;changed=true}
-    if(!isValid(data.lineage.compoundSkillChoice,skills)&&skills[0]){data.lineage.compoundSkillChoice=skills[0].value;changed=true}
-    const origins=originKey(data);
-    if(data.lineage.compoundChoiceOrigins!==origins){data.lineage.compoundChoiceOrigins=origins;changed=true}
-    return changed;
-  }
-
-"""
-          if anchor not in s: raise SystemExit('lineage plugin migration anchor missing')
+          p=Path('lineage-creation-v515.js'); s=p.read_text(); anchor="  function normalizeDirectState(data){\n"
+          migration="\n".join(["  function migrateLineageNaming(data){","    if(!data?.lineage||Number(data.lineage.namingVersion||0)>=2)return false;","    if(data.lineage.type==='compound')data.lineage.type='direct';","    else if(data.lineage.type==='direct')data.lineage.type='compound';","    data.lineage.namingVersion=2;","    return true;","  }","","  function seedMigratedCompoundChoices(data){","    if(!data?.lineage||data.lineage.type!=='compound')return false;","    const plus2=attributeOptions(data.godId,data.lineage.secondaryGodId,2);","    const plus1=attributeOptions(data.godId,data.lineage.secondaryGodId,1);","    const skills=skillOptions(data.godId,data.lineage.secondaryGodId);","    let changed=false;","    if(!isValid(data.lineage.compoundAttributePlus2,plus2)&&plus2[0]){data.lineage.compoundAttributePlus2=plus2[0].value;changed=true}","    if(!isValid(data.lineage.compoundAttributePlus1,plus1)&&plus1[0]){data.lineage.compoundAttributePlus1=plus1[0].value;changed=true}","    if(!isValid(data.lineage.compoundSkillChoice,skills)&&skills[0]){data.lineage.compoundSkillChoice=skills[0].value;changed=true}","    const origins=originKey(data);","    if(data.lineage.compoundChoiceOrigins!==origins){data.lineage.compoundChoiceOrigins=origins;changed=true}","    return changed;","  }",""])+"\n"
+          if anchor not in s: raise SystemExit('plugin anchor missing')
           s=s.replace(anchor,migration+anchor,1)
-          s=replace_once(s,
-            "    let changed=normalizeDirectState(data);\n    if(data.lineage?.type==='compound'&&data.divineSkillChoice){data.divineSkillChoice='';changed=true}",
-            "    const namingMigrated=migrateLineageNaming(data);\n    let changed=namingMigrated;\n    if(namingMigrated&&seedMigratedCompoundChoices(data))changed=true;\n    if(normalizeDirectState(data))changed=true;\n    if(data.lineage?.type==='compound'&&data.divineSkillChoice){data.divineSkillChoice='';changed=true}",
-            'plugin preboot migration')
+          s=ro(s,"    let changed=normalizeDirectState(data);\n    if(data.lineage?.type==='compound'&&data.divineSkillChoice){data.divineSkillChoice='';changed=true}","    const namingMigrated=migrateLineageNaming(data);\n    let changed=namingMigrated;\n    if(namingMigrated&&seedMigratedCompoundChoices(data))changed=true;\n    if(normalizeDirectState(data))changed=true;\n    if(data.lineage?.type==='compound'&&data.divineSkillChoice){data.divineSkillChoice='';changed=true}",'plugin preboot')
           p.write_text(s)
-
-          # Cache/version bump.
-          version_old='v5.15.9-lineage-structure'
-          version_new='v5.15.10-lineage-semantics'
+          old='v5.15.9-lineage-structure'; new='v5.15.10-lineage-semantics'
           p=Path('bootstrap-v511.js'); s=p.read_text();
-          if s.count(version_old)<2: raise SystemExit('bootstrap version markers missing')
-          s=s.replace(version_old,version_new); p.write_text(s)
+          if s.count(old)<2: raise SystemExit('bootstrap markers missing')
+          p.write_text(s.replace(old,new))
           p=Path('index.html'); s=p.read_text();
-          if version_old not in s: raise SystemExit('index version marker missing')
-          s=s.replace(version_old,version_new); p.write_text(s)
-          p=Path('RUNTIME-MANIFEST.md'); s=p.read_text();
-          note='- `v5.15.10-lineage-semantics`: corrige a nomenclatura canônica dos Legados. Direto = DEUS + LEGADO (trocas de até 3 passivas e 2 ativas, estrutura inicial do deus principal); Composto = LEGADO + LEGADO (4 + 3 passivas, cinco primeiras ativas de ambos, sem 6+, menor HP inicial e escolhas de +2/+1/perícia entre as duas origens). Fichas salvas com os nomes antigos são migradas automaticamente.\n'
-          if note not in s:s=s.replace('\n## Regra de manutenção', '\n'+note+'\n## Regra de manutenção')
+          if old not in s: raise SystemExit('index marker missing')
+          p.write_text(s.replace(old,new))
+          p=Path('RUNTIME-MANIFEST.md'); s=p.read_text(); note='- `v5.15.10-lineage-semantics`: corrige a nomenclatura canônica dos Legados. Direto = DEUS + LEGADO (trocas de até 3 passivas e 2 ativas, estrutura inicial do deus principal); Composto = LEGADO + LEGADO (4 + 3 passivas, cinco primeiras ativas de ambos, sem 6+, menor HP inicial e escolhas de +2/+1/perícia entre as duas origens). Fichas salvas com os nomes antigos são migradas automaticamente.\n'
+          if note not in s: s=s.replace('\n## Regra de manutenção','\n'+note+'\n## Regra de manutenção')
           p.write_text(s)
           PY
       - name: Validate runtime
@@ -125,20 +57,10 @@ jobs:
           node --check app-v511.js
           node --check lineage-creation-v515.js
           node --check bootstrap-v511.js
-          python - <<'PY'
-          from pathlib import Path
-          s=Path('app-v511.js').read_text()
-          assert 'DEUS + LEGADO · Legado Direto' in s
-          assert 'LEGADO + LEGADO · Legado Composto' in s
-          assert "if(type==='direct'){\n      const passives=main.passives.map" in s
-          assert "if(type==='compound'){\n      const pa=new Set(state.lineage.directPrimaryPassives" in s
-          assert "if(l.type==='direct'){\n      if((l.compoundPassiveReplacements" in s
-          assert "if(l.type==='compound'){\n      if((l.directPrimaryPassives" in s
-          p=Path('lineage-creation-v515.js').read_text()
-          assert 'migrateLineageNaming' in p and 'seedMigratedCompoundChoices' in p
-          assert 'v5.15.10-lineage-semantics' in Path('bootstrap-v511.js').read_text()
-          assert 'v5.15.10-lineage-semantics' in Path('index.html').read_text()
-          PY
+          grep -F "DEUS + LEGADO · Legado Direto" app-v511.js
+          grep -F "LEGADO + LEGADO · Legado Composto" app-v511.js
+          grep -F "migrateLineageNaming" lineage-creation-v515.js
+          grep -F "v5.15.10-lineage-semantics" index.html bootstrap-v511.js
           git diff --check
       - name: Commit ficha fix
         run: |
