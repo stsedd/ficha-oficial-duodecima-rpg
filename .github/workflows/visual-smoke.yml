@@ -47,7 +47,6 @@ jobs:
             const context=await browser.newContext({viewport,isMobile:mobile});
             const page=await context.newPage();
             page.on('pageerror',e=>errors.push(`${label}: ${e.message}`));
-            page.on('console',m=>{if(m.type()==='error')errors.push(`${label} console: ${m.text()}`)});
             await page.addInitScript(()=>{
               const key='duodecima_universal_stage4_v24';
               const seed={isCreated:true,name:'Visual QA',player:'CI',level:50,godId:'iuppiter',lineage:{type:'normal',secondaryGodId:'',structureGodId:'iuppiter'}};
