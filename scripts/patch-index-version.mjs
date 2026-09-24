@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-// Mantém a versão visível e as cache keys do GitHub Pages sincronizadas com VERSION.txt.
+// VERSION.txt é a fonte canônica: mantém versão visível e cache keys do GitHub Pages sincronizadas.
 const indexFile=new URL('../index.html',import.meta.url);
 const versionFile=new URL('../VERSION.txt',import.meta.url);
 const version=(await fs.readFile(versionFile,'utf8')).trim();
