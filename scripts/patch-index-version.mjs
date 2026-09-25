@@ -11,6 +11,7 @@ html=html
   .replace(/(<span class="version-chip"[^>]*>)v[^<]+(<\/span>)/,`$1${version}$2`)
   .replace(/(SCUTUM · Ficha Universal da Legio XII Fulminata · )v[^<]+(<\/p>)/,`$1${version}$2`)
   .replace(/styles-v511\.css\?v=[^"']+/g,`styles-v511.css?v=${version}`)
+  .replace(/system-v55\.js\?v=[^"']+/g,`system-v55.js?v=${version}`)
   .replace(/core-bridge-v511\.js\?v=[^"']+/g,`core-bridge-v511.js?v=${version}-core`)
   .replace(/bootstrap-v511\.js\?v=[^"']+/g,`bootstrap-v511.js?v=${version}`);
 
