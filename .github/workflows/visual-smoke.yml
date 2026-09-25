@@ -49,17 +49,45 @@ jobs:
             page.on('pageerror',e=>errors.push(`${label}: ${e.message}`));
             await page.addInitScript(()=>{
               const key='duodecima_universal_stage4_v24';
-              const seed={isCreated:true,name:'Visual QA',player:'CI',level:50,godId:'iuppiter',lineage:{type:'normal',secondaryGodId:'',structureGodId:'iuppiter'}};
+              const photo=(name,tone)=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="650"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#09090a"/><stop offset="1" stop-color="${tone}"/></linearGradient></defs><rect width="900" height="650" fill="url(#g)"/><circle cx="450" cy="270" r="150" fill="none" stroke="#ffffff33" stroke-width="10"/><path d="M210 420 Q450 120 690 420" fill="none" stroke="#ffffff88" stroke-width="18"/><text x="450" y="560" fill="#fff" font-family="serif" font-size="54" text-anchor="middle">${name}</text></svg>`);
+              const seed={
+                isCreated:true,name:'Visual QA',player:'CI',level:50,godId:'iuppiter',activeTab:'status',
+                lineage:{type:'normal',namingVersion:2,secondaryGodId:'',structureGodId:'iuppiter'},
+                familiars:{mountFameClaimed:false,notes:'QA visual da nova mini-ficha.',entries:[{
+                  id:'fam-ci',name:'Névoa Rubra',species:'Alicórnio',type:'montaria',active:true,currentHp:52,
+                  attributes:{for:2,des:1,con:2,int:0,fe:0,car:0},skills:['Atletismo','Percepção'],
+                  images:[photo('Perfil','#5b1d2c'),photo('Voo','#2d263d'),photo('Detalhe','#4b3030')],
+                  abilities:[
+                    {id:'famab-1',name:'Vínculo Sagrado',type:'passiva',description:'Recebe bônus em testes de resistência enquanto permanece próximo do mestre.'},
+                    {id:'famab-2',name:'Passos Etéreos',type:'passiva',description:'Move-se por terreno difícil sem penalidade.'},
+                    {id:'famab-3',name:'Investida Alada',type:'ativa',description:'Avança em voo e derruba o alvo ao final do movimento.'}
+                  ],
+                  barding:{enabled:true,name:'Barda de Prata Lunar',type:'Leve',defense:16,material:'Prata e couro',effects:'Proteção reforçada para combate montado.',equipment:'Sela de campanha · alforjes',imageUrl:photo('Barda','#3c2528')},
+                  knownVip:true,staffApproved:true,legendaryHpMax:0,legendaryUsed:false,legendaryOccasion:'',notes:'Temperamento protetor e muito atento ao dono.'
+                }]}
+              };
               localStorage.setItem(key,JSON.stringify(seed));
             });
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
             await page.screenshot({path:`visual-artifacts/${label}-overview.png`,fullPage:true});
-            const tabs=['Combate & Poderes','Inventário','Magia'];
+            const tabs=['Combate & Poderes','Inventário','Familiares','Magia'];
             for(const tab of tabs){
               const button=page.getByRole('button',{name:tab,exact:true}).first();
               if(await button.count()){
                 await button.click();
-                await page.waitForTimeout(150);
+                await page.waitForTimeout(180);
+                if(tab==='Familiares'){
+                  const familiar=await page.evaluate(()=>{
+                    const card=document.querySelector('.familiar-sheet'),gallery=document.querySelectorAll('.familiar-photo-slot'),attrs=document.querySelectorAll('.familiar-attribute-row'),groups=document.querySelectorAll('.familiar-ability-group'),barding=document.querySelector('.familiar-barding');
+                    return {card:!!card,gallery:gallery.length,attrs:attrs.length,groups:groups.length,barding:!!barding,scroll:document.documentElement.scrollWidth,viewport:window.innerWidth};
+                  });
+                  if(!familiar.card)errors.push(`${label}: mini-ficha de familiar ausente`);
+                  if(familiar.gallery!==3)errors.push(`${label}: galeria esperava 3 slots, encontrou ${familiar.gallery}`);
+                  if(familiar.attrs!==6)errors.push(`${label}: atributos esperavam 6 linhas, encontrou ${familiar.attrs}`);
+                  if(familiar.groups!==2)errors.push(`${label}: habilidades esperavam 2 grupos, encontrou ${familiar.groups}`);
+                  if(!familiar.barding)errors.push(`${label}: seção de barda ausente`);
+                  if(familiar.scroll>familiar.viewport+2)errors.push(`${label}: familiares com overflow horizontal ${familiar.scroll}px > ${familiar.viewport}px`);
+                }
                 await page.screenshot({path:`visual-artifacts/${label}-${tab.toLowerCase().normalize('NFD').replace(/[^a-z]/g,'')}.png`,fullPage:true});
               }
             }
