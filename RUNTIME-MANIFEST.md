@@ -33,6 +33,8 @@ Pastas completas de entregas antigas foram retiradas do `main`; o histórico con
 
 - `v5.15.12-familiar-sheet`: redesenha Familiares como mini-fichas temáticas, com HP em destaque, atributos/perícias em coluna, habilidades editáveis, galeria de até 3 imagens e barda completa para montarias. Dados antigos são migrados sem perda e imagens novas usam compactação própria.
 
+- `v5.15.14-backups`: adiciona histórico local de segurança da ficha. Antes de resetar/criar outra ficha, importar JSON ou substituir a ficha por preload, o estado atual é salvo em IndexedDB; a interface permite criar backups manuais e restaurar checkpoints, também procurando cópias legadas ainda existentes. Mantém os 8 backups automáticos mais recentes e preserva Exportar JSON como cópia externa.
+
 ## Regra de manutenção
 
 Ao trocar qualquer arquivo ativo, atualize este manifesto e a chave de cache correspondente em `index.html` ou `bootstrap-v511.js`. A camada automática de snapshot mantém a última versão canônica do Core disponível caso o endpoint remoto falhe.

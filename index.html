@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Character Archive — Legio XII Fulminata · v5.15.13-indefeso</title>
-  <link rel="stylesheet" href="styles-v511.css?v=v5.15.13-indefeso">
+  <title>Character Archive — Legio XII Fulminata · v5.15.14-backups</title>
+  <link rel="stylesheet" href="styles-v511.css?v=v5.15.14-backups">
 </head>
 <body data-theme="standard" data-mode="dark" data-palette="red" data-special="none">
   <div class="theme-ambient-layer theme-ambient-back" data-theme-layer="back" aria-hidden="true"></div>
@@ -31,11 +31,12 @@
       <div class="archive-toolbar-copy">
         <div id="coreStatus" class="core-status loading" title="Sincronizando regras"><i></i><span>CORE…</span></div>
         <span class="archive-save-note"><b>Salvamento local</b> · esta ficha fica neste navegador</span>
-        <span class="version-chip" title="Versão da ficha">v5.15.13-indefeso</span>
+        <span class="version-chip" title="Versão da ficha">v5.15.14-backups</span>
       </div>
       <div class="actions archive-actions">
         <button id="exportBtn" class="ghost small-btn" type="button">Exportar JSON</button>
         <label class="ghost file-btn small-btn">Importar JSON<input id="importInput" type="file" accept="application/json"></label>
+        <button id="backupsBtn" class="ghost small-btn" type="button">Backups</button>
         <button id="helpBtn" class="ghost small-btn" type="button">Ajuda</button>
         <label id="bannerBtn" class="primary file-btn small-btn banner-upload-label" for="bannerUploadInput" role="button" tabindex="0">Adicionar banner</label>
         <button id="editBannerBtn" class="ghost small-btn hidden" type="button">Ajustar recorte</button>
@@ -48,7 +49,7 @@
     <section id="creationView" class="grid two"></section>
     <section id="sheetView" class="hidden"></section>
 
-    <footer><p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.15.13-indefeso</p></footer>
+    <footer><p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.15.14-backups</p></footer>
   </main>
 
   <dialog id="bannerCropDialog" class="banner-crop-dialog">
@@ -117,6 +118,15 @@
       <div class="theme-dialog-foot"><span>Paletas e temas especiais acompanham o JSON. Temas exclusivos precisam estar instalados no dispositivo.</span><button value="cancel" class="primary">Concluir</button></div>
     </form>
   </dialog>
+  <dialog id="backupDialog" class="theme-dialog">
+    <form method="dialog" class="theme-dialog-card backup-dialog-card">
+      <div class="row between theme-dialog-head"><div><p class="eyebrow">SEGURANÇA</p><h2>Backups da ficha</h2><p class="muted compact">A ficha salva checkpoints automáticos antes de resetar, criar outra ficha ou importar um JSON, além de manter backups periódicos neste navegador.</p></div><button value="cancel" class="theme-dialog-close" aria-label="Fechar">×</button></div>
+      <div class="backup-dialog-actions"><button type="button" id="backupNowBtn" class="primary small-btn">Criar backup agora</button><span class="muted">Os 8 backups automáticos mais recentes são mantidos.</span></div>
+      <div id="backupList" class="backup-list" aria-live="polite"></div>
+      <p class="muted compact backup-local-note">Os backups ficam neste navegador. Para uma cópia fora do dispositivo, continue usando Exportar JSON.</p>
+    </form>
+  </dialog>
+
   <dialog id="helpDialog" class="help-dialog">
     <form method="dialog" class="help-dialog-card">
       <div class="row between"><div><p class="eyebrow">AJUDA RÁPIDA</p><h2>Arquivo da ficha</h2></div><button value="cancel" aria-label="Fechar">×</button></div>
@@ -138,12 +148,12 @@
   <script src="gods-v511.js?v=5.11.0"></script>
   <script src="abilities-v511.js?v=5.11.0"></script>
   <script src="abilities-extra-v55.js?v=5.5.0"></script>
-  <script src="system-v55.js?v=v5.15.13-indefeso"></script>
+  <script src="system-v55.js?v=v5.15.14-backups"></script>
   <script src="talents-v55.js?v=5.5.0"></script>
   <script src="magic-v55.js?v=5.5.0"></script>
   <script src="roma-v55.js?v=5.5.0"></script>
   <script src="familiars-v55.js?v=5.5.0"></script>
-  <script src="core-bridge-v511.js?v=v5.15.13-indefeso-core"></script>
-  <script src="bootstrap-v511.js?v=v5.15.13-indefeso"></script>
+  <script src="core-bridge-v511.js?v=v5.15.14-backups-core"></script>
+  <script src="bootstrap-v511.js?v=v5.15.14-backups"></script>
 </body>
 </html>

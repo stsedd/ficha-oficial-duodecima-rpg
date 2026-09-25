@@ -5121,3 +5121,13 @@ body[data-mode="light"] .familiar-photo-actions button{background:color-mix(in s
 @media(max-width:1180px){.familiar-sheet-head{grid-template-columns:1fr}.familiar-sheet-body{grid-template-columns:260px minmax(0,1fr)}.familiar-barding-grid{grid-template-columns:200px minmax(0,1fr)}}
 @media(max-width:900px){.familiar-sheet-body{grid-template-columns:1fr}.familiar-ability-columns{grid-template-columns:1fr}.familiar-barding-grid{grid-template-columns:1fr}.familiar-barding-media{min-height:220px;max-height:320px}.familiar-name-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.familiar-sheet-toolbar{align-items:flex-start}.familiar-sheet-toolbar>div{align-items:flex-start;flex-direction:column}.familiar-sheet-head,.familiar-sheet-body{padding:9px;gap:9px}.familiar-name-grid{grid-template-columns:1fr}.familiar-gallery{gap:4px}.familiar-photo-actions{left:3px;right:3px;bottom:3px}.familiar-photo-actions button{padding:3px 4px;font-size:6px}.familiar-hp-hero{grid-template-columns:1fr;gap:8px}.familiar-hp-number{grid-template-columns:auto auto;justify-content:start}.familiar-hp-actions{grid-template-columns:repeat(4,1fr);}.familiar-hp-actions input{grid-column:1/4}.familiar-hp-actions button:last-child{grid-column:4}.familiar-barding{margin:0 9px 9px}.familiar-barding-media{min-height:180px}.familiar-attribute-row{grid-template-columns:minmax(0,1fr) 36px auto}.familiar-remove{font-size:8px}.familiar-panel{padding:9px}}
+
+
+/* v5.15.14 · backups locais da ficha */
+.backup-dialog-card{width:min(760px,calc(100vw - 28px))}
+.backup-dialog-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:4px 0 14px}
+.backup-list{display:grid;gap:9px;max-height:min(56vh,520px);overflow:auto;padding-right:3px}
+.backup-entry{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--panel) 96%,var(--accent) 4%)}
+.backup-entry-copy{min-width:0;flex:1}.backup-entry-copy strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.backup-entry-copy p{margin:5px 0 0}
+.backup-entry .pill{flex:0 0 auto}.backup-empty{padding:18px;border:1px dashed var(--line);border-radius:10px;text-align:center}.backup-empty p{margin:6px 0 0}.backup-local-note{margin:14px 0 0}
+@media(max-width:620px){.backup-entry{align-items:flex-start;flex-direction:column}.backup-entry>button{width:100%}.backup-entry-copy{width:100%}}

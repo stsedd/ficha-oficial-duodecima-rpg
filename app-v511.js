@@ -3,6 +3,10 @@
 
   const SCHEMA_VERSION = 24;
   const STORAGE_KEY = 'duodecima_universal_stage4_v24';
+  const SHEET_BACKUP_DB = 'duodecima_sheet_backups_v1';
+  const SHEET_BACKUP_STORE = 'snapshots';
+  const SHEET_BACKUP_LIMIT = 8;
+  const SHEET_BACKUP_FALLBACK_KEY = 'duodecima_sheet_backup_fallback_v1';
     const LEGACY_KEYS = [
     'duodecima_universal_stage4_v23','duodecima_universal_stage4_v22','duodecima_universal_stage4_v21','duodecima_universal_stage3a_v20','duodecima_universal_stage2m_v19','duodecima_universal_stage2l_v18','duodecima_universal_stage2k_v17','duodecima_universal_stage2h_v14','duodecima_universal_stage2g_v13','duodecima_universal_stage2f_v12','duodecima_universal_stage2e_v11','duodecima_universal_stage2d_v10','duodecima_universal_stage2c_v9','duodecima_universal_stage2b_v8','duodecima_universal_stage2a_v7','duodecima_universal_stage1f_v6','duodecima_universal_stage1e_v5','duodecima_universal_stage1d_v4',
     'duodecima_universal_stage1c_v3','duodecima_universal_stage1b_v2','duodecima_universal_stage1a_v1'
@@ -212,6 +216,101 @@
     createdAt:null,updatedAt:null
   });
   let state = defaultState();
+
+  function deepCloneJson(value){return JSON.parse(JSON.stringify(value))}
+  function sheetBackupSignature(data){
+    const clone=deepCloneJson(data||{});delete clone.updatedAt;
+    const text=JSON.stringify(clone);let hash=2166136261;
+    for(let i=0;i<text.length;i++){hash^=text.charCodeAt(i);hash=Math.imul(hash,16777619)}
+    return `${(hash>>>0).toString(36)}:${text.length}`;
+  }
+  function hasMeaningfulSheetData(data){
+    if(!data)return false;
+    if(data.isCreated||data.createdAt||String(data.name||'').trim()||String(data.player||'').trim())return true;
+    if(Object.values(data.baseAttributes||{}).some(v=>Number(v)!==0))return true;
+    if((data.initialSkills||[]).length||(data.talents||[]).length||(data.conditions||[]).length||(data.weapons||[]).length)return true;
+    if((data.inventory?.items||[]).length||(data.familiars?.entries||[]).length)return true;
+    if(String(data.notes||'').trim())return true;
+    return Object.values(data.history||{}).some(v=>typeof v==='string'&&v.trim());
+  }
+  function openSheetBackupDb(){
+    return new Promise((resolve,reject)=>{
+      if(!window.indexedDB){reject(new Error('indexeddb-unavailable'));return}
+      const req=indexedDB.open(SHEET_BACKUP_DB,1);
+      req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(SHEET_BACKUP_STORE))db.createObjectStore(SHEET_BACKUP_STORE,{keyPath:'id'})};
+      req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error('indexeddb-error'));
+    });
+  }
+  async function sheetBackupDbAction(mode,payload){
+    const db=await openSheetBackupDb();
+    try{
+      return await new Promise((resolve,reject)=>{
+        const tx=db.transaction(SHEET_BACKUP_STORE,mode==='list'?'readonly':'readwrite');
+        const store=tx.objectStore(SHEET_BACKUP_STORE);
+        if(mode==='list'){
+          const req=store.getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error||new Error('backup-list-error'));return;
+        }
+        if(mode==='put')store.put(payload);else if(mode==='delete')store.delete(payload);else{reject(new Error('backup-mode'));return}
+        tx.oncomplete=()=>resolve(true);tx.onerror=()=>reject(tx.error||new Error('backup-tx-error'));tx.onabort=()=>reject(tx.error||new Error('backup-tx-abort'));
+      });
+    }finally{db.close()}
+  }
+  function legacyRecoveryCandidates(){
+    const out=[];
+    for(const key of LEGACY_KEYS){
+      try{
+        const raw=safeStorage.getItem(key);if(!raw)continue;
+        const data=JSON.parse(raw);if(!hasMeaningfulSheetData(data))continue;
+        out.push({id:`legacy:${key}`,savedAt:data.updatedAt||data.createdAt||'',reason:'Cópia local de versão anterior',name:data.name||'Ficha antiga',signature:sheetBackupSignature(data),state:data,legacy:true});
+      }catch(_){ }
+    }
+    return out;
+  }
+  async function listSheetBackups(){
+    let records=[];
+    try{records=await sheetBackupDbAction('list')}catch(_){ }
+    try{const raw=safeStorage.getItem(SHEET_BACKUP_FALLBACK_KEY);if(raw){const item=JSON.parse(raw);if(item?.state)records.push({...item,fallback:true})}}catch(_){ }
+    records.push(...legacyRecoveryCandidates());
+    records.sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
+    const seen=new Set();
+    return records.filter(item=>{const key=item.id||item.signature;if(!key||seen.has(key))return false;seen.add(key);return true});
+  }
+  async function storeSheetBackup(data,reason='Backup automático',force=false){
+    if(!hasMeaningfulSheetData(data))return false;
+    const snapshot=deepCloneJson(data),signature=sheetBackupSignature(snapshot);
+    const record={id:`backup-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,savedAt:new Date().toISOString(),reason,name:snapshot.name||'Ficha sem nome',signature,state:snapshot};
+    try{
+      const current=(await sheetBackupDbAction('list')).sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
+      if(!force&&current[0]?.signature===signature)return false;
+      await sheetBackupDbAction('put',record);
+      const all=[record,...current.filter(x=>x.id!==record.id)].sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
+      for(const extra of all.slice(SHEET_BACKUP_LIMIT))await sheetBackupDbAction('delete',extra.id);
+      return true;
+    }catch(err){
+      try{safeStorage.setItem(SHEET_BACKUP_FALLBACK_KEY,JSON.stringify(record));return true}catch(_){console.warn('[Ficha] Não foi possível criar backup local.',err);return false}
+    }
+  }
+  function backupDateLabel(value){
+    if(!value)return 'data antiga';
+    const d=new Date(value);if(Number.isNaN(d.getTime()))return 'data antiga';
+    return d.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+  }
+  async function updateBackupButtonCount(){
+    const btn=document.getElementById('backupsBtn');if(!btn)return;
+    const list=await listSheetBackups();btn.textContent=list.length?`Backups · ${list.length}`:'Backups';
+  }
+  async function renderBackupDialog(){
+    const root=document.getElementById('backupList');if(!root)return;
+    const list=await listSheetBackups();
+    root.innerHTML=list.length?list.map(item=>`<article class="backup-entry"><div class="backup-entry-copy"><div class="row between"><strong>${esc(item.name||'Ficha sem nome')}</strong><span class="pill">${esc(backupDateLabel(item.savedAt))}</span></div><p class="muted compact">${esc(item.reason||'Backup local')}${item.legacy?' · recuperação de versão anterior':''}</p></div><button type="button" class="ghost small-btn" data-restore-backup="${esc(item.id)}">Restaurar</button></article>`).join(''):`<div class="backup-empty"><b>Nenhum backup encontrado.</b><p class="muted compact">A partir desta versão, a ficha cria checkpoints automáticos antes de operações destrutivas.</p></div>`;
+  }
+  async function restoreSheetBackup(id){
+    const list=await listSheetBackups(),item=list.find(x=>x.id===id);if(!item){notify('Esse backup não está mais disponível.');return}
+    if(!confirm(`Restaurar “${item.name||'Ficha sem nome'}” de ${backupDateLabel(item.savedAt)}? A ficha atual também será salva em Backups antes da restauração.`))return;
+    await storeSheetBackup(state,'Antes de restaurar outro backup',true);
+    state=migrate(deepCloneJson(item.state));syncCurrentCaps();save();render();
+    document.getElementById('backupDialog')?.close();await updateBackupButtonCount();notify('Backup restaurado.');
+  }
 
   function godById(id){return gods.find(g=>g.id===id)||null}
   function primaryGod(){return godById(state.godId)||gods[0]}
@@ -584,13 +683,17 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     out.notes=typeof data?.notes==='string'?data.notes:'';
     return out;
   }
-  function load(){
+  async function load(){
     try{
-      if(window.__DUODECIMA_PRELOAD__){state=migrate(window.__DUODECIMA_PRELOAD__); if(state.tempMods) state.tempMods.rolls=0; save();return;}
+      if(window.__DUODECIMA_PRELOAD__){
+        const previousRaw=safeStorage.getItem(STORAGE_KEY);
+        if(previousRaw){try{await storeSheetBackup(JSON.parse(previousRaw),'Antes de criar outra ficha',true)}catch(_){ }}
+        state=migrate(window.__DUODECIMA_PRELOAD__);if(state.tempMods)state.tempMods.rolls=0;save();return;
+      }
       let raw=safeStorage.getItem(STORAGE_KEY);
       if(!raw){for(const k of LEGACY_KEYS){raw=safeStorage.getItem(k);if(raw)break}}
       if(!raw)return;
-      state=migrate(JSON.parse(raw)); if(state.tempMods) state.tempMods.rolls=0; save();
+      state=migrate(JSON.parse(raw));if(state.tempMods)state.tempMods.rolls=0;save();
     }catch(e){console.warn(e)}
   }
   function syncCurrentCaps(){
@@ -1689,11 +1792,18 @@ function longRest(){
   function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
   function initials(name=''){const parts=String(name||'').trim().split(/\s+/).filter(Boolean);if(!parts.length)return 'XII';return (parts[0][0]||'').concat(parts.length>1?(parts[parts.length-1][0]||''):'').toUpperCase()}
 
+  byId('backupsBtn').onclick=async()=>{await renderBackupDialog();byId('backupDialog').showModal()};
+  byId('backupNowBtn').onclick=async()=>{const ok=await storeSheetBackup(state,'Backup manual',true);await renderBackupDialog();await updateBackupButtonCount();notify(ok?'Backup criado.':'Não havia conteúdo para salvar em backup.')};
+  byId('backupList').onclick=e=>{const btn=e.target.closest?.('[data-restore-backup]');if(btn)restoreSheetBackup(btn.dataset.restoreBackup)};
   byId('exportBtn').onclick=()=>{save();const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`duodecima-${(state.name||'personagem').toLowerCase().replace(/[^a-z0-9]+/g,'-')}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
-  byId('importInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);const ver=Number(data.schemaVersion);if(!Number.isFinite(ver)||ver<1||ver>SCHEMA_VERSION)throw new Error('schema');state=migrate(data);syncCurrentCaps();save();render();notify('Ficha importada.')}catch(err){notify('Não foi possível importar este JSON.')}};reader.readAsText(f)};
-  byId('resetBtn').onclick=()=>{if(!confirm('Apagar a ficha local desta versão?'))return;safeStorage.removeItem(STORAGE_KEY);LEGACY_KEYS.forEach(k=>safeStorage.removeItem(k));state=defaultState();render();notify('Ficha resetada.')};
+  byId('importInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=async()=>{try{const data=JSON.parse(reader.result);const ver=Number(data.schemaVersion);if(!Number.isFinite(ver)||ver<1||ver>SCHEMA_VERSION)throw new Error('schema');await storeSheetBackup(state,'Antes de importar JSON',true);state=migrate(data);syncCurrentCaps();save();render();await updateBackupButtonCount();notify('Ficha importada. A anterior ficou em Backups.')}catch(err){notify('Não foi possível importar este JSON.')}};reader.readAsText(f)};
+  byId('resetBtn').onclick=async()=>{if(!confirm('Criar uma ficha nova? A ficha atual será salva automaticamente em Backups antes de ser limpa.'))return;const backed=await storeSheetBackup(state,'Antes de resetar / criar outra ficha',true);state=defaultState();save();render();await updateBackupButtonCount();notify(backed?'Ficha anterior salva em Backups.':'Ficha resetada.')};
 
-  load();
+  await load();
+  await storeSheetBackup(state,'Backup de segurança ao abrir');
+  await updateBackupButtonCount();
+  setInterval(()=>{storeSheetBackup(state,'Backup automático').then(updateBackupButtonCount)},5*60*1000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')storeSheetBackup(state,'Backup automático').then(updateBackupButtonCount)});
   await compactStoredEquipmentImages();
   await initExclusiveThemes();
   bindShellChrome();
