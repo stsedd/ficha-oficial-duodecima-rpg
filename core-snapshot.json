@@ -2,15 +2,15 @@
   "manifest": {
     "core": "Duodécima Core",
     "schemaVersion": 2,
-    "contentVersion": "2026.09.24.3",
-    "updatedAt": "2026-09-24",
+    "contentVersion": "2026.09.25.1",
+    "updatedAt": "2026-09-25",
     "status": "canonical-phase-2",
     "counts": {
       "deities": 52,
       "kits": 51,
       "skills": 26,
       "talents": 32,
-      "conditions": 27
+      "conditions": 28
     },
     "files": {
       "attributes": "data/atributos.json",
@@ -46,7 +46,8 @@
       "No despertar mágico, cada −1 em FOR, DES ou CON concede +25 Energia máxima, até 3 pontos no total; bônus divinos não são sacrificáveis.",
       "Vis: HP inicial 30 + Constituição; a cada 10 níveis, +5 + Constituição no HP máximo.",
       "Fortuna: Bênção da Boa Hora dura 2 rodadas em 0–15 e 3 rodadas em 16–29/30+, afetando 1/2/3 criaturas e concedendo +1d4 em ataques e resistências; incompatível com Mau Agouro.",
-      "Legado Direto = DEUS + LEGADO: mantém o kit do deus principal e pode trocar até 3 passivas e 2 das cinco primeiras ativas; HP, atributos e perícia inicial seguem o deus principal. Legado Composto = LEGADO + LEGADO: usa 4 passivas de uma origem + 3 da outra, as cinco primeiras ativas de ambas, sem habilidades 6+, menor HP inicial e escolhas de +2, +1 e perícia entre as duas origens."
+      "Legado Direto = DEUS + LEGADO: mantém o kit do deus principal e pode trocar até 3 passivas e 2 das cinco primeiras ativas; HP, atributos e perícia inicial seguem o deus principal. Legado Composto = LEGADO + LEGADO: usa 4 passivas de uma origem + 3 da outra, as cinco primeiras ativas de ambas, sem habilidades 6+, menor HP inicial e escolhas de +2, +1 e perícia entre as duas origens.",
+      "Indefeso é condição canônica: o alvo não rola testes de Defesa e sua Defesa/CA padrão passa a 5. Paralisado e Inconsciente mantêm a automação de Defesa fixa em 5 por concederem Indefeso."
     ]
   },
   "attributes": {
@@ -729,8 +730,8 @@
   },
   "conditions": {
     "schemaVersion": 1,
-    "updatedAt": "2026-09-04",
-    "count": 27,
+    "updatedAt": "2026-09-25",
+    "count": 28,
     "stackingRule": "Condições são estados temporários. Se várias se aplicarem, seus efeitos se acumulam; se entrarem em conflito, aplique o mais severo.",
     "conditions": [
       {
@@ -831,10 +832,20 @@
         "automation": {}
       },
       {
+        "id": "indefeso",
+        "name": "Indefeso",
+        "description": "Sem conseguir se defender. O alvo não rola mais testes de Defesa; em vez disso, a Defesa / CA padrão de um alvo indefeso é 5.",
+        "automation": {
+          "fixedDefense": 5
+        }
+      },
+      {
         "id": "inconsciente",
         "name": "Inconsciente",
         "description": "Fica indefesa e incapaz de agir. Ataques corpo a corpo contra uma criatura inconsciente são considerados acertos críticos.",
-        "automation": {}
+        "automation": {
+          "fixedDefense": 5
+        }
       },
       {
         "id": "incorporeo",
@@ -863,7 +874,7 @@
       {
         "id": "paralisado",
         "name": "Paralisado",
-        "description": "Fica indefeso e incapaz de se mover. Força e Destreza efetivas passam a −1, mas ações puramente mentais ainda são possíveis. A Defesa é 5.",
+        "description": "Fica indefeso e incapaz de se mover. Força e Destreza efetivas passam a −1, mas ações puramente mentais ainda são possíveis.",
         "automation": {
           "fixedDefense": 5
         }
@@ -57416,5 +57427,5 @@
       "No despertar, cada ponto retirado de FOR, DES ou CON concede +25 de Energia máxima, até 3 pontos no total."
     ]
   },
-  "generatedAt": "2026-09-25T10:12:09.505Z"
+  "generatedAt": "2026-09-25T23:25:01.809Z"
 }
