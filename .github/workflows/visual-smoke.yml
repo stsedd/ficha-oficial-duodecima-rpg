@@ -70,26 +70,30 @@ jobs:
             });
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
             await page.screenshot({path:`visual-artifacts/${label}-overview.png`,fullPage:true});
-            const tabs=['Combate & Poderes','Inventário','Familiares','Magia'];
+            const tabs=[
+              {id:'combat',file:'combate'},
+              {id:'inventory',file:'inventario'},
+              {id:'familiars',file:'familiares'},
+              {id:'magic',file:'magia'}
+            ];
             for(const tab of tabs){
-              const button=page.getByRole('button',{name:tab,exact:true}).first();
-              if(await button.count()){
-                await button.click();
-                await page.waitForTimeout(180);
-                if(tab==='Familiares'){
-                  const familiar=await page.evaluate(()=>{
-                    const card=document.querySelector('.familiar-sheet'),gallery=document.querySelectorAll('.familiar-photo-slot'),attrs=document.querySelectorAll('.familiar-attribute-row'),groups=document.querySelectorAll('.familiar-ability-group'),barding=document.querySelector('.familiar-barding');
-                    return {card:!!card,gallery:gallery.length,attrs:attrs.length,groups:groups.length,barding:!!barding,scroll:document.documentElement.scrollWidth,viewport:window.innerWidth};
-                  });
-                  if(!familiar.card)errors.push(`${label}: mini-ficha de familiar ausente`);
-                  if(familiar.gallery!==3)errors.push(`${label}: galeria esperava 3 slots, encontrou ${familiar.gallery}`);
-                  if(familiar.attrs!==6)errors.push(`${label}: atributos esperavam 6 linhas, encontrou ${familiar.attrs}`);
-                  if(familiar.groups!==2)errors.push(`${label}: habilidades esperavam 2 grupos, encontrou ${familiar.groups}`);
-                  if(!familiar.barding)errors.push(`${label}: seção de barda ausente`);
-                  if(familiar.scroll>familiar.viewport+2)errors.push(`${label}: familiares com overflow horizontal ${familiar.scroll}px > ${familiar.viewport}px`);
-                }
-                await page.screenshot({path:`visual-artifacts/${label}-${tab.toLowerCase().normalize('NFD').replace(/[^a-z]/g,'')}.png`,fullPage:true});
+              const button=page.locator(`[data-tab="${tab.id}"]`).first();
+              if(!(await button.count())){errors.push(`${label}: aba ${tab.id} não encontrada`);continue}
+              await button.click();
+              await page.waitForTimeout(220);
+              if(tab.id==='familiars'){
+                const familiar=await page.evaluate(()=>{
+                  const card=document.querySelector('.familiar-sheet'),gallery=document.querySelectorAll('.familiar-photo-slot'),attrs=document.querySelectorAll('.familiar-attribute-row'),groups=document.querySelectorAll('.familiar-ability-group'),barding=document.querySelector('.familiar-barding');
+                  return {card:!!card,gallery:gallery.length,attrs:attrs.length,groups:groups.length,barding:!!barding,scroll:document.documentElement.scrollWidth,viewport:window.innerWidth};
+                });
+                if(!familiar.card)errors.push(`${label}: mini-ficha de familiar ausente`);
+                if(familiar.gallery!==3)errors.push(`${label}: galeria esperava 3 slots, encontrou ${familiar.gallery}`);
+                if(familiar.attrs!==6)errors.push(`${label}: atributos esperavam 6 linhas, encontrou ${familiar.attrs}`);
+                if(familiar.groups!==2)errors.push(`${label}: habilidades esperavam 2 grupos, encontrou ${familiar.groups}`);
+                if(!familiar.barding)errors.push(`${label}: seção de barda ausente`);
+                if(familiar.scroll>familiar.viewport+2)errors.push(`${label}: familiares com overflow horizontal ${familiar.scroll}px > ${familiar.viewport}px`);
               }
+              await page.screenshot({path:`visual-artifacts/${label}-${tab.file}.png`,fullPage:true});
             }
             await context.close();
           };
