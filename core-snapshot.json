@@ -2,7 +2,7 @@
   "manifest": {
     "core": "Duodécima Core",
     "schemaVersion": 2,
-    "contentVersion": "2026.09.24.2",
+    "contentVersion": "2026.09.24.3",
     "updatedAt": "2026-09-24",
     "status": "canonical-phase-2",
     "counts": {
@@ -36,7 +36,6 @@
       "Potestas escolhe Atletismo ou Intimidação; Fortuna recebe +1 Destreza em vez de +1 Agilidade.",
       "Herança Monstruosa de Cimopoleia recupera Scaleskin, Dentes de Tubarão e Shimmerskin.",
       "Vis: conjuração por Fé e perícia divina inicial Intimidação.",
-      "Legado Direto usa HP, bônus de atributos e perícia do deus principal; Legado Composto usa o menor HP, escolhe um +2, um +1 e uma perícia entre as duas origens, sem somar os dois kits.",
       "Regras de Legado e sacrifício do despertar mágico permanecem estruturadas; sacrifícios físicos podem levar FOR/DES/CON abaixo de zero.",
       "Celtas estão liberados e podem aparecer como estrangeiros; a regra está estruturada em data/origens.json.",
       "Bronze Celestial não afeta criaturas mortais; restrições de alvo dos materiais estão estruturadas em data/equipamentos.json.",
@@ -46,7 +45,8 @@
       "Magia passa a ter fonte estruturada em data/magia.json. Custos finais por círculo: 20, 45, 70, 95, 120, 150, 185, 225 e 270 Energia; truques custam 0.",
       "No despertar mágico, cada −1 em FOR, DES ou CON concede +25 Energia máxima, até 3 pontos no total; bônus divinos não são sacrificáveis.",
       "Vis: HP inicial 30 + Constituição; a cada 10 níveis, +5 + Constituição no HP máximo.",
-      "Fortuna: Bênção da Boa Hora dura 2 rodadas em 0–15 e 3 rodadas em 16–29/30+, afetando 1/2/3 criaturas e concedendo +1d4 em ataques e resistências; incompatível com Mau Agouro."
+      "Fortuna: Bênção da Boa Hora dura 2 rodadas em 0–15 e 3 rodadas em 16–29/30+, afetando 1/2/3 criaturas e concedendo +1d4 em ataques e resistências; incompatível com Mau Agouro.",
+      "Legado Direto = DEUS + LEGADO: mantém o kit do deus principal e pode trocar até 3 passivas e 2 das cinco primeiras ativas; HP, atributos e perícia inicial seguem o deus principal. Legado Composto = LEGADO + LEGADO: usa 4 passivas de uma origem + 3 da outra, as cinco primeiras ativas de ambas, sem habilidades 6+, menor HP inicial e escolhas de +2, +1 e perícia entre as duas origens."
     ]
   },
   "attributes": {
@@ -56940,12 +56940,12 @@
       "compound": {
         "id": "compound",
         "label": "Legado Composto",
-        "formula": "DEUS + LEGADO",
-        "description": "É filho direto de um deus, mas também carrega uma herança divina secundária.",
-        "passiveReplacementsMax": 3,
-        "activeReplacementsMax": 2,
-        "activeReplacementSlotsMax": 5,
-        "activeReplacementLevelRule": "same-or-lower",
+        "formula": "LEGADO + LEGADO",
+        "description": "É filho de semideuses e carrega duas heranças divinas próximas.",
+        "primaryPassives": 4,
+        "secondaryPassives": 3,
+        "activeSlotsPerOrigin": 5,
+        "abilitiesAboveFive": false,
         "creation": {
           "hp": {
             "mode": "lowestOfOrigins",
@@ -56969,11 +56969,12 @@
       "direct": {
         "id": "direct",
         "label": "Legado Direto",
-        "formula": "LEGADO + LEGADO",
-        "description": "É filho de semideuses e carrega duas heranças divinas próximas.",
-        "primaryPassives": 4,
-        "secondaryPassives": 3,
-        "activeSlotsPerOrigin": 5,
+        "formula": "DEUS + LEGADO",
+        "description": "É filho direto de um deus, mas também carrega uma herança divina secundária.",
+        "passiveReplacementsMax": 3,
+        "activeReplacementsMax": 2,
+        "activeReplacementSlotsMax": 5,
+        "activeReplacementLevelRule": "same-or-lower",
         "creation": {
           "baseOrigin": "primaryDeity",
           "hp": {
@@ -57415,5 +57416,5 @@
       "No despertar, cada ponto retirado de FOR, DES ou CON concede +25 de Energia máxima, até 3 pontos no total."
     ]
   },
-  "generatedAt": "2026-09-24T10:01:54.411Z"
+  "generatedAt": "2026-09-25T10:12:09.505Z"
 }
