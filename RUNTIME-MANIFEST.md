@@ -31,6 +31,8 @@ Pastas completas de entregas antigas foram retiradas do `main`; o histórico con
 
 - `v5.15.11-lineage-semantics`: corrige a nomenclatura canônica dos Legados. Direto = DEUS + LEGADO (até 3 trocas de passivas e 2 trocas entre as cinco primeiras ativas; HP, atributos e perícia inicial do deus principal). Composto = LEGADO + LEGADO (4 + 3 passivas, cinco primeiras ativas de ambos, sem habilidades 6+, menor HP inicial e escolhas de +2/+1/perícia entre as duas origens). Fichas salvas com a nomenclatura anterior são migradas automaticamente.
 
+- `v5.15.12-familiar-sheet`: redesenha Familiares como mini-fichas temáticas, com HP em destaque, atributos/perícias em coluna, habilidades editáveis, galeria de até 3 imagens e barda completa para montarias. Dados antigos são migrados sem perda e imagens novas usam compactação própria.
+
 ## Regra de manutenção
 
 Ao trocar qualquer arquivo ativo, atualize este manifesto e a chave de cache correspondente em `index.html` ou `bootstrap-v511.js`. A camada automática de snapshot mantém a última versão canônica do Core disponível caso o endpoint remoto falhe.
