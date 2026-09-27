@@ -1,13 +1,12 @@
 (async () => {
   'use strict';
 
-  // v5.15.15 · camada independente de recuperação de I/O.
-  // Carrega antes da aplicação para que importação/exportação de ficha e
-  // instalação de temas continuem funcionando mesmo se backup/IndexedDB falhar.
+  // v5.15.16 · força a camada de I/O corrigida e a aplicação atual,
+  // evitando que o navegador reutilize os bundles v5.15.14 quebrados.
   try {
     await new Promise((resolve,reject)=>{
       const io=document.createElement('script');
-      io.src='io-recovery-v51515.js?v=5.15.15';
+      io.src='io-recovery-v51515.js?v=5.15.16-io';
       io.onload=resolve;
       io.onerror=()=>reject(new Error('Falha ao carregar recuperação de importação/exportação'));
       document.body.appendChild(io);
@@ -18,8 +17,6 @@
 
   try { await window.DUODECIMA_CORE_READY; } catch (_) {}
 
-  // v5.15.2 · camada visual tardia para garantir legibilidade das habilidades
-  // e da progressão por estacas sem misturar regra mecânica com CSS.
   if(!document.querySelector('link[data-duodecima-polish="5.15.2"]')){
     const polish=document.createElement('link');
     polish.rel='stylesheet';
@@ -39,8 +36,7 @@
       const magic=await response.json();
       const awakening=magic.awakening||{};
       window.DUODECIMA_MAGIC={
-        ...fallback,
-        ...magic,
+        ...fallback,...magic,
         sacrificeEnergyEach:Number(awakening.sacrificeEnergyEach??fallback.sacrificeEnergyEach??25),
         maxSacrifices:Number(awakening.maxSacrifices??fallback.maxSacrifices??3),
         sacrificialAttributes:[...(awakening.sacrificialAttributes||fallback.sacrificialAttributes||['for','des','con'])],
@@ -49,9 +45,7 @@
         hpProgressionPenalty:Number(awakening.hpProgressionPenalty??fallback.hpProgressionPenalty??2),
         highCircleUses:{...(fallback.highCircleUses||{}),...(magic.highCircleUses||{})}
       };
-    }catch(err){
-      console.warn('[Ficha] Regras estruturadas de Magia indisponíveis; mantendo cópia local sincronizada.',err);
-    }
+    }catch(err){console.warn('[Ficha] Regras estruturadas de Magia indisponíveis; mantendo cópia local sincronizada.',err)}
   }
   await syncMagicRules();
 
@@ -59,51 +53,42 @@
     await new Promise((resolve,reject)=>{
       const guard=document.createElement('script');
       guard.src=`contract-guard-v516.js?v=5.15.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
-      guard.onload=resolve;
-      guard.onerror=()=>reject(new Error('Falha ao carregar guarda de contrato do Core'));
+      guard.onload=resolve;guard.onerror=()=>reject(new Error('Falha ao carregar guarda de contrato do Core'));
       document.body.appendChild(guard);
     });
-    try{await window.DUODECIMA_CONTRACT_GUARD_READY}catch(_){ }
-  }catch(err){
-    console.warn('[Ficha] Guarda de contrato do Core indisponível; seguindo com as regras empacotadas.',err);
-  }
+    try{await window.DUODECIMA_CONTRACT_GUARD_READY}catch(_){}
+  }catch(err){console.warn('[Ficha] Guarda de contrato do Core indisponível; seguindo com as regras empacotadas.',err)}
 
   try {
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`lineage-creation-v515.js?v=v5.15.14-backups-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
-      patch.onload=resolve;
-      patch.onerror=()=>reject(new Error('Falha ao carregar automação de Legados'));
+      patch.src=`lineage-creation-v515.js?v=5.15.16-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar automação de Legados'));
       document.body.appendChild(patch);
     });
     try { await window.DUODECIMA_LINEAGE_CREATION_READY; } catch (_) {}
-  } catch (err) {
-    console.warn('[Ficha] Automação de Legados indisponível; carregando ficha base.',err);
-  }
+  } catch (err) {console.warn('[Ficha] Automação de Legados indisponível; carregando ficha base.',err)}
 
-  const script = document.createElement('script');
-  script.src = `app-v511.js?v=v5.15.14-backups-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
-  script.defer = false;
+  const script=document.createElement('script');
+  script.src=`app-v511.js?v=5.15.16-io-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.defer=false;
   script.onload=async()=>{
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
         patch.src=`magic-sacrifice-sync-v5153.js?v=5.15.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
-        patch.onload=resolve;
-        patch.onerror=()=>reject(new Error('Falha ao carregar sincronização do sacrifício mágico'));
+        patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar sincronização do sacrifício mágico'));
         document.body.appendChild(patch);
       });
     }catch(err){console.warn('[Ficha] Sincronização visual do sacrifício mágico indisponível.',err)}
-
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
         patch.src=`stabilization-v516.js?v=v5.15.7-image-storage-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
-        patch.onload=resolve;
-        patch.onerror=()=>reject(new Error('Falha ao carregar camada de estabilização'));
+        patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar camada de estabilização'));
         document.body.appendChild(patch);
       });
-      try{await window.DUODECIMA_STABILIZATION_READY}catch(_){ }
+      try{await window.DUODECIMA_STABILIZATION_READY}catch(_){}
     }catch(err){console.warn('[Ficha] Camada de estabilização indisponível.',err)}
   };
   document.body.appendChild(script);
