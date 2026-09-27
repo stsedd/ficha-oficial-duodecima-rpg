@@ -1,5 +1,21 @@
 (async () => {
   'use strict';
+
+  // v5.15.15 · camada independente de recuperação de I/O.
+  // Carrega antes da aplicação para que importação/exportação de ficha e
+  // instalação de temas continuem funcionando mesmo se backup/IndexedDB falhar.
+  try {
+    await new Promise((resolve,reject)=>{
+      const io=document.createElement('script');
+      io.src='io-recovery-v51515.js?v=5.15.15';
+      io.onload=resolve;
+      io.onerror=()=>reject(new Error('Falha ao carregar recuperação de importação/exportação'));
+      document.body.appendChild(io);
+    });
+  } catch (err) {
+    console.warn('[Ficha] Camada de recuperação de I/O indisponível.',err);
+  }
+
   try { await window.DUODECIMA_CORE_READY; } catch (_) {}
 
   // v5.15.2 · camada visual tardia para garantir legibilidade das habilidades
