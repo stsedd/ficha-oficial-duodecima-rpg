@@ -2,8 +2,8 @@
   "manifest": {
     "core": "Duodécima Core",
     "schemaVersion": 2,
-    "contentVersion": "2026.09.25.1",
-    "updatedAt": "2026-09-25",
+    "contentVersion": "2026.09.27.1",
+    "updatedAt": "2026-09-27",
     "status": "canonical-phase-2",
     "counts": {
       "deities": 52,
@@ -27,6 +27,13 @@
       "magic": "data/magia.json"
     },
     "notes": [
+      "Combate recebe estrutura canônica de 2 ações, 10 m de deslocamento e 1 ação livre, além de Disparada, Defender, Ajudar, Preparar, Furtividade, Percepção Passiva, manobras, cobertura e quedas.",
+      "Iniciativa passa a usar 1d20 + Agilidade; sem a perícia Agilidade, usa-se Destreza pura.",
+      "Aterrissagem em quedas de até 10 m usa Atletismo ou Acrobacia com CD 10 + 2 × metros da queda; a partir de 11 m a criatura termina Caída automaticamente.",
+      "Rebentos de Roma recebem dois +1 em atributos diferentes, podem alcançar teto 6 e seus bônus de Rebento não são sacrificáveis no despertar mágico.",
+      "Sucessor de Rebento começa com 9 pontos distribuíveis e +25 Energia máxima permanente, mantendo teto comum 5 até tornar-se Rebento.",
+      "Honesta Missio, passagem do tempo, anos de serviço, Bolsa Décimus e boas práticas de missão estão estruturados em data/sistema.json.",
+      "Forja recebe blueprints detalhadas e o risco do Ouro Imperial; Bronze Celestial mata monstros mitológicos e não mitológicos, pode ferir outros seres sobrenaturais e não causa dano a mortais.",
       "Fase 2 adiciona resources[] compatível com resource legado, incluindo recursos pessoais, coletivos, por alvo e locais de habilidade.",
       "Maré Crescente, Acúmulo Necromântico e Carga Noturna usam o mesmo limite de Raiva do Trovão: 8 + 1 a cada 10 níveis.",
       "Escolhas persistentes/progressivas de habilidades agora podem ser representadas em choices[] sem depender de interpretação do texto.",
@@ -38,16 +45,14 @@
       "Vis: conjuração por Fé e perícia divina inicial Intimidação.",
       "Regras de Legado e sacrifício do despertar mágico permanecem estruturadas; sacrifícios físicos podem levar FOR/DES/CON abaixo de zero.",
       "Celtas estão liberados e podem aparecer como estrangeiros; a regra está estruturada em data/origens.json.",
-      "Bronze Celestial não afeta criaturas mortais; restrições de alvo dos materiais estão estruturadas em data/equipamentos.json.",
       "Pó de Monstro é material de procedência mitológica ligado ao ciclo do Tártaro; criaturas comuns ou mortais não o geram.",
-      "Estratégia e Enganação agora possuem descrições canônicas completas.",
+      "Estratégia e Enganação possuem descrições canônicas completas.",
       "A política de repetição e acumulação de todos os talentos está explicitada em data/talento-acumulo.json.",
-      "Magia passa a ter fonte estruturada em data/magia.json. Custos finais por círculo: 20, 45, 70, 95, 120, 150, 185, 225 e 270 Energia; truques custam 0.",
-      "No despertar mágico, cada −1 em FOR, DES ou CON concede +25 Energia máxima, até 3 pontos no total; bônus divinos não são sacrificáveis.",
+      "Magia tem fonte estruturada em data/magia.json. Custos finais por círculo: 20, 45, 70, 95, 120, 150, 185, 225 e 270 Energia; truques custam 0.",
       "Vis: HP inicial 30 + Constituição; a cada 10 níveis, +5 + Constituição no HP máximo.",
       "Fortuna: Bênção da Boa Hora dura 2 rodadas em 0–15 e 3 rodadas em 16–29/30+, afetando 1/2/3 criaturas e concedendo +1d4 em ataques e resistências; incompatível com Mau Agouro.",
-      "Legado Direto = DEUS + LEGADO: mantém o kit do deus principal e pode trocar até 3 passivas e 2 das cinco primeiras ativas; HP, atributos e perícia inicial seguem o deus principal. Legado Composto = LEGADO + LEGADO: usa 4 passivas de uma origem + 3 da outra, as cinco primeiras ativas de ambas, sem habilidades 6+, menor HP inicial e escolhas de +2, +1 e perícia entre as duas origens.",
-      "Indefeso é condição canônica: o alvo não rola testes de Defesa e sua Defesa/CA padrão passa a 5. Paralisado e Inconsciente mantêm a automação de Defesa fixa em 5 por concederem Indefeso."
+      "Legado Direto = DEUS + LEGADO; Legado Composto = LEGADO + LEGADO, seguindo as regras estruturadas em data/sistema.json.",
+      "Indefeso é condição canônica: o alvo não rola testes de Defesa e sua Defesa/CA padrão passa a 5."
     ]
   },
   "attributes": {
@@ -729,33 +734,39 @@
     }
   },
   "conditions": {
-    "schemaVersion": 1,
-    "updatedAt": "2026-09-25",
+    "schemaVersion": 2,
+    "updatedAt": "2026-09-27",
     "count": 28,
-    "stackingRule": "Condições são estados temporários. Se várias se aplicarem, seus efeitos se acumulam; se entrarem em conflito, aplique o mais severo.",
+    "intro": "Condições são estados temporários que afetam o personagem durante o jogo. Elas costumam ser causadas por habilidades, ações, ambiente ou efeitos externos e alteram diretamente o desempenho em combate ou em interações. Cada condição possui um efeito específico, como limitar ações, reduzir eficiência, impedir movimento ou aplicar penalidades em testes. Algumas podem durar apenas um turno, enquanto outras permanecem até serem removidas por habilidade, item ou fim de combate.",
+    "stackingRule": "Se várias condições se aplicarem a uma mesma criatura, aplique todos os seus efeitos. Se os efeitos entrarem em conflito, aplique o mais severo.",
+    "resistanceTests": {
+      "description": "Muitas habilidades, magias ou criaturas especificam que um alvo precisa fazer um teste de resistência para evitar alguns ou todos os efeitos impostos. A descrição pode especificar o atributo usado e o que acontece em caso de sucesso ou falha. Quando não deixar claro, use o atributo mais conveniente para a situação; por exemplo, um disparo pode exigir Destreza e calor extremo em área pode exigir Tolerância.",
+      "dcFormula": "8 + modificador do atributo de conjuração + bônus de proficiência + modificadores especiais",
+      "example": "Um semideus nível 70, com bônus de proficiência +4 e +5 no atributo de conjuração, possui DT 17 (8 + 4 + 5)."
+    },
     "conditions": [
       {
         "id": "abalado",
         "name": "Abalado",
-        "description": "Com medo ou receio de algo. A criatura sofre −2 em jogadas de ataque e testes de habilidade, perícia e resistência. Se ficar Abalada novamente, passa a ficar Apavorada.",
+        "description": "Com medo ou receio de algo. A criatura sofre −2 em jogadas de ataque e testes de habilidade, perícia e resistência. Se ficar Abalada novamente, em vez disso fica Apavorada.",
         "automation": {}
       },
       {
         "id": "agarrado",
         "name": "Agarrado",
-        "description": "Preso em combate corpo a corpo. Sofre −2 nas jogadas de ataque, só pode atacar com armas leves e não pode se mover.",
+        "description": "Preso em combate corpo a corpo. A criatura sofre −2 nas jogadas de ataque, só pode atacar com armas leves e não pode se mover.",
         "automation": {}
       },
       {
         "id": "apavorado",
         "name": "Apavorado",
-        "description": "Não consegue se aproximar voluntariamente da fonte do medo. Enquanto estiver ciente dela, possui desvantagem nas jogadas de ataque e testes de habilidade.",
+        "description": "Com muito medo de algo. A criatura não consegue se aproximar voluntariamente da fonte do medo. Enquanto estiver ciente da fonte do medo, possui desvantagem nas jogadas de ataque e testes de habilidade.",
         "automation": {}
       },
       {
         "id": "atordoado",
         "name": "Atordoado",
-        "description": "A criatura fica incapaz de agir e também fica Desprevenida.",
+        "description": "A criatura fica incapaz de agir e Desprevenida.",
         "automation": {
           "defenseMod": -4
         }
@@ -763,86 +774,78 @@
       {
         "id": "caido",
         "name": "Caído",
-        "description": "Está deitado e move-se com metade do deslocamento. Oponentes recebem +3 em ataques corpo a corpo contra ela, mas sofrem −3 em ataques à distância.",
+        "description": "A criatura fica deitada no chão e move-se com metade do deslocamento. Seus oponentes recebem +3 nas jogadas de ataque corpo a corpo, mas sofrem −3 nas jogadas de ataque à distância.",
         "automation": {}
       },
       {
         "id": "cego",
         "name": "Cego",
-        "description": "Falha automaticamente em qualquer teste que exija visão. Ataques contra a criatura possuem vantagem; as jogadas de ataque e Defesa da criatura são feitas com desvantagem.",
+        "description": "Incapaz de enxergar. A criatura falha automaticamente em qualquer teste que exija visão, como testes de Percepção relacionados a isso. Jogadas de ataque contra a criatura possuem vantagem, e as jogadas de ataque e Defesa da criatura são feitas com desvantagem.",
         "automation": {}
       },
       {
         "id": "confuso",
         "name": "Confuso",
-        "description": "No começo de cada turno, role 1d6: 1 foge de quem causou a confusão; 2–3 não faz nada; 4–5 ataca a criatura mais próxima; 6 age normalmente.",
+        "description": "Com o discernimento afetado por um efeito. Role 1d6 no começo de cada turno: 1, foge de quem causou a confusão; 2–3, não faz nada e fica balbuciando incoerentemente; 4–5, ataca a criatura mais próxima; 6, age normalmente.",
         "automation": {}
-      },
-      {
-        "id": "desprevenido",
-        "name": "Desprevenido",
-        "description": "Está com a guarda baixa e sofre −4 na Defesa.",
-        "automation": {
-          "defenseMod": -4
-        }
       },
       {
         "id": "desorientado",
         "name": "Desorientado",
-        "description": "Sofre −2 em Percepção, Investigação, testes de Destreza e Defesa.",
+        "description": "Sem noção dos sentidos. A criatura sofre −2 em Percepção, Investigação, testes de Destreza e Defesa.",
         "automation": {
           "defenseMod": -2,
           "dexRollMod": -2
         }
       },
       {
+        "id": "desprevenido",
+        "name": "Desprevenido",
+        "description": "Com a guarda baixa. A criatura sofre −4 na Defesa.",
+        "automation": {
+          "defenseMod": -4
+        }
+      },
+      {
         "id": "enjoado",
         "name": "Enjoado",
-        "description": "Só pode realizar uma ação por rodada. Se ficar Enjoado novamente, passa a ficar Envenenado.",
+        "description": "Passando mal por qualquer motivo, geralmente bebidas ou viagens. A criatura só pode realizar uma ação por rodada. Se ficar Enjoada novamente, passa a ficar Envenenada.",
         "automation": {}
       },
       {
         "id": "enredado",
         "name": "Enredado",
-        "description": "Sofre −2 em ataques, −4 em Destreza, move-se com metade do deslocamento e não pode correr ou fazer investidas.",
+        "description": "Com o movimento prejudicado. A criatura sofre −2 nas jogadas de ataque, −4 na Destreza, move-se com metade do deslocamento e não pode correr ou fazer investidas.",
         "automation": {}
       },
       {
         "id": "envenenado",
         "name": "Envenenado",
-        "description": "Recebe desvantagem em ataques e testes de habilidade. Se ficar Enjoado ou Envenenado novamente, sofre +1d4 de dano de veneno e também passa a ter desvantagem em testes de Defesa.",
+        "description": "A criatura recebe desvantagem nas jogadas de ataque e testes de habilidade. Se ficar Enjoada ou Envenenada novamente, recebe +1d4 pontos de dano de veneno e também passa a ter desvantagem em testes de Defesa.",
         "automation": {}
       },
       {
         "id": "exausto",
         "name": "Exausto",
-        "description": "É cumulativo. Cada aplicação concede 1 nível de Exaustão. Em testes de d20, o resultado é reduzido em 2 × nível de Exaustão. A velocidade é reduzida em 5 m × nível. No nível 5, perde metade do HP máximo e da Energia; no nível 6, morre.",
+        "description": "Esta condição é cumulativa. Cada vez que a recebe, ganha 1 nível de Exaustão. Você morre se chegar ao nível 6. Ao realizar um teste com d20, o resultado é reduzido em 2 × seu nível de Exaustão. Sua velocidade é reduzida em 2 m × seu nível de Exaustão. No nível 5, seu HP máximo e sua Energia máxima são reduzidos à metade. Para todos os efeitos, considera-se que uma pessoa possui deslocamento padrão de 10 m.",
         "automation": {}
       },
       {
         "id": "fascinado",
         "name": "Fascinado",
-        "description": "Fica parada observando a fonte da fascinação e sofre −4 em Percepção. Qualquer ameaça óbvia encerra o efeito. Outra criatura pode gastar uma ação para sacudi-la e anular a condição.",
+        "description": "Com a atenção presa em alguma coisa. A criatura fica parada, sem fazer nada exceto observar aquilo que a fascinou, e sofre −4 nos testes de Percepção. Qualquer ameaça óbvia anula este efeito. Outra criatura pode gastar uma ação padrão para sacudir a criatura fascinada e anular a condição.",
         "automation": {}
       },
       {
         "id": "fatigado",
         "name": "Fatigado",
-        "description": "Sofre −2 em Força e Destreza e não pode correr ou fazer investidas. Se ficar Fatigado novamente, passa a ficar Exausto.",
+        "description": "Com fadiga, ou seja, cansado. A criatura sofre −2 na Força e Destreza e não pode correr ou fazer investidas. Se ficar Fatigada novamente, fica Exausta.",
         "automation": {}
-      },
-      {
-        "id": "indefeso",
-        "name": "Indefeso",
-        "description": "Sem conseguir se defender. O alvo não rola mais testes de Defesa; em vez disso, a Defesa / CA padrão de um alvo indefeso é 5.",
-        "automation": {
-          "fixedDefense": 5
-        }
       },
       {
         "id": "inconsciente",
         "name": "Inconsciente",
-        "description": "Fica indefesa e incapaz de agir. Ataques corpo a corpo contra uma criatura inconsciente são considerados acertos críticos.",
+        "description": "Indefesa e incapaz de agir. Ataques corpo a corpo são considerados acertos críticos contra uma criatura inconsciente.",
         "automation": {
           "fixedDefense": 5
         }
@@ -850,31 +853,39 @@
       {
         "id": "incorporeo",
         "name": "Incorpóreo",
-        "description": "Sem corpo físico. É imune a ataques não mágicos; ataques mágicos ainda possuem 50% de chance de falha. Pode atravessar objetos sólidos, salvo efeitos de essência. Ataques incorpóreos ignoram bônus de CA vindos de armadura, escudo e armadura natural.",
+        "description": "Sem corpo físico. A criatura é imune a ataques, exceto mágicos, e mesmo esses têm 50% de chance de falha. Pode atravessar objetos sólidos, exceto efeitos de essência; seus ataques ignoram bônus na CA por armaduras, escudos e armadura natural.",
         "automation": {}
+      },
+      {
+        "id": "indefeso",
+        "name": "Indefeso",
+        "description": "Sem conseguir se defender. O alvo não rola mais testes de Defesa; em vez disso, a Defesa / CA padrão de um alvo Indefeso é 5.",
+        "automation": {
+          "fixedDefense": 5
+        }
       },
       {
         "id": "invisivel",
         "name": "Invisível",
-        "description": "Não pode ser vista. Se estiver invisível ao rolar iniciativa, possui vantagem. Ataques contra ela têm desvantagem e seus ataques possuem vantagem, salvo contra criaturas capazes de percebê-la. Equipamentos carregados também ficam ocultos.",
+        "description": "Não pode ser vista. Se estiver Invisível ao rolar a iniciativa, possui vantagem na rolagem. Uma criatura Invisível não é afetada por efeitos que exijam que o alvo seja visto, a menos que o criador do efeito possa percebê-la de alguma forma. Qualquer equipamento vestido ou carregado também fica oculto. Jogadas de ataque contra a criatura Invisível têm desvantagem e suas jogadas de ataque têm vantagem; se outra criatura puder vê-la de alguma forma, ela não recebe esse benefício contra essa criatura.",
         "automation": {}
       },
       {
         "id": "lento",
         "name": "Lento",
-        "description": "Só pode realizar uma ação padrão ou uma ação de movimento por rodada, não ambas. Sofre −1 em ataques, Defesa e testes de Destreza e move-se à metade do deslocamento.",
+        "description": "A criatura só pode realizar uma ação padrão ou uma ação de movimento, não ambas, por rodada. Além disso, sofre −1 nas jogadas de ataque, na Defesa e nos testes de Destreza, e move-se à metade do deslocamento.",
         "automation": {}
       },
       {
         "id": "ofuscado",
         "name": "Ofuscado",
-        "description": "Com a visão prejudicada, sofre −1 nas jogadas de ataque.",
+        "description": "Com a visão prejudicada. A criatura sofre −1 nas jogadas de ataque.",
         "automation": {}
       },
       {
         "id": "paralisado",
         "name": "Paralisado",
-        "description": "Fica indefeso e incapaz de se mover. Força e Destreza efetivas passam a −1, mas ações puramente mentais ainda são possíveis.",
+        "description": "Indefesa e incapaz de se mover. A criatura fica com valores efetivos de Força e Destreza iguais a −1, mas pode realizar ações puramente mentais.",
         "automation": {
           "fixedDefense": 5
         }
@@ -882,37 +893,37 @@
       {
         "id": "pasmo",
         "name": "Pasmo",
-        "description": "Fica incapaz de agir, mas ainda consegue se defender normalmente.",
+        "description": "Incapaz de agir, mas pode se defender normalmente.",
         "automation": {}
       },
       {
         "id": "queimando",
         "name": "Queimando",
-        "description": "No início de cada turno, faça Destreza CD 15. Em sucesso, apaga o fogo. Em falha, sofre 1d4 de dano e continua queimando. Uma criatura pode gastar uma ação para apagar as chamas de si ou de outra criatura próxima.",
+        "description": "Com chamas no corpo. No início de cada turno, a criatura deve fazer um teste de Destreza (CD 15). Se for bem-sucedida, consegue apagar o fogo. Se falhar, sofre 1d4 pontos de dano e continua Queimando. Uma criatura pode gastar uma ação para apagar as chamas de si mesma ou de outra criatura próxima.",
         "automation": {}
       },
       {
         "id": "sangrando",
         "name": "Sangrando",
-        "description": "No início de cada turno, faça Constituição CD 15. Em sucesso, estabiliza. Em falha, sofre 1d4 de dano e continua sangrando. Receber cura remove a condição.",
-        "automation": {}
-      },
-      {
-        "id": "silenciado",
-        "name": "Silenciado",
-        "description": "Não pode usar magias ou habilidades que exijam som, fala clara, comando verbal ou conjuração verbal.",
+        "description": "Com um ferimento aberto. No início de cada turno, a criatura deve fazer um teste de Constituição (CD 15). Se for bem-sucedida, estabiliza. Se falhar, sofre 1d4 pontos de dano e continua Sangrando. A criatura perde essa condição se receber cura de alguma fonte.",
         "automation": {}
       },
       {
         "id": "surdo",
         "name": "Surdo",
-        "description": "Sofre −4 em Iniciativa e Percepção. Para lançar magia, precisa fazer um teste de Fé com CD 10 + nível da magia.",
+        "description": "Incapaz de ouvir. A criatura sofre −4 nos testes de Iniciativa e Percepção. Além disso, precisa fazer um teste de Fé para lançar qualquer magia, com CD 10 + o nível da magia.",
+        "automation": {}
+      },
+      {
+        "id": "silenciado",
+        "name": "Silenciado",
+        "description": "Não pode usar magias ou habilidades que exijam som, fala clara, como comando verbal, ou conjuração verbal.",
         "automation": {}
       },
       {
         "id": "surpreendido",
         "name": "Surpreendido",
-        "description": "Não está ciente dos inimigos. Não pode agir e fica Desprevenido durante a primeira rodada do combate.",
+        "description": "Não está ciente de seus inimigos. A criatura não pode agir e fica Desprevenida durante a primeira rodada do combate.",
         "automation": {}
       }
     ]
@@ -56657,7 +56668,8 @@
     ]
   },
   "system": {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
+    "updatedAt": "2026-09-27",
     "levels": {
       "min": 1,
       "max": 100
@@ -56866,17 +56878,168 @@
     },
     "combat": {
       "actionsPerTurn": 2,
-      "simpleInteraction": 1,
+      "movementMeters": 10,
+      "freeActionsPerTurn": 1,
       "baseRoll": "1d20",
-      "skillRoll": "1d20 + atributo sugerido + bônus aplicáveis",
-      "initiative": "1d20 + Destreza + Agilidade",
-      "defense": "1d20 + Destreza + bônus situacionais",
+      "skillRoll": "1d20 + bônus da perícia aplicável",
+      "initiative": "1d20 + Agilidade; se não possuir Agilidade, 1d20 + Destreza",
+      "defense": "1d20 + Destreza + bônus aplicáveis",
       "resistance": "teste de atributo puro, salvo alteração explícita",
       "abilityDC": "8 + atributo de conjuração + BP + modificadores especiais",
       "weaponAttack": "1d20 + Força ou Destreza + bônus aplicáveis",
       "abilityAttack": "1d20 + atributo de conjuração + BP",
       "pvp": "Atacante rola ataque e defensor rola Defesa; maior vence; empate favorece a ação ofensiva.",
       "monsters": "Por padrão usam CA/CD fixa e continuam fazendo Resistências quando necessário.",
+      "turn": {
+        "movementCanBeSplit": true,
+        "freeActionExamples": [
+          "sacar ou guardar uma arma ou item",
+          "pegar um objeto próximo",
+          "abrir uma porta destrancada",
+          "usar uma poção em si mesmo",
+          "outra interação simples semelhante"
+        ],
+        "potionOnOtherActions": 1,
+        "complexInteractionActions": 1,
+        "speechCostsAction": false
+      },
+      "commonActions": {
+        "attack": {
+          "actions": 1,
+          "text": "Realiza um ataque seguindo as regras normais."
+        },
+        "dash": {
+          "actions": 1,
+          "movementBonusMeters": 10,
+          "stackable": true,
+          "name": "Disparada"
+        },
+        "defend": {
+          "actions": 1,
+          "effect": "Ataques contra a criatura possuem desvantagem até o início do próximo turno.",
+          "name": "Defender"
+        },
+        "help": {
+          "actions": 1,
+          "effect": "Um aliado recebe vantagem no próximo teste relacionado antes do início do próximo turno de quem ajudou.",
+          "name": "Ajudar"
+        },
+        "ready": {
+          "actions": 1,
+          "effect": "Declare um gatilho perceptível e uma ação de custo 1. Se o gatilho ocorrer antes do início do próximo turno, a ação preparada pode ser realizada fora do turno; caso contrário, é perdida.",
+          "preparedAttackExtraAttack": false,
+          "name": "Preparar"
+        },
+        "hide": {
+          "actions": 1,
+          "requiresNotVisible": true,
+          "contest": "Furtividade vs. Percepção Passiva",
+          "name": "Esconder-se"
+        }
+      },
+      "outOfTurn": {
+        "generalLimit": null,
+        "sameEffectLimitPerRound": 1,
+        "rule": "Uma habilidade, talento ou efeito só pode ser utilizado uma vez por rodada fora do turno, salvo quando a própria descrição disser o contrário. Efeitos diferentes podem ser usados na mesma rodada."
+      },
+      "passivePerception": {
+        "formula": "10 + bônus total de Percepção",
+        "appliesTo": [
+          "personagens",
+          "NPCs",
+          "inimigos"
+        ],
+        "activeSearch": {
+          "actions": 1,
+          "skills": [
+            "percepcao",
+            "investigacao"
+          ],
+          "contest": "resultado de Furtividade usado para se esconder"
+        }
+      },
+      "maneuvers": {
+        "defaultActions": 1,
+        "defaultRange": "corpo a corpo",
+        "grapple": {
+          "attack": "Atletismo",
+          "defense": [
+            "Atletismo",
+            "Acrobacia"
+          ],
+          "success": "Alvo fica Agarrado.",
+          "releaseActions": 0,
+          "releaseOutsideTurn": true,
+          "dragMovementMultiplier": 0.5,
+          "contestedGrappler": "Se outra criatura tentar agarrar o mesmo alvo já agarrado, os agarradores fazem Atletismo contestado; o vencedor mantém ou assume o controle."
+        },
+        "push": {
+          "attack": "Atletismo",
+          "defense": [
+            "Atletismo",
+            "Acrobacia"
+          ],
+          "success": "Empurra o alvo aproximadamente 2 metros."
+        },
+        "trip": {
+          "attack": "Atletismo",
+          "defense": [
+            "Atletismo",
+            "Acrobacia"
+          ],
+          "success": "Alvo fica Caído."
+        },
+        "disarm": {
+          "attack": [
+            "Atletismo",
+            "Acrobacia"
+          ],
+          "defense": [
+            "Atletismo",
+            "Acrobacia"
+          ],
+          "success": "O alvo deixa cair um objeto que esteja segurando."
+        },
+        "sizeDisclaimer": "Criaturas muito maiores ou fisicamente superiores podem receber vantagem para resistir a Agarrar, Empurrar ou Derrubar. Se a diferença física tornar a manobra impossível, o Mestre pode determinar que ela não pode ser realizada."
+      },
+      "cover": {
+        "partial": {
+          "defenseBonus": 2,
+          "examples": [
+            "árvore",
+            "mureta",
+            "barricada",
+            "obstáculo que cubra parte do corpo"
+          ]
+        },
+        "strong": {
+          "defenseBonus": 4,
+          "examples": [
+            "trincheira",
+            "fortificação",
+            "estrutura que cubra grande parte do corpo"
+          ]
+        },
+        "rule": "A cobertura só se aplica contra ataques para os quais o obstáculo realmente esteja entre atacante e alvo."
+      },
+      "falling": {
+        "damagePerMeters": 3,
+        "damageDie": "1d6",
+        "maximumDice": null,
+        "underThreeMetersUsuallyNoDamage": true,
+        "landing": {
+          "availableThroughMeters": 10,
+          "skills": [
+            "Atletismo",
+            "Acrobacia"
+          ],
+          "dcFormula": "10 + 2 × metros da queda",
+          "success": "Permanece de pé.",
+          "failure": "Termina Caído.",
+          "automaticProneFromMeters": 11
+        },
+        "forcedMovementUsesSameRules": true
+      },
       "criticals": {
         "natural1": "Falha automática; não gera contra-ataque automático.",
         "natural20": "Acerto garantido e dano crítico.",
@@ -57004,6 +57167,117 @@
         }
       }
     },
+    "rebentos": {
+      "id": "rebentos-de-roma",
+      "title": "Rebentos de Roma",
+      "attributeRewards": {
+        "total": 2,
+        "mustUseDifferentAttributes": true,
+        "maxAttribute": 6,
+        "manualAllocation": true,
+        "sacrificableByMagic": false
+      },
+      "divineBlessing": {
+        "enabled": true,
+        "definedWith": "Dii Consentis",
+        "needNotMatchAscendance": true,
+        "text": "Bênção definida considerando trajetória, feitos, vínculos e relações com as divindades."
+      },
+      "honestaMissio": {
+        "optional": true,
+        "automatic": false,
+        "minimumLevel": null,
+        "freesActiveCharacterSlot": true,
+        "ownershipRemainsWithPlayer": true,
+        "regularProgressionEnds": true,
+        "rpAllowed": true,
+        "specialMissionIntervalOffMonths": 3,
+        "proleReservation": {
+          "onYears": 1,
+          "offMonths": 3
+        },
+        "text": "Descanso honroso após os serviços a Roma; o personagem pode continuar em RP e em acontecimentos narrativamente pertinentes."
+      },
+      "successor": {
+        "unlockedByRebento": true,
+        "startingAttributePoints": 9,
+        "normalAttributeMax": 5,
+        "energyBaseBonus": 25,
+        "energyBaseTotal": 125,
+        "bonusIsPermanent": true,
+        "automaticallyRebento": false
+      }
+    },
+    "timeAndService": {
+      "offMonthsPerOnYear": 3,
+      "onYearsPerOffYear": 4,
+      "calendarTracksRealMonths": true,
+      "yearTurns": [
+        "equinócio de março",
+        "solstício de junho",
+        "equinócio de setembro",
+        "solstício de dezembro"
+      ],
+      "age": {
+        "yearsPerTurn": 1,
+        "retroactiveForNewCharacters": false,
+        "updateWithinPeriodAllowed": true
+      },
+      "service": {
+        "yearsPerCompletedTurnInterval": 1,
+        "marksPerCompletedTurnInterval": 1,
+        "firstIntervalStartsAtFirstTurnSeen": true,
+        "example": "Quem entra em maio não recebe marca no solstício de junho; o primeiro período completo vai de junho a setembro."
+      },
+      "ongoingScenes": "Cenas iniciadas antes da virada permanecem cronologicamente antes dela; a virada vale para cenas posteriores."
+    },
+    "bolsaDecimus": {
+      "minimumServiceMarks": 2,
+      "eligibleStatuses": [
+        "legionário ativo com 2+ marcas",
+        "veterano aposentado após 10 anos",
+        "Rebento de Roma autorizado a deixar o serviço",
+        "licenciado para função incompatível com serviço ativo",
+        "afastado permanentemente por fatalidade ou incapacidade"
+      ],
+      "ineligibleStatuses": [
+        "deserção",
+        "expulsão",
+        "abandono irregular"
+      ],
+      "ownership": "As unidades pertencem ao programa; o morador paga aluguel e não adquire a propriedade.",
+      "rentPerOnYear": [
+        {
+          "type": "kitnet",
+          "rooms": 1,
+          "supports": "1 pessoa e 1 pet pequeno",
+          "denarii": 250
+        },
+        {
+          "type": "apartamento de 1 quarto",
+          "rooms": 1,
+          "supports": "1 casal",
+          "denarii": 300
+        },
+        {
+          "type": "apartamento de 2 quartos",
+          "rooms": 2,
+          "supports": "1 casal e até 2 crianças",
+          "denarii": 450
+        }
+      ],
+      "paymentTiming": "a cada virada de serviço",
+      "buyingHouseEndsBenefit": true
+    },
+    "missionGuidelines": {
+      "lateNightScheduling": "Quem solicita mestragem de madrugada deve se responsabilizar por conseguir participar; se estiver cansado demais, deve avisar e remarcar antes.",
+      "respectGM": "Evite cortar o Mestre, spammar pings enquanto ele escreve e mantenha controle da própria ficha, recursos e informações básicas.",
+      "guards": {
+        "tunnelMaxLevel": 60,
+        "role": "Auxiliar e proteger quem está chegando; não é espaço para farm de fama.",
+        "focus": "A pessoa principal da mesa de chegada é o novo personagem."
+      }
+    },
     "magicAwakening": {
       "sacrificialAttributes": [
         "for",
@@ -57014,12 +57288,17 @@
       "sacrificeEnergyEach": 25,
       "canReduceBelowZero": true,
       "divineBonusesSacrificable": false,
-      "note": "Cada ponto sacrificado reduz em 1 o atributo físico estrutural e concede +25 de Energia máxima. O atributo pode ficar negativo. Bônus divinos não são pontos sacrificáveis."
+      "rebentoBonusesSacrificable": false,
+      "protectedBonusSources": [
+        "divine",
+        "rebento"
+      ],
+      "note": "Cada ponto sacrificado reduz em 1 o atributo físico estrutural e concede +25 de Energia máxima. O atributo pode ficar negativo. Bônus divinos e bônus de Rebento não são sacrificáveis."
     }
   },
   "equipment": {
-    "schemaVersion": 2,
-    "updatedAt": "2026-09-22",
+    "schemaVersion": 3,
+    "updatedAt": "2026-09-27",
     "materials": [
       {
         "id": "ferro-aco",
@@ -57028,9 +57307,15 @@
         "resistance": 3,
         "unbreakable": false,
         "armorHint": "Leve",
+        "blueprint": "simples",
+        "description": "Material básico e acessível, usado em treinos, armas simples e primeiras tentativas de forja.",
         "targeting": {
-          "ineffectiveAgainst": [],
-          "ruleText": "Sem restrição especial de alvo definida pelo material."
+          "canHarm": [
+            "mortal",
+            "nao-mitologico"
+          ],
+          "cannotHarm": [],
+          "ruleText": "Eficaz contra mortais e criaturas não mitológicas; não possui propriedade sagrada contra monstros mitológicos."
         }
       },
       {
@@ -57040,9 +57325,15 @@
         "resistance": 2,
         "unbreakable": false,
         "armorHint": "Defensiva",
+        "blueprint": "simples",
+        "description": "Metal leve e gélido, capaz de atingir criaturas fantasmagóricas e não mitológicas.",
         "targeting": {
-          "ineffectiveAgainst": [],
-          "ruleText": "Sem restrição especial de alvo definida pelo material."
+          "canHarm": [
+            "fantasmagorico",
+            "nao-mitologico"
+          ],
+          "cannotHarm": [],
+          "ruleText": "Consegue ferir criaturas fantasmagóricas e não mitológicas."
         }
       },
       {
@@ -57052,11 +57343,21 @@
         "resistance": 4,
         "unbreakable": false,
         "armorHint": "Defensiva",
+        "blueprint": "mediana",
+        "description": "Metal sagrado característico dos semideuses gregos.",
         "targeting": {
-          "ineffectiveAgainst": [
+          "canHarm": [
+            "monstro-mitologico",
+            "monstro-nao-mitologico",
+            "espirito",
+            "sobrenatural-nao-mortal"
+          ],
+          "cannotHarm": [
             "mortal"
           ],
-          "ruleText": "Bronze Celestial não afeta criaturas mortais."
+          "canKillMythologicalMonsters": true,
+          "canKillNonMythologicalMonsters": true,
+          "ruleText": "Mata monstros mitológicos e não mitológicos e pode ferir outras criaturas sobrenaturais, como espíritos. Não causa dano algum a mortais."
         }
       },
       {
@@ -57066,9 +57367,15 @@
         "resistance": 5,
         "unbreakable": false,
         "armorHint": "Responsiva",
+        "blueprint": "mediana",
+        "description": "Metal exógeno, expansivo e muito resistente, mágico mas não sacro.",
         "targeting": {
-          "ineffectiveAgainst": [],
-          "ruleText": "Sem restrição especial de alvo definida pelo material."
+          "canHarm": [
+            "mortal",
+            "nao-mitologico"
+          ],
+          "cannotHarm": [],
+          "ruleText": "Fere mortais e criaturas não mitológicas; não é um metal sacro."
         }
       },
       {
@@ -57077,10 +57384,25 @@
         "attack": 3,
         "resistance": null,
         "unbreakable": true,
-        "armorHint": "Sem armadura/escudo complexo",
+        "armorHint": "Não produz armaduras",
+        "blueprint": "complexa",
+        "description": "Metal divino romano, feito com icor dos deuses e tradicionalmente banhado no Lethe.",
         "targeting": {
-          "ineffectiveAgainst": [],
-          "ruleText": "Sem restrição especial de alvo definida pelo material."
+          "canHarm": [
+            "mitologico",
+            "tita",
+            "divindade"
+          ],
+          "cannotHarm": [],
+          "ruleText": "Consegue ferir seres mitológicos, Titãs e divindades."
+        },
+        "forgingRisk": {
+          "rawD20AtOrBelow": 8,
+          "ignoreBonusesForTrigger": true,
+          "consequenceRoll": "1d100",
+          "affectsHelpers": true,
+          "natural1Failures": 2,
+          "ruleText": "Ao rolar 8 ou menos no d20 bruto durante a forja, marque a Administração e role 1d100 para determinar o que o ferreiro e quem estiver ajudando perdem de si no processo. Um 1 natural conta como duas falhas."
         }
       },
       {
@@ -57089,10 +57411,16 @@
         "attack": 3,
         "resistance": null,
         "unbreakable": true,
-        "armorHint": "Não é normalmente forjável",
+        "armorHint": "Não produz armaduras",
+        "blueprint": "nao-forjavel",
+        "description": "Metal cruel ligado à fragmentação e aprisionamento de almas.",
         "targeting": {
-          "ineffectiveAgainst": [],
-          "ruleText": "Sem restrição especial de alvo definida pelo material."
+          "canHarm": [
+            "mortal",
+            "monstro"
+          ],
+          "cannotHarm": [],
+          "ruleText": "Fere mortais e monstros diversos; criaturas mortas por ele sofrem efeitos especiais sobre a alma conforme a narrativa."
         }
       }
     ],
@@ -57106,6 +57434,67 @@
         "ordinaryCreaturesGenerate": false
       }
     ],
+    "mining": {
+      "testsPerWindow": 3,
+      "windowDays": 2,
+      "roll": "1d20",
+      "successYieldFragments": 1,
+      "natural1OptionalCriticalTable": "1d6"
+    },
+    "forging": {
+      "roll": "1d20 + Força ou Constituição",
+      "repairAfterMissionDenarii": 20,
+      "natural1DurabilityLoss": 1,
+      "armorCriticalHitDurabilityLoss": 1,
+      "blueprints": {
+        "simples": {
+          "dc": 7,
+          "materials": [
+            "ferro-aco",
+            "mithril"
+          ],
+          "weaponsAndShields": {
+            "stages": 2,
+            "intervalMinutes": 15
+          },
+          "armor": {
+            "stages": 3,
+            "intervalMinutes": 20
+          },
+          "failureLimit": 1
+        },
+        "mediana": {
+          "dc": 12,
+          "materials": [
+            "bronze-celestial",
+            "uro"
+          ],
+          "weaponsAndShields": {
+            "stages": 3,
+            "intervalMinutes": 30
+          },
+          "armorAndProstheses": {
+            "stages": 3,
+            "intervalMinutes": 120
+          },
+          "failureLimit": 2
+        },
+        "complexa": {
+          "dc": 18,
+          "materials": [
+            "ouro-imperial"
+          ],
+          "weapons": {
+            "stages": 5,
+            "intervalMinutes": 120
+          },
+          "armorAllowed": false,
+          "shieldsAllowed": false,
+          "failureLimit": 3,
+          "lossMustBeReported": true
+        }
+      }
+    },
     "armorTypes": [
       {
         "id": "nenhuma",
@@ -57135,7 +57524,8 @@
         "id": "pesada",
         "name": "Pesada",
         "defense": 2,
-        "reduction": 2
+        "reduction": 2,
+        "currentlyAvailable": false
       }
     ],
     "weaponTypes": [
@@ -57328,7 +57718,8 @@
     }
   },
   "magic": {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
+    "updatedAt": "2026-09-27",
     "circles": [
       {
         "circle": 1,
@@ -57399,6 +57790,11 @@
       "sacrificeEnergyEach": 25,
       "canReduceBelowZero": true,
       "divineBonusesSacrificable": false,
+      "rebentoBonusesSacrificable": false,
+      "protectedBonusSources": [
+        "divine",
+        "rebento"
+      ],
       "hpProgressionPenalty": 2
     },
     "highCircleUses": {
@@ -57424,8 +57820,9 @@
       "O custo é definido pelo círculo utilizado; truques custam 0 Energia.",
       "Fireball e Lightning Bolt usam o turno completo quando conjurados.",
       "Efeitos anteriormente descritos como 1 minuto passam, em regra, a 3 turnos; controles fortes podem usar 2 turnos.",
-      "No despertar, cada ponto retirado de FOR, DES ou CON concede +25 de Energia máxima, até 3 pontos no total."
+      "No despertar, cada ponto retirado de FOR, DES ou CON concede +25 de Energia máxima, até 3 pontos no total.",
+      "Bônus divinos e os +1 concedidos por Rebento de Roma não podem ser sacrificados no despertar mágico."
     ]
   },
-  "generatedAt": "2026-09-27T10:33:37.901Z"
+  "generatedAt": "2026-09-28T11:42:11.259Z"
 }
