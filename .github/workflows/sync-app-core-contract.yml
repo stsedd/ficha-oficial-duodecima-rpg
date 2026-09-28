@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Patch app canonical limits
+      - name: Patch canonical rules and visual polish
         run: node scripts/patch-app-core-contract.mjs
 
       - name: Syntax check
@@ -34,12 +34,12 @@ jobs:
 
       - name: Commit if changed
         run: |
-          if git diff --quiet -- app-v511.js; then
-            echo 'app-v511.js já está sincronizado.'
+          if git diff --quiet -- app-v511.js polish-v5152.css; then
+            echo 'app-v511.js e polish-v5152.css já estão sincronizados.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add app-v511.js
-          git commit -m 'chore: sync ficha canonical limits with Core'
+          git add app-v511.js polish-v5152.css
+          git commit -m 'chore: sync ficha canonical rules and polish'
           git push
