@@ -69,6 +69,11 @@ jobs:
               localStorage.setItem(key,JSON.stringify(seed));
             });
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+            // Core/bootstrap terminam de montar a ficha de forma assíncrona. No mobile,
+            // networkidle pode acontecer alguns ms antes das abas existirem no DOM.
+            // Aguarde a primeira aba que será exercitada antes de iniciar as capturas.
+            try{await page.waitForSelector('[data-tab="combat"]',{state:'attached',timeout:5000})}
+            catch(_){errors.push(`${label}: aba combat não encontrada após aguardar renderização`)}
             await page.screenshot({path:`visual-artifacts/${label}-overview.png`,fullPage:true});
             const tabs=[
               {id:'combat',file:'combate'},
