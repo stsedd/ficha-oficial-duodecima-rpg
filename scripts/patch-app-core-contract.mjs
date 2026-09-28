@@ -84,7 +84,6 @@ once(
 // Os dois controles visuais de nível têm o mesmo contrato.
 const levelInputOld='type="number" min="1" max="100" value="${state.level}"';
 const levelInputNew='type="number" min="${CORE_LEVEL_MIN}" max="${CORE_LEVEL_MAX}" value="${state.level}"';
-const count=(src.match(/type=\\?"number\\?" min=\\?"1\\?" max=\\?"100\\?" value=\\?"\$\{state\.level\}\\?"/g)||[]).length;
 if(!src.includes(levelInputNew)){
   const before=src;
   src=src.split(levelInputOld).join(levelInputNew);
@@ -96,5 +95,27 @@ once(
   'limite de nível'
 );
 
+// O cartão de atributo deve refletir o mesmo valor estrutural usado por HP, Energia e rolagens.
+once(
+  "    const divine=Math.max(0,Number(god()?.bonuses?.[k])||0),lvl=Math.max(0,Number(state.levelAttributes[k])||0),base=Math.max(0,Number(state.baseAttributes[k])||0),tal=Math.max(0,talentAttributeBonus(k)),raw=base+lvl+tal+divine,capped=Math.min(CORE_ATTR_MAX,raw),extra=attributeExtraBonus(k),total=capped+extra,pen=sanityAttrPenalty(k),eff=total+pen,overflow=Math.max(0,raw-CORE_ATTR_MAX),incDisabled=raw>=CORE_ATTR_MAX||(!state.isCreated&&sum(state.baseAttributes)>=CORE_ATTR_START);",
+  "    const divine=Math.max(0,Number(god()?.bonuses?.[k])||0),lvl=Math.max(0,Number(state.levelAttributes[k])||0),base=Math.max(0,Number(state.baseAttributes[k])||0),tal=Math.max(0,talentAttributeBonus(k)),raw=base+lvl+tal+divine,capped=Math.min(CORE_ATTR_MAX,raw),extra=attributeExtraBonus(k),sacrifice=magicSacrifice(k),total=capped+extra-sacrifice,pen=sanityAttrPenalty(k),eff=total+pen,overflow=Math.max(0,raw-CORE_ATTR_MAX),incDisabled=raw>=CORE_ATTR_MAX||(!state.isCreated&&sum(state.baseAttributes)>=CORE_ATTR_START);",
+  'sacrifício mágico no cartão de atributo'
+);
+once(
+  "${extra?` · extra +${extra}`:''}${overflow?",
+  "${extra?` · extra +${extra}`:''}${sacrifice?` · magia −${sacrifice}`:''}${overflow?",
+  'texto do sacrifício mágico no atributo'
+);
+
 if(changes){await fs.writeFile(file,src,'utf8');console.log(`app-v511.js atualizado em ${changes} grupo(s) de contrato canônico.`)}
 else console.log('app-v511.js já usa o contrato canônico do Core.');
+
+const polishFile=new URL('../polish-v5152.css',import.meta.url);
+let polish=await fs.readFile(polishFile,'utf8');
+const oldLight='body[data-theme="light"]';
+const newLight='body[data-mode="light"]';
+if(polish.includes(oldLight)){
+  polish=polish.split(oldLight).join(newLight);
+  await fs.writeFile(polishFile,polish,'utf8');
+  console.log('polish-v5152.css atualizado para o contrato data-mode do tema claro.');
+}else console.log('polish-v5152.css já usa data-mode para o tema claro.');
