@@ -35,6 +35,7 @@ jobs:
           node --check core-bridge-v511.js
           node --check lineage-creation-v515.js
           node --check bootstrap-v511.js
+          node --check rebento-fresh-creation-v5161.js
           node --check rebento-mechanics-v516.js
           node --check rules-sync-v516.js
           node --check stabilization-v516.js
