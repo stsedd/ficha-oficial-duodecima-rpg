@@ -116,7 +116,7 @@
     const eyebrow=card.querySelector('.eyebrow');if(eyebrow&&eyebrow.textContent!=='CONVERSÃO NO DESPERTAR')eyebrow.textContent='CONVERSÃO NO DESPERTAR';
     const title=card.querySelector('h2');if(title&&title.textContent!=='Atributos físicos → Energia')title.textContent='Atributos físicos → Energia';
     const desc=card.querySelector('p.muted.compact');
-    const copy=`Use <b>−</b> para retirar um ponto de FOR, DES ou CON e receber <b>+${energy} de Energia máxima</b>. Use <b>+</b> para desfazer a troca. São até ${max} pontos no total; o atributo pode ficar negativo e bônus divinos não entram nessa conversão.`;
+    const copy=`Use <b>−</b> para retirar um ponto de FOR, DES ou CON e receber <b>+${energy} de Energia máxima</b>. Use <b>+</b> para desfazer a troca. São até ${max} pontos no total; o atributo pode ficar negativo. Bônus divinos e os +1 de Rebento não entram nessa conversão.`;
     if(desc&&desc.dataset.magicSacCopy!=='1'){desc.innerHTML=copy;desc.dataset.magicSacCopy='1';}
     if(!card.querySelector('.magic-sacrifice-help')){
       const help=document.createElement('div');help.className='magic-sacrifice-help';
