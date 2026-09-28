@@ -31,6 +31,13 @@
     rebentoCss.dataset.duodecimaRebento='5.16.0';
     document.head.appendChild(rebentoCss);
   }
+  if(!document.querySelector('link[data-duodecima-rules="5.16.0"]')){
+    const rulesCss=document.createElement('link');
+    rulesCss.rel='stylesheet';
+    rulesCss.href='rules-sync-v516.css?v=5.16.0';
+    rulesCss.dataset.duodecimaRules='5.16.0';
+    document.head.appendChild(rulesCss);
+  }
 
   async function syncMagicRules(){
     const fallback=window.DUODECIMA_MAGIC||{};
@@ -93,6 +100,14 @@
   script.src=`app-v511.js?v=5.16.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer=false;
   script.onload=async()=>{
+    try{
+      await new Promise((resolve,reject)=>{
+        const patch=document.createElement('script');
+        patch.src=`rules-sync-v516.js?v=5.16.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar sincronização das regras de combate'));
+        document.body.appendChild(patch);
+      });
+    }catch(err){console.warn('[Ficha] Sincronização das regras de combate indisponível.',err)}
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
