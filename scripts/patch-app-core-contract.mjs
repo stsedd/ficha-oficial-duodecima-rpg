@@ -5,7 +5,12 @@ let src=await fs.readFile(file,'utf8');
 let changes=0;
 function once(from,to,label){
   if(src.includes(to))return;
-  if(!src.includes(from))throw new Error(`Trecho não encontrado para ${label}`);
+  if(!src.includes(from)){console.warn(`Trecho legado não encontrado para ${label}; mantendo implementação atual.`);return;}
+  src=src.replace(from,to);changes++;
+}
+function requiredOnce(from,to,label){
+  if(src.includes(to))return;
+  if(!src.includes(from))throw new Error(`Trecho obrigatório não encontrado para ${label}`);
   src=src.replace(from,to);changes++;
 }
 
@@ -81,7 +86,6 @@ once(
   'mudança de atributo por nível'
 );
 
-// Os dois controles visuais de nível têm o mesmo contrato.
 const levelInputOld='type="number" min="1" max="100" value="${state.level}"';
 const levelInputNew='type="number" min="${CORE_LEVEL_MIN}" max="${CORE_LEVEL_MAX}" value="${state.level}"';
 if(!src.includes(levelInputNew)){
@@ -95,13 +99,12 @@ once(
   'limite de nível'
 );
 
-// O cartão de atributo deve refletir o mesmo valor estrutural usado por HP, Energia e rolagens.
-once(
+requiredOnce(
   "    const divine=Math.max(0,Number(god()?.bonuses?.[k])||0),lvl=Math.max(0,Number(state.levelAttributes[k])||0),base=Math.max(0,Number(state.baseAttributes[k])||0),tal=Math.max(0,talentAttributeBonus(k)),raw=base+lvl+tal+divine,capped=Math.min(CORE_ATTR_MAX,raw),extra=attributeExtraBonus(k),total=capped+extra,pen=sanityAttrPenalty(k),eff=total+pen,overflow=Math.max(0,raw-CORE_ATTR_MAX),incDisabled=raw>=CORE_ATTR_MAX||(!state.isCreated&&sum(state.baseAttributes)>=CORE_ATTR_START);",
   "    const divine=Math.max(0,Number(god()?.bonuses?.[k])||0),lvl=Math.max(0,Number(state.levelAttributes[k])||0),base=Math.max(0,Number(state.baseAttributes[k])||0),tal=Math.max(0,talentAttributeBonus(k)),raw=base+lvl+tal+divine,capped=Math.min(CORE_ATTR_MAX,raw),extra=attributeExtraBonus(k),sacrifice=magicSacrifice(k),total=capped+extra-sacrifice,pen=sanityAttrPenalty(k),eff=total+pen,overflow=Math.max(0,raw-CORE_ATTR_MAX),incDisabled=raw>=CORE_ATTR_MAX||(!state.isCreated&&sum(state.baseAttributes)>=CORE_ATTR_START);",
   'sacrifício mágico no cartão de atributo'
 );
-once(
+requiredOnce(
   "${extra?` · extra +${extra}`:''}${overflow?",
   "${extra?` · extra +${extra}`:''}${sacrifice?` · magia −${sacrifice}`:''}${overflow?",
   'texto do sacrifício mágico no atributo'
