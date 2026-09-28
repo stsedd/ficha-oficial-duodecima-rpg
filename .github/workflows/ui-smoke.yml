@@ -41,6 +41,7 @@ jobs:
           node --check rules-sync-v516.js
           node --check stabilization-v516.js
           node --check app-v511.js
+          node --check scripts/rebento-toggle-smoke.mjs
 
       - name: Validate exclusive themes
         run: node scripts/validate-themes.mjs
@@ -59,6 +60,9 @@ jobs:
 
       - name: Run UI smoke
         run: node scripts/ui-smoke.mjs
+
+      - name: Run Rebento activation smoke
+        run: node scripts/rebento-toggle-smoke.mjs
 
       - name: Upload screenshots
         if: always()
