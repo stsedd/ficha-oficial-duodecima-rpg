@@ -45,8 +45,15 @@
       box.className='subcard rebento-successor-creation';
       first.querySelector('.section-title')?.after(box);
     }
-    box.innerHTML=`<label class="rebento-toggle-line"><span><b>Sucessor de Rebento</b><small>Personagem criado após um Rebento de Roma. Começa com ${limit} pontos de atributo e +${bonus} de Energia máxima permanente.</small></span><input id="rebentoSuccessorToggle" type="checkbox" ${active?'checked':''}></label>${active?'<p class="muted compact">O teto de atributos continua 5 até que este personagem também se torne um Rebento.</p>':''}`;
-    box.querySelector('#rebentoSuccessorToggle').onchange=e=>{setPref(e.target.checked);location.reload()};
+
+    // Evita reconstruir o input a cada mutação da tela. Além de ser mais leve,
+    // isso mantém o checkbox estável para clique, teclado e testes automatizados.
+    const signature=`${active?'1':'0'}:${limit}:${bonus}`;
+    if(box.dataset.rebentoSignature!==signature||!box.querySelector('#rebentoSuccessorToggle')){
+      box.dataset.rebentoSignature=signature;
+      box.innerHTML=`<label class="rebento-toggle-line"><span><b>Sucessor de Rebento</b><small>Personagem criado após um Rebento de Roma. Começa com ${limit} pontos de atributo e +${bonus} de Energia máxima permanente.</small></span><input id="rebentoSuccessorToggle" type="checkbox" ${active?'checked':''}></label>${active?'<p class="muted compact">O teto de atributos continua 5 até que este personagem também se torne um Rebento.</p>':''}`;
+      box.querySelector('#rebentoSuccessorToggle').onchange=e=>{setPref(e.target.checked);location.reload()};
+    }
 
     if(active){
       const pointsLabel=[...first.querySelectorAll('.row.between .label')].find(x=>/8 pontos de atributos/i.test(x.textContent||''));
