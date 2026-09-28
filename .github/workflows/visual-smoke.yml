@@ -11,7 +11,13 @@ on:
       - 'contract-guard-v516.js'
       - 'lineage-creation-v515.js'
       - 'stabilization-v516.js'
-      - 'magic-sacrifice-sync-v5153.js'
+      - 'rebento-fresh-creation-v5161.js'
+      - 'rebento-mechanics-v516.js'
+      - 'rebento-mechanics-v516.css'
+      - 'rebento-visual-v5163.js'
+      - 'rebento-visual-v5163.css'
+      - 'rules-sync-v516.js'
+      - 'rules-sync-v516.css'
       - 'polish-v5152.css'
       - '.github/workflows/visual-smoke.yml'
   workflow_dispatch:
@@ -69,9 +75,6 @@ jobs:
               localStorage.setItem(key,JSON.stringify(seed));
             });
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
-            // Core/bootstrap terminam de montar a ficha de forma assíncrona. No mobile,
-            // networkidle pode acontecer alguns ms antes das abas existirem no DOM.
-            // Aguarde a primeira aba que será exercitada antes de iniciar as capturas.
             try{await page.waitForSelector('[data-tab="combat"]',{state:'attached',timeout:5000})}
             catch(_){errors.push(`${label}: aba combat não encontrada após aguardar renderização`)}
             await page.screenshot({path:`visual-artifacts/${label}-overview.png`,fullPage:true});
