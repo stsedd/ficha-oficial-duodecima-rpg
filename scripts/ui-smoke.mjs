@@ -15,16 +15,35 @@ for(const test of cases){
   page.on('pageerror',error=>failures.push(`${test.name}: pageerror ${error.message}`));
   await page.goto(base,{waitUntil:'networkidle',timeout:60000});
   await page.waitForSelector('#creationView',{state:'visible',timeout:30000});
+  try{await page.waitForSelector('#rebentoSuccessorToggle',{state:'attached',timeout:7000})}catch(_){failures.push(`${test.name}: toggle Sucessor de Rebento não apareceu na criação`)}
   await page.screenshot({path:`ui-artifacts/${test.name}-creation.png`,fullPage:true});
   const layout=await page.evaluate(()=>({
     viewport:window.innerWidth,
     scroll:document.documentElement.scrollWidth,
     core:document.querySelector('#coreStatus')?.textContent?.trim()||'',
-    creationVisible:!document.querySelector('#creationView')?.classList.contains('hidden')
+    creationVisible:!document.querySelector('#creationView')?.classList.contains('hidden'),
+    successorToggle:!!document.querySelector('#rebentoSuccessorToggle')
   }));
   if(!layout.creationVisible)failures.push(`${test.name}: tela de criação não está visível`);
   if(layout.scroll>layout.viewport+2)failures.push(`${test.name}: overflow horizontal ${layout.scroll}px > ${layout.viewport}px`);
   if(!layout.core)failures.push(`${test.name}: status do Core ausente`);
+  if(!layout.successorToggle)failures.push(`${test.name}: controle de sucessor ausente`);
+
+  if(layout.successorToggle){
+    await Promise.all([
+      page.waitForNavigation({waitUntil:'domcontentloaded',timeout:15000}).catch(()=>null),
+      page.locator('#rebentoSuccessorToggle').click()
+    ]);
+    await page.waitForSelector('#rebentoSuccessorToggle',{state:'attached',timeout:10000});
+    const successor=await page.evaluate(()=>({
+      checked:document.querySelector('#rebentoSuccessorToggle')?.checked===true,
+      nine:[...document.querySelectorAll('#creationView .label')].some(x=>/9 pontos de atributos/i.test(x.textContent||'')),
+      energy:Number(window.DUODECIMA_SYSTEM?.energy?.base||0)
+    }));
+    if(!successor.checked)failures.push(`${test.name}: sucessor não persistiu após recarregar`);
+    if(!successor.nine)failures.push(`${test.name}: criação de sucessor não mostrou 9 pontos`);
+    if(successor.energy!==125)failures.push(`${test.name}: Energia base de sucessor esperada 125, recebeu ${successor.energy}`);
+  }
 
   const bannerCheck=await page.evaluate(async()=>{
     const cover=document.querySelector('#siteBanner'),img=document.querySelector('#siteBannerImage');
