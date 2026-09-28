@@ -60,21 +60,27 @@
     if(!root||root.classList.contains('hidden'))return;
     const data=readState();if(!data)return;
     const first=root.querySelector('article.card.stack');if(!first)return;
-    const successor=isSuccessor(data),rules=rebentoRules().successor||{},limit=Number(rules.startingAttributePoints||9);
+    const successor=isSuccessor(data),rules=rebentoRules().successor||{},limit=Number(rules.startingAttributePoints||9),energyBonus=Number(rules.energyBaseBonus||25);
     let box=first.querySelector('.rebento-successor-creation');
     if(!box){
       box=document.createElement('div');box.className='subcard rebento-successor-creation';
       const head=first.querySelector('.section-title');head?.after(box);
     }
-    box.innerHTML=`<label class="rebento-toggle-line"><span><b>Sucessor de Rebento</b><small>Personagem criado após um Rebento de Roma. Começa com ${limit} pontos de atributo e +${Number(rules.energyBaseBonus||25)} de Energia máxima permanente.</small></span><input id="rebentoSuccessorToggle" type="checkbox" ${successor?'checked':''}></label>${successor?'<p class="muted compact">O teto de atributos continua 5 até que este personagem também se torne um Rebento.</p>':''}`;
-    const toggle=box.querySelector('#rebentoSuccessorToggle');
-    toggle.onchange=()=>{
-      const fresh=readState();if(!fresh)return;
-      if(!toggle.checked&&spentBase(fresh)>8){toggle.checked=true;notify('Reduza os atributos da criação para 8 pontos antes de desativar Sucessor de Rebento.');return}
-      ensureRoma(fresh).successorOfRebento=toggle.checked;
-      fresh.currentEnergy=null;
-      writeState(fresh);reload();
-    };
+
+    // Não reconstruir o checkbox a cada MutationObserver: isso removia o nó entre pointerdown e click.
+    const signature=`${successor}|${limit}|${energyBonus}`;
+    if(box.dataset.rebentoSignature!==signature||!box.querySelector('#rebentoSuccessorToggle')){
+      box.dataset.rebentoSignature=signature;
+      box.innerHTML=`<label class="rebento-toggle-line"><span><b>Sucessor de Rebento</b><small>Personagem criado após um Rebento de Roma. Começa com ${limit} pontos de atributo e +${energyBonus} de Energia máxima permanente.</small></span><input id="rebentoSuccessorToggle" type="checkbox" ${successor?'checked':''}></label>${successor?'<p class="muted compact">O teto de atributos continua 5 até que este personagem também se torne um Rebento.</p>':''}`;
+      const toggle=box.querySelector('#rebentoSuccessorToggle');
+      toggle.onchange=()=>{
+        const fresh=readState();if(!fresh)return;
+        if(!toggle.checked&&spentBase(fresh)>8){toggle.checked=true;notify('Reduza os atributos da criação para 8 pontos antes de desativar Sucessor de Rebento.');return}
+        ensureRoma(fresh).successorOfRebento=toggle.checked;
+        fresh.currentEnergy=null;
+        writeState(fresh);reload();
+      };
+    }
     if(!successor)return;
 
     // Corrige o resumo visual hardcoded em 8 sem alterar a ficha-base.
@@ -144,18 +150,28 @@
     let box=rail.querySelector('.rebento-profile-control');
     if(!box){box=document.createElement('section');box.className='rebento-profile-control';const identity=rail.querySelector('.rail-identity');identity?.after(box)}
     const options=(slot)=>`<option value="">Escolha…</option>${ATTRS.map(([k,abbr,label])=>`<option value="${k}" ${selected[slot]===k?'selected':''} ${selected[1-slot]===k?'disabled':''}>${abbr} · ${label}</option>`).join('')}`;
-    box.innerHTML=`<button type="button" class="rebento-profile-toggle ${active?'active':''}" aria-pressed="${active?'true':'false'}"><span>${active?'✦':'○'}</span><b>${active?'Rebento de Roma':'Marcar como Rebento de Roma'}</b><small>${active?`Teto especial ${max} · ${selected.length}/2 bônus escolhidos`:'Libera dois +1 em atributos diferentes e o teto especial de 6.'}</small></button>${active?`<div class="rebento-bonus-selectors"><label><span>1º +1 de Rebento</span><select data-rebento-slot="0">${options(0)}</select></label><label><span>2º +1 de Rebento</span><select data-rebento-slot="1">${options(1)}</select></label></div><p class="rebento-rule-note">Os +1 de Rebento são protegidos e não podem ser sacrificados pelo despertar da magia.</p>`:''}`;
-    box.querySelector('.rebento-profile-toggle').onclick=()=>{
-      const fresh=readState();if(!fresh)return;const roma=ensureRoma(fresh),was=!!roma.rebentoApproved;
-      if(was){const old=rebentoSelections(fresh);syncRebentoExtra(fresh,old,[]);roma.rebentoApproved=false}else{roma.rebentoApproved=true;roma.rebentoAttributes=Array.isArray(roma.rebentoAttributes)?roma.rebentoAttributes:[]}
-      fresh.currentHp=null;fresh.currentEnergy=null;writeState(fresh);reload();
-    };
-    box.querySelectorAll('[data-rebento-slot]').forEach(sel=>sel.onchange=()=>changeRebentoSelection(Number(sel.dataset.rebentoSlot),sel.value));
+
+    // A antiga versão reconstruía este botão continuamente. Em navegadores reais o nó podia
+    // desaparecer entre pressionar e soltar o mouse, então o click nunca era disparado.
+    const signature=`${active}|${selected.join(',')}|${max}`;
+    if(box.dataset.rebentoSignature!==signature||!box.querySelector('.rebento-profile-toggle')){
+      box.dataset.rebentoSignature=signature;
+      box.innerHTML=`<button type="button" class="rebento-profile-toggle ${active?'active':''}" aria-pressed="${active?'true':'false'}"><span>${active?'✦':'○'}</span><b>${active?'Rebento de Roma':'Marcar como Rebento de Roma'}</b><small>${active?`Teto especial ${max} · ${selected.length}/2 bônus escolhidos`:'Libera dois +1 em atributos diferentes e o teto especial de 6.'}</small></button>${active?`<div class="rebento-bonus-selectors"><label><span>1º +1 de Rebento</span><select data-rebento-slot="0">${options(0)}</select></label><label><span>2º +1 de Rebento</span><select data-rebento-slot="1">${options(1)}</select></label></div><p class="rebento-rule-note">Os +1 de Rebento são protegidos e não podem ser sacrificados pelo despertar da magia.</p>`:''}`;
+      box.querySelector('.rebento-profile-toggle').onclick=()=>{
+        const fresh=readState();if(!fresh)return;const roma=ensureRoma(fresh),was=!!roma.rebentoApproved;
+        if(was){const old=rebentoSelections(fresh);syncRebentoExtra(fresh,old,[]);roma.rebentoApproved=false}else{roma.rebentoApproved=true;roma.rebentoAttributes=Array.isArray(roma.rebentoAttributes)?roma.rebentoAttributes:[]}
+        fresh.currentHp=null;fresh.currentEnergy=null;writeState(fresh);reload();
+      };
+      box.querySelectorAll('[data-rebento-slot]').forEach(sel=>sel.onchange=()=>changeRebentoSelection(Number(sel.dataset.rebentoSlot),sel.value));
+    }
+
+    // Também mantém os badges idempotentes para o observer não criar um loop de renderização.
     document.querySelectorAll('#sheetView .attr').forEach(card=>{
       const text=card.querySelector('.attr-name')?.textContent||'',k=ATTRS.find(a=>text.trim().startsWith(`${a[1]} ·`))?.[0];if(!k)return;
-      card.classList.toggle('has-rebento-bonus',selected.includes(k));
-      card.querySelector('.rebento-attr-badge')?.remove();
-      if(selected.includes(k)){const badge=document.createElement('span');badge.className='rebento-attr-badge';badge.textContent='REBENTO +1';card.appendChild(badge)}
+      const hasBonus=selected.includes(k),badge=card.querySelector('.rebento-attr-badge');
+      card.classList.toggle('has-rebento-bonus',hasBonus);
+      if(hasBonus&&!badge){const next=document.createElement('span');next.className='rebento-attr-badge';next.textContent='REBENTO +1';card.appendChild(next)}
+      else if(!hasBonus&&badge)badge.remove();
     });
   }
 
