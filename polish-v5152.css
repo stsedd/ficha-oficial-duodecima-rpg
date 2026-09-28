@@ -199,24 +199,24 @@
 .ability-actions small{font-size:8px!important}
 
 /* Light mode */
-body[data-theme="light"] .ability-card,
-body[data-theme="light"] .ability-tier,
-body[data-theme="light"] .stake-compact,
-body[data-theme="light"] .core-substake{
+body[data-mode="light"] .ability-card,
+body[data-mode="light"] .ability-tier,
+body[data-mode="light"] .stake-compact,
+body[data-mode="light"] .core-substake{
   background:linear-gradient(180deg,#fffdf9,#f6eee6)!important;
   border-color:#d9c8c3!important;
 }
-body[data-theme="light"] .ability-summary,
-body[data-theme="light"] .ability-tier-copy p,
-body[data-theme="light"] .core-subtier-copy p,
-body[data-theme="light"] .core-note p,
-body[data-theme="light"] .core-description p,
-body[data-theme="light"] .ability-notes p{color:#5f5155!important}
-body[data-theme="light"] .ability-tier.current{
+body[data-mode="light"] .ability-summary,
+body[data-mode="light"] .ability-tier-copy p,
+body[data-mode="light"] .core-subtier-copy p,
+body[data-mode="light"] .core-note p,
+body[data-mode="light"] .core-description p,
+body[data-mode="light"] .ability-notes p{color:#5f5155!important}
+body[data-mode="light"] .ability-tier.current{
   background:linear-gradient(90deg,color-mix(in srgb,var(--theme-accent,#c92e43) 8%,#fffaf5),#fffaf5 72%)!important;
 }
-body[data-theme="light"] .ability-tier.current::after{background:#fffaf4!important}
-body[data-theme="light"] .stake-compact>.row b{color:#3b2f33!important}
+body[data-mode="light"] .ability-tier.current::after{background:#fffaf4!important}
+body[data-mode="light"] .stake-compact>.row b{color:#3b2f33!important}
 
 /* Responsividade: nunca comprimir texto de habilidade em colunas minúsculas. */
 @media(min-width:1680px){.ability-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
