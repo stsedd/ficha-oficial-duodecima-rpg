@@ -1,0 +1,43 @@
+/* Rebentos de Roma · camada exclusivamente visual.
+   Mantém integralmente a paleta, o modo claro/escuro e o tema especial escolhido.
+   O título acrescenta apenas brilho dourado e, fora do tema Brasa, reutiliza as mesmas partículas de brasa. */
+
+body[data-rebento="true"]{
+  --rebento-gold:#e5bd58;
+  --rebento-gold-soft:rgba(229,189,88,.24);
+  --rebento-gold-faint:rgba(229,189,88,.11);
+}
+
+/* O tema escolhido continua mandando em fundo, bordas e cores. O drop-shadow é apenas aditivo. */
+body[data-rebento="true"] #sheetView .card,
+body[data-rebento="true"] #sheetView .attr,
+body[data-rebento="true"] #sheetView .ability-card,
+body[data-rebento="true"] #sheetView .familiar-sheet{
+  filter:drop-shadow(0 0 3px var(--rebento-gold-soft)) drop-shadow(0 0 9px var(--rebento-gold-faint));
+}
+
+body[data-rebento="true"] #sheetView .rebento-profile-badge,
+body[data-rebento="true"] #sheetView .rebento-title,
+body[data-rebento="true"] #sheetView .rebento-attr-badge{
+  filter:drop-shadow(0 0 5px rgba(229,189,88,.34));
+}
+
+/* Reutiliza exatamente a camada e a animação das brasas já existentes na ficha.
+   Em Brasa, o efeito original permanece intacto; nos demais temas, as partículas viram ouro. */
+body[data-rebento="true"]:not([data-special="fire"]) .fire-embers{display:block}
+body[data-rebento="true"]:not([data-special="fire"]) .fire-embers i{
+  width:3px;
+  height:3px;
+  background:#f1cf72;
+  box-shadow:0 0 5px #d5a93f,0 0 11px rgba(232,190,77,.62);
+}
+
+/* Em fundos claros o brilho continua presente, mas menos invasivo. */
+body[data-rebento="true"][data-mode="light"]{
+  --rebento-gold-soft:rgba(183,133,24,.20);
+  --rebento-gold-faint:rgba(183,133,24,.09);
+}
+
+@media (prefers-reduced-motion:reduce){
+  body[data-rebento="true"] .fire-embers{display:none!important}
+}
