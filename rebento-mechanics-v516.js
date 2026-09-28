@@ -83,14 +83,12 @@
     }
     if(!successor)return;
 
-    // Corrige o resumo visual hardcoded em 8 sem alterar a ficha-base.
     const spent=spentBase(data),left=limit-spent;
     const labels=[...first.querySelectorAll('.row.between .label')];
     const pointsLabel=labels.find(x=>/8 pontos de atributos/i.test(x.textContent||''));
     if(pointsLabel){pointsLabel.textContent=`${limit} pontos de atributos`;const sibling=pointsLabel.parentElement?.querySelector('b');if(sibling)sibling.textContent=`${left} restante(s)`;const bar=pointsLabel.closest('div')?.parentElement?.querySelector('.progress i');if(bar)bar.style.width=`${Math.max(0,Math.min(100,spent/limit*100))}%`}
     first.querySelectorAll('[data-base-inc]').forEach(btn=>{const k=btn.dataset.baseInc;btn.disabled=!baseCanIncrease(data,k,limit)});
 
-    // O app-base trava o 9º ponto em 8; o patch captura apenas esse caso.
     if(!root.dataset.rebentoCapture){
       root.dataset.rebentoCapture='1';
       root.addEventListener('click',e=>{
@@ -142,6 +140,13 @@
     }
     syncRebentoExtra(fresh,old,clean);writeState(fresh);reload();
   }
+  function toggleRebentoState(){
+    const fresh=readState();if(!fresh)return;
+    const roma=ensureRoma(fresh),was=!!roma.rebentoApproved;
+    if(was){const old=rebentoSelections(fresh);syncRebentoExtra(fresh,old,[]);roma.rebentoApproved=false}
+    else{roma.rebentoApproved=true;roma.rebentoAttributes=Array.isArray(roma.rebentoAttributes)?roma.rebentoAttributes:[]}
+    fresh.currentHp=null;fresh.currentEnergy=null;writeState(fresh);reload();
+  }
 
   function patchRebentoProfile(){
     const rail=document.querySelector('#sheetView .character-rail');if(!rail)return;
@@ -151,21 +156,12 @@
     if(!box){box=document.createElement('section');box.className='rebento-profile-control';const identity=rail.querySelector('.rail-identity');identity?.after(box)}
     const options=(slot)=>`<option value="">Escolha…</option>${ATTRS.map(([k,abbr,label])=>`<option value="${k}" ${selected[slot]===k?'selected':''} ${selected[1-slot]===k?'disabled':''}>${abbr} · ${label}</option>`).join('')}`;
 
-    // A antiga versão reconstruía este botão continuamente. Em navegadores reais o nó podia
-    // desaparecer entre pressionar e soltar o mouse, então o click nunca era disparado.
     const signature=`${active}|${selected.join(',')}|${max}`;
     if(box.dataset.rebentoSignature!==signature||!box.querySelector('.rebento-profile-toggle')){
       box.dataset.rebentoSignature=signature;
       box.innerHTML=`<button type="button" class="rebento-profile-toggle ${active?'active':''}" aria-pressed="${active?'true':'false'}"><span>${active?'✦':'○'}</span><b>${active?'Rebento de Roma':'Marcar como Rebento de Roma'}</b><small>${active?`Teto especial ${max} · ${selected.length}/2 bônus escolhidos`:'Libera dois +1 em atributos diferentes e o teto especial de 6.'}</small></button>${active?`<div class="rebento-bonus-selectors"><label><span>1º +1 de Rebento</span><select data-rebento-slot="0">${options(0)}</select></label><label><span>2º +1 de Rebento</span><select data-rebento-slot="1">${options(1)}</select></label></div><p class="rebento-rule-note">Os +1 de Rebento são protegidos e não podem ser sacrificados pelo despertar da magia.</p>`:''}`;
-      box.querySelector('.rebento-profile-toggle').onclick=()=>{
-        const fresh=readState();if(!fresh)return;const roma=ensureRoma(fresh),was=!!roma.rebentoApproved;
-        if(was){const old=rebentoSelections(fresh);syncRebentoExtra(fresh,old,[]);roma.rebentoApproved=false}else{roma.rebentoApproved=true;roma.rebentoAttributes=Array.isArray(roma.rebentoAttributes)?roma.rebentoAttributes:[]}
-        fresh.currentHp=null;fresh.currentEnergy=null;writeState(fresh);reload();
-      };
-      box.querySelectorAll('[data-rebento-slot]').forEach(sel=>sel.onchange=()=>changeRebentoSelection(Number(sel.dataset.rebentoSlot),sel.value));
     }
 
-    // Também mantém os badges idempotentes para o observer não criar um loop de renderização.
     document.querySelectorAll('#sheetView .attr').forEach(card=>{
       const text=card.querySelector('.attr-name')?.textContent||'',k=ATTRS.find(a=>text.trim().startsWith(`${a[1]} ·`))?.[0];if(!k)return;
       const hasBonus=selected.includes(k),badge=card.querySelector('.rebento-attr-badge');
@@ -186,8 +182,19 @@
   function initObserver(){
     let queued=false;const queue=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;patchAll()})};
     new MutationObserver(queue).observe(document.body,{childList:true,subtree:true});queue();
-    document.addEventListener('change',e=>{if(e.target?.id==='importInput')setTimeout(reload,900)},true);
-    document.addEventListener('click',e=>{if(e.target?.closest?.('#resetBtn'))setTimeout(reload,250)},true);
+
+    // Delegação em captura: a ficha-base pode rerenderizar a lateral durante o clique. Tratamos
+    // Rebento antes de qualquer rerender para o controle funcionar de forma consistente.
+    document.addEventListener('click',e=>{
+      const rebento=e.target.closest?.('.rebento-profile-toggle');
+      if(rebento){e.preventDefault();e.stopImmediatePropagation();toggleRebentoState();return}
+      if(e.target?.closest?.('#resetBtn'))setTimeout(reload,250);
+    },true);
+    document.addEventListener('change',e=>{
+      const selector=e.target.closest?.('[data-rebento-slot]');
+      if(selector){e.stopImmediatePropagation();changeRebentoSelection(Number(selector.dataset.rebentoSlot),selector.value);return}
+      if(e.target?.id==='importInput')setTimeout(reload,900);
+    },true);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initObserver,{once:true});else initObserver();
 })();
