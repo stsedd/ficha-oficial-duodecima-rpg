@@ -1,12 +1,11 @@
 (async () => {
   'use strict';
 
-  // v5.15.16 · força a camada de I/O corrigida e a aplicação atual,
-  // evitando que o navegador reutilize os bundles v5.15.14 quebrados.
+  // v5.16.0 · Rebentos de Roma, sucessores e regras canônicas do Core.
   try {
     await new Promise((resolve,reject)=>{
       const io=document.createElement('script');
-      io.src='io-recovery-v51515.js?v=5.15.16-io';
+      io.src='io-recovery-v51515.js?v=5.16.0-io';
       io.onload=resolve;
       io.onerror=()=>reject(new Error('Falha ao carregar recuperação de importação/exportação'));
       document.body.appendChild(io);
@@ -23,6 +22,14 @@
     polish.href='polish-v5152.css?v=5.15.2';
     polish.dataset.duodecimaPolish='5.15.2';
     document.head.appendChild(polish);
+  }
+
+  if(!document.querySelector('link[data-duodecima-rebento="5.16.0"]')){
+    const rebentoCss=document.createElement('link');
+    rebentoCss.rel='stylesheet';
+    rebentoCss.href='rebento-mechanics-v516.css?v=5.16.0';
+    rebentoCss.dataset.duodecimaRebento='5.16.0';
+    document.head.appendChild(rebentoCss);
   }
 
   async function syncMagicRules(){
@@ -42,6 +49,8 @@
         sacrificialAttributes:[...(awakening.sacrificialAttributes||fallback.sacrificialAttributes||['for','des','con'])],
         sacrificeCanGoBelowZero:awakening.canReduceBelowZero!==false,
         divineBonusesSacrificable:awakening.divineBonusesSacrificable===true,
+        rebentoBonusesSacrificable:awakening.rebentoBonusesSacrificable===true,
+        protectedBonusSources:[...(awakening.protectedBonusSources||fallback.protectedBonusSources||['divine','rebento'])],
         hpProgressionPenalty:Number(awakening.hpProgressionPenalty??fallback.hpProgressionPenalty??2),
         highCircleUses:{...(fallback.highCircleUses||{}),...(magic.highCircleUses||{})}
       };
@@ -52,7 +61,7 @@
   try{
     await new Promise((resolve,reject)=>{
       const guard=document.createElement('script');
-      guard.src=`contract-guard-v516.js?v=5.15.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      guard.src=`contract-guard-v516.js?v=5.16.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       guard.onload=resolve;guard.onerror=()=>reject(new Error('Falha ao carregar guarda de contrato do Core'));
       document.body.appendChild(guard);
     });
@@ -62,21 +71,32 @@
   try {
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`lineage-creation-v515.js?v=5.15.16-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`lineage-creation-v515.js?v=5.16.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar automação de Legados'));
       document.body.appendChild(patch);
     });
     try { await window.DUODECIMA_LINEAGE_CREATION_READY; } catch (_) {}
   } catch (err) {console.warn('[Ficha] Automação de Legados indisponível; carregando ficha base.',err)}
 
+  // Precisa rodar antes do app principal para o sucessor ajustar a Energia base
+  // antes de rawEnergyMax() capturar o sistema do Core.
+  try{
+    await new Promise((resolve,reject)=>{
+      const patch=document.createElement('script');
+      patch.src=`rebento-mechanics-v516.js?v=5.16.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar mecânicas de Rebento'));
+      document.body.appendChild(patch);
+    });
+  }catch(err){console.warn('[Ficha] Mecânicas de Rebento indisponíveis; carregando ficha base.',err)}
+
   const script=document.createElement('script');
-  script.src=`app-v511.js?v=5.15.16-io-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src=`app-v511.js?v=5.16.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer=false;
   script.onload=async()=>{
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src=`magic-sacrifice-sync-v5153.js?v=5.15.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.src=`magic-sacrifice-sync-v5153.js?v=5.16.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
         patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar sincronização do sacrifício mágico'));
         document.body.appendChild(patch);
       });
@@ -84,7 +104,7 @@
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src=`stabilization-v516.js?v=v5.15.7-image-storage-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.src=`stabilization-v516.js?v=5.16.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
         patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar camada de estabilização'));
         document.body.appendChild(patch);
       });
