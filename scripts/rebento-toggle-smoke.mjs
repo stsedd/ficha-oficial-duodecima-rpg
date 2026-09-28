@@ -11,6 +11,8 @@ for(const test of [
   const context=await browser.newContext({viewport:test.viewport});
   await context.addInitScript(()=>{
     const key='duodecima_universal_stage4_v24';
+    if(sessionStorage.getItem('__rebento_toggle_seeded__')==='1')return;
+    sessionStorage.setItem('__rebento_toggle_seeded__','1');
     const zero={for:0,des:0,con:0,int:0,fe:0,car:0};
     localStorage.setItem(key,JSON.stringify({
       schemaVersion:24,isCreated:true,name:'Rebento Toggle QA',player:'CI',level:50,godId:'iuppiter',
