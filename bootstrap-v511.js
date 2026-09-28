@@ -1,11 +1,11 @@
 (async () => {
   'use strict';
 
-  // v5.16.2 · Rebentos de Roma, sucessores e regras canônicas do Core.
+  // v5.16.3 · Rebentos de Roma, sucessores, regras canônicas e camada visual aditiva.
   try {
     await new Promise((resolve,reject)=>{
       const io=document.createElement('script');
-      io.src='io-recovery-v51515.js?v=5.16.2-io';
+      io.src='io-recovery-v51515.js?v=5.16.3-io';
       io.onload=resolve;
       io.onerror=()=>reject(new Error('Falha ao carregar recuperação de importação/exportação'));
       document.body.appendChild(io);
@@ -19,7 +19,7 @@
   if(!document.querySelector('link[data-duodecima-polish="5.15.2"]')){
     const polish=document.createElement('link');
     polish.rel='stylesheet';
-    polish.href='polish-v5152.css?v=5.15.2';
+    polish.href='polish-v5152.css?v=5.16.3';
     polish.dataset.duodecimaPolish='5.15.2';
     document.head.appendChild(polish);
   }
@@ -27,14 +27,21 @@
   if(!document.querySelector('link[data-duodecima-rebento="5.16.0"]')){
     const rebentoCss=document.createElement('link');
     rebentoCss.rel='stylesheet';
-    rebentoCss.href='rebento-mechanics-v516.css?v=5.16.2';
+    rebentoCss.href='rebento-mechanics-v516.css?v=5.16.3';
     rebentoCss.dataset.duodecimaRebento='5.16.0';
     document.head.appendChild(rebentoCss);
+  }
+  if(!document.querySelector('link[data-duodecima-rebento-visual="5.16.3"]')){
+    const rebentoVisual=document.createElement('link');
+    rebentoVisual.rel='stylesheet';
+    rebentoVisual.href='rebento-visual-v5163.css?v=5.16.3';
+    rebentoVisual.dataset.duodecimaRebentoVisual='5.16.3';
+    document.head.appendChild(rebentoVisual);
   }
   if(!document.querySelector('link[data-duodecima-rules="5.16.0"]')){
     const rulesCss=document.createElement('link');
     rulesCss.rel='stylesheet';
-    rulesCss.href='rules-sync-v516.css?v=5.16.2';
+    rulesCss.href='rules-sync-v516.css?v=5.16.3';
     rulesCss.dataset.duodecimaRules='5.16.0';
     document.head.appendChild(rulesCss);
   }
@@ -68,7 +75,7 @@
   try{
     await new Promise((resolve,reject)=>{
       const guard=document.createElement('script');
-      guard.src=`contract-guard-v516.js?v=5.16.2-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      guard.src=`contract-guard-v516.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       guard.onload=resolve;guard.onerror=()=>reject(new Error('Falha ao carregar guarda de contrato do Core'));
       document.body.appendChild(guard);
     });
@@ -78,42 +85,48 @@
   try {
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`lineage-creation-v515.js?v=5.16.2-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`lineage-creation-v515.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar automação de Legados'));
       document.body.appendChild(patch);
     });
     try { await window.DUODECIMA_LINEAGE_CREATION_READY; } catch (_) {}
   } catch (err) {console.warn('[Ficha] Automação de Legados indisponível; carregando ficha base.',err)}
 
-  // Camada que mantém a escolha de sucessor mesmo antes do app-base criar seu primeiro estado local.
   try{
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`rebento-fresh-creation-v5161.js?v=5.16.2-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`rebento-fresh-creation-v5161.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar inicialização de sucessor'));
       document.body.appendChild(patch);
     });
   }catch(err){console.warn('[Ficha] Inicialização de sucessor indisponível.',err)}
 
-  // Precisa rodar antes do app principal para o sucessor ajustar a Energia base
-  // antes de rawEnergyMax() capturar o sistema do Core.
   try{
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`rebento-mechanics-v516.js?v=5.16.2-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`rebento-mechanics-v516.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar mecânicas de Rebento'));
       document.body.appendChild(patch);
     });
   }catch(err){console.warn('[Ficha] Mecânicas de Rebento indisponíveis; carregando ficha base.',err)}
 
+  try{
+    await new Promise((resolve,reject)=>{
+      const visual=document.createElement('script');
+      visual.src='rebento-visual-v5163.js?v=5.16.3';
+      visual.onload=resolve;visual.onerror=()=>reject(new Error('Falha ao carregar visual de Rebento'));
+      document.body.appendChild(visual);
+    });
+  }catch(err){console.warn('[Ficha] Camada visual de Rebento indisponível.',err)}
+
   const script=document.createElement('script');
-  script.src=`app-v511.js?v=5.16.2-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src=`app-v511.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer=false;
   script.onload=async()=>{
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src=`rules-sync-v516.js?v=5.16.2-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.src=`rules-sync-v516.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
         patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar sincronização das regras de combate'));
         document.body.appendChild(patch);
       });
@@ -121,15 +134,7 @@
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src=`magic-sacrifice-sync-v5153.js?v=5.16.2-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
-        patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar sincronização do sacrifício mágico'));
-        document.body.appendChild(patch);
-      });
-    }catch(err){console.warn('[Ficha] Sincronização visual do sacrifício mágico indisponível.',err)}
-    try{
-      await new Promise((resolve,reject)=>{
-        const patch=document.createElement('script');
-        patch.src=`stabilization-v516.js?v=5.16.2-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.src=`stabilization-v516.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
         patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar camada de estabilização'));
         document.body.appendChild(patch);
       });
