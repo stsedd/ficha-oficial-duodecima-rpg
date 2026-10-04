@@ -143,7 +143,7 @@
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src='qol-v5171.js?v=5.17.1';
+        patch.src='qol-v5171.js?v=5.17.2-reset-fix';
         patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar ajustes de reset, descansos e Sanidade'));
         document.body.appendChild(patch);
       });
