@@ -140,6 +140,14 @@
       });
       try{await window.DUODECIMA_STABILIZATION_READY}catch(_){}
     }catch(err){console.warn('[Ficha] Camada de estabilização indisponível.',err)}
+    try{
+      await new Promise((resolve,reject)=>{
+        const patch=document.createElement('script');
+        patch.src='qol-v5171.js?v=5.17.1';
+        patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar ajustes de reset, descansos e Sanidade'));
+        document.body.appendChild(patch);
+      });
+    }catch(err){console.warn('[Ficha] Ajustes de qualidade de vida indisponíveis.',err)}
   };
   document.body.appendChild(script);
 })();
