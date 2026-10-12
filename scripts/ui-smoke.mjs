@@ -156,7 +156,8 @@ for(const test of cases){
     await page.waitForTimeout(120);
     const blue=await page.evaluate(()=>{
       const attr=document.querySelector('.attr');
-      const resource=document.querySelector('.resource-chip');
+      const resource=document.querySelector('.core-stat');
+      const meter=document.querySelector('.core-stat-meter > i');
       const danger=document.querySelector('.danger');
       const equipment=document.querySelector('.equipment-card');
       return {
@@ -164,7 +165,8 @@ for(const test of cases){
         mode:document.body.dataset.mode,
         accent:getComputedStyle(document.body).getPropertyValue('--theme-accent').trim(),
         attrStripe:attr?getComputedStyle(attr,'::before').backgroundImage:'',
-        resourceStripe:resource?getComputedStyle(resource,'::before').backgroundColor:'',
+        resourceStripe:resource?getComputedStyle(resource,'::after').backgroundImage:'',
+        resourceMeter:meter?getComputedStyle(meter).backgroundImage:'',
         dangerBorder:danger?getComputedStyle(danger).borderColor:'',
         equipmentBg:equipment?getComputedStyle(equipment).backgroundImage:''
       };
@@ -173,7 +175,7 @@ for(const test of cases){
     const legacyRed=/rgb\\((?:213, 54, 69|227, 31, 50|199, 42, 64|134, 36, 58|185, 75, 96)\\)/i;
     if(blue.palette!=='blue'||blue.mode!=='dark')failures.push(`${test.name}-theme: Azul Dark não persistiu (${blue.palette}/${blue.mode})`);
     if(!/3f7fd8/i.test(blue.accent))failures.push(`${test.name}-theme: acento Azul inesperado (${blue.accent})`);
-    if(!/63, 127, 216/.test(blue.resourceStripe))failures.push(`${test.name}-theme: barra lateral de recurso não acompanhou Azul (${blue.resourceStripe})`);
+    if(!/63, 127, 216/.test(blue.resourceStripe)||!/35, 75, 137/.test(blue.resourceMeter)||!/105, 165, 243/.test(blue.resourceMeter))failures.push(`${test.name}-theme: recursos não acompanharam Azul (${blue.resourceStripe} / ${blue.resourceMeter})`);
     if(!/63, 127, 216/.test(blue.attrStripe))failures.push(`${test.name}-theme: detalhe de atributo não acompanhou Azul (${blue.attrStripe})`);
     if(legacyRed.test(serialized))failures.push(`${test.name}-theme: vestígio vermelho detectado em componentes auditados ${serialized}`);
     await page.screenshot({path:`ui-artifacts/${test.name}-theme-blue-dark.png`,fullPage:true});
