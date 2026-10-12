@@ -1,0 +1,231 @@
+/* Ficha Oficial da Duodécima · v5.18.0
+   Consistência de paletas.
+   Remove vestígios da identidade vermelha quando uma paleta padrão diferente é escolhida.
+   Temas especiais e exclusivos continuam responsáveis pelas próprias cores. */
+
+body[data-palette][data-special="none"][data-exclusive-theme="none"]{
+  --accent:var(--theme-accent);
+  --accent-deep:var(--theme-accent-deep);
+  --accent-bright:var(--theme-accent-bright);
+  --purple:color-mix(in srgb,var(--theme-accent-deep) 78%,#18131d 22%);
+  --purple-bright:color-mix(in srgb,var(--theme-accent-bright) 84%,#fff 16%);
+  --theme-line-tint:color-mix(in srgb,var(--theme-accent) 24%,var(--line) 76%);
+  --theme-line-tint-strong:color-mix(in srgb,var(--theme-accent) 44%,var(--line) 56%);
+  --theme-surface-tint:color-mix(in srgb,var(--theme-accent-deep) 10%,#0b0a0d 90%);
+  --theme-surface-tint-strong:color-mix(in srgb,var(--theme-accent-deep) 17%,#0b0a0d 83%);
+  --theme-panel-texture:
+    radial-gradient(circle at 14% 16%,rgba(255,255,255,.045) 0 1px,transparent 1px 100%),
+    radial-gradient(circle at 82% 12%,rgba(var(--theme-accent-rgb),.08) 0,transparent 24%),
+    repeating-linear-gradient(135deg,rgba(255,255,255,.018) 0 2px,transparent 2px 10px);
+  --theme-card-glow-soft:
+    0 0 0 1px rgba(var(--theme-accent-rgb),.10),
+    0 0 24px rgba(var(--theme-accent-rgb),.05);
+}
+
+/* Fundos e superfícies decorativas que ainda carregavam vinho/vermelho fixo. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="standard"]{
+  background:
+    radial-gradient(circle at 11% -5%,rgba(var(--theme-accent-rgb),.18),transparent 31%),
+    radial-gradient(circle at 90% 8%,rgba(var(--theme-accent-rgb),.055),transparent 24%),
+    linear-gradient(180deg,#09090b 0%,#070709 50%,#09090b 100%)!important;
+}
+
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(
+  .archive-brandbar,.archive-toolbar,.theme-toggle,.theme-dialog,
+  .theme-dialog-card,.theme-choice,.profile-cover,.sheet-tabs,
+  .character-rail,.combat-resource-dock
+){
+  border-color:var(--theme-line-tint)!important;
+}
+
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .archive-brandbar{
+  background:linear-gradient(180deg,var(--theme-surface-tint-strong),#08080a)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .profile-cover-empty{
+  background:radial-gradient(circle at center,rgba(var(--theme-accent-rgb),.10),transparent 46%)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(button,.file-btn):not(.primary):not(.danger):hover{
+  border-color:var(--theme-line-tint-strong)!important;
+}
+
+/* Recursos: HP, EN, SAN e recursos de combate pertencem à paleta atual. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .resource-chip::before{
+  background:var(--theme-accent)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .resource-chip.resource-en::before{
+  background:color-mix(in srgb,var(--theme-accent-deep) 72%,var(--theme-accent-bright) 28%)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .resource-chip.resource-san::before{
+  background:color-mix(in srgb,var(--theme-accent-bright) 54%,#f3f3f5 46%)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(.resource-meter,.combat-mini-meter,.core-stat-meter){
+  border-color:color-mix(in srgb,var(--theme-accent) 18%,var(--line) 82%)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(.resource-meter,.combat-mini-meter,.core-stat-meter)>i{
+  background:linear-gradient(90deg,var(--theme-accent-deep),var(--theme-accent-bright))!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .combat-resource-chip.special{
+  border-color:var(--theme-line-tint)!important;
+  background:linear-gradient(180deg,var(--theme-surface-tint-strong),var(--theme-surface-tint))!important;
+}
+
+/* Atributos, perícias, talentos, habilidades e combate. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .attr::before{
+  background:linear-gradient(90deg,transparent,var(--theme-accent),transparent)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .attr:hover{
+  border-color:var(--theme-line-tint-strong)!important;
+  background:linear-gradient(180deg,var(--theme-surface-tint-strong),#0b0a0d)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .point-dot.earned{
+  border-color:var(--theme-accent-line)!important;
+  color:color-mix(in srgb,var(--theme-accent-bright) 76%,var(--text) 24%)!important;
+  background:rgba(var(--theme-accent-rgb),.08)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(.skill-matrix-row,.skill-ledger-row):hover{
+  border-color:var(--theme-line-tint-strong)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(.skill-matrix-row.trained,.skill-ledger-row.trained){
+  border-color:var(--theme-accent-line)!important;
+  border-left-color:var(--theme-accent)!important;
+  box-shadow:inset 3px 0 0 var(--theme-accent)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .energy-cost{
+  border-color:var(--theme-accent-line)!important;
+  color:color-mix(in srgb,var(--theme-accent-bright) 78%,var(--text) 22%)!important;
+  background:rgba(var(--theme-accent-rgb),.08)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(.talent-preview,.roll-result,.mount-box){
+  border-color:var(--theme-line-tint-strong)!important;
+  background:linear-gradient(180deg,var(--theme-surface-tint-strong),var(--theme-surface-tint))!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(.tier-current,.ability-tier.current,.core-subtier.current){
+  border-color:var(--theme-accent-line)!important;
+  border-left-color:var(--theme-accent)!important;
+  background:linear-gradient(90deg,rgba(var(--theme-accent-rgb),.12),var(--theme-surface-tint) 72%)!important;
+  box-shadow:inset 3px 0 0 var(--theme-accent)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .death-priority{
+  border-color:var(--theme-accent-line)!important;
+  background:
+    linear-gradient(90deg,rgba(var(--theme-accent-rgb),.10),transparent 38%),
+    linear-gradient(180deg,var(--theme-surface-tint-strong),var(--theme-surface-tint))!important;
+  box-shadow:inset 3px 0 0 var(--theme-accent),var(--shadow-soft)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .condition-check.active{
+  border-color:var(--theme-accent-line)!important;
+  background:linear-gradient(180deg,rgba(var(--theme-accent-rgb),.11),var(--theme-surface-tint))!important;
+  box-shadow:inset 2px 0 0 var(--theme-accent)!important;
+}
+
+/* Ações destrutivas continuam visualmente distintas, mas não reintroduzem vermelho de outra paleta. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .danger{
+  color:color-mix(in srgb,var(--theme-accent-bright) 68%,var(--text) 32%)!important;
+  border-color:var(--theme-accent-line)!important;
+  background:color-mix(in srgb,var(--theme-accent-deep) 22%,var(--panel) 78%)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(
+  .danger-text,.weapon-card.broken,.diagnostic.error,.death-count.failure,.rail-death.dead
+){
+  border-color:var(--theme-accent-line)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(
+  .danger-text b,.diagnostic.error b,.rail-death.dead b
+){
+  color:color-mix(in srgb,var(--theme-accent-bright) 74%,var(--text) 26%)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .danger-note{
+  border-left-color:var(--theme-accent)!important;
+  background:rgba(var(--theme-accent-rgb),.08)!important;
+}
+
+/* Equipamento: remove vinho/vermelho residual das cartas e da rolagem horizontal. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .equipment-deck{
+  scrollbar-color:var(--theme-accent-deep) #0a0a0c!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .equipment-card{
+  border-color:var(--theme-line-tint-strong)!important;
+  background:
+    radial-gradient(circle at 70% 16%,rgba(var(--theme-accent-rgb),.10),transparent 25%),
+    linear-gradient(160deg,var(--theme-surface-tint-strong) 0%,#0d0c0f 58%,#08080a 100%)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .equipment-card.weapon{
+  background:
+    radial-gradient(circle at 70% 17%,rgba(var(--theme-accent-rgb),.15),transparent 25%),
+    linear-gradient(160deg,var(--theme-surface-tint-strong),#0d0c0f 60%,#08080a)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .equipment-card:hover,
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .equipment-card:focus-visible{
+  border-color:var(--theme-accent)!important;
+  box-shadow:0 24px 46px rgba(0,0,0,.48),0 0 28px rgba(var(--theme-accent-rgb),.10)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .equipment-card::before{
+  border-color:rgba(var(--theme-accent-rgb),.14)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .equipment-card::after{
+  background:linear-gradient(90deg,transparent,rgba(var(--theme-accent-rgb),.28),transparent)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .equipment-card-glyph{
+  color:color-mix(in srgb,var(--theme-accent-bright) 42%,var(--text) 58%)!important;
+  text-shadow:0 0 24px rgba(var(--theme-accent-rgb),.16)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .equipment-card-copy small{
+  color:color-mix(in srgb,var(--theme-accent-bright) 76%,var(--text) 24%)!important;
+}
+
+/* QoL de Sanidade: o estado continua legível sem furar a paleta com vermelho fixo. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .qol-sanity-card{
+  border-left-color:var(--theme-accent)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .qol-sanity-card[data-tone="danger"]{
+  border-left-color:var(--theme-accent-deep)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .qol-effective-attr{
+  color:var(--theme-accent)!important;
+}
+
+/* LIGHT: superfícies continuam claras, mas todos os acentos vêm da paleta escolhida. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="light"]{
+  --theme-line-tint:var(--theme-light-line);
+  --theme-line-tint-strong:var(--theme-light-line-strong);
+  --theme-surface-tint:var(--theme-light-surface);
+  --theme-surface-tint-strong:var(--theme-light-surface-2);
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="light"] :is(
+  .archive-brandbar,.archive-toolbar,.card,.subcard,.stat,.attr,.resource-chip,.combat-resource-chip,
+  .ability-card,.talent-card,.spell-card,.weapon-card,.familiar-card,.skill-matrix-row,.skill-ledger-row,
+  .condition-check,.death-priority,.roll-result,.talent-preview,.mount-box
+){
+  border-color:var(--theme-light-line)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="light"] :is(input,select,textarea):focus{
+  border-color:var(--theme-accent)!important;
+  box-shadow:0 0 0 2px rgba(var(--theme-accent-rgb),.12)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="light"] :is(button,.file-btn):not(.primary):not(.danger):hover{
+  border-color:var(--theme-light-line-strong)!important;
+  background:color-mix(in srgb,var(--theme-wash) 16%,#fffaf4 84%)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="light"] .danger{
+  color:color-mix(in srgb,var(--theme-accent-deep) 82%,#302528 18%)!important;
+  background:color-mix(in srgb,var(--theme-wash) 38%,#fffaf4 62%)!important;
+  border-color:var(--theme-accent-line)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="light"] .danger-note{
+  color:color-mix(in srgb,var(--theme-accent-deep) 78%,#403238 22%)!important;
+  background:color-mix(in srgb,var(--theme-wash) 34%,#fffaf4 66%)!important;
+  border-left-color:var(--theme-accent)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="light"] .profile-cover-empty{
+  background:radial-gradient(circle at center,rgba(var(--theme-accent-rgb),.08),transparent 46%)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="light"] .condition-check.active{
+  border-color:var(--theme-accent-line)!important;
+  background:color-mix(in srgb,var(--theme-wash) 30%,var(--theme-light-surface) 70%)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="light"] .death-priority{
+  border-color:var(--theme-accent-line)!important;
+  background:
+    linear-gradient(90deg,rgba(var(--theme-accent-rgb),.07),transparent 40%),
+    linear-gradient(180deg,var(--theme-light-surface),var(--theme-light-surface-2))!important;
+}
