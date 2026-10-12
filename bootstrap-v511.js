@@ -46,6 +46,11 @@
     document.head.appendChild(rulesCss);
   }
 
+  // v5.18.1 · esta camada precisa ficar por último no cascade.
+  // Os CSS antigos ainda têm acentos vinho/vermelhos hard-coded.
+  const paletteConsistency=document.querySelector('link[href*="theme-consistency-v518.css"]');
+  if(paletteConsistency)document.head.appendChild(paletteConsistency);
+
   async function syncMagicRules(){
     const fallback=window.DUODECIMA_MAGIC||{};
     const state=window.DUODECIMA_CORE_STATE||{};
