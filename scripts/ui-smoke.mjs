@@ -146,6 +146,38 @@ for(const test of cases){
   if(result.legacyMagicPatch)failures.push(`${test.name}-rebento: patch legado magic-sacrifice-sync ainda está sendo carregado`);
   if(result.scroll>result.viewport+2)failures.push(`${test.name}-rebento: overflow horizontal ${result.scroll}px > ${result.viewport}px`);
   await page.screenshot({path:`ui-artifacts/${test.name}-rebento-pink-light.png`,fullPage:true});
+
+  // Regressão de tema: trocar para Azul deve eliminar vestígios vermelhos da identidade visual.
+  const themeButton=page.locator('#themePaletteBtn');
+  if(await themeButton.count())await themeButton.click();
+  const blueChoice=page.locator('[data-palette-choice="blue"][data-theme-mode="dark"]').first();
+  if(await blueChoice.count()){
+    await blueChoice.click();
+    await page.waitForTimeout(120);
+    const blue=await page.evaluate(()=>{
+      const attr=document.querySelector('.attr');
+      const resource=document.querySelector('.resource-chip');
+      const danger=document.querySelector('.danger');
+      const equipment=document.querySelector('.equipment-card');
+      return {
+        palette:document.body.dataset.palette,
+        mode:document.body.dataset.mode,
+        accent:getComputedStyle(document.body).getPropertyValue('--theme-accent').trim(),
+        attrStripe:attr?getComputedStyle(attr,'::before').backgroundImage:'',
+        resourceStripe:resource?getComputedStyle(resource,'::before').backgroundColor:'',
+        dangerBorder:danger?getComputedStyle(danger).borderColor:'',
+        equipmentBg:equipment?getComputedStyle(equipment).backgroundImage:''
+      };
+    });
+    const serialized=JSON.stringify(blue);
+    const legacyRed=/rgb\\((?:213, 54, 69|227, 31, 50|199, 42, 64|134, 36, 58|185, 75, 96)\\)/i;
+    if(blue.palette!=='blue'||blue.mode!=='dark')failures.push(`${test.name}-theme: Azul Dark não persistiu (${blue.palette}/${blue.mode})`);
+    if(!/3f7fd8/i.test(blue.accent))failures.push(`${test.name}-theme: acento Azul inesperado (${blue.accent})`);
+    if(!/63, 127, 216/.test(blue.resourceStripe))failures.push(`${test.name}-theme: barra lateral de recurso não acompanhou Azul (${blue.resourceStripe})`);
+    if(!/63, 127, 216/.test(blue.attrStripe))failures.push(`${test.name}-theme: detalhe de atributo não acompanhou Azul (${blue.attrStripe})`);
+    if(legacyRed.test(serialized))failures.push(`${test.name}-theme: vestígio vermelho detectado em componentes auditados ${serialized}`);
+    await page.screenshot({path:`ui-artifacts/${test.name}-theme-blue-dark.png`,fullPage:true});
+  }else failures.push(`${test.name}-theme: opção Azul Dark não encontrada`);
   await context.close();
 }
 
