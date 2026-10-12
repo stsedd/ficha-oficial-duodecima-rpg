@@ -1,4 +1,4 @@
-/* Ficha Oficial da Duodécima · v5.18.0
+/* Ficha Oficial da Duodécima · v5.18.1
    Consistência de paletas.
    Remove vestígios da identidade vermelha quando uma paleta padrão diferente é escolhida.
    Temas especiais e exclusivos continuam responsáveis pelas próprias cores. */
@@ -228,4 +228,136 @@ body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme=
   background:
     linear-gradient(90deg,rgba(var(--theme-accent-rgb),.07),transparent 40%),
     linear-gradient(180deg,var(--theme-light-surface),var(--theme-light-surface-2))!important;
+}
+
+
+/* v5.18.1 · segundo passe de consistência visual */
+/* As variáveis históricas ainda são usadas por partes antigas da ficha.
+   Nos temas padrão elas passam a apontar para a paleta ativa, evitando
+   que componentes legados voltem a injetar vermelho/vinho. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"]{
+  --red:var(--theme-accent);
+  --red2:var(--theme-accent-deep);
+  --red-bright:var(--theme-accent-bright);
+  --ui-red:var(--theme-accent);
+  --ui-red-bright:var(--theme-accent-bright);
+  --ui-line:var(--theme-line-tint);
+  --ui-line-strong:var(--theme-line-tint-strong);
+  --theme-card-border:var(--theme-line-tint);
+}
+
+/* No Dark, a ficha continua escura, mas as superfícies deixam de carregar
+   o vinho antigo. Mono Black vira grafite de verdade; as demais paletas
+   recebem apenas um banho discreto da própria cor. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="standard"]{
+  --bg:color-mix(in srgb,var(--theme-accent-deep) 4%,#070709 96%);
+  --panel:color-mix(in srgb,var(--theme-accent-deep) 7%,#0d0d10 93%);
+  --panel2:color-mix(in srgb,var(--theme-accent) 8%,#151519 92%);
+  --line:color-mix(in srgb,var(--theme-accent) 12%,#34343a 88%);
+  --line-strong:color-mix(in srgb,var(--theme-accent) 30%,#4b4a51 70%);
+}
+
+/* Linhas ornamentais antigas eram hard-coded em vermelho. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .card::before{
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--theme-accent-rgb),.62),
+    rgba(var(--theme-accent-rgb),.24),
+    transparent
+  )!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .card::after{
+  border-right-color:rgba(var(--theme-accent-rgb),.24)!important;
+  border-bottom-color:rgba(var(--theme-accent-rgb),.24)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .mechanics-section>.section-title::after{
+  background:linear-gradient(90deg,rgba(var(--theme-accent-rgb),.36),transparent)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .divider{
+  background:linear-gradient(90deg,transparent,rgba(var(--theme-accent-rgb),.28),transparent)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .core-stat::after{
+  background:linear-gradient(90deg,transparent,var(--theme-accent),transparent)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .sheet-tabs button.active{
+  box-shadow:inset 0 -2px 0 var(--theme-accent)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .sheet-tabs button.active span{
+  color:color-mix(in srgb,var(--theme-accent-bright) 72%,var(--text) 28%)!important;
+}
+
+/* Bordas recorrentes passam a derivar da mesma família de cor. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(
+  .card,.subcard,.stat,.attr,.skill-check,.skill-matrix-row,.skill-ledger-row,
+  .point-dot,.ability-card,.talent-card,.spell-card,.weapon-card,.familiar-card,
+  .resource-chip,.core-stat,.combat-resource-chip,.inventory-item,
+  .exclusive-theme-manager,.exclusive-theme-card
+){
+  border-color:var(--theme-line-tint)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(
+  .skill-matrix-row.trained,.skill-ledger-row.trained,.tier-current,
+  .ability-tier.current,.core-subtier.current,.condition-check.active
+){
+  border-color:var(--theme-accent-line)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"] :is(
+  .skill-matrix-row.trained,.skill-ledger-row.trained
+){
+  border-left-color:var(--theme-accent)!important;
+  box-shadow:inset 3px 0 0 var(--theme-accent)!important;
+}
+
+/* Botões primários também pertencem à paleta atual. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"] .primary{
+  color:var(--theme-accent-contrast)!important;
+  border-color:var(--theme-accent)!important;
+  background:linear-gradient(180deg,var(--theme-accent-bright),var(--theme-accent-deep))!important;
+}
+
+/* Header: mantém presença no Dark sem virar uma tarja preta fixa. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="standard"] .archive-brandbar{
+  background:
+    radial-gradient(circle at 86% -18%,rgba(var(--theme-accent-rgb),.13),transparent 40%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb,var(--theme-accent) 10%,#242329 90%),
+      color-mix(in srgb,var(--theme-accent-deep) 8%,#15151a 92%)
+    )!important;
+  border-color:var(--theme-line-tint-strong)!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+
+/* Header Light precisa ser uma superfície clara de verdade. */
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="light"] .archive-brandbar{
+  background:
+    radial-gradient(circle at 84% -20%,rgba(var(--theme-accent-rgb),.10),transparent 42%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb,var(--theme-accent) 6%,#fffdf9 94%),
+      color-mix(in srgb,var(--theme-accent) 10%,#f1ebe6 90%)
+    )!important;
+  border-color:var(--theme-light-line-strong)!important;
+  box-shadow:0 10px 24px rgba(61,48,55,.08),inset 0 1px 0 rgba(255,255,255,.78)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="light"] .archive-brand-copy>strong{
+  color:var(--text)!important;
+}
+body[data-palette][data-special="none"][data-exclusive-theme="none"][data-theme="light"] .archive-brand-character{
+  color:var(--muted)!important;
+}
+
+/* O upload de tema exclusivo estava espremido no diálogo. */
+.exclusive-theme-upload{
+  min-width:220px;
+  min-height:48px!important;
+  padding:11px 18px!important;
+  border-radius:11px!important;
+  line-height:1.15;
+  white-space:nowrap;
+}
+.exclusive-theme-upload-row{gap:12px!important}
+@media(max-width:600px){
+  .exclusive-theme-upload{min-width:0;width:100%}
 }
