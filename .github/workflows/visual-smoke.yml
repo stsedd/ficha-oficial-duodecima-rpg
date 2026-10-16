@@ -19,6 +19,7 @@ on:
       - 'rules-sync-v516.js'
       - 'rules-sync-v516.css'
       - 'polish-v5152.css'
+      - 'critical-usability-v519.css'
       - '.github/workflows/visual-smoke.yml'
   workflow_dispatch:
 
@@ -77,6 +78,37 @@ jobs:
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
             try{await page.waitForSelector('[data-tab="combat"]',{state:'attached',timeout:5000})}
             catch(_){errors.push(`${label}: aba combat não encontrada após aguardar renderização`)}
+            if(mobile){
+              const critical=await page.evaluate(()=>{
+                const brand=document.querySelector('.archive-brandbar');
+                const title=document.querySelector('.archive-brand-copy>strong');
+                const rail=document.querySelector('.character-rail');
+                const tabs=document.querySelector('.sheet-tabs');
+                const toggle=document.querySelector('#railMobileProfileToggle');
+                const palette=document.querySelector('#themePaletteBtn');
+                const firstTab=document.querySelector('.sheet-tabs button');
+                const rect=el=>el?.getBoundingClientRect();
+                const titleRect=rect(title),brandRect=rect(brand);
+                const minText=[...document.querySelectorAll('.rail-mobile-summary-copy small,.rail-mobile-summary-vitals span,.skill-tiny-check span')].reduce((min,el)=>Math.min(min,parseFloat(getComputedStyle(el).fontSize)||99),99);
+                return {
+                  collapsed:rail?.dataset.mobileExpanded,
+                  railHeight:rect(rail)?.height||Infinity,
+                  tabsTop:rect(tabs)?.top||Infinity,
+                  viewport:innerHeight,
+                  titleVisible:!!titleRect&&!!brandRect&&titleRect.left>=brandRect.left-1&&titleRect.right<=brandRect.right+1&&titleRect.width>80,
+                  toggleHeight:rect(toggle)?.height||0,
+                  paletteHeight:rect(palette)?.height||0,
+                  tabHeight:rect(firstTab)?.height||0,
+                  minText
+                };
+              });
+              if(critical.collapsed!=='false')errors.push(`${label}: perfil mobile não iniciou recolhido`);
+              if(critical.railHeight>280)errors.push(`${label}: resumo mobile alto demais (${critical.railHeight.toFixed(1)}px)`);
+              if(critical.tabsTop>=critical.viewport)errors.push(`${label}: abas continuam fora da primeira tela (${critical.tabsTop.toFixed(1)}px >= ${critical.viewport}px)`);
+              if(!critical.titleVisible)errors.push(`${label}: Character Archive continua cortado no header`);
+              if(critical.toggleHeight<40||critical.paletteHeight<40||critical.tabHeight<40)errors.push(`${label}: alvo de toque abaixo de 40px (${critical.toggleHeight.toFixed(1)}/${critical.paletteHeight.toFixed(1)}/${critical.tabHeight.toFixed(1)})`);
+              if(critical.minText<9.9)errors.push(`${label}: microtexto crítico abaixo de 10px (${critical.minText}px)`);
+            }
             await page.screenshot({path:`visual-artifacts/${label}-overview.png`,fullPage:true});
             const tabs=[
               {id:'combat',file:'combate'},
