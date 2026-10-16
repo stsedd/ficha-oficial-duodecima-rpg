@@ -25,10 +25,10 @@
     align-items:start!important;
   }
 }
-@media(min-width:981px) and (max-width:1500px){
+@media(min-width:981px) and (max-width:1249px){
   .ability-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
-@media(min-width:1501px){
+@media(min-width:1250px){
   .ability-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 }
 .ability-group{margin-top:13px!important}
