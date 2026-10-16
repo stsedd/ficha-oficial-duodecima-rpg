@@ -942,7 +942,9 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function renderCharacterRail(g){
     const h=state.history||{},band=sanityBand(),energy=energyBand();
     const profileBits=[h.age?`${esc(h.age)} anos`:'',state.roma?.cohort?esc(state.roma.cohort):'',h.origin?esc(h.origin):'',state.roma?.citizenship?esc(state.roma.citizenship):''].filter(Boolean);
-    return `<aside class="character-rail card" data-theme-component="profile" data-theme-frame="profile" data-mobile-expanded="false">
+    let mobileProfileExpanded=false;
+    try{mobileProfileExpanded=sessionStorage.getItem('duodecima_mobile_profile_expanded')==='1'}catch(_){}
+    return `<aside class="character-rail card" data-theme-component="profile" data-theme-frame="profile" data-mobile-expanded="${mobileProfileExpanded?'true':'false'}">
       <div class="rail-brandline"><span>LEG · XII · FULMINATA</span><b>${GROUP_LABEL[g.group]||g.group}</b></div>
       <div class="rail-mobile-summary" aria-label="Resumo rápido do personagem">
         <div class="rail-mobile-summary-head">
@@ -956,7 +958,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
           <div><span>DEF</span><b>${signed(defenseBonus())}</b></div>
         </div>
       </div>
-      <button id="railMobileProfileToggle" class="rail-mobile-profile-toggle ghost" type="button" aria-expanded="false">Ver perfil completo</button>
+      <button id="railMobileProfileToggle" class="rail-mobile-profile-toggle ghost" type="button" aria-expanded="${mobileProfileExpanded?'true':'false'}">${mobileProfileExpanded?'Ocultar perfil':'Ver perfil completo'}</button>
       <div class="rail-portrait-wrap"><div class="rail-portrait-badges"><label class="rail-orb rail-orb-level" data-theme-component="orb" data-orb="level" data-theme-frame="orb"><span>Nível</span><input id="levelOrbInput" type="number" min="${CORE_LEVEL_MIN}" max="${CORE_LEVEL_MAX}" value="${state.level}"></label><div class="rail-orb rail-orb-bp" data-theme-component="orb" data-orb="bp" data-theme-frame="orb"><span>BP</span><strong>${signed(bp())}</strong></div></div><div class="rail-portrait ${h.portraitUrl?'has-image':''}"${h.portraitUrl?` style="background-image:url('${esc(h.portraitUrl)}')"`:''}>${h.portraitUrl?'':esc(initials(state.name||g.name))}</div><button id="heroPortraitUploadBtn" class="rail-photo-button" type="button">Trocar retrato</button></div>
       <div class="rail-identity"><p class="eyebrow">${esc(g.name)}${state.lineage?.type!=='normal'?' · LEGADO':''}</p><h2>${esc(state.name||'Sem nome')}</h2>${h.tagline?`<p class="rail-tagline">${esc(h.tagline)}</p>`:''}<div class="rail-meta">${profileBits.length?profileBits.map(x=>`<span>${x}</span>`).join(''):'<span>Perfil sem detalhes adicionais</span>'}</div></div>
       <div class="rail-level-row" data-theme-component="profile-stats"><div class="rail-defense-stat" ${themeResourceAttrs('defense')}><span>${themeIconSlot('defense')}<span class="theme-resource-label">Defesa</span></span><strong>${signed(defenseBonus())}</strong><label class="rail-defense-adjust" title="Bônus ou penalidade manual de Defesa">manual <input id="railDefenseAdjust" type="number" value="${Number(state.tempMods.defense)||0}"></label></div><div ${themeResourceAttrs('dt')}><span>${themeIconSlot('dt')}<span class="theme-resource-label">DT</span></span><strong>${castDT()}</strong></div></div>
@@ -1600,6 +1602,7 @@ function applyManualResource(kind,input){
         rail.dataset.mobileExpanded=next?'true':'false';
         mobileProfileToggle.setAttribute('aria-expanded',next?'true':'false');
         mobileProfileToggle.textContent=next?'Ocultar perfil':'Ver perfil completo';
+        try{sessionStorage.setItem('duodecima_mobile_profile_expanded',next?'1':'0')}catch(_){};
       };
     }
     document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.activeTab=b.dataset.tab;save();renderSheet()});
