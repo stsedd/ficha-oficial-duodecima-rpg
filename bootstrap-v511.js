@@ -46,10 +46,13 @@
     document.head.appendChild(rulesCss);
   }
 
-  // v5.18.1 · esta camada precisa ficar por último no cascade.
-  // Os CSS antigos ainda têm acentos vinho/vermelhos hard-coded.
+  // v5.18.1 · a consistência de paleta vence os CSS legados.
   const paletteConsistency=document.querySelector('link[href*="theme-consistency-v518.css"]');
   if(paletteConsistency)document.head.appendChild(paletteConsistency);
+
+  // v5.19.0 · a camada crítica de usabilidade é sempre a última do cascade.
+  const criticalUsability=document.querySelector('link[href*="critical-usability-v519.css"]');
+  if(criticalUsability)document.head.appendChild(criticalUsability);
 
   async function syncMagicRules(){
     const fallback=window.DUODECIMA_MAGIC||{};
@@ -125,7 +128,7 @@
   }catch(err){console.warn('[Ficha] Camada visual de Rebento indisponível.',err)}
 
   const script=document.createElement('script');
-  script.src=`app-v511.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src=`app-v511.js?v=5.19.0-critical-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer=false;
   script.onload=async()=>{
     try{
