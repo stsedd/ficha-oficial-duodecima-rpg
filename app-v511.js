@@ -817,7 +817,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
 
   function renderTabs(){
     const tabs=[['status','Visão geral'],['combat','Combate & Poderes'],['inventory','Inventário'],['familiars','Familiares'],['roma','Roma'],['magic','Magia'],['history','História'],['notes','Notas']];
-    return `<nav class="sheet-tabs" data-theme-component="tabs" aria-label="Seções da ficha"><div class="sheet-tab-scroll">${tabs.map(([id,label],idx)=>`<button type="button" data-tab="${id}" data-theme-tab="${id}" aria-current="${state.activeTab===id?'page':'false'}" class="${state.activeTab===id?'active':''}"><span>${String(idx+1).padStart(2,'0')}</span>${label}</button>`).join('')}</div></nav>`;
+    return `<nav class="sheet-tabs" data-theme-component="tabs" aria-label="Seções da ficha"><button class="sheet-tab-edge sheet-tab-edge--left" type="button" data-tab-scroll="-1" aria-label="Mostrar abas anteriores">‹</button><div class="sheet-tab-scroll">${tabs.map(([id,label],idx)=>`<button type="button" data-tab="${id}" data-theme-tab="${id}" aria-current="${state.activeTab===id?'page':'false'}" class="${state.activeTab===id?'active':''}"><span>${String(idx+1).padStart(2,'0')}</span>${label}</button>`).join('')}</div><button class="sheet-tab-edge sheet-tab-edge--right" type="button" data-tab-scroll="1" aria-label="Mostrar próximas abas">›</button></nav>`;
   }
   function resourceAdjustBox(kind,label,current,max,quick,context='status',showBand=false){
     const inputId=`${context}-${kind}Manual`;
@@ -1592,6 +1592,31 @@ function applyManualResource(kind,input){
 }
   function bindSheet(){
     syncShellChrome();
+    const tabNav=document.querySelector('.sheet-tabs'),tabScroller=tabNav?.querySelector('.sheet-tab-scroll');
+    if(tabNav&&tabScroller){
+      const left=tabNav.querySelector('.sheet-tab-edge--left'),right=tabNav.querySelector('.sheet-tab-edge--right');
+      const updateTabEdges=()=>{
+        const max=Math.max(0,tabScroller.scrollWidth-tabScroller.clientWidth),x=tabScroller.scrollLeft;
+        const canLeft=x>4,canRight=x<max-4;
+        tabNav.classList.toggle('can-scroll-left',canLeft);
+        tabNav.classList.toggle('can-scroll-right',canRight);
+        if(left){left.disabled=!canLeft;left.setAttribute('aria-disabled',canLeft?'false':'true')}
+        if(right){right.disabled=!canRight;right.setAttribute('aria-disabled',canRight?'false':'true')}
+      };
+      const centerActiveTab=()=>{
+        const active=tabScroller.querySelector('[data-tab].active');
+        if(!active)return;
+        const target=active.offsetLeft-(tabScroller.clientWidth-active.offsetWidth)/2;
+        tabScroller.scrollLeft=Math.max(0,target);
+        updateTabEdges();
+      };
+      tabScroller.addEventListener('scroll',updateTabEdges,{passive:true});
+      document.querySelectorAll('[data-tab-scroll]').forEach(btn=>btn.onclick=()=>{
+        const dir=Number(btn.dataset.tabScroll)||0;
+        tabScroller.scrollBy({left:dir*Math.max(160,tabScroller.clientWidth*.78),behavior:'smooth'});
+      });
+      requestAnimationFrame(()=>{centerActiveTab();requestAnimationFrame(updateTabEdges)});
+    }
     const mobileProfileToggle=byId('railMobileProfileToggle');
     if(mobileProfileToggle){
       mobileProfileToggle.onclick=()=>{
@@ -1780,9 +1805,9 @@ function longRest(){
     document.querySelectorAll('[data-palette-choice]').forEach(btn=>{const selected=!exclusiveId&&special==='none'&&btn.dataset.paletteChoice===palette&&(btn.dataset.themeMode||'dark')===mode;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',selected?'true':'false')});
     document.querySelectorAll('.theme-preset-card').forEach(card=>{const selected=!exclusiveId&&special==='none'&&card.dataset.presetPalette===palette;card.classList.toggle('active',selected)});
     document.querySelectorAll('[data-special-choice]').forEach(btn=>{const selected=!exclusiveId&&btn.dataset.specialChoice===special;btn.classList.toggle('active',selected);btn.setAttribute('aria-selected',selected?'true':'false')});renderExclusiveThemeList();
-    const img=byId('siteBannerImage'),empty=byId('siteBannerEmpty'),edit=byId('editBannerBtn'),clear=byId('clearBannerBtn'),bannerBtn=byId('bannerBtn');
+    const img=byId('siteBannerImage'),empty=byId('siteBannerEmpty'),edit=byId('editBannerBtn'),clear=byId('clearBannerBtn'),bannerBtn=byId('bannerBtn'),banner=byId('siteBanner');
     if(img){if(src){img.src=src;img.classList.remove('hidden');img.style.objectPosition=`${x}% ${y}%`;img.style.transform=`scale(${zoom/100})`}else{img.removeAttribute('src');img.classList.add('hidden');img.style.transform='none'}}
-    if(empty)empty.classList.toggle('hidden',!!src);if(edit)edit.classList.toggle('hidden',!src);if(clear)clear.classList.toggle('hidden',!src);if(bannerBtn)bannerBtn.textContent=src?'Trocar imagem':'Adicionar banner';
+    if(banner)banner.classList.toggle('is-empty',!src);if(empty)empty.classList.toggle('hidden',!!src);if(edit)edit.classList.toggle('hidden',!src);if(clear)clear.classList.toggle('hidden',!src);if(bannerBtn)bannerBtn.textContent=src?'Trocar imagem':'Adicionar banner';
   }
   function readBannerImage(file,onReady,onError){
     if(!file)return;
