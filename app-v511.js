@@ -1590,6 +1590,34 @@ function applyManualResource(kind,input){
   if(kind==='hp')setHp(state.currentHp+delta);else if(kind==='en')setEnergy(state.currentEnergy+delta);else if(kind==='san')setSanity(state.currentSanity+delta);else return;
   if(input)input.value='';save();renderSheet();const label=kind==='hp'?'HP':kind==='en'?'Energia':'Sanidade';notify(`${label} ${delta>0?'+':''}${delta}.`);
 }
+
+  let abilityMasonryFrame=0,abilityMasonryResizeBound=false;
+  function layoutAbilityMasonry(){
+    cancelAnimationFrame(abilityMasonryFrame);
+    abilityMasonryFrame=requestAnimationFrame(()=>{
+      const desktop=window.innerWidth>760;
+      document.querySelectorAll('.ability-grid').forEach(grid=>{
+        const cards=[...grid.children].filter(el=>el.classList?.contains('ability-card'));
+        cards.forEach(card=>card.style.gridRowEnd='');
+        if(!desktop||!cards.length)return;
+        const style=getComputedStyle(grid),row=parseFloat(style.gridAutoRows)||8,gap=parseFloat(style.rowGap)||10;
+        cards.forEach(card=>{
+          const height=card.getBoundingClientRect().height;
+          const span=Math.max(1,Math.ceil((height+gap)/(row+gap)));
+          card.style.gridRowEnd=`span ${span}`;
+        });
+      });
+    });
+  }
+  function bindAbilityMasonry(){
+    if(!abilityMasonryResizeBound){
+      window.addEventListener('resize',layoutAbilityMasonry,{passive:true});
+      abilityMasonryResizeBound=true;
+    }
+    document.querySelectorAll('.ability-card details').forEach(el=>el.addEventListener('toggle',()=>requestAnimationFrame(layoutAbilityMasonry)));
+    requestAnimationFrame(()=>requestAnimationFrame(layoutAbilityMasonry));
+  }
+
   function bindSheet(){
     syncShellChrome();
     const tabNav=document.querySelector('.sheet-tabs'),tabScroller=tabNav?.querySelector('.sheet-tab-scroll');
@@ -1699,6 +1727,7 @@ document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{
     if(state.activeTab==='familiars'){bindFamiliars();}
     if(state.activeTab==='roma'){bindRoma();}
     if(state.activeTab==='magic'){bindMagic();}
+    if(state.activeTab==='combat')bindAbilityMasonry();
   }
 
   function bindArmor(){
