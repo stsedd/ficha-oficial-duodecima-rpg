@@ -50,9 +50,13 @@
   const paletteConsistency=document.querySelector('link[href*="theme-consistency-v518.css"]');
   if(paletteConsistency)document.head.appendChild(paletteConsistency);
 
-  // v5.19.0 · a camada crítica de usabilidade é sempre a última do cascade.
+  // v5.19.0 · a camada crítica de usabilidade vem depois do legado.
   const criticalUsability=document.querySelector('link[href*="critical-usability-v519.css"]');
   if(criticalUsability)document.head.appendChild(criticalUsability);
+
+  // v5.19.1 · polimento visual/navegação vence todas as camadas anteriores.
+  const visualPolish=document.querySelector('link[href*="visual-polish-v5191.css"]');
+  if(visualPolish)document.head.appendChild(visualPolish);
 
   async function syncMagicRules(){
     const fallback=window.DUODECIMA_MAGIC||{};
@@ -128,7 +132,7 @@
   }catch(err){console.warn('[Ficha] Camada visual de Rebento indisponível.',err)}
 
   const script=document.createElement('script');
-  script.src=`app-v511.js?v=5.19.0-critical-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src=`app-v511.js?v=5.19.1-mobile-polish-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer=false;
   script.onload=async()=>{
     try{
