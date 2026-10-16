@@ -37,6 +37,10 @@ for(const test of [
   page.on('pageerror',error=>failures.push(`${test.name}: pageerror ${error.message}`));
   await page.goto(base,{waitUntil:'networkidle',timeout:60000});
   await page.waitForSelector('#sheetView:not(.hidden)',{state:'visible',timeout:30000});
+  if(test.name==='mobile'){
+    const profileToggle=page.locator('#railMobileProfileToggle');
+    if(await profileToggle.count())await profileToggle.click();
+  }
   await page.waitForSelector('.rebento-profile-toggle',{state:'visible',timeout:10000});
 
   const before=await page.evaluate(()=>({
