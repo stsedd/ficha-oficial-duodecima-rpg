@@ -20,6 +20,7 @@ on:
       - 'rules-sync-v516.css'
       - 'polish-v5152.css'
       - 'critical-usability-v519.css'
+      - 'visual-polish-v5191.css'
       - '.github/workflows/visual-smoke.yml'
   workflow_dispatch:
 
@@ -60,6 +61,10 @@ jobs:
               const seed={
                 isCreated:true,name:'Visual QA',player:'CI',level:50,godId:'iuppiter',activeTab:'status',
                 lineage:{type:'normal',namingVersion:2,secondaryGodId:'',structureGodId:'iuppiter'},
+                armor:{equipped:true,name:'Lorica QA',type:'leve',material:'ferro-aco',resistanceCurrent:3,imageUrl:photo('Lorica','#39252b'),isHeritage:false,notes:'Armadura de teste usada para validar o baralho de combate.'},
+                shield:{equipped:true,name:'Scutum QA',material:'ferro-aco',stakes:14,resistanceCurrent:3,masterTalent:false,imageUrl:photo('Scutum','#2f2227'),isHeritage:false,notes:'Escudo de teste visual.'},
+                weapons:[{id:'weapon-ci',name:'Gladius QA',type:'corpo-a-corpo',attr:'for',material:'ferro-aco',stakes:8,resistanceCurrent:3,attackExtra:0,damageExtra:0,equipped:true,imageUrl:photo('Gladius','#5b1d2c'),isHeritage:false,notes:'Lâmina curta de campanha.'}],
+                inventory:{aureus:3,denarius:42,notes:'QA visual do inventário.',items:[{id:'item-ci',name:'Poção de Cura QA',qty:3,category:'consumivel',material:'Vidro',rune:'',effect:'Recupera HP durante a cena.',notes:'Consumível usado para validar o card do baralho.',imageUrl:photo('Poção','#40243d'),showInDeck:true,isHeritage:false,attackAttr:'for',attackBonus:0,damage:'',range:''}]},
                 familiars:{mountFameClaimed:false,notes:'QA visual da nova mini-ficha.',entries:[{
                   id:'fam-ci',name:'Névoa Rubra',species:'Alicórnio',type:'montaria',active:true,currentHp:52,
                   attributes:{for:2,des:1,con:2,int:0,fe:0,car:0},skills:['Atletismo','Percepção'],
@@ -86,7 +91,7 @@ jobs:
                 const tabs=document.querySelector('.sheet-tabs');
                 const toggle=document.querySelector('#railMobileProfileToggle');
                 const palette=document.querySelector('#themePaletteBtn');
-                const firstTab=document.querySelector('.sheet-tabs button');
+                const firstTab=document.querySelector('.sheet-tabs [data-tab]');
                 const rect=el=>el?.getBoundingClientRect();
                 const titleRect=rect(title),brandRect=rect(brand);
                 const minText=[...document.querySelectorAll('.rail-mobile-summary-copy small,.rail-mobile-summary-vitals span,.skill-tiny-check span')].reduce((min,el)=>Math.min(min,parseFloat(getComputedStyle(el).fontSize)||99),99);
@@ -99,7 +104,9 @@ jobs:
                   toggleHeight:rect(toggle)?.height||0,
                   paletteHeight:rect(palette)?.height||0,
                   tabHeight:rect(firstTab)?.height||0,
-                  minText
+                  minText,
+                  bannerHidden:getComputedStyle(document.querySelector('#siteBanner')).display==='none',
+                  rightArrow:document.querySelector('.sheet-tabs')?.classList.contains('can-scroll-right')===true
                 };
               });
               if(critical.collapsed!=='false')errors.push(`${label}: perfil mobile não iniciou recolhido`);
@@ -108,6 +115,8 @@ jobs:
               if(!critical.titleVisible)errors.push(`${label}: Character Archive continua cortado no header`);
               if(critical.toggleHeight<40||critical.paletteHeight<40||critical.tabHeight<40)errors.push(`${label}: alvo de toque abaixo de 40px (${critical.toggleHeight.toFixed(1)}/${critical.paletteHeight.toFixed(1)}/${critical.tabHeight.toFixed(1)})`);
               if(critical.minText<9.9)errors.push(`${label}: microtexto crítico abaixo de 10px (${critical.minText}px)`);
+              if(!critical.bannerHidden)errors.push(`${label}: banner vazio continua reservando espaço`);
+              if(!critical.rightArrow)errors.push(`${label}: navegação inicial não indica abas à direita`);
             }
             await page.screenshot({path:`visual-artifacts/${label}-overview.png`,fullPage:true});
             const tabs=[
@@ -120,7 +129,34 @@ jobs:
               const button=page.locator(`[data-tab="${tab.id}"]`).first();
               if(!(await button.count())){errors.push(`${label}: aba ${tab.id} não encontrada`);continue}
               await button.click();
-              await page.waitForTimeout(220);
+              await page.waitForTimeout(260);
+              if(mobile){
+                const navState=await page.evaluate((id)=>{
+                  const scroller=document.querySelector('.sheet-tab-scroll'),active=document.querySelector(`[data-tab="${id}"]`),nav=document.querySelector('.sheet-tabs');
+                  if(!scroller||!active||!nav)return {ok:false};
+                  const s=scroller.getBoundingClientRect(),a=active.getBoundingClientRect();
+                  return {
+                    ok:true,
+                    visible:a.left>=s.left-2&&a.right<=s.right+2,
+                    active:active.classList.contains('active'),
+                    canLeft:nav.classList.contains('can-scroll-left'),
+                    canRight:nav.classList.contains('can-scroll-right')
+                  };
+                },tab.id);
+                if(!navState.ok||!navState.active||!navState.visible)errors.push(`${label}: aba ativa ${tab.id} não ficou visível no carrossel`);
+                if(['inventory','familiars','magic'].includes(tab.id)&&!navState.canLeft)errors.push(`${label}: navegação ${tab.id} deveria indicar abas anteriores`);
+              }
+              if(tab.id==='combat'&&mobile){
+                const deck=await page.evaluate(()=>{
+                  const el=document.querySelector('.equipment-deck.upgraded-equipment-deck'),cards=[...document.querySelectorAll('.equipment-deck.upgraded-equipment-deck .equipment-card')];
+                  if(!el)return {present:false};
+                  const style=getComputedStyle(el),first=cards[0]?.getBoundingClientRect();
+                  return {present:true,count:cards.length,overflow:el.scrollWidth>el.clientWidth+4,flow:style.gridAutoFlow,firstWidth:first?.width||0,viewport:innerWidth};
+                });
+                if(!deck.present||deck.count<4)errors.push(`${label}: baralho de QA não renderizou 4 cartas`);
+                if(!deck.overflow||deck.flow!=='column')errors.push(`${label}: baralho mobile não virou carrossel horizontal`);
+                if(deck.firstWidth<250||deck.firstWidth>=deck.viewport)errors.push(`${label}: largura inesperada da carta mobile (${deck.firstWidth.toFixed(1)}px)`);
+              }
               if(tab.id==='familiars'){
                 const familiar=await page.evaluate(()=>{
                   const card=document.querySelector('.familiar-sheet'),gallery=document.querySelectorAll('.familiar-photo-slot'),attrs=document.querySelectorAll('.familiar-attribute-row'),groups=document.querySelectorAll('.familiar-ability-group'),barding=document.querySelector('.familiar-barding');
