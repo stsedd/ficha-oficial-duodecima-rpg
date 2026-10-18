@@ -329,6 +329,42 @@ jobs:
             await context.close();
           }
 
+          // Regressão: trocas de ativas por Legado assumem nível/custo da vaga substituída.
+          {
+            const context=await browser.newContext({viewport:{width:1280,height:900}});
+            const page=await context.newPage();
+            page.on('pageerror',e=>errors.push(`legacy-swap: ${e.message}`));
+            await page.addInitScript(()=>{
+              localStorage.setItem('duodecima_universal_stage4_v24',JSON.stringify({
+                isCreated:true,name:'Legado QA',player:'CI',level:50,godId:'fortuna',activeTab:'combat',
+                lineage:{
+                  type:'direct',namingVersion:2,secondaryGodId:'angitia',structureGodId:'fortuna',
+                  compoundPassiveReplacements:[],
+                  compoundActiveReplacements:[
+                    {primaryIndex:4,secondaryId:'infusao-vital'},
+                    {primaryIndex:3,secondaryId:'formulacao-rapida'}
+                  ],
+                  compoundActiveSlots:[],directPrimaryPassives:[],directSecondaryPassives:[]
+                }
+              }));
+            });
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+            try{
+              const assertSwap=async(name,expectedLevel,expectedCost)=>{
+                const card=page.locator('.ability-card').filter({hasText:name}).first();
+                await card.waitFor({state:'visible',timeout:10000});
+                const text=(await card.textContent())||'';
+                if(!text.includes(`Nv ${expectedLevel}`))errors.push(`legacy-swap: ${name} não assumiu Nv ${expectedLevel}`);
+                if(!text.includes(`${expectedCost} EN`))errors.push(`legacy-swap: ${name} não assumiu custo ${expectedCost} EN`);
+                const use=(await card.locator('[data-use-ability]').textContent())||'';
+                if(!use.includes(`−${expectedCost} EN`))errors.push(`legacy-swap: botão de ${name} ainda cobra custo original`);
+              };
+              await assertSwap('Infusão Vital',20,70);
+              await assertSwap('Formulação Rápida',15,45);
+            }catch(e){errors.push(`legacy-swap: ${e.message}`)}
+            await context.close();
+          }
+
           await browser.close();
           if(errors.length){console.error(errors.join('\n'));process.exit(1)}
           NODE
