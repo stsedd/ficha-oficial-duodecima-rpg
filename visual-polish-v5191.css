@@ -252,3 +252,139 @@ body[data-theme="light"] .sheet-tabs.can-scroll-left .sheet-tab-edge--left,
 body[data-theme="light"] .sheet-tabs.can-scroll-right .sheet-tab-edge--right{
   border-color:var(--theme-accent-line)!important;
 }
+
+
+/* =========================================================
+   v5.19.2 · PRESSÁGIO GUARDADO
+   Slots persistentes para anotar os d20 reservados pela habilidade.
+   ========================================================= */
+.omen-tracker{
+  margin-top:10px;
+  padding:11px;
+  border:1px solid color-mix(in srgb,var(--theme-accent) 22%,var(--line) 78%);
+  border-radius:9px;
+  background:
+    linear-gradient(180deg,rgba(var(--theme-accent-rgb),.045),transparent 42%),
+    color-mix(in srgb,var(--panel2) 92%,var(--theme-accent) 8%);
+}
+.omen-tracker-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.omen-tracker-head>div{min-width:0}
+.omen-kicker{
+  display:block;
+  margin-bottom:3px;
+  color:color-mix(in srgb,var(--theme-accent-bright) 62%,var(--muted) 38%);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.omen-tracker-head b{
+  display:block;
+  color:var(--text);
+  font-size:12px;
+  line-height:1.2;
+}
+.omen-tracker>p{margin:7px 0 9px}
+.omen-slot-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+}
+.omen-slot-grid[data-omen-capacity="1"]{grid-template-columns:1fr}
+.omen-slot-grid[data-omen-capacity="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+.omen-slot{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:5px;
+  align-items:end;
+  min-width:0;
+  padding:7px;
+  border:1px solid color-mix(in srgb,var(--theme-accent) 12%,var(--line) 88%);
+  border-radius:7px;
+  background:color-mix(in srgb,var(--panel) 94%,var(--theme-accent) 6%);
+}
+.omen-slot.filled{
+  border-color:color-mix(in srgb,var(--theme-accent) 42%,var(--line) 58%);
+  box-shadow:inset 2px 0 0 rgba(var(--theme-accent-rgb),.58);
+}
+.omen-slot label{
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+.omen-slot label>span{
+  color:var(--muted);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.omen-slot input{
+  width:100%;
+  min-width:0;
+  min-height:34px;
+  padding:5px 7px;
+  text-align:center;
+  font:700 18px/1 var(--serif);
+}
+.omen-use{
+  min-width:48px;
+  min-height:34px;
+  padding:5px 7px!important;
+  font-size:9px!important;
+}
+.omen-use:disabled{opacity:.42}
+.omen-clear{
+  width:100%;
+  min-height:32px;
+  margin-top:7px;
+  padding:5px 8px!important;
+  font-size:9px!important;
+}
+
+body[data-theme="light"] .omen-tracker{
+  background:
+    linear-gradient(180deg,rgba(var(--theme-accent-rgb),.055),transparent 45%),
+    var(--theme-light-surface)!important;
+  border-color:var(--theme-light-line)!important;
+}
+body[data-theme="light"] .omen-slot{
+  background:var(--theme-light-input)!important;
+  border-color:var(--theme-light-line)!important;
+}
+body[data-theme="light"] .omen-slot.filled{
+  border-color:var(--theme-accent-line)!important;
+}
+
+@media(max-width:620px){
+  .omen-tracker{padding:10px}
+  .omen-kicker{font-size:9px}
+  .omen-tracker-head b{font-size:13px}
+  .omen-slot-grid,
+  .omen-slot-grid[data-omen-capacity="2"],
+  .omen-slot-grid[data-omen-capacity="3"]{
+    grid-template-columns:1fr!important;
+  }
+  .omen-slot{
+    grid-template-columns:minmax(0,1fr) 64px;
+    padding:8px;
+  }
+  .omen-slot label>span{font-size:9px}
+  .omen-slot input{
+    min-height:40px;
+    font-size:20px;
+  }
+  .omen-use{
+    min-width:64px;
+    min-height:40px!important;
+    font-size:10px!important;
+  }
+  .omen-clear{
+    min-height:38px!important;
+    font-size:10px!important;
+  }
+}
