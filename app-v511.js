@@ -1779,6 +1779,50 @@ document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{
       for(let i=0;i<count;i++)delete state.choiceDetails[`${prefix}${i}`];
       save();renderSheet();notify('Presságios guardados limpos.');
     });
+
+    document.querySelectorAll('[data-ability-tool-field]').forEach(input=>input.oninput=()=>{
+      state.choiceDetails=state.choiceDetails||{};
+      const key=input.dataset.abilityToolField,value=input.value;
+      if(value.trim())state.choiceDetails[key]=value;else delete state.choiceDetails[key];
+      const slot=input.closest('.ability-note-slot');if(slot)slot.classList.toggle('filled',!!value.trim());
+      const box=input.closest('.ability-toolbox'),badge=box?.querySelector('[data-tool-count]');
+      if(box&&badge){
+        const fields=[...box.querySelectorAll('[data-ability-tool-field]')],filled=fields.filter(el=>String(el.value||'').trim()).length;
+        badge.textContent=`${filled}/${fields.length}`;
+      }
+      save();
+    });
+    document.querySelectorAll('[data-ability-tool-field]').forEach(input=>input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();input.blur()}});
+    document.querySelectorAll('[data-ability-tool-clear]').forEach(btn=>btn.onclick=()=>{
+      state.choiceDetails=state.choiceDetails||{};
+      const key=btn.dataset.abilityToolClear;if(!key)return;
+      const old=state.choiceDetails[key];delete state.choiceDetails[key];save();renderSheet();
+      if(old)notify('Registro removido.');
+    });
+    document.querySelectorAll('[data-ability-tool-clear-many]').forEach(btn=>btn.onclick=()=>{
+      state.choiceDetails=state.choiceDetails||{};
+      const keys=String(btn.dataset.abilityToolClearMany||'').split('|').filter(Boolean);
+      keys.forEach(key=>delete state.choiceDetails[key]);save();renderSheet();
+    });
+    document.querySelectorAll('[data-ability-tool-toggle]').forEach(input=>input.onchange=()=>{
+      state.choiceDetails=state.choiceDetails||{};
+      const key=input.dataset.abilityToolToggle;if(!key)return;
+      if(input.checked)state.choiceDetails[key]='1';else delete state.choiceDetails[key];
+      save();renderSheet();
+    });
+    document.querySelectorAll('[data-ability-tool-number]').forEach(btn=>btn.onclick=()=>{
+      state.choiceDetails=state.choiceDetails||{};
+      const raw=String(btn.dataset.abilityToolNumber||''),idx=raw.lastIndexOf(':'),key=raw.slice(0,idx),delta=Number(raw.slice(idx+1));
+      if(!key||!Number.isFinite(delta))return;
+      const max=Number(btn.dataset.toolMax)||3,current=Math.max(0,Number(state.choiceDetails[key])||0);
+      state.choiceDetails[key]=String(clamp(current+delta,0,max));save();renderSheet();
+    });
+    document.querySelectorAll('[data-ability-tool-set]').forEach(btn=>btn.onclick=()=>{
+      state.choiceDetails=state.choiceDetails||{};
+      const raw=String(btn.dataset.abilityToolSet||''),idx=raw.lastIndexOf(':'),key=raw.slice(0,idx),value=Number(raw.slice(idx+1));
+      if(!key||!Number.isFinite(value))return;
+      state.choiceDetails[key]=String(Math.max(0,value));save();renderSheet();
+    });
     document.querySelectorAll('[data-stakes]').forEach(input=>input.onchange=()=>{state.abilityStakes[input.dataset.stakes]=clamp(Number(input.value),0,Number(input.dataset.stakeMax)||30);save();renderSheet()});
     document.querySelectorAll('[data-core-stakes]').forEach(input=>input.onchange=()=>{state.abilityStakes[input.dataset.coreStakes]=clamp(Number(input.value),0,30);save();renderSheet()});
     document.querySelectorAll('[data-core-stake-set]').forEach(btn=>btn.onclick=()=>{const raw=btn.dataset.coreStakeSet||'',idx=raw.lastIndexOf(':'),key=raw.slice(0,idx),value=Number(raw.slice(idx+1));if(!key)return;state.abilityStakes[key]=clamp(value,0,30);save();renderSheet()});
