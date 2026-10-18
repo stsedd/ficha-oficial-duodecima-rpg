@@ -219,6 +219,116 @@ jobs:
             await context.close();
           }
 
+          // Regressões específicas: habilidades que guardam estado/informação.
+          const openAbilityQa=async(godId,name)=>{
+            const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true});
+            const page=await context.newPage();
+            page.on('pageerror',e=>errors.push(`${godId}: ${e.message}`));
+            await page.addInitScript(({godId,name})=>{
+              localStorage.setItem('duodecima_universal_stage4_v24',JSON.stringify({
+                isCreated:true,name,player:'CI',level:50,godId,activeTab:'combat',
+                lineage:{type:'normal',namingVersion:2,secondaryGodId:'',structureGodId:godId}
+              }));
+            },{godId,name});
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+            return {context,page};
+          };
+
+          {
+            const {context,page}=await openAbilityQa('angerona','Segredos QA');
+            try{
+              let card=page.locator('.ability-card').filter({hasText:'Segredo Guardado'}).first();
+              await card.waitFor({state:'visible',timeout:10000});
+              await card.locator('[data-stake-set]').filter({hasText:'30'}).first().click();await page.waitForTimeout(120);
+              card=page.locator('.ability-card').filter({hasText:'Segredo Guardado'}).first();
+              const tracker=card.locator('[data-ability-tool="secrets"]'),fields=tracker.locator('[data-ability-tool-field]');
+              if(await fields.count()!==3)errors.push(`segredo: 30+ esperava 3 campos, encontrou ${await fields.count()}`);
+              await fields.first().fill('Nome verdadeiro do alvo');
+              if((await fields.first().inputValue())!=='Nome verdadeiro do alvo')errors.push('segredo: campo não aceitou anotação');
+              await tracker.locator('[data-ability-tool-clear]').first().click();await page.waitForTimeout(100);
+              card=page.locator('.ability-card').filter({hasText:'Segredo Guardado'}).first();
+              if(await card.locator('[data-ability-tool-field]').first().inputValue()!=='')errors.push('segredo: Esquecer não limpou o registro');
+            }catch(e){errors.push(`segredo: ${e.message}`)}
+            await context.close();
+          }
+
+          {
+            const {context,page}=await openAbilityQa('angitia','Ampola QA');
+            try{
+              let card=page.locator('.ability-card').filter({hasText:'Transfusão Tóxica'}).first();
+              await card.waitFor({state:'visible',timeout:10000});
+              let tracker=card.locator('[data-ability-tool="toxic-vial"]'),field=tracker.locator('[data-ability-tool-field]');
+              if(await tracker.count()!==1)errors.push('transfusao: rastreador de ampola ausente');
+              await field.fill('Envenenado');
+              await tracker.locator('[data-ability-tool-clear]').click();await page.waitForTimeout(100);
+              card=page.locator('.ability-card').filter({hasText:'Transfusão Tóxica'}).first();
+              if(await card.locator('[data-ability-tool-field]').inputValue()!=='')errors.push('transfusao: Aplicar/esvaziar não limpou a ampola');
+            }catch(e){errors.push(`transfusao: ${e.message}`)}
+            await context.close();
+          }
+
+          {
+            const {context,page}=await openAbilityQa('libitina','Relicários QA');
+            try{
+              let card=page.locator('.ability-card').filter({hasText:'Relicários Funerários'}).first();
+              await card.waitFor({state:'visible',timeout:10000});
+              let tracker=card.locator('[data-ability-tool="funerary-relics"]');
+              await tracker.locator('[data-ability-tool-set]').click();await page.waitForTimeout(100);
+              card=page.locator('.ability-card').filter({hasText:'Relicários Funerários'}).first();tracker=card.locator('[data-ability-tool="funerary-relics"]');
+              if((await tracker.locator('.relic-counter>strong').textContent()).trim()!=='1')errors.push('relicarios: Repor não preencheu o relicário');
+              await tracker.locator('button.primary').click();await page.waitForTimeout(100);
+              card=page.locator('.ability-card').filter({hasText:'Relicários Funerários'}).first();tracker=card.locator('[data-ability-tool="funerary-relics"]');
+              if((await tracker.locator('.relic-counter>strong').textContent()).trim()!=='0')errors.push('relicarios: Consumir não reduziu o contador');
+              await card.locator('[data-stake-set]').filter({hasText:'30'}).first().click();await page.waitForTimeout(100);
+              card=page.locator('.ability-card').filter({hasText:'Relicários Funerários'}).first();tracker=card.locator('[data-ability-tool="funerary-relics"]');
+              await tracker.locator('[data-ability-tool-set]').click();await page.waitForTimeout(100);
+              card=page.locator('.ability-card').filter({hasText:'Relicários Funerários'}).first();tracker=card.locator('[data-ability-tool="funerary-relics"]');
+              if((await tracker.locator('.relic-counter>strong').textContent()).trim()!=='3')errors.push('relicarios: faixa 30+ não repôs 3 relicários');
+            }catch(e){errors.push(`relicarios: ${e.message}`)}
+            await context.close();
+          }
+
+          {
+            const {context,page}=await openAbilityQa('invidia','Inveja QA');
+            try{
+              let card=page.locator('.ability-card').filter({hasText:'Objeto da Inveja'}).first();
+              await card.waitFor({state:'visible',timeout:10000});
+              let tracker=card.locator('[data-ability-tool="envy-target"]'),field=tracker.locator('[data-ability-tool-field]');
+              if(await tracker.count()!==1)errors.push('invidia: controle de alvo ausente');
+              await field.fill('Hydra QA');
+              await tracker.locator('[data-ability-tool-toggle]').check();await page.waitForTimeout(100);
+              card=page.locator('.ability-card').filter({hasText:'Objeto da Inveja'}).first();tracker=card.locator('[data-ability-tool="envy-target"]');
+              if(await tracker.locator('[data-ability-tool-field]').inputValue()!=='Hydra QA')errors.push('invidia: alvo não persistiu após marcar a troca');
+              if(!(await tracker.locator('[data-ability-tool-toggle]').isChecked()))errors.push('invidia: uso da troca não persistiu');
+              await tracker.locator('[data-ability-tool-clear-many]').click();await page.waitForTimeout(100);
+              card=page.locator('.ability-card').filter({hasText:'Objeto da Inveja'}).first();
+              if(await card.locator('[data-ability-tool-field]').inputValue()!=='')errors.push('invidia: Nova cena não limpou o alvo');
+            }catch(e){errors.push(`invidia: ${e.message}`)}
+            await context.close();
+          }
+
+          {
+            const {context,page}=await openAbilityQa('laverna','Eco QA');
+            try{
+              let card=page.locator('.ability-card').filter({hasText:'Eco de Travessia'}).first();
+              await card.waitFor({state:'visible',timeout:10000});
+              await card.locator('[data-stake-set]').filter({hasText:'30'}).first().click();await page.waitForTimeout(100);
+              card=page.locator('.ability-card').filter({hasText:'Eco de Travessia'}).first();
+              let tracker=card.locator('[data-ability-tool="travel-echo"]'),field=tracker.locator('[data-ability-tool-field]');
+              await field.fill('Atrás do altar');
+              const toggles=tracker.locator('[data-ability-tool-toggle]');
+              if(await toggles.count()!==2)errors.push(`eco: 30+ esperava 2 controles de uso, encontrou ${await toggles.count()}`);
+              await toggles.first().check();await page.waitForTimeout(100);
+              card=page.locator('.ability-card').filter({hasText:'Eco de Travessia'}).first();tracker=card.locator('[data-ability-tool="travel-echo"]');
+              if(await tracker.locator('[data-ability-tool-field]').inputValue()!=='Atrás do altar')errors.push('eco: ponto marcado não persistiu');
+              if(await tracker.locator('[data-ability-tool-toggle]').nth(1).isDisabled())errors.push('eco: rota adicional do aliado continuou bloqueada depois do retorno');
+              await tracker.locator('[data-ability-tool-clear-many]').click();await page.waitForTimeout(100);
+              card=page.locator('.ability-card').filter({hasText:'Eco de Travessia'}).first();
+              if(await card.locator('[data-ability-tool-field]').inputValue()!=='')errors.push('eco: Limpar eco não removeu o ponto');
+            }catch(e){errors.push(`eco: ${e.message}`)}
+            await context.close();
+          }
+
           await browser.close();
           if(errors.length){console.error(errors.join('\n'));process.exit(1)}
           NODE
