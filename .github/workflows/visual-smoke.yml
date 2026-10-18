@@ -175,6 +175,50 @@ jobs:
           };
           await capture({width:1440,height:1100},'desktop');
           await capture({width:390,height:844},'mobile',true);
+
+          // Regressão específica: Presságio Guardado precisa oferecer 1/2/3 slots
+          // conforme as estacas e persistir o resultado anotado.
+          {
+            const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true});
+            const page=await context.newPage();
+            page.on('pageerror',e=>errors.push(`pressagio: ${e.message}`));
+            await page.addInitScript(()=>{
+              localStorage.setItem('duodecima_universal_stage4_v24',JSON.stringify({
+                isCreated:true,name:'Presságio QA',player:'CI',level:50,godId:'fortuna',activeTab:'combat',
+                lineage:{type:'normal',namingVersion:2,secondaryGodId:'',structureGodId:'fortuna'}
+              }));
+            });
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+            const card=page.locator('.ability-card').filter({hasText:'Presságio Guardado'}).first();
+            try{
+              await card.waitFor({state:'visible',timeout:10000});
+              let tracker=card.locator('.omen-tracker');
+              if(await tracker.count()!==1)errors.push('pressagio: rastreador de d20 ausente');
+              let slots=tracker.locator('[data-omen-slot]');
+              if(await slots.count()!==1)errors.push(`pressagio: faixa 0–15 esperava 1 slot, encontrou ${await slots.count()}`);
+              if(await slots.count()){
+                await slots.first().fill('17');
+                await slots.first().blur();
+                await page.waitForTimeout(120);
+              }
+              const tier16=card.locator('[data-stake-set]').filter({hasText:'16'}).first();
+              await tier16.click();await page.waitForTimeout(120);
+              tracker=page.locator('.ability-card').filter({hasText:'Presságio Guardado'}).first().locator('.omen-tracker');
+              slots=tracker.locator('[data-omen-slot]');
+              if(await slots.count()!==2)errors.push(`pressagio: faixa 16–29 esperava 2 slots, encontrou ${await slots.count()}`);
+              if(await slots.first().inputValue()!=='17')errors.push('pressagio: valor guardado não persistiu ao trocar de faixa');
+              const tier30=page.locator('.ability-card').filter({hasText:'Presságio Guardado'}).first().locator('[data-stake-set]').filter({hasText:'30'}).first();
+              await tier30.click();await page.waitForTimeout(120);
+              tracker=page.locator('.ability-card').filter({hasText:'Presságio Guardado'}).first().locator('.omen-tracker');
+              slots=tracker.locator('[data-omen-slot]');
+              if(await slots.count()!==3)errors.push(`pressagio: faixa 30+ esperava 3 slots, encontrou ${await slots.count()}`);
+              await tracker.locator('[data-omen-use]').first().click();await page.waitForTimeout(120);
+              tracker=page.locator('.ability-card').filter({hasText:'Presságio Guardado'}).first().locator('.omen-tracker');
+              if(await tracker.locator('[data-omen-slot]').first().inputValue()!=='')errors.push('pressagio: botão Usar não limpou o slot consumido');
+            }catch(e){errors.push(`pressagio: ${e.message}`)}
+            await context.close();
+          }
+
           await browser.close();
           if(errors.length){console.error(errors.join('\n'));process.exit(1)}
           NODE
