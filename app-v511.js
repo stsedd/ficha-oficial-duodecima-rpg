@@ -1712,6 +1712,29 @@ document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{
     document.querySelectorAll('[data-en-full]').forEach(b=>b.onclick=()=>{setEnergy(energyMax());save();renderSheet()});
     document.querySelectorAll('[data-manual-resource]').forEach(b=>b.onclick=()=>applyManualResource(b.dataset.manualResource,byId(b.dataset.manualInput)));
     document.querySelectorAll('[data-resource-manual-input]').forEach(input=>input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();applyManualResource(input.dataset.resourceManualInput,input)}});
+    document.querySelectorAll('[data-omen-slot]').forEach(input=>{
+      const commit=()=>{
+        state.choiceDetails=state.choiceDetails||{};
+        const key=input.dataset.omenSlot,raw=String(input.value||'').trim();
+        if(!raw){delete state.choiceDetails[key];save();renderSheet();return}
+        const value=clamp(Math.round(Number(raw)||1),1,20);
+        state.choiceDetails[key]=String(value);input.value=String(value);save();renderSheet();
+      };
+      input.onchange=commit;
+      input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();input.blur()}};
+    });
+    document.querySelectorAll('[data-omen-use]').forEach(btn=>btn.onclick=()=>{
+      state.choiceDetails=state.choiceDetails||{};
+      const key=btn.dataset.omenUse,value=state.choiceDetails[key];
+      if(!value)return;
+      delete state.choiceDetails[key];save();renderSheet();notify(`Presságio ${value} marcado como usado.`);
+    });
+    document.querySelectorAll('[data-omen-clear]').forEach(btn=>btn.onclick=()=>{
+      state.choiceDetails=state.choiceDetails||{};
+      const prefix=`omen:${btn.dataset.omenClear}:`,count=Math.max(1,Number(btn.dataset.omenCount)||1);
+      for(let i=0;i<count;i++)delete state.choiceDetails[`${prefix}${i}`];
+      save();renderSheet();notify('Presságios guardados limpos.');
+    });
     document.querySelectorAll('[data-stakes]').forEach(input=>input.onchange=()=>{state.abilityStakes[input.dataset.stakes]=clamp(Number(input.value),0,Number(input.dataset.stakeMax)||30);save();renderSheet()});
     document.querySelectorAll('[data-core-stakes]').forEach(input=>input.onchange=()=>{state.abilityStakes[input.dataset.coreStakes]=clamp(Number(input.value),0,30);save();renderSheet()});
     document.querySelectorAll('[data-core-stake-set]').forEach(btn=>btn.onclick=()=>{const raw=btn.dataset.coreStakeSet||'',idx=raw.lastIndexOf(':'),key=raw.slice(0,idx),value=Number(raw.slice(idx+1));if(!key)return;state.abilityStakes[key]=clamp(value,0,30);save();renderSheet()});
