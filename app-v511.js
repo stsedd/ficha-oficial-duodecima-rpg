@@ -1616,7 +1616,7 @@ function renderToxicVialTracker(a){
 function renderRelicTracker(a,st){
   if(a.id!=='relicarios-funerarios')return '';
   const key=abilityToolKey(a,'relics'),max=abilityToolCapacity(st),stored=Math.max(0,Number(state.choiceDetails?.[key])||0),current=Math.min(stored,max);
-  return `<section class="ability-toolbox relic-tracker" data-ability-tool="funerary-relics"><div class="ability-toolbox-head"><div><span>RELICÁRIOS FUNERÁRIOS</span><b>Relicários disponíveis</b></div><span class="pill ${current===max?'good':''}">${current}/${max}</span></div><p class="muted compact">Reponha ao fim de um descanso longo ou no início de uma missão/evento. Consumir reduz um relicário disponível.</p><div class="relic-counter"><button type="button" data-ability-tool-number="${esc(key)}:-1" aria-label="Remover um relicário">−</button><strong>${current}</strong><button type="button" data-ability-tool-number="${esc(key)}:1" data-tool-max="${max}" aria-label="Adicionar um relicário">+</button><button type="button" class="ghost" data-ability-tool-set="${esc(key)}:${max}">Repor ${max}</button><button type="button" class="primary" data-ability-tool-number="${esc(key)}:-1" ${current?'':'disabled'}>Consumir</button></div></section>`;
+  return `<section class="ability-toolbox relic-tracker" data-ability-tool="funerary-relics"><div class="ability-toolbox-head"><div><span>RELICÁRIOS FUNERÁRIOS</span><b>Relicários disponíveis</b></div><span class="pill ${current===max?'good':''}">${current}/${max}</span></div><p class="muted compact">Reponha ao fim de um descanso longo ou no início de uma missão/evento. Consumir reduz um relicário disponível.</p><div class="relic-counter"><button type="button" data-ability-tool-number="${esc(key)}:-1" data-tool-max="${max}" aria-label="Remover um relicário">−</button><strong>${current}</strong><button type="button" data-ability-tool-number="${esc(key)}:1" data-tool-max="${max}" aria-label="Adicionar um relicário">+</button><button type="button" class="ghost" data-ability-tool-set="${esc(key)}:${max}">Repor ${max}</button><button type="button" class="primary" data-ability-tool-number="${esc(key)}:-1" data-tool-max="${max}" ${current?'':'disabled'}>Consumir</button></div></section>`;
 }
 
 function renderEnvyTargetTracker(a){
@@ -1790,6 +1790,20 @@ document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{
         const fields=[...box.querySelectorAll('[data-ability-tool-field]')],filled=fields.filter(el=>String(el.value||'').trim()).length;
         badge.textContent=`${filled}/${fields.length}`;
       }
+      if(box){
+        const head=box.querySelector('.ability-toolbox-head b'),status=box.querySelector('.ability-toolbox-head>.pill'),filled=!!value.trim();
+        if(box.dataset.abilityTool==='toxic-vial'){
+          if(head)head.textContent=filled?'Condição pronta para reutilizar':'Nenhuma condição guardada';
+          if(status){status.textContent=filled?'cheia':'vazia';status.classList.toggle('good',filled)}
+        }else if(box.dataset.abilityTool==='envy-target'){
+          if(head)head.textContent=filled?value.trim():'Nenhum alvo definido';
+          if(status){status.textContent=filled?'ativo':'sem alvo';status.classList.toggle('good',filled)}
+        }else if(box.dataset.abilityTool==='travel-echo'){
+          const returned=box.querySelector('[data-ability-tool-toggle]')?.checked===true;
+          if(head)head.textContent=filled?value.trim():'Nenhum ponto marcado';
+          if(status){status.textContent=!filled?'sem eco':returned?'retorno usado':'retorno disponível';status.classList.toggle('good',filled&&!returned)}
+        }
+      }
       save();
     });
     document.querySelectorAll('[data-ability-tool-field]').forEach(input=>input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();input.blur()}});
@@ -1814,7 +1828,7 @@ document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{
       state.choiceDetails=state.choiceDetails||{};
       const raw=String(btn.dataset.abilityToolNumber||''),idx=raw.lastIndexOf(':'),key=raw.slice(0,idx),delta=Number(raw.slice(idx+1));
       if(!key||!Number.isFinite(delta))return;
-      const max=Number(btn.dataset.toolMax)||3,current=Math.max(0,Number(state.choiceDetails[key])||0);
+      const max=Number(btn.dataset.toolMax)||3,current=clamp(Number(state.choiceDetails[key])||0,0,max);
       state.choiceDetails[key]=String(clamp(current+delta,0,max));save();renderSheet();
     });
     document.querySelectorAll('[data-ability-tool-set]').forEach(btn=>btn.onclick=()=>{
