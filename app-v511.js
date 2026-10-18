@@ -740,7 +740,22 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
       const actives=main.actives.map(a=>({...a,sourceGodId:state.godId}));
       (state.lineage.compoundActiveReplacements||[]).slice(0,2).forEach(r=>{
         const idx=Number(r.primaryIndex),target=main.actives[idx],rep=sub.actives.find(x=>x.id===r.secondaryId);
-        if(Number.isInteger(idx)&&idx>=0&&idx<5&&target&&rep&&Number(rep.level)<=Number(target.level)) actives[idx]={...rep,sourceGodId:sid,legacyFrom:sid};
+        if(Number.isInteger(idx)&&idx>=0&&idx<5&&target&&rep&&Number(rep.level)<=Number(target.level)){
+          // A habilidade herdada ocupa a vaga mecânica da ativa substituída.
+          // Conteúdo/origem vêm do Legado; nível, slot e custo vêm da vaga principal.
+          actives[idx]={
+            ...rep,
+            sourceGodId:sid,
+            legacyFrom:sid,
+            legacyOriginalLevel:rep.level,
+            legacyOriginalSlot:rep.slot,
+            legacyOriginalCost:rep.cost,
+            legacyReplacedAbilityId:target.id,
+            level:target.level,
+            slot:target.slot,
+            cost:target.cost
+          };
+        }
       });
       return {passives,actives};
     }
@@ -1369,7 +1384,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
       const activeRows=[0,1].map(row=>{
         const r=activeReps[row]||{},primaryIndex=r.primaryIndex===''||r.primaryIndex==null?'':Number(r.primaryIndex),target=primaryIndex===''?null:a.actives[primaryIndex];
         const candidates=target?b.actives.filter(x=>Number(x.level)<=Number(target.level)):[];
-        return `<div class="subcard"><b>Substituição ativa ${row+1}</b><p class="muted compact">Escolha primeiro qual habilidade do kit principal será trocada. Depois, escolha uma habilidade da segunda origem de <b>mesmo nível ou menor</b>.</p><label><span class="label">Ativa do kit principal</span><select data-legacy-active-row="${row}:primaryIndex"><option value="">Nenhuma</option>${a.actives.slice(0,5).map((x,i)=>`<option value="${i}" ${primaryIndex===i?'selected':''}>Nv ${x.level} · ${x.name}</option>`).join('')}</select></label><label><span class="label">Ativa do legado</span><select data-legacy-active-row="${row}:secondaryId" ${target?'':'disabled'}><option value="">${target?'Selecione…':'Escolha a ativa principal primeiro'}</option>${candidates.map(x=>`<option value="${x.id}" ${r.secondaryId===x.id?'selected':''}>Nv ${x.level} · ${x.name}</option>`).join('')}</select></label>${target?`<small class="muted">Pode escolher qualquer ativa de ${sub.name} até o nível ${target.level}.</small>`:''}</div>`;
+        return `<div class="subcard"><b>Substituição ativa ${row+1}</b><p class="muted compact">Escolha primeiro qual habilidade do kit principal será trocada. Depois, escolha uma habilidade da segunda origem de <b>mesmo nível ou menor</b>. A habilidade herdada assume <b>o nível e o custo da habilidade substituída</b>.</p><label><span class="label">Ativa do kit principal</span><select data-legacy-active-row="${row}:primaryIndex"><option value="">Nenhuma</option>${a.actives.slice(0,5).map((x,i)=>`<option value="${i}" ${primaryIndex===i?'selected':''}>Nv ${x.level} · ${x.name}</option>`).join('')}</select></label><label><span class="label">Ativa do legado</span><select data-legacy-active-row="${row}:secondaryId" ${target?'':'disabled'}><option value="">${target?'Selecione…':'Escolha a ativa principal primeiro'}</option>${candidates.map(x=>`<option value="${x.id}" ${r.secondaryId===x.id?'selected':''}>Nv ${x.level} · ${x.name}</option>`).join('')}</select></label>${target?`<small class="muted">Pode escolher qualquer ativa de ${sub.name} até o nível ${target.level}. Ao trocar, ela passa a ser Nv ${target.level} e custa ${target.cost} EN.</small>`:''}</div>`;
       }).join('');
       return `<section class="mechanics-section"><article class="card"><p class="eyebrow">CONFIGURAÇÃO DE LEGADO · DEUS + LEGADO</p><h2>${main.name} + ${sub.name}</h2>${controls}<div class="notice lineage-rule-note"><b>DEUS + LEGADO · Legado Direto.</b> É filho direto de um deus, mas também carrega uma herança divina secundária. Mantém o kit principal e, logo abaixo, você escolhe exatamente quais passivas e ativas serão trocadas pelas da segunda origem.</div><div class="grid three legacy-grid">${[0,1,2].map(row=>{const r=reps[row]||{};return `<div class="subcard"><b>Substituição passiva ${row+1}</b><label><span class="label">Passiva do kit principal</span><select data-legacy-passive-row="${row}:primaryIndex"><option value="">Nenhuma</option>${a.passives.map((x,i)=>`<option value="${i}" ${Number(r.primaryIndex)===i?'selected':''}>${i+1}. ${x.name}</option>`).join('')}</select></label><label><span class="label">Passiva do legado</span><select data-legacy-passive-row="${row}:secondaryId"><option value="">Selecione…</option>${b.passives.map(x=>`<option value="${x.id}" ${r.secondaryId===x.id?'selected':''}>${x.name}</option>`).join('')}</select></label></div>`}).join('')}</div><div class="grid two legacy-active-grid" style="margin-top:12px">${activeRows}</div></article></section>`;
     }
