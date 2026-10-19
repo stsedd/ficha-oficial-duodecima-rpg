@@ -1,0 +1,1 @@
+window.SCUTUM_CONFIG={supabaseUrl:"",supabaseAnonKey:""};
