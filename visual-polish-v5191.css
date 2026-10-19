@@ -591,3 +591,54 @@ body[data-theme="light"] .relic-counter>strong{
     font-size:20px;
   }
 }
+
+
+/* =========================================================
+   v5.20.0 · MORTAL DA NÉVOA
+   Origem mortal, sem deus estrutural, poderes ou Energia natural.
+   ========================================================= */
+.mortal-creation-box{
+  display:grid;
+  gap:10px;
+  padding:10px;
+  border:1px solid color-mix(in srgb,var(--theme-accent) 18%,var(--line) 82%);
+  border-radius:10px;
+  background:
+    linear-gradient(180deg,rgba(var(--theme-accent-rgb),.035),transparent 52%),
+    color-mix(in srgb,var(--panel2) 96%,var(--theme-accent) 4%);
+}
+.mortal-creation-box>.subcard{
+  margin:0;
+}
+.mortal-creation-box select{
+  min-height:40px;
+}
+.mortal-origin-section .notice,
+.mortal-power-empty .notice{
+  margin-top:9px;
+}
+.mortal-no-energy{
+  opacity:.82;
+}
+.mortal-no-energy .core-stat-value,
+.mortal-no-energy>strong{
+  font-style:italic;
+}
+body[data-theme="light"] .mortal-creation-box{
+  background:
+    linear-gradient(180deg,rgba(var(--theme-accent-rgb),.04),transparent 55%),
+    var(--theme-light-surface)!important;
+  border-color:var(--theme-light-line)!important;
+}
+@media(max-width:620px){
+  .mortal-creation-box{
+    padding:9px;
+    gap:9px;
+  }
+  .mortal-creation-box .notice,
+  .mortal-origin-section .notice,
+  .mortal-power-empty .notice{
+    font-size:11px!important;
+    line-height:1.45!important;
+  }
+}
