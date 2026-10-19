@@ -54,7 +54,7 @@
   const criticalUsability=document.querySelector('link[href*="critical-usability-v519.css"]');
   if(criticalUsability)document.head.appendChild(criticalUsability);
 
-  // v5.19.3 · polimento visual e ferramentas persistentes de habilidade vencem as camadas anteriores.
+  // v5.20.0 · polimento visual, ferramentas persistentes e origem mortal vencem as camadas anteriores.
   const visualPolish=document.querySelector('link[href*="visual-polish-v5191.css"]');
   if(visualPolish)document.head.appendChild(visualPolish);
 
@@ -132,7 +132,7 @@
   }catch(err){console.warn('[Ficha] Camada visual de Rebento indisponível.',err)}
 
   const script=document.createElement('script');
-  script.src=`app-v511.js?v=5.19.4-legacy-swap-costs-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src=`app-v511.js?v=5.20.0-mortal-nevoa-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer=false;
   script.onload=async()=>{
     try{
