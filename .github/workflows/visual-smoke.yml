@@ -381,6 +381,7 @@ jobs:
             });
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
             try{
+              await page.locator('.mortal-origin-section').waitFor({state:'visible',timeout:10000});
               const body=(await page.textContent('body'))||'';
               if(!body.includes('Mortal da Névoa'))errors.push('mortal: identidade Mortal da Névoa ausente');
               if(await page.locator('.ability-card').count()!==0)errors.push('mortal: habilidades divinas foram renderizadas');
@@ -406,10 +407,11 @@ jobs:
             page.on('pageerror',e=>errors.push(`mortal-create: ${e.message}`));
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
             try{
-              await page.selectOption('#originType','mortal');await page.waitForTimeout(120);
+              await page.selectOption('#originType','mortal');
+              await page.locator('#originSkillChoice').waitFor({state:'visible',timeout:10000});
               if(await page.locator('#godSelect').count())errors.push('mortal-create: seletor de deus permaneceu visível');
               if(await page.locator('#originSkillChoice').count()!==1)errors.push('mortal-create: seletor de perícia de origem ausente');
-              await page.selectOption('#originSkillChoice',{label:/Medicina/});await page.waitForTimeout(120);
+              await page.selectOption('#originSkillChoice','Medicina');await page.waitForTimeout(120);
               const medicine=page.locator('[data-skill="Medicina"]');
               if(!(await medicine.isDisabled()))errors.push('mortal-create: perícia de origem ainda pode ser gasta nas escolhas por INT');
               const text=(await page.textContent('.mortal-creation-box'))||'';
@@ -436,6 +438,7 @@ jobs:
             });
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
             try{
+              await page.locator('[data-pane="magic"] .magic-summary').waitFor({state:'visible',timeout:10000});
               const magicText=(await page.textContent('[data-pane="magic"]'))||'';
               if(!magicText.includes('Energia máx. 55'))errors.push('mortal-magic: Nv20 + 1 sacrifício deveria resultar em 55 EN');
               if(!magicText.includes('+15 EN'))errors.push('mortal-magic: progressão de +15 EN/10 níveis não está explicada');
