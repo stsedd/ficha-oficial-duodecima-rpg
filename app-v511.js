@@ -211,7 +211,7 @@
   const defaultFamiliars = () => ({entries:[],mountFameClaimed:false,notes:''});
   const defaultRoma = () => ({fame:0,fameEntries:[],rebentoApproved:false,affinities:[],affinityEntries:[],legionRank:'',religioRank:'',customRank:'',job:'',jobSalary:0,jobPeriod:'',cohort:'',citizenship:'',legionYears:0,serviceMarks:0,retired:false,titles:[],permissions:[],deeds:[],notes:''});
   const defaultState = () => ({
-    schemaVersion:SCHEMA_VERSION,isCreated:false,name:'',player:'',level:1,godId:'iuppiter',
+    schemaVersion:SCHEMA_VERSION,isCreated:false,name:'',player:'',level:1,originType:'divine',devotionGodId:'',originSkillChoice:'',godId:'iuppiter',
     baseAttributes:emptyAttrs(),levelAttributes:emptyAttrs(),attributeExtras:emptyAttrs(),divineSkillChoice:'',initialSkills:[],levelSkillChoices:{20:'',40:''},skillMeta:{},lineage:defaultLineage(),talents:[],talentDraftId:'',magic:defaultMagic(),inventory:defaultInventory(),familiars:defaultFamiliars(),roma:defaultRoma(),
     currentHp:null,currentEnergy:null,currentSanity:100,resourceCurrent:0,resourceValues:{},targetResources:{},
     abilityStakes:{},abilityChoices:{},choiceDetails:{},abilityUses:{},conditions:[],exhaustion:0,death:defaultDeath(),tempMods:defaultTempMods(),fortunaBlessing:false,fortunaBlessingMonth:'',
@@ -316,10 +316,18 @@
     document.getElementById('backupDialog')?.close();await updateBackupButtonCount();notify('Backup restaurado.');
   }
 
+  const MORTAL_PROFILE={
+    id:'mortal-nevoa',name:'Mortal da Névoa',group:'Mortal',
+    source:'Origem mortal · atravessou a Névoa',
+    hpBase:10,hpPerDecade:3,bonuses:{},skillBonuses:{},grantedSkills:[],skillChoice:[],casting:'fe',resources:[],notes:[]
+  };
+  function isMortal(){return state.originType==='mortal'}
+  function hasSheetCasting(){return !isMortal()||!!state.magic?.enabled}
+  function sheetCastingAttr(){return isMortal()?(state.magic?.castingAttr||'fe'):god().casting}
   function godById(id){return gods.find(g=>g.id===id)||null}
-  function primaryGod(){return godById(state.godId)||gods[0]}
+  function primaryGod(){return isMortal()?MORTAL_PROFILE:(godById(state.godId)||gods[0])}
   function god(){return primaryGod()}
-  function baseAbilitySet(id=state.godId){return abilitiesDb[id]||null}
+  function baseAbilitySet(id=state.godId){return isMortal()&&id===state.godId?null:(abilitiesDb[id]||null)}
   function isTriumvir(id){return godById(id)?.group==='Triunviro'}
   function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
   function sum(obj){return Object.values(obj||{}).reduce((a,b)=>a+(Number(b)||0),0)}
@@ -351,13 +359,28 @@
   function bp(){const l=state.level,ranges=system.proficiencyRanges||[];if(ranges.length){const row=ranges.find(r=>l>=Number(r.min||0)&&(r.max==null||l<=Number(r.max)));if(row)return Number(row.bonus)||0}if(l<=20)return 1;if(l<=40)return 2;if(l<=60)return 3;if(l<=80)return 4;if(l<=99)return 5;return 6}
   function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
   function fortunaBlessingIsCurrent(){return state.fortunaBlessing===true&&state.fortunaBlessingMonth===currentMonthKey()}
-  function rawHpMax(){const g=god(),con=structuralAttr('con'),dec=Math.floor(state.level/10),fragility=state.magic?.enabled?(Number(magicRules.hpProgressionPenalty)||2):0,perDec=Math.max(0,g.hpPerDecade-fragility),fortunaBonus=fortunaBlessingIsCurrent()?10:0;return g.hpBase+con+dec*(perDec+con)+(talentCount('duravel')*con*(1+dec))+fortunaBonus}
+  function rawHpMax(){
+    const g=god(),con=structuralAttr('con'),dec=Math.floor(state.level/10);
+    const fragility=!isMortal()&&state.magic?.enabled?(Number(magicRules.hpProgressionPenalty)||2):0;
+    const perDec=Math.max(0,g.hpPerDecade-fragility),fortunaBonus=fortunaBlessingIsCurrent()?10:0;
+    return g.hpBase+con+dec*(perDec+con)+(talentCount('duravel')*con*(1+dec))+fortunaBonus;
+  }
   function magicSacrificeTotal(){return ['for','des','con'].reduce((t,k)=>t+magicSacrifice(k),0)}
-  function rawEnergyMax(){const e=system.energy||{},base=Number(e.base??100),every=Math.max(1,Number(e.everyLevels??5)),inc=Number(e.increment??25);return base+Math.floor(state.level/every)*inc+(state.magic?.enabled?magicSacrificeTotal()*(Number(magicRules.sacrificeEnergyEach)||25):0)}
+  function rawEnergyMax(){
+    if(isMortal()){
+      if(!state.magic?.enabled)return 0;
+      const decadeEnergy=Math.floor(state.level/10)*15;
+      const sacrificeEnergy=magicSacrificeTotal()*(Number(magicRules.sacrificeEnergyEach)||25);
+      return decadeEnergy+sacrificeEnergy;
+    }
+    const e=system.energy||{},base=Number(e.base??100),every=Math.max(1,Number(e.everyLevels??5)),inc=Number(e.increment??25);
+    return base+Math.floor(state.level/every)*inc+(state.magic?.enabled?magicSacrificeTotal()*(Number(magicRules.sacrificeEnergyEach)||25):0);
+  }
   function hpMax(){return state.exhaustion>=5?Math.max(1,Math.floor(rawHpMax()/2)):rawHpMax()}
-  function energyMax(){return state.exhaustion>=5?Math.max(1,Math.floor(rawEnergyMax()/2)):rawEnergyMax()}
+  function energyMax(){const raw=rawEnergyMax();return state.exhaustion>=5&&raw>0?Math.max(1,Math.floor(raw/2)):raw}
 
 function divineResources(){
+  if(isMortal())return [];
   const structural=god()?.id||state.godId,originIds=[state.godId];
   if(state.lineage?.type!=='normal'&&state.lineage?.secondaryGodId&&!originIds.includes(state.lineage.secondaryGodId))originIds.push(state.lineage.secondaryGodId);
   const set=effectiveAbilitySet(),effective=[...(set?.passives||[]),...(set?.actives||[])];
@@ -406,7 +429,7 @@ function resourceKey(resource){return `${resource?._sourceGodId||god()?.id||stat
 function abilityResourcesFor(a){return divineResources().filter(r=>r.scope==='ability'&&r.sourceAbilityId===a.id&&(r._sourceGodId||state.godId)===(a.sourceGodId||state.godId))}
   function targetResources(){return divineResources().filter(r=>r.scope==='target')}
   function resourceMax(){const r=hudResources()[0];return r?resourceMaxFor(r):0}
-  function divineGranted(){return [...(god().grantedSkills||[]),...(state.divineSkillChoice?[state.divineSkillChoice]:[])]}
+  function divineGranted(){return isMortal()?(state.originSkillChoice?[state.originSkillChoice]:[]):[...(god().grantedSkills||[]),...(state.divineSkillChoice?[state.divineSkillChoice]:[])]}
   function skillAttr(name){return skills.find(s=>s.name===name)?.attr||null}
   function skillId(name){return skills.find(s=>s.name===name)?.id||String(name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-')}
   function skillNameById(id){return skills.find(s=>s.id===id)?.name||skills.find(s=>skillId(s.name)===id)?.name||id}
@@ -416,7 +439,7 @@ function abilityResourcesFor(a){return divineResources().filter(r=>r.scope==='ab
   function conditionDefenseMod(){return state.conditions.reduce((t,n)=>t+(Number(conditionData(n)?.defenseMod)||0),0)}
   function conditionDexRollMod(){return state.conditions.reduce((t,n)=>t+(Number(conditionData(n)?.dexRollMod)||0),0)}
   function fixedDefense(){const vals=state.conditions.map(n=>conditionData(n)?.fixedDefense).filter(v=>Number.isFinite(v));return vals.length?Math.min(...vals):null}
-  function energyRollPenalty(){const e=system.energy||{},ratio=Number(e.lowThresholdRatio??.5),pen=Number(e.lowPenaltyD20??-1);return state.currentEnergy<=energyMax()*ratio?pen:0}
+  function energyRollPenalty(){const max=energyMax();if(max<=0)return 0;const e=system.energy||{},ratio=Number(e.lowThresholdRatio??.5),pen=Number(e.lowPenaltyD20??-1);return state.currentEnergy<=max*ratio?pen:0}
   function exhaustionRollPenalty(){const per=Number(system.exhaustion?.d20PenaltyPerLevel??-2);return per*clamp(Number(state.exhaustion)||0,0,Number(system.exhaustion?.max??6))}
   function globalD20Penalty(){return energyRollPenalty()+exhaustionRollPenalty()}
   function attrRollConditionPenalty(k){return k==='des'?conditionDexRollMod():0}
@@ -431,7 +454,7 @@ function abilityResourcesFor(a){return divineResources().filter(r=>r.scope==='ab
   function basicAutomaticSkillSources(name){
     const out=[];
     if(state.initialSkills.includes(name))out.push('Inicial');
-    if(divineGranted().includes(name))out.push('Prole');
+    if(divineGranted().includes(name))out.push(isMortal()?'Origem':'Prole');
     if(talentGrantedSkills().includes(name)||talentExpertSkills().includes(name))out.push('Talento');
     if((skillTraining(name)?.stakes||0)>=30)out.push('Treino');
     return [...new Set(out)];
@@ -572,6 +595,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     return {name:'Estável',cls:'good-text',text:'Sem penalidade de Sanidade.'};
   }
   function energyBand(){
+    if(energyMax()<=0)return {name:'Sem Energia',cls:'muted',text:isMortal()?'Mortais sem reserva mágica não possuem Energia.':'Sem reserva de Energia disponível.'};
     if(state.currentEnergy<=0)return {name:'0 EN · Inconsciente',cls:'danger-text',text:'Energia 0 causa inconsciência imediata.'};
     if(state.currentEnergy<=energyMax()/2)return {name:'≤50% · Desgastado',cls:'warn-text',text:'−1 em todas as rolagens enquanto a Energia estiver em metade ou menos.'};
     return {name:'Energia estável',cls:'good-text',text:'Sem penalidade por Energia.'};
@@ -582,6 +606,9 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function migrate(data){
     const out=Object.assign(defaultState(),data||{});
     out.schemaVersion=SCHEMA_VERSION;
+    out.originType=data?.originType==='mortal'?'mortal':'divine';
+    out.devotionGodId=typeof data?.devotionGodId==='string'?data.devotionGodId:'';
+    out.originSkillChoice=typeof data?.originSkillChoice==='string'?data.originSkillChoice:'';
     out.fortunaBlessing=out.fortunaBlessing===true;
     const fortunaMonth=currentMonthKey();
     if(out.fortunaBlessing&&out.fortunaBlessingMonth&&out.fortunaBlessingMonth!==fortunaMonth)out.fortunaBlessing=false;
@@ -731,6 +758,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function resetLineage(type='normal'){state.lineage=defaultLineage();state.lineage.type=type;if(type!=='normal'&&eligibleLegacyGods()[0])state.lineage.secondaryGodId=eligibleLegacyGods()[0].id;if(type==='direct')state.lineage.structureGodId=state.godId;if(type==='compound')initializeDirectSelections()}
   function initializeDirectSelections(){const a=baseAbilitySet(state.godId),b=baseAbilitySet(state.lineage?.secondaryGodId);if(a)state.lineage.directPrimaryPassives=a.passives.slice(0,4).map(x=>x.id);if(b)state.lineage.directSecondaryPassives=b.passives.slice(0,3).map(x=>x.id)}
   function effectiveAbilitySet(){
+    if(isMortal())return {passives:[],actives:[]};
     const main=baseAbilitySet(state.godId);if(!main)return null;
     const type=state.lineage?.type||'normal';if(type==='normal'||isTriumvir(state.godId))return {passives:main.passives.map(a=>({...a,sourceGodId:state.godId})),actives:main.actives.map(a=>({...a,sourceGodId:state.godId}))};
     const sid=state.lineage?.secondaryGodId,sub=baseAbilitySet(sid);if(!sub)return {passives:main.passives.map(a=>({...a,sourceGodId:state.godId})),actives:main.actives.map(a=>({...a,sourceGodId:state.godId}))};
@@ -773,8 +801,8 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     return ordered.filter(group=>groups[group]?.length).map(group=>`<optgroup label="${GROUP_LABEL[group]||group}">${groups[group].map(g=>`<option value="${g.id}" ${selectedId===g.id?'selected':''}>${g.name}</option>`).join('')}</optgroup>`).join('');
   }
   function attrCard(k,abbr,label,creation=false){
-    const divine=Math.max(0,Number(god()?.bonuses?.[k])||0),lvl=Math.max(0,Number(state.levelAttributes[k])||0),base=Math.max(0,Number(state.baseAttributes[k])||0),tal=Math.max(0,talentAttributeBonus(k)),raw=base+lvl+tal+divine,capped=Math.min(CORE_ATTR_MAX,raw),extra=attributeExtraBonus(k),sacrifice=magicSacrifice(k),total=capped+extra-sacrifice,pen=sanityAttrPenalty(k),eff=total+pen,overflow=Math.max(0,raw-CORE_ATTR_MAX),incDisabled=raw>=CORE_ATTR_MAX||(!state.isCreated&&sum(state.baseAttributes)>=CORE_ATTR_START);
-    return `<div class="attr"><div class="attr-name">${abbr} · ${label}</div><div class="attr-total">${total}</div><div class="attr-break">base ${base} · nível +${lvl}${tal?` · talento +${tal}`:''} · divino +${divine}${extra?` · extra +${extra}`:''}${sacrifice?` · magia −${sacrifice}`:''}${overflow?` · excedente padrão ${overflow} ignorado pelo limite ${CORE_ATTR_MAX}`:''}${pen?` · penalidade de sanidade ${pen} (efetivo ${eff})`:''}</div>${creation?`<div class="stepper"><button data-base-dec="${k}">−</button><span class="base">${base}</span><button data-base-inc="${k}" ${incDisabled?'disabled':''}>+</button></div>`:''}</div>`;
+    const divine=isMortal()?0:Math.max(0,Number(god()?.bonuses?.[k])||0),lvl=Math.max(0,Number(state.levelAttributes[k])||0),base=Math.max(0,Number(state.baseAttributes[k])||0),tal=Math.max(0,talentAttributeBonus(k)),raw=base+lvl+tal+divine,capped=Math.min(CORE_ATTR_MAX,raw),extra=attributeExtraBonus(k),sacrifice=magicSacrifice(k),total=capped+extra-sacrifice,pen=sanityAttrPenalty(k),eff=total+pen,overflow=Math.max(0,raw-CORE_ATTR_MAX),incDisabled=raw>=CORE_ATTR_MAX||(!state.isCreated&&sum(state.baseAttributes)>=CORE_ATTR_START);
+    return `<div class="attr"><div class="attr-name">${abbr} · ${label}</div><div class="attr-total">${total}</div><div class="attr-break">base ${base} · nível +${lvl}${tal?` · talento +${tal}`:''} ${!isMortal()?` · divino +${divine}`:''}${extra?` · extra +${extra}`:''}${sacrifice?` · magia −${sacrifice}`:''}${overflow?` · excedente padrão ${overflow} ignorado pelo limite ${CORE_ATTR_MAX}`:''}${pen?` · penalidade de sanidade ${pen} (efetivo ${eff})`:''}</div>${creation?`<div class="stepper"><button data-base-dec="${k}">−</button><span class="base">${base}</span><button data-base-inc="${k}" ${incDisabled?'disabled':''}>+</button></div>`:''}</div>`;
   }
 
   function renderCreationLineage(){
@@ -798,29 +826,50 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     </div>`;
   }
   function canFinishCreation(){
+    if(sum(state.baseAttributes)!==CORE_ATTR_START||state.initialSkills.length!==initialSkillLimit())return false;
+    if(isMortal())return !!state.originSkillChoice;
     const g=god(),type=state.lineage?.type||'normal',sub=secondaryGod();
     const lineageOk=type==='normal'||(!isTriumvir(state.godId)&&!!sub&&sub.id!==state.godId);
-    return lineageOk&&sum(state.baseAttributes)===CORE_ATTR_START&&state.initialSkills.length===initialSkillLimit()&&(!g.skillChoice?.length||!!state.divineSkillChoice);
+    return lineageOk&&(!g.skillChoice?.length||!!state.divineSkillChoice);
   }
   function renderCreation(){
-    const g=god(),spent=sum(state.baseAttributes),left=CORE_ATTR_START-spent,granted=g.grantedSkills||[],customGranted=granted.filter(s=>!skills.some(x=>x.name===s));
-    const sourceClass=g.source.startsWith('Atualizado')?'good':g.source.startsWith('Provisório')?'warn':'';
+    const g=god(),spent=sum(state.baseAttributes),left=CORE_ATTR_START-spent,isMort=isMortal();
+    const granted=isMort?(state.originSkillChoice?[state.originSkillChoice]:[]):g.grantedSkills||[];
+    const customGranted=granted.filter(s=>!skills.some(x=>x.name===s));
+    const sourceClass=!isMort&&g.source.startsWith('Atualizado')?'good':!isMort&&g.source.startsWith('Provisório')?'warn':'';
+    const freeSkillLabel=isMort?'origem':'divina';
+    const finishHelp=isMort
+      ?`Para concluir: distribua exatamente ${CORE_ATTR_START} pontos, escolha 1 perícia de origem e ${initialSkillLimit()} perícias por INT.`
+      :`Para concluir: distribua exatamente ${CORE_ATTR_START} pontos, escolha ${initialSkillLimit()} perícias por INT e preencha a escolha divina quando o kit exigir.`;
     creationView.innerHTML=`
       <article class="card stack">
-        <div class="section-title"><div><p class="eyebrow">1 · IDENTIDADE & DIVINDADE</p><h2>Criação</h2></div><span class="pill ${sourceClass}">${g.source}</span></div>
+        <div class="section-title"><div><p class="eyebrow">1 · IDENTIDADE & ORIGEM</p><h2>Criação</h2></div><span class="pill ${sourceClass}">${isMort?'Mortal da Névoa':g.source}</span></div>
         <div class="grid two"><label><span class="label">Personagem</span><input id="nameInput" value="${esc(state.name)}" placeholder="Nome do personagem"></label><label><span class="label">Player</span><input id="playerInput" value="${esc(state.player)}" placeholder="Nome do player"></label></div>
-        <label><span class="label">Divindade principal / primeira origem</span><select id="godSelect">${groupedGodOptions()}</select></label>${renderCreationLineage()}
-        <div class="subcard compact"><div class="row between"><strong>${g.name}${state.lineage?.type==='direct'?' · kit estrutural':''}</strong><span class="pill">${GROUP_LABEL[g.group]||g.group}</span></div><p class="muted">Conjuração: <b>${attrName(g.casting)}</b> · HP: <b>${g.hpBase} + CON</b> · por 10 níveis: <b>+${g.hpPerDecade} + CON</b></p><p><span class="label">Bônus divinos</span>${bonusText(g)}</p>${granted.length?`<p><span class="label">Perícia(s) divina(s)</span>${granted.join(', ')}</p>`:''}${g.skillChoice?.length?`<label><span class="label">Escolha divina (não gasta escolhas por Inteligência)</span><select id="divineSkillChoice"><option value="">Selecione…</option>${g.skillChoice.map(s=>`<option ${state.divineSkillChoice===s?'selected':''}>${s}</option>`).join('')}</select></label>`:''}${customGranted.length?`<div class="notice">Atenção: ${customGranted.join(', ')} não existe na lista-base atual de perícias. Mantive como veio da fonte.</div>`:''}${(g.notes||[]).map(n=>`<div class="notice">${n}</div>`).join('')}</div>
+        <label><span class="label">Origem do personagem</span><select id="originType"><option value="divine" ${!isMort?'selected':''}>Prole Divina</option><option value="mortal" ${isMort?'selected':''}>Mortal da Névoa</option></select></label>
+        ${isMort
+          ?`<div class="mortal-creation-box">
+              <div class="subcard compact"><div class="row between"><strong>Mortal da Névoa</strong><span class="pill">MORTAL</span></div><p class="muted">Sem ascendência divina, sem poderes divinos e sem Energia natural.</p><p><b>HP:</b> 10 + CON · <b>por 10 níveis:</b> +3 + CON</p><p><b>Magia:</b> se despertar, recebe +15 EN a cada 10 níveis; cada ponto físico sacrificado ainda concede +${magicRules.sacrificeEnergyEach||25} EN.</p></div>
+              <label><span class="label">Perícia de origem · gratuita</span><select id="originSkillChoice"><option value="">Escolha qualquer perícia…</option>${skills.map(s=>`<option value="${esc(s.name)}" ${state.originSkillChoice===s.name?'selected':''}>${esc(s.name)} · ${attrAbbr(s.attr)}</option>`).join('')}</select></label>
+              <div class="notice">A perícia de origem não consome as escolhas de <b>2 + INT</b>. Mortais não recebem bônus divinos de atributos nem acesso a Legado.</div>
+            </div>`
+          :`<label><span class="label">Divindade principal / primeira origem</span><select id="godSelect">${groupedGodOptions()}</select></label>${renderCreationLineage()}
+            <div class="subcard compact"><div class="row between"><strong>${g.name}${state.lineage?.type==='direct'?' · kit estrutural':''}</strong><span class="pill">${GROUP_LABEL[g.group]||g.group}</span></div><p class="muted">Conjuração: <b>${attrName(g.casting)}</b> · HP: <b>${g.hpBase} + CON</b> · por 10 níveis: <b>+${g.hpPerDecade} + CON</b></p><p><span class="label">Bônus divinos</span>${bonusText(g)}</p>${granted.length?`<p><span class="label">Perícia(s) divina(s)</span>${granted.join(', ')}</p>`:''}${g.skillChoice?.length?`<label><span class="label">Escolha divina (não gasta escolhas por Inteligência)</span><select id="divineSkillChoice"><option value="">Selecione…</option>${g.skillChoice.map(s=>`<option ${state.divineSkillChoice===s?'selected':''}>${s}</option>`).join('')}</select></label>`:''}${customGranted.length?`<div class="notice">Atenção: ${customGranted.join(', ')} não existe na lista-base atual de perícias. Mantive como veio da fonte.</div>`:''}${(g.notes||[]).map(n=>`<div class="notice">${n}</div>`).join('')}</div>`}
         <div><div class="row between"><span class="label">${CORE_ATTR_START} pontos de atributos</span><b>${left} restante(s)</b></div><div class="progress"><i style="width:${clamp(spent/Math.max(1,CORE_ATTR_START)*100,0,100)}%"></i></div></div>
-        <div class="attrs">${ATTRS.map(a=>attrCard(...a,true)).join('')}</div><p class="dev-note">O limite normal é ${CORE_ATTR_MAX} considerando pontos da criação, progressão, talentos comuns e bônus divinos. Só efeitos que digam explicitamente ultrapassar o limite podem levar o atributo acima de ${CORE_ATTR_MAX}.</p>
+        <div class="attrs">${ATTRS.map(a=>attrCard(...a,true)).join('')}</div><p class="dev-note">O limite normal é ${CORE_ATTR_MAX} considerando pontos da criação, progressão e talentos comuns${isMort?'.':' e bônus divinos.'} Só efeitos que digam explicitamente ultrapassar o limite podem levar o atributo acima de ${CORE_ATTR_MAX}.</p>
       </article>
-      <aside class="card stack"><div><p class="eyebrow">2 · PERÍCIAS INICIAIS</p><h2>Escolhas por Inteligência</h2><p class="muted">A ficha usa <b>2 + INT inicial</b>. Bônus divinos não consomem essas escolhas.</p></div><div class="row between"><span class="pill">Limite: ${initialSkillLimit()}</span><span class="pill">Escolhidas: ${state.initialSkills.length}</span></div><div class="skills">${skills.map(s=>{const divine=divineGranted().includes(s.name),checked=state.initialSkills.includes(s.name),disabled=divine||(!checked&&state.initialSkills.length>=initialSkillLimit());return `<label class="skill-check ${disabled?'disabled':''}"><input type="checkbox" data-skill="${esc(s.name)}" ${checked?'checked':''} ${disabled?'disabled':''}><span>${s.name}<small class="muted"> · ${attrAbbr(s.attr)}${divine?' · divina':''}</small></span></label>`}).join('')}</div><button id="finishBtn" class="primary" ${canFinishCreation()?'':'disabled'}>Criar ficha de teste</button>${!canFinishCreation()?`<p class="notice">Para concluir: distribua exatamente ${CORE_ATTR_START} pontos, escolha ${initialSkillLimit()} perícias por INT e preencha a escolha divina quando o kit exigir.</p>`:''}</aside>`;
+      <aside class="card stack"><div><p class="eyebrow">2 · PERÍCIAS INICIAIS</p><h2>Escolhas por Inteligência</h2><p class="muted">A ficha usa <b>2 + INT inicial</b>. A perícia ${isMort?'de origem':'divina'} não consome essas escolhas.</p></div><div class="row between"><span class="pill">Limite: ${initialSkillLimit()}</span><span class="pill">Escolhidas: ${state.initialSkills.length}</span></div><div class="skills">${skills.map(s=>{const free=divineGranted().includes(s.name),checked=state.initialSkills.includes(s.name),disabled=free||(!checked&&state.initialSkills.length>=initialSkillLimit());return `<label class="skill-check ${disabled?'disabled':''}"><input type="checkbox" data-skill="${esc(s.name)}" ${checked?'checked':''} ${disabled?'disabled':''}><span>${s.name}<small class="muted"> · ${attrAbbr(s.attr)}${free?` · ${freeSkillLabel}`:''}</small></span></label>`}).join('')}</div><button id="finishBtn" class="primary" ${canFinishCreation()?'':'disabled'}>Criar ficha de teste</button>${!canFinishCreation()?`<p class="notice">${finishHelp}</p>`:''}</aside>`;
     bindCreation();
   }
   function bindCreation(){
     byId('nameInput').oninput=e=>{state.name=e.target.value;save()};byId('playerInput').oninput=e=>{state.player=e.target.value;save()};
-    byId('godSelect').onchange=e=>{state.godId=e.target.value;state.divineSkillChoice='';state.initialSkills=[];state.resourceCurrent=0;state.resourceValues={};state.targetResources={};state.abilityChoices={};state.choiceDetails={};state.abilityUses={};if(isTriumvir(state.godId))resetLineage('normal');else if(state.lineage?.type!=='normal'&&state.lineage.secondaryGodId===state.godId)resetLineage(state.lineage.type);else if(state.lineage?.type==='direct')state.lineage.structureGodId=state.godId;save();renderCreation()};
-
+    const origin=byId('originType');if(origin)origin.onchange=e=>{
+      state.originType=e.target.value==='mortal'?'mortal':'divine';
+      state.initialSkills=[];state.resourceCurrent=0;state.resourceValues={};state.targetResources={};state.abilityChoices={};state.choiceDetails={};state.abilityUses={};
+      if(isMortal()){state.divineSkillChoice='';resetLineage('normal')}else state.originSkillChoice='';
+      syncCurrentCaps();save();renderCreation();
+    };
+    const mortalSkill=byId('originSkillChoice');if(mortalSkill)mortalSkill.onchange=e=>{state.originSkillChoice=e.target.value;state.initialSkills=state.initialSkills.filter(s=>s!==e.target.value);save();renderCreation()};
+    const godSelect=byId('godSelect');if(godSelect)godSelect.onchange=e=>{state.godId=e.target.value;state.divineSkillChoice='';state.initialSkills=[];state.resourceCurrent=0;state.resourceValues={};state.targetResources={};state.abilityChoices={};state.choiceDetails={};state.abilityUses={};if(isTriumvir(state.godId))resetLineage('normal');else if(state.lineage?.type!=='normal'&&state.lineage.secondaryGodId===state.godId)resetLineage(state.lineage.type);else if(state.lineage?.type==='direct')state.lineage.structureGodId=state.godId;save();renderCreation()};
     const lineageType=byId('creationLineageType');if(lineageType)lineageType.onchange=e=>{const type=e.target.value;if(type!=='normal'&&isTriumvir(state.godId)){notify('Triúnviros não participam da mistura de kits por Legado.');resetLineage('normal')}else resetLineage(type);state.divineSkillChoice='';state.initialSkills=[];save();renderCreation()};
     const lineageSecondary=byId('creationSecondaryGod');if(lineageSecondary)lineageSecondary.onchange=e=>{state.lineage.secondaryGodId=e.target.value;if(state.lineage.type==='direct')state.lineage.structureGodId=state.godId;if(state.lineage.type==='compound')initializeDirectSelections();state.divineSkillChoice='';state.initialSkills=[];save();renderCreation()};
     const d=byId('divineSkillChoice');if(d)d.onchange=e=>{state.divineSkillChoice=e.target.value;state.initialSkills=state.initialSkills.filter(s=>s!==e.target.value);save();renderCreation()};
