@@ -453,6 +453,41 @@ jobs:
             await context.close();
           }
 
+          // Banners de habilidade + baralho rápido: 3 favoritas, resumo customizado e navegação para a habilidade.
+          {
+            const context=await browser.newContext({viewport:{width:1280,height:900}});
+            const page=await context.newPage();
+            page.on('pageerror',e=>errors.push(`ability-deck: ${e.message}`));
+            await page.addInitScript(()=>{
+              const art='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="900" height="260"><defs><linearGradient id="g"><stop stop-color="#162f2a"/><stop offset="1" stop-color="#a77735"/></linearGradient></defs><rect width="900" height="260" fill="url(#g)"/><circle cx="680" cy="95" r="38" fill="#d52d2d"/><path d="M80 190 Q360 30 790 170" fill="none" stroke="#f5e2af" stroke-width="8"/></svg>');
+              localStorage.setItem('duodecima_universal_stage4_v24',JSON.stringify({
+                isCreated:true,name:'Baralho QA',player:'CI',level:50,godId:'fortuna',activeTab:'combat',
+                lineage:{type:'normal',namingVersion:2,secondaryGodId:'',structureGodId:'fortuna'},
+                abilityDeck:['fortuna:active:pressagio-guardado','fortuna:active:bencao-boa-hora','fortuna:active:mau-agouro'],
+                abilityVisuals:{'fortuna:active:pressagio-guardado':{imageUrl:art,summary:'Guarda resultados de d20 para substituir rolagens.'}}
+              }));
+            });
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+            try{
+              await page.locator('.ability-quick-deck').waitFor({state:'visible',timeout:10000});
+              if(await page.locator('.ability-quick-card').count()!==3)errors.push(`ability-deck: esperava 3 cartas rápidas, encontrou ${await page.locator('.ability-quick-card').count()}`);
+              const pressagio=page.locator('.ability-card').filter({hasText:'Presságio Guardado'}).first();
+              await pressagio.waitFor({state:'visible',timeout:10000});
+              if(await pressagio.locator('.ability-art-banner img').count()!==1)errors.push('ability-deck: banner de Presságio Guardado ausente');
+              const quick=page.locator('.ability-quick-card').filter({hasText:'Presságio Guardado'}).first();
+              if(!((await quick.textContent())||'').includes('Guarda resultados de d20'))errors.push('ability-deck: resumo customizado não apareceu na carta');
+              await quick.locator('[data-open-ability-button]').click();await page.waitForTimeout(180);
+              if(!(await pressagio.evaluate(el=>el.classList.contains('ability-jump-highlight'))))errors.push('ability-deck: abrir carta não destacou a habilidade completa');
+              const augurio=page.locator('.ability-card').filter({hasText:'Augúrio'}).first();
+              await augurio.locator('[data-ability-deck-toggle]').click();await page.waitForTimeout(80);
+              if(!((await page.locator('#toast').textContent())||'').includes('até 3 habilidades'))errors.push('ability-deck: limite de 3 favoritas não foi aplicado');
+              const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('duodecima_universal_stage4_v24')||'{}').abilityDeck||[]);
+              if(stored.length!==3)errors.push(`ability-deck: limite deveria persistir 3 favoritas, persistiu ${stored.length}`);
+              await page.screenshot({path:'visual-artifacts/desktop-ability-deck.png',fullPage:true});
+            }catch(e){errors.push(`ability-deck: ${e.message}`)}
+            await context.close();
+          }
+
           await browser.close();
           if(errors.length){console.error(errors.join('\n'));process.exit(1)}
           NODE
