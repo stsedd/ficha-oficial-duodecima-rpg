@@ -365,6 +365,88 @@ jobs:
             await context.close();
           }
 
+          // Regressão: Mortal da Névoa não herda deus, poderes ou Energia natural.
+          {
+            const context=await browser.newContext({viewport:{width:1280,height:900}});
+            const page=await context.newPage();
+            page.on('pageerror',e=>errors.push(`mortal: ${e.message}`));
+            await page.addInitScript(()=>{
+              localStorage.setItem('duodecima_universal_stage4_v24',JSON.stringify({
+                isCreated:true,name:'Mortal QA',player:'CI',level:20,originType:'mortal',originSkillChoice:'Medicina',
+                godId:'iuppiter',activeTab:'status',
+                baseAttributes:{for:2,des:1,con:2,int:1,fe:1,car:1},
+                initialSkills:['Percepção','Investigação','Sobrevivência'],
+                lineage:{type:'normal',namingVersion:2,secondaryGodId:'',structureGodId:'',compoundPassiveReplacements:[],compoundActiveReplacements:[],compoundActiveSlots:[],directPrimaryPassives:[],directSecondaryPassives:[]}
+              }));
+            });
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+            try{
+              const body=(await page.textContent('body'))||'';
+              if(!body.includes('Mortal da Névoa'))errors.push('mortal: identidade Mortal da Névoa ausente');
+              if(await page.locator('.ability-card').count()!==0)errors.push('mortal: habilidades divinas foram renderizadas');
+              if(await page.locator('.mortal-origin-section').count()!==1)errors.push('mortal: card de origem mortal ausente');
+              const hp=(await page.locator('.core-hp .core-stat-value').first().textContent()||'').replace(/\s+/g,'');
+              if(hp!=='22/22')errors.push(`mortal: HP Nv20 esperado 22/22, recebeu ${hp}`);
+              const en=(await page.locator('.core-en .core-stat-value').first().textContent()||'').trim();
+              if(en!=='—')errors.push(`mortal: sem Magia deveria mostrar EN —, recebeu ${en}`);
+              if(await page.locator('.core-en .core-stat-adjust').count())errors.push('mortal: Energia inexistente ainda oferece ajuste manual');
+              const cast=(await page.locator('.core-cast .core-stat-value').first().textContent()||'').trim();
+              if(cast!=='—')errors.push(`mortal: conjuração comum deveria ser —, recebeu ${cast}`);
+              if(body.includes('0 EN · Inconsciente'))errors.push('mortal: ausência de Energia foi tratada como inconsciência');
+              if(body.includes('divino +'))errors.push('mortal: bônus divino apareceu no detalhamento de atributos');
+              await page.screenshot({path:'visual-artifacts/desktop-mortal.png',fullPage:true});
+            }catch(e){errors.push(`mortal: ${e.message}`)}
+            await context.close();
+          }
+
+          // Criação mortal: origem substitui a escolha de deus e concede uma perícia gratuita.
+          {
+            const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true});
+            const page=await context.newPage();
+            page.on('pageerror',e=>errors.push(`mortal-create: ${e.message}`));
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+            try{
+              await page.selectOption('#originType','mortal');await page.waitForTimeout(120);
+              if(await page.locator('#godSelect').count())errors.push('mortal-create: seletor de deus permaneceu visível');
+              if(await page.locator('#originSkillChoice').count()!==1)errors.push('mortal-create: seletor de perícia de origem ausente');
+              await page.selectOption('#originSkillChoice',{label:/Medicina/});await page.waitForTimeout(120);
+              const medicine=page.locator('[data-skill="Medicina"]');
+              if(!(await medicine.isDisabled()))errors.push('mortal-create: perícia de origem ainda pode ser gasta nas escolhas por INT');
+              const text=(await page.textContent('.mortal-creation-box'))||'';
+              if(!text.includes('10 + CON')||!text.includes('+3 + CON')||!text.includes('+15 EN'))errors.push('mortal-create: regras básicas não aparecem na criação');
+              await page.screenshot({path:'visual-artifacts/mobile-mortal-creation.png',fullPage:true});
+            }catch(e){errors.push(`mortal-create: ${e.message}`)}
+            await context.close();
+          }
+
+          // Mortal mágico: +15 EN a cada 10 níveis, mais sacrifícios, sem penalizar a progressão mortal de HP.
+          {
+            const context=await browser.newContext({viewport:{width:1280,height:900}});
+            const page=await context.newPage();
+            page.on('pageerror',e=>errors.push(`mortal-magic: ${e.message}`));
+            await page.addInitScript(()=>{
+              localStorage.setItem('duodecima_universal_stage4_v24',JSON.stringify({
+                isCreated:true,name:'Mortal Mago QA',player:'CI',level:20,originType:'mortal',originSkillChoice:'Medicina',
+                godId:'iuppiter',activeTab:'magic',currentEnergy:55,
+                baseAttributes:{for:2,des:1,con:2,int:1,fe:1,car:1},
+                initialSkills:['Percepção','Investigação','Sobrevivência'],
+                lineage:{type:'normal',namingVersion:2,secondaryGodId:'',structureGodId:'',compoundPassiveReplacements:[],compoundActiveReplacements:[],compoundActiveSlots:[],directPrimaryPassives:[],directSecondaryPassives:[]},
+                magic:{enabled:true,castingAttr:'int',circle:1,sacrifices:{for:1,des:0,con:0},spells:[],concentrationSpellId:'',concentrationDamage:0,highCircleUsed:{6:0,7:0,8:0,9:0},notes:''}
+              }));
+            });
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+            try{
+              const magicText=(await page.textContent('[data-pane="magic"]'))||'';
+              if(!magicText.includes('Energia máx. 55'))errors.push('mortal-magic: Nv20 + 1 sacrifício deveria resultar em 55 EN');
+              if(!magicText.includes('+15 EN'))errors.push('mortal-magic: progressão de +15 EN/10 níveis não está explicada');
+              const hp=(await page.locator('.rail-vitals').first().textContent())||'';
+              if(!hp.includes('22/22'))errors.push('mortal-magic: Magia reduziu indevidamente a progressão de HP mortal');
+              const rail=(await page.locator('.rail-vitals').first().textContent())||'';
+              if(!rail.replace(/\s+/g,' ').includes('55/55'))errors.push('mortal-magic: reserva de Energia 55/55 não apareceu na ficha');
+            }catch(e){errors.push(`mortal-magic: ${e.message}`)}
+            await context.close();
+          }
+
           await browser.close();
           if(errors.length){console.error(errors.join('\n'));process.exit(1)}
           NODE
