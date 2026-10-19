@@ -214,7 +214,7 @@
     schemaVersion:SCHEMA_VERSION,isCreated:false,name:'',player:'',level:1,originType:'divine',devotionGodId:'',originSkillChoice:'',godId:'iuppiter',
     baseAttributes:emptyAttrs(),levelAttributes:emptyAttrs(),attributeExtras:emptyAttrs(),divineSkillChoice:'',initialSkills:[],levelSkillChoices:{20:'',40:''},skillMeta:{},lineage:defaultLineage(),talents:[],talentDraftId:'',magic:defaultMagic(),inventory:defaultInventory(),familiars:defaultFamiliars(),roma:defaultRoma(),
     currentHp:null,currentEnergy:null,currentSanity:100,resourceCurrent:0,resourceValues:{},targetResources:{},
-    abilityStakes:{},abilityChoices:{},choiceDetails:{},abilityUses:{},conditions:[],exhaustion:0,death:defaultDeath(),tempMods:defaultTempMods(),fortunaBlessing:false,fortunaBlessingMonth:'',
+    abilityStakes:{},abilityChoices:{},choiceDetails:{},abilityUses:{},abilityVisuals:{},abilityDeck:[],conditions:[],exhaustion:0,death:defaultDeath(),tempMods:defaultTempMods(),fortunaBlessing:false,fortunaBlessingMonth:'',
     skillTrainings:[],weapons:[],armor:defaultArmor(),shield:defaultShield(),lastRoll:null,
     activeTab:'status',appearance:{mode:'dark',palette:'red',special:'none',exclusiveThemeId:''},history:{summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',birth:'',residence:'',portraitUrl:'',bannerUrl:'',bannerSourceUrl:'',bannerPositionX:50,bannerPositionY:50,bannerScale:100},notes:'',
     createdAt:null,updatedAt:null
@@ -566,6 +566,28 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   }
   function canUseInitialSkill(name){return !divineGranted().includes(name)}
   function abilityKey(a){return `${a.sourceGodId||state.godId}:${a.type}:${a.id}`}
+  function abilityVisual(a){const raw=state.abilityVisuals?.[abilityKey(a)]||{};return {imageUrl:String(raw.imageUrl||''),summary:String(raw.summary||'')}}
+  function abilityVisualState(key){state.abilityVisuals=state.abilityVisuals||{};if(!state.abilityVisuals[key])state.abilityVisuals[key]={imageUrl:'',summary:''};return state.abilityVisuals[key]}
+  function abilityInDeck(a){return (state.abilityDeck||[]).includes(abilityKey(a))}
+  function abilityDeckSummary(a){
+    const manual=abilityVisual(a).summary.trim();if(manual)return manual;
+    const st=Math.min(stakesOf(a),magicAbilityStakeMax(a));
+    const raw=a.tiers?tierText(a,st):(a.summary||a.extra||'');
+    return compactText(cleanAbilityText(raw).replace(/\s+/g,' '),105)||'Abrir para consultar a habilidade completa.';
+  }
+  function abilityDeckEntries(set=effectiveAbilitySet()){
+    const all=[...(set?.passives||[]),...(set?.actives||[])],byKey=new Map(all.map(a=>[abilityKey(a),a]));
+    return (state.abilityDeck||[]).slice(0,3).map(k=>byKey.get(k)).filter(Boolean);
+  }
+  function renderAbilityQuickDeck(set){
+    if(isMortal()||!set)return '';
+    const picked=abilityDeckEntries(set);
+    const cards=picked.map(a=>{
+      const key=abilityKey(a),visual=abilityVisual(a),godName=godById(a.sourceGodId||state.godId)?.name||'',cost=a.type==='active'?`${a.cost} EN`:'PASSIVA';
+      return `<article class="ability-quick-card ${visual.imageUrl?'has-art':''}" tabindex="0" role="button" data-open-ability="${esc(key)}" aria-label="Abrir ${esc(a.name)}"><div class="ability-quick-art">${visual.imageUrl?`<img src="${esc(visual.imageUrl)}" alt="">`:`<div class="ability-quick-art-empty"><span>✦</span><small>${esc(godName||'Habilidade')}</small></div>`}<div class="ability-quick-art-shade"></div><div class="ability-quick-badges">${a.type==='active'?`<span>Nv ${a.level}</span>`:'<span>Passiva</span>'}<span>${esc(cost)}</span></div></div><div class="ability-quick-copy"><div class="ability-quick-title"><b>${esc(a.name)}</b>${godName?`<small>${esc(godName)}</small>`:''}</div><p data-quick-summary-key="${esc(key)}">${esc(abilityDeckSummary(a))}</p><button type="button" class="ability-quick-open" data-open-ability-button="${esc(key)}">Abrir habilidade <span>→</span></button></div></article>`;
+    }).join('');
+    return `<section class="ability-quick-deck mechanics-section ${picked.length?'':'is-empty'}" data-theme-component="ability-quick-deck"><div class="ability-quick-deck-head"><div><p class="eyebrow">ACESSO RÁPIDO</p><h3>Baralho de habilidades</h3></div><span class="pill">${picked.length}/3</span></div><p class="muted compact">Fixe até 3 habilidades que você consulta com mais frequência. Clique em uma carta para ir direto à descrição completa.</p>${picked.length?`<div class="ability-quick-track">${cards}</div>`:`<div class="ability-quick-empty"><span>☆</span><div><b>Nenhuma habilidade no baralho</b><p>Abra uma habilidade abaixo e use <strong>☆ Baralho</strong> para fixá-la aqui.</p></div></div>`}</section>`;
+  }
   function stakesOf(a){return clamp(Number(state.abilityStakes?.[abilityKey(a)]||0),0,30)}
   function tierName(stakes){return stakes>=30?'30+':stakes>=16?'16–29':'0–15'}
   function tierText(a,stakes){if(!a.tiers)return a.extra||'Sem estacas mecânicas cadastradas.';return stakes>=30?a.tiers.high:stakes>=16?a.tiers.mid:a.tiers.low}
@@ -612,6 +634,8 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     out.originType=data?.originType==='mortal'?'mortal':'divine';
     out.devotionGodId=typeof data?.devotionGodId==='string'?data.devotionGodId:'';
     out.originSkillChoice=typeof data?.originSkillChoice==='string'?data.originSkillChoice:'';
+    out.abilityVisuals=data?.abilityVisuals&&typeof data.abilityVisuals==='object'?Object.fromEntries(Object.entries(data.abilityVisuals).filter(([k])=>typeof k==='string').map(([k,v])=>[k,{imageUrl:typeof v?.imageUrl==='string'?v.imageUrl:'',summary:typeof v?.summary==='string'?v.summary.slice(0,180):''}])):{};
+    out.abilityDeck=Array.isArray(data?.abilityDeck)?[...new Set(data.abilityDeck.filter(x=>typeof x==='string'))].slice(0,3):[];
     out.fortunaBlessing=out.fortunaBlessing===true;
     const fortunaMonth=currentMonthKey();
     if(out.fortunaBlessing&&out.fortunaBlessingMonth&&out.fortunaBlessingMonth!==fortunaMonth)out.fortunaBlessing=false;
@@ -1183,6 +1207,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     return `<section class="tab-pane ${state.activeTab==='combat'?'':'hidden'}" data-pane="combat" data-theme-zone="combat">
       ${renderCombatResourceDock()}
       ${renderTargetResourceTrackers()}
+      ${renderAbilityQuickDeck(set)}
       <section class="combat-command-grid mechanics-section">
         <article class="card combat-essentials-card"><div class="section-title"><div><p class="eyebrow">COMBATE</p><h3>Referência imediata</h3></div><button id="rollDefense" class="primary">Rolar Defesa</button></div><div class="combat-quick-values"><div><span>Defesa</span><b>${fDef!==null?fDef:`1d20 ${signed(defenseBonus())}`}</b></div><div><span>Iniciativa</span><b>1d20 ${signed(initiativeBonus())}</b></div><div><span>RD</span><b>${damageReduction()}</b></div><div><span>Conjuração</span><b>${castAttackText()}</b></div><div><span>DT</span><b>${castDtText()}</b></div><div><span>Sanidade</span><b>${san.name}</b></div></div><div class="compact-fields"><label><span class="label">Ajuste manual de Defesa</span><input id="tempDefense" type="number" value="${state.tempMods.defense}"></label></div>${state.lastRoll?`<div class="roll-result compact-roll"><span>${esc(state.lastRoll.label)}</span><b>${state.lastRoll.total}</b><small>d20 ${state.lastRoll.die}${state.lastRoll.modifier!==undefined?` ${signed(state.lastRoll.modifier)}`:''}</small></div>`:''}</article>
         ${renderCompactActiveConditions()}
@@ -1711,13 +1736,15 @@ function renderAbilityStateTools(a,st){
 }
 
 function renderAbility(a){
-  const maxSt=magicAbilityStakeMax(a),rawSt=stakesOf(a),st=Math.min(rawSt,maxSt),locked=a.type==='active'&&state.level<a.level,cost=a.type==='active'?a.cost:null;
+  const key=abilityKey(a),visual=abilityVisual(a),inDeck=abilityInDeck(a),maxSt=magicAbilityStakeMax(a),rawSt=stakesOf(a),st=Math.min(rawSt,maxSt),locked=a.type==='active'&&state.level<a.level,cost=a.type==='active'?a.cost:null;
   const tiers=a.tiers?[['low','0–15',a.tiers.low,st<=15],['mid','16–29',a.tiers.mid,st>=16&&st<=29],['high','30+',a.tiers.high,st>=30]].filter(x=>x[2]):[];
   const complex=(a.coreBlocks||[]).some(b=>b.type==='variants'||b.type==='options'),hasCoreNote=(a.coreBlocks||[]).some(b=>b.type==='note');
   const summary=String(a.summary||'');
   const summaryHtml=complex&&summary.length>260?`<details class="ability-lore"><summary>Descrição da habilidade</summary>${renderStructuredText(summary)}</details>`:`<div class="ability-summary">${renderStructuredText(summary)}</div>`;
   const simpleFallback=!tiers.length&&!complex&&!hasCoreNote&&a.extra?`<div class="ability-tier-list single"><div class="ability-tier current"><div class="ability-tier-copy">${renderStructuredText(a.extra)}</div></div></div>`:'';
-  return `<article class="ability-card ${locked?'ability-locked':''} ${a.type==='active'?'active-ability':'passive-ability'} ${a.isExtra?'extra-ability':''} ${complex?'ability-complex':''}" data-theme-component="ability" data-ability-id="${esc(a.id||abilityKey(a))}" data-ability-type="${esc(a.type||'passive')}" data-ability-source="${esc(a.sourceGodId||state.godId||'')}" data-theme-frame="ability"><div class="ability-head"><div><div class="row ability-title-row"><b>${esc(a.name)}</b>${a.sourceGodId&&a.sourceGodId!==state.godId?`<span class="pill warn">${godById(a.sourceGodId)?.name||'Legado'}</span>`:''}</div><div class="ability-meta">${a.type==='active'?(a.isExtra?'<span class="meta-extra">Extra</span>':`<span>Nv ${a.level}</span><span>${cost} EN</span>`):'<span>Passiva</span>'}${state.magic?.enabled&&maxSt===29?'<span>mágico · até 29</span>':''}</div></div></div>${summaryHtml}${renderCoreBlocks(a)}${renderAbilityChoices(a)}${renderAbilityResources(a)}${renderAbilityUsage(a)}${tiers.length?`<div class="ability-tier-list">${tiers.map(([key,label,text,current])=>`<div class="ability-tier ${current?'current':''}" data-tier="${key}"><b>${label}</b><div class="ability-tier-copy">${renderStructuredText(text)}</div></div>`).join('')}</div><div class="stake-compact"><div class="row between"><span>Estacas</span><b>${st}/${maxSt}</b></div><input type="range" min="0" max="${maxSt}" value="${st}" data-stakes="${abilityKey(a)}" data-stake-max="${maxSt}"><div class="stake-quick"><button data-stake-set="${abilityKey(a)}:0" data-stake-limit="${maxSt}">0</button><button data-stake-set="${abilityKey(a)}:16" data-stake-limit="${maxSt}">16</button>${maxSt>=30?`<button data-stake-set="${abilityKey(a)}:30" data-stake-limit="${maxSt}">30</button>`:''}</div></div>`:simpleFallback}${renderStoredOmens(a,st)}${renderAbilityStateTools(a,st)}${a.extra&&a.tiers&&!hasCoreNote?`<details class="ability-notes"><summary>Observações</summary>${renderStructuredText(a.extra)}</details>`:''}${a.type==='active'?`<div class="ability-actions">${a.isExtra?'<span class="pill warn">Habilidade extra</span>':(locked?`<span class="locked">Bloqueada até o nível ${a.level}</span>`:`<button class="primary" data-use-ability="${abilityKey(a)}" data-cost="${cost}">Usar · −${cost} EN</button>`)}${a.isExtra?'':`<small>EN atual ${state.currentEnergy}</small>`}</div>`:''}</article>`;
+  const banner=visual.imageUrl?`<div class="ability-art-banner"><img src="${esc(visual.imageUrl)}" alt=""><div class="ability-art-shade"></div><div class="ability-art-actions"><button type="button" data-ability-image-upload="${esc(key)}">Trocar imagem</button><button type="button" class="danger" data-ability-image-clear="${esc(key)}" aria-label="Remover imagem">×</button></div></div>`:'';
+  const visualConfig=`<details class="ability-visual-config"><summary>Imagem & baralho</summary><div class="ability-visual-config-body"><div class="ability-visual-actions"><button type="button" data-ability-image-upload="${esc(key)}">${visual.imageUrl?'Trocar banner':'Adicionar banner'}</button>${visual.imageUrl?`<button type="button" class="ghost" data-ability-image-clear="${esc(key)}">Remover imagem</button>`:''}</div><label><span>Resumo do baralho <small>opcional · até 180 caracteres</small></span><input type="text" maxlength="180" value="${esc(visual.summary)}" placeholder="${esc(abilityDeckSummary(a))}" data-ability-deck-summary="${esc(key)}"></label><p class="muted compact">O banner só aparece nesta habilidade e na carta rápida. O texto completo continua exatamente aqui na ficha.</p></div></details>`;
+  return `<article class="ability-card ${locked?'ability-locked':''} ${a.type==='active'?'active-ability':'passive-ability'} ${a.isExtra?'extra-ability':''} ${complex?'ability-complex':''} ${visual.imageUrl?'has-ability-art':''}" data-theme-component="ability" data-ability-key="${esc(key)}" data-ability-id="${esc(a.id||key)}" data-ability-type="${esc(a.type||'passive')}" data-ability-source="${esc(a.sourceGodId||state.godId||'')}" data-theme-frame="ability">${banner}<div class="ability-head"><div><div class="row ability-title-row"><b>${esc(a.name)}</b>${a.sourceGodId&&a.sourceGodId!==state.godId?`<span class="pill warn">${godById(a.sourceGodId)?.name||'Legado'}</span>`:''}</div><div class="ability-meta">${a.type==='active'?(a.isExtra?'<span class="meta-extra">Extra</span>':`<span>Nv ${a.level}</span><span>${cost} EN</span>`):'<span>Passiva</span>'}${state.magic?.enabled&&maxSt===29?'<span>mágico · até 29</span>':''}</div></div><button type="button" class="ability-deck-toggle ${inDeck?'active':''}" data-ability-deck-toggle="${esc(key)}" aria-pressed="${inDeck?'true':'false'}" title="${inDeck?'Remover do baralho rápido':'Adicionar ao baralho rápido'}">${inDeck?'★ No baralho':'☆ Baralho'}</button></div>${summaryHtml}${visualConfig}${renderCoreBlocks(a)}${renderAbilityChoices(a)}${renderAbilityResources(a)}${renderAbilityUsage(a)}${tiers.length?`<div class="ability-tier-list">${tiers.map(([key,label,text,current])=>`<div class="ability-tier ${current?'current':''}" data-tier="${key}"><b>${label}</b><div class="ability-tier-copy">${renderStructuredText(text)}</div></div>`).join('')}</div><div class="stake-compact"><div class="row between"><span>Estacas</span><b>${st}/${maxSt}</b></div><input type="range" min="0" max="${maxSt}" value="${st}" data-stakes="${key}" data-stake-max="${maxSt}"><div class="stake-quick"><button data-stake-set="${key}:0" data-stake-limit="${maxSt}">0</button><button data-stake-set="${key}:16" data-stake-limit="${maxSt}">16</button>${maxSt>=30?`<button data-stake-set="${key}:30" data-stake-limit="${maxSt}">30</button>`:''}</div></div>`:simpleFallback}${renderStoredOmens(a,st)}${renderAbilityStateTools(a,st)}${a.extra&&a.tiers&&!hasCoreNote?`<details class="ability-notes"><summary>Observações</summary>${renderStructuredText(a.extra)}</details>`:''}${a.type==='active'?`<div class="ability-actions">${a.isExtra?'<span class="pill warn">Habilidade extra</span>':(locked?`<span class="locked">Bloqueada até o nível ${a.level}</span>`:`<button class="primary" data-use-ability="${key}" data-cost="${cost}">Usar · −${cost} EN</button>`)}${a.isExtra?'':`<small>EN atual ${state.currentEnergy}</small>`}</div>`:''}</article>`;
 }
 
 function applyManualResource(kind,input){
@@ -1795,6 +1822,30 @@ function applyManualResource(kind,input){
     }
     document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.activeTab=b.dataset.tab;save();renderSheet()});
     document.querySelectorAll('[data-go-tab]').forEach(b=>b.onclick=()=>{state.activeTab=b.dataset.goTab;save();renderSheet()});
+    document.querySelectorAll('[data-ability-image-upload]').forEach(b=>b.onclick=()=>{
+      const key=b.dataset.abilityImageUpload;if(!key)return;
+      chooseStoredImage(url=>{const visual=abilityVisualState(key),previous=visual.imageUrl;visual.imageUrl=url;if(!save()){visual.imageUrl=previous;return}renderSheet();notify('Banner da habilidade atualizado.')},1200,120000);
+    });
+    document.querySelectorAll('[data-ability-image-clear]').forEach(b=>b.onclick=()=>{
+      const key=b.dataset.abilityImageClear;if(!key)return;const visual=abilityVisualState(key);visual.imageUrl='';save();renderSheet();notify('Banner da habilidade removido.');
+    });
+    document.querySelectorAll('[data-ability-deck-toggle]').forEach(b=>b.onclick=()=>{
+      const key=b.dataset.abilityDeckToggle;if(!key)return;state.abilityDeck=Array.isArray(state.abilityDeck)?state.abilityDeck:[];
+      if(state.abilityDeck.includes(key))state.abilityDeck=state.abilityDeck.filter(x=>x!==key);
+      else{if(state.abilityDeck.length>=3){notify('O baralho rápido comporta até 3 habilidades. Remova uma antes de adicionar outra.');return}state.abilityDeck.push(key)}
+      save();renderSheet();
+    });
+    document.querySelectorAll('[data-ability-deck-summary]').forEach(input=>input.onchange=()=>{const key=input.dataset.abilityDeckSummary;if(!key)return;abilityVisualState(key).summary=String(input.value||'').slice(0,180);save();renderSheet()});
+    const openAbilityFromDeck=key=>{
+      const card=[...document.querySelectorAll('[data-ability-key]')].find(el=>el.dataset.abilityKey===key);if(!card)return;
+      card.scrollIntoView({behavior:'smooth',block:'center'});card.classList.add('ability-jump-highlight');setTimeout(()=>card.classList.remove('ability-jump-highlight'),1600);
+    };
+    document.querySelectorAll('[data-open-ability-button]').forEach(b=>b.onclick=e=>{e.stopPropagation();openAbilityFromDeck(b.dataset.openAbilityButton)});
+    document.querySelectorAll('[data-open-ability]').forEach(card=>{
+      card.onclick=e=>{if(e.target.closest('button,input,select,textarea,label,a,summary'))return;openAbilityFromDeck(card.dataset.openAbility)};
+      card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openAbilityFromDeck(card.dataset.openAbility)}};
+    });
+
     document.querySelectorAll('[data-edit-equipment]').forEach(b=>b.onclick=()=>{const target=b.dataset.editEquipment;state.activeTab='inventory';save();renderSheet();setTimeout(()=>{let el=null;if(target==='armor')el=byId('armorEditor');else if(target==='shield')el=byId('shieldEditor');else if(target.startsWith('weapon:'))el=document.querySelector(`[data-weapon-card="${target.slice(7)}"]`);else if(target.startsWith('item:'))el=document.querySelector(`[data-item-card="${target.slice(5)}"]`);if(el){el.classList.add('edit-flash');el.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>el.classList.remove('edit-flash'),1400)}},0)});
     // Seleção puramente visual do baralho. Não altera nenhuma mecânica nem é salva no JSON;
     // existe para temas poderem destacar uma carta clicada/focada de forma consistente.
