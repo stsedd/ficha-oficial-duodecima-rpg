@@ -2022,14 +2022,16 @@ function useAbility(key,cost){
 
 function shortRest(){
   if(state.death.dead){notify('Personagem morto não pode descansar.');return}if(state.currentHp===0){notify('Em 0 HP, estabilize e recupere 1 HP antes de descansar.');return}
-  const hp=Number(system.rests?.short?.hp??25),en=Number(system.rests?.short?.energy??150);setHp(state.currentHp+hp);setEnergy(state.currentEnergy+en);
+  const hp=Number(system.rests?.short?.hp??25),en=Number(system.rests?.short?.energy??150),hasEnergy=energyMax()>0;
+  setHp(state.currentHp+hp);if(hasEnergy)setEnergy(state.currentEnergy+en);
   const set=effectiveAbilitySet();for(const a of [...(set?.passives||[]),...(set?.actives||[])]){const rule=abilityUsageRule(a);if(rule?.period==='descanso curto')state.abilityUses[abilityUsageKey(a)]=0}
-  save();renderSheet();notify(`Descanso curto: +${hp} HP e +${en} Energia.`)
+  save();renderSheet();notify(hasEnergy?`Descanso curto: +${hp} HP e +${en} Energia.`:`Descanso curto: +${hp} HP.`)
 }
 
 function longRest(){
   if(state.death.dead){notify('Personagem morto não pode descansar.');return}if(state.currentHp===0){notify('Em 0 HP, estabilize e recupere 1 HP antes de descansar.');return}
-  setHp(hpMax());setEnergy(energyMax());if(state.magic?.enabled)state.magic.highCircleUsed={6:0,7:0,8:0,9:0};state.abilityUses={};save();renderSheet();notify('Descanso longo: HP e Energia completos; usos limitados restaurados.')
+  const hasEnergy=energyMax()>0;
+  setHp(hpMax());if(hasEnergy)setEnergy(energyMax());if(state.magic?.enabled)state.magic.highCircleUsed={6:0,7:0,8:0,9:0};state.abilityUses={};save();renderSheet();notify(hasEnergy?'Descanso longo: HP e Energia completos; usos limitados restaurados.':'Descanso longo: HP completo; usos limitados restaurados.')
 }
   function rollD20(label,modifier){const die=Math.floor(Math.random()*20)+1,total=die+modifier;state.lastRoll={label,die,modifier,total};save();renderSheet();notify(`${label}: ${total} (${die} no d20).`)}
   function rollDefense(){const f=fixedDefense();if(f!==null){state.lastRoll={label:'Defesa fixa',die:'—',modifier:0,total:f};save();renderSheet();notify(`Defesa fixa: ${f}.`);return}rollD20('Defesa',defenseBonus())}
