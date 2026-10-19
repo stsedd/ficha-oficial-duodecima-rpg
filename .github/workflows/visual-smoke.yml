@@ -382,7 +382,10 @@ jobs:
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
             try{
               await page.locator('.mortal-origin-section').waitFor({state:'visible',timeout:10000});
+              await page.locator('.qol-rest-strip').waitFor({state:'visible',timeout:10000});
               const body=(await page.textContent('body'))||'';
+              const restCopy=(await page.locator('.qol-rest-copy small').textContent())||'';
+              if(restCopy.includes('EN'))errors.push(`mortal: resumo de descanso ainda promete Energia inexistente (${restCopy})`);
               if(!body.includes('Mortal da Névoa'))errors.push('mortal: identidade Mortal da Névoa ausente');
               if(await page.locator('.ability-card').count()!==0)errors.push('mortal: habilidades divinas foram renderizadas');
               if(await page.locator('.mortal-origin-section').count()!==1)errors.push('mortal: card de origem mortal ausente');
