@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#050505">
+  <title>SCUTUM Lab · Ficha — Legio XII Fulminata · v5.21.1-ability-deck-polish</title>
+  <link rel="stylesheet" href="styles-v511.css?v=v5.21.1-ability-deck-polish">
+  <link rel="stylesheet" href="theme-consistency-v518.css?v=5.18.1">
+  <link rel="stylesheet" href="critical-usability-v519.css?v=5.19.0">
+  <link rel="stylesheet" href="visual-polish-v5191.css?v=5.21.1">
+</head>
+<body data-theme="standard" data-mode="dark" data-palette="red" data-special="none">
+  <div class="theme-ambient-layer theme-ambient-back" data-theme-layer="back" aria-hidden="true"></div>
+  <div class="theme-ambient-layer theme-ambient-front" data-theme-layer="front" aria-hidden="true"></div>
+  <main class="shell">
+    <section class="archive-brandbar" aria-label="Identificação da ficha">
+      <div class="archive-brand-copy">
+        <span class="archive-brand-kicker">LEGIO XII FULMINATA</span>
+        <strong>Character Archive</strong>
+      </div>
+      <div class="appearance-top-actions" aria-label="Aparência da ficha">
+        <button id="themePaletteBtn" class="theme-toggle theme-palette-btn" type="button" aria-haspopup="dialog" aria-controls="themeDialog" title="Escolher tema padrão"><span id="themePaletteSwatch" class="theme-palette-swatch" aria-hidden="true"></span><span class="theme-toggle-copy"><small>TEMA</small><b id="themePaletteLabel">Vermelho · Dark</b></span></button>
+        <button id="themeSpecialBtn" class="theme-toggle theme-special-btn" type="button" aria-haspopup="dialog" aria-controls="themeDialog" title="Escolher tema especial"><span id="themeSpecialSwatch" class="theme-special-swatch" aria-hidden="true">✦</span><span class="theme-toggle-copy"><small>ESPECIAL</small><b id="themeSpecialLabel">Nenhum</b></span></button>
+      </div>
+    </section>
+
+    <header id="siteBanner" class="profile-cover profile-cover-pure" aria-label="Banner do personagem">
+      <img id="siteBannerImage" class="profile-cover-image hidden" alt="Banner do personagem">
+      <div id="siteBannerEmpty" class="profile-cover-empty" aria-hidden="true"></div>
+    </header>
+
+    <section class="archive-toolbar" aria-label="Arquivo e personalização da ficha">
+      <div class="archive-toolbar-copy">
+        <div id="coreStatus" class="core-status loading" title="Sincronizando regras"><i></i><span>CORE…</span></div>
+        <span class="archive-save-note"><b>SCUTUM Lab</b> · ficha vinculada à sua conta</span>
+        <span class="version-chip" title="Versão da ficha">v5.21.1-ability-deck-polish</span>
+      </div>
+      <div class="actions archive-actions">
+        <button id="exportBtn" class="ghost small-btn" type="button">Exportar JSON</button>
+        <label class="ghost file-btn small-btn">Importar JSON<input id="importInput" type="file" accept="application/json"></label>
+        <button id="backupsBtn" class="ghost small-btn" type="button">Backups</button>
+        <button id="helpBtn" class="ghost small-btn" type="button">Ajuda</button>
+        <label id="bannerBtn" class="primary file-btn small-btn banner-upload-label" for="bannerUploadInput" role="button" tabindex="0">Adicionar banner</label>
+        <button id="editBannerBtn" class="ghost small-btn hidden" type="button">Ajustar recorte</button>
+        <button id="clearBannerBtn" class="ghost small-btn hidden" type="button">Remover banner</button>
+        <button id="resetBtn" class="danger small-btn" type="button">Resetar</button>
+        <input id="bannerUploadInput" type="file" accept="image/*" hidden>
+      </div>
+    </section>
+
+    <section id="creationView" class="grid two"></section>
+    <section id="sheetView" class="hidden"></section>
+
+    <footer><p>SCUTUM · Ficha Universal da Legio XII Fulminata · v5.21.1-ability-deck-polish</p></footer>
+  </main>
+
+  <dialog id="bannerCropDialog" class="banner-crop-dialog">
+    <form method="dialog" class="banner-crop-card" id="bannerCropForm">
+      <div class="row between banner-crop-head"><div><p class="eyebrow">BANNER</p><h2>Escolher recorte</h2><p class="muted compact">O banner fica fixo no topo. Arraste o enquadramento pelos controles até a imagem ficar como você quer.</p></div><button value="cancel" class="theme-dialog-close" aria-label="Fechar">×</button></div>
+      <div class="banner-crop-viewport" id="bannerCropViewport"><img id="bannerCropPreview" alt="Prévia do recorte"></div>
+      <div class="banner-crop-controls">
+        <label><span>Horizontal</span><input id="bannerCropX" type="range" min="0" max="100" step="1" value="50"><b id="bannerCropXValue">50%</b></label>
+        <label><span>Vertical</span><input id="bannerCropY" type="range" min="0" max="100" step="1" value="50"><b id="bannerCropYValue">50%</b></label>
+        <label><span>Zoom</span><input id="bannerCropScale" type="range" min="100" max="220" step="1" value="100"><b id="bannerCropScaleValue">100%</b></label>
+      </div>
+      <div class="banner-crop-actions"><button type="button" id="bannerCropCancel" class="ghost">Cancelar</button><button type="button" id="bannerCropSave" class="primary">Salvar recorte</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="themeDialog" class="theme-dialog">
+    <form method="dialog" class="theme-dialog-card">
+      <div class="row between theme-dialog-head"><div><p class="eyebrow">APARÊNCIA</p><h2>Escolher tema</h2><p class="muted compact">Cada tema padrão já possui uma versão Dark e uma versão Light. Escolha a variação diretamente aqui; não existe mais um botão separado de modo.</p></div><button value="cancel" class="theme-dialog-close" aria-label="Fechar">×</button></div>
+      <div class="theme-section-label "><b>Temas padrão</b><span>Cada cor em Dark e Light</span></div>
+      <div class="theme-preset-grid" role="listbox" aria-label="Temas padrão">
+        <article class="theme-preset-card" data-preset-palette="red" style="--choice:#d53645;--choice2:#7d1e2b;--choice-bg:#f6d9dd"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Vermelho</b><small>Legio XII</small></div><div class="theme-preset-actions" role="group" aria-label="Vermelho: escolher versão"><button type="button" data-palette-choice="red" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="red" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="pink" style="--choice:#e44788;--choice2:#8f2856;--choice-bg:#f7d8e8"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Rosa</b><small>Rosa & vinho</small></div><div class="theme-preset-actions" role="group" aria-label="Rosa: escolher versão"><button type="button" data-palette-choice="pink" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="pink" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="blue" style="--choice:#3f7fd8;--choice2:#234b89;--choice-bg:#dde9f8"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Azul</b><small>Azul imperial</small></div><div class="theme-preset-actions" role="group" aria-label="Azul: escolher versão"><button type="button" data-palette-choice="blue" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="blue" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="orange" style="--choice:#dd702f;--choice2:#884019;--choice-bg:#f8e2d1"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Laranja</b><small>Âmbar quente</small></div><div class="theme-preset-actions" role="group" aria-label="Laranja: escolher versão"><button type="button" data-palette-choice="orange" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="orange" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="green" style="--choice:#3f9b68;--choice2:#245f42;--choice-bg:#dcefe3"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Verde</b><small>Laurel</small></div><div class="theme-preset-actions" role="group" aria-label="Verde: escolher versão"><button type="button" data-palette-choice="green" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="green" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="purple" style="--choice:#8a59cf;--choice2:#50307c;--choice-bg:#e8ddf5"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Roxo</b><small>Púrpura</small></div><div class="theme-preset-actions" role="group" aria-label="Roxo: escolher versão"><button type="button" data-palette-choice="purple" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="purple" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="gold" style="--choice:#b88939;--choice2:#6f4d1c;--choice-bg:#f4e8c9"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Dourado</b><small>Aureum</small></div><div class="theme-preset-actions" role="group" aria-label="Dourado: escolher versão"><button type="button" data-palette-choice="gold" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="gold" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="silver" style="--choice:#919aa8;--choice2:#535d69;--choice-bg:#e8ebef"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Prata</b><small>Argentum</small></div><div class="theme-preset-actions" role="group" aria-label="Prata: escolher versão"><button type="button" data-palette-choice="silver" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="silver" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="wine" style="--choice:#9d3450;--choice2:#5d1c2e;--choice-bg:#ecdce1"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Vinho</b><small>Bordô</small></div><div class="theme-preset-actions" role="group" aria-label="Vinho: escolher versão"><button type="button" data-palette-choice="wine" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="wine" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="teal" style="--choice:#319a92;--choice2:#1d5d59;--choice-bg:#d7eeec"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Teal</b><small>Verde-azulado</small></div><div class="theme-preset-actions" role="group" aria-label="Teal: escolher versão"><button type="button" data-palette-choice="teal" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="teal" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="sepia" style="--choice:#9a6c45;--choice2:#5c3d25;--choice-bg:#eee2d7"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Sépia</b><small>Pergaminho</small></div><div class="theme-preset-actions" role="group" aria-label="Sépia: escolher versão"><button type="button" data-palette-choice="sepia" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="sepia" data-theme-mode="light">Light</button></div></article>
+      </div>
+      <div class="theme-section-label pastel-label"><b>Pastéis</b><span>Também disponíveis nos dois modos</span></div>
+      <div class="theme-preset-grid" role="listbox" aria-label="Pastéis">
+        <article class="theme-preset-card" data-preset-palette="blush" style="--choice:#d96b83;--choice2:#9f3e55;--choice-bg:#f7e1e6"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Blush</b><small>Rosa pastel</small></div><div class="theme-preset-actions" role="group" aria-label="Blush: escolher versão"><button type="button" data-palette-choice="blush" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="blush" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="peach" style="--choice:#d98249;--choice2:#9a4f26;--choice-bg:#ffd6a5"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Peach</b><small>Pêssego</small></div><div class="theme-preset-actions" role="group" aria-label="Peach: escolher versão"><button type="button" data-palette-choice="peach" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="peach" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="lilac" style="--choice:#9c78cf;--choice2:#684597;--choice-bg:#e6d6f7"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Lilac</b><small>Lilás</small></div><div class="theme-preset-actions" role="group" aria-label="Lilac: escolher versão"><button type="button" data-palette-choice="lilac" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="lilac" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="sage" style="--choice:#6f9f70;--choice2:#456c49;--choice-bg:#d6ead4"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Sage</b><small>Sálvia</small></div><div class="theme-preset-actions" role="group" aria-label="Sage: escolher versão"><button type="button" data-palette-choice="sage" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="sage" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="lemon" style="--choice:#c69c2e;--choice2:#856315;--choice-bg:#fef3b0"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Lemon</b><small>Amarelo suave</small></div><div class="theme-preset-actions" role="group" aria-label="Lemon: escolher versão"><button type="button" data-palette-choice="lemon" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="lemon" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="mauve" style="--choice:#a47ba8;--choice2:#6c4c70;--choice-bg:#e6d6e7"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Mauve</b><small>Malva</small></div><div class="theme-preset-actions" role="group" aria-label="Mauve: escolher versão"><button type="button" data-palette-choice="mauve" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="mauve" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="coral" style="--choice:#e16f63;--choice2:#a64038;--choice-bg:#ffc1b6"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Coral</b><small>Coral pastel</small></div><div class="theme-preset-actions" role="group" aria-label="Coral: escolher versão"><button type="button" data-palette-choice="coral" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="coral" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="aqua" style="--choice:#5caaa5;--choice2:#347470;--choice-bg:#d0f0ed"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Aqua</b><small>Verde-água</small></div><div class="theme-preset-actions" role="group" aria-label="Aqua: escolher versão"><button type="button" data-palette-choice="aqua" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="aqua" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="sand" style="--choice:#a87a47;--choice2:#6f4d2b;--choice-bg:#ead8b0"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Sand</b><small>Areia</small></div><div class="theme-preset-actions" role="group" aria-label="Sand: escolher versão"><button type="button" data-palette-choice="sand" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="sand" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="sky" style="--choice:#789acf;--choice2:#4a6591;--choice-bg:#dce6f7"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Sky</b><small>Azul suave</small></div><div class="theme-preset-actions" role="group" aria-label="Sky: escolher versão"><button type="button" data-palette-choice="sky" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="sky" data-theme-mode="light">Light</button></div></article>
+      </div>
+      <div class="theme-section-label mono-label"><b>Monocromáticos</b><span>Preto, grafite e pérola</span></div>
+      <div class="theme-preset-grid" role="listbox" aria-label="Monocromáticos">
+        <article class="theme-preset-card" data-preset-palette="mono-black" style="--choice:#2f2f32;--choice2:#0e0e10;--choice-bg:#e4e4e6"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Mono Black</b><small>Grafite</small></div><div class="theme-preset-actions" role="group" aria-label="Mono Black: escolher versão"><button type="button" data-palette-choice="mono-black" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="mono-black" data-theme-mode="light">Light</button></div></article>
+        <article class="theme-preset-card" data-preset-palette="mono-white" style="--choice:#e9e9e9;--choice2:#9f9f9f;--choice-bg:#f1f1f1"><i class="theme-preset-swatch" aria-hidden="true"></i><div class="theme-preset-copy"><b>Mono White</b><small>Pérola</small></div><div class="theme-preset-actions" role="group" aria-label="Mono White: escolher versão"><button type="button" data-palette-choice="mono-white" data-theme-mode="dark">Dark</button><button type="button" data-palette-choice="mono-white" data-theme-mode="light">Light</button></div></article>
+      </div>
+      <div class="theme-section-label special-label"><b>Temas especiais</b><span>Efeitos visuais completos, independentes das paletas</span></div>
+      <div class="special-theme-grid" role="listbox" aria-label="Temas especiais">
+        <button type="button" class="theme-choice special-theme-choice" data-special-choice="none" style="--choice:#787075;--choice2:#282427;--choice-bg:#ddd7d9"><i></i><span><b>Nenhum</b><small>Usar o tema padrão escolhido</small></span></button>
+        <button type="button" class="theme-choice special-theme-choice fire-theme-choice" data-special-choice="fire" style="--choice:#ff671f;--choice2:#6e1607;--choice-bg:#261008"><i>🔥</i><span><b>Fogo</b><small>Carvão · brasa · incandescência</small></span></button>
+        <button type="button" class="theme-choice special-theme-choice snow-theme-choice" data-special-choice="snow" style="--choice:#78aeca;--choice2:#244e67;--choice-bg:#eaf3f7"><i>❄</i><span><b>Neve</b><small>Gelo · geada · flocos</small></span></button>
+      </div>
+      <div class="theme-section-label exclusive-label"><b>Temas exclusivos</b><span>Instalados somente neste navegador</span></div>
+      <section class="exclusive-theme-manager" aria-label="Temas exclusivos">
+        <div class="exclusive-theme-upload-row">
+          <label class="primary exclusive-theme-upload">↑ Upar tema exclusivo<input id="exclusiveThemeInput" type="file" accept=".duodecima-theme,application/json" hidden></label>
+          <button id="exclusiveThemeDeactivate" type="button" class="ghost">Usar tema padrão</button>
+        </div>
+        <p class="muted compact exclusive-theme-help">O arquivo <b>.duodecima-theme</b> pode instalar CSS, imagens e fontes embutidas. O tema fica neste dispositivo; o JSON da personagem guarda somente qual tema está ativo.</p>
+        <div id="exclusiveThemeList" class="exclusive-theme-list" aria-live="polite"></div>
+      </section>
+      <div class="theme-dialog-foot"><span>Paletas e temas especiais acompanham o JSON. Temas exclusivos precisam estar instalados no dispositivo.</span><button value="cancel" class="primary">Concluir</button></div>
+    </form>
+  </dialog>
+  <dialog id="backupDialog" class="theme-dialog">
+    <form method="dialog" class="theme-dialog-card backup-dialog-card">
+      <div class="row between theme-dialog-head"><div><p class="eyebrow">SEGURANÇA</p><h2>Backups da ficha</h2><p class="muted compact">A ficha salva checkpoints automáticos antes de resetar, criar outra ficha ou importar um JSON, além de manter backups periódicos neste navegador.</p></div><button value="cancel" class="theme-dialog-close" aria-label="Fechar">×</button></div>
+      <div class="backup-dialog-actions"><button type="button" id="backupNowBtn" class="primary small-btn">Criar backup agora</button><span class="muted">Os 8 backups automáticos mais recentes são mantidos.</span></div>
+      <div id="backupList" class="backup-list" aria-live="polite"></div>
+      <p class="muted compact backup-local-note">Os backups ficam neste navegador. Para uma cópia fora do dispositivo, continue usando Exportar JSON.</p>
+    </form>
+  </dialog>
+
+  <dialog id="helpDialog" class="help-dialog">
+    <form method="dialog" class="help-dialog-card">
+      <div class="row between"><div><p class="eyebrow">AJUDA RÁPIDA</p><h2>Arquivo da ficha</h2></div><button value="cancel" aria-label="Fechar">×</button></div>
+      <p>A ficha salva automaticamente no navegador. Exporte um JSON sempre que fizer alterações importantes para manter um backup fora do navegador.</p>
+      <p>As rolagens continuam sendo feitas pelo Discord. Esta página funciona como referência visual e mecânica durante as missões.</p>
+      <button class="primary" value="cancel">Entendi</button>
+    </form>
+  </dialog>
+  <div class="fire-embers" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="fire-flame-bed" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="fire-heat-haze" aria-hidden="true"></div>
+  <div class="snow-fall" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="snow-fall-front" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="snow-mist" aria-hidden="true"></div>
+  <div class="snow-drift" aria-hidden="true"></div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scutum-config.js"></script>
+  <script src="sheet-cloud.js"></script>
+  <script src="skills-v511.js?v=5.11.0"></script>
+  <script src="gods-v511.js?v=5.11.0"></script>
+  <script src="abilities-v511.js?v=5.11.0"></script>
+  <script src="abilities-extra-v55.js?v=5.5.0"></script>
+  <script src="system-v55.js?v=v5.21.1-ability-deck-polish"></script>
+  <script src="talents-v55.js?v=5.5.0"></script>
+  <script src="magic-v55.js?v=5.5.0"></script>
+  <script src="roma-v55.js?v=5.5.0"></script>
+  <script src="familiars-v55.js?v=5.5.0"></script>
+  <script src="core-bridge-v511.js?v=v5.21.1-ability-deck-polish-core"></script>
+  <script src="qol-v5171.js?v=5.17.3-direct-reset"></script>
+  <script src="bootstrap-v511.js?v=v5.21.1-ability-deck-polish"></script>
+</body>
+</html>
