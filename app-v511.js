@@ -443,8 +443,11 @@ function abilityResourcesFor(a){return divineResources().filter(r=>r.scope==='ab
   function exhaustionRollPenalty(){const per=Number(system.exhaustion?.d20PenaltyPerLevel??-2);return per*clamp(Number(state.exhaustion)||0,0,Number(system.exhaustion?.max??6))}
   function globalD20Penalty(){return energyRollPenalty()+exhaustionRollPenalty()}
   function attrRollConditionPenalty(k){return k==='des'?conditionDexRollMod():0}
-  function castAttack(){return effectiveAttr(god().casting)+bp()+(hasTalent('mestre-habilidades')?1:0)+globalD20Penalty()+attrRollConditionPenalty(god().casting)}
-  function castDT(){return 8+effectiveAttr(god().casting)+bp()}
+  function castAttack(){if(isMortal())return state.magic?.enabled?magicCastBonus():0;const k=god().casting;return effectiveAttr(k)+bp()+(hasTalent('mestre-habilidades')?1:0)+globalD20Penalty()+attrRollConditionPenalty(k)}
+  function castDT(){if(isMortal())return state.magic?.enabled?magicCastDT():0;return 8+effectiveAttr(god().casting)+bp()}
+  function energyValueText(){return energyMax()>0?`${state.currentEnergy}/${energyMax()}`:'—'}
+  function castAttackText(){return hasSheetCasting()?`1d20 ${signed(castAttack())}`:'—'}
+  function castDtText(){return hasSheetCasting()?String(castDT()):'—'}
   function skillTraining(name){return state.skillTrainings.find(t=>t.name===name)}
   function skillMetaFor(name){
     if(!state.skillMeta||typeof state.skillMeta!=='object')state.skillMeta={};
@@ -642,6 +645,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     }
     out.lineage.directPrimaryPassives=Array.isArray(data?.lineage?.directPrimaryPassives)?data.lineage.directPrimaryPassives:[];
     out.lineage.directSecondaryPassives=Array.isArray(data?.lineage?.directSecondaryPassives)?data.lineage.directSecondaryPassives:[];
+    if(out.originType==='mortal')out.lineage=defaultLineage();
     out.magic=Object.assign(defaultMagic(),data?.magic||{});
     out.magic.sacrifices=Object.assign({for:0,des:0,con:0},data?.magic?.sacrifices||{});
     ['for','des','con'].forEach(k=>out.magic.sacrifices[k]=clamp(Number(out.magic.sacrifices[k])||0,0,3));
@@ -753,8 +757,8 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function setEnergy(next){state.currentEnergy=clamp(Number(next)||0,0,energyMax())}
   function setSanity(next){state.currentSanity=clamp(Number(next)||0,0,100)}
 
-  function secondaryGod(){return godById(state.lineage?.secondaryGodId)}
-  function eligibleLegacyGods(){return gods.filter(g=>g.id!==state.godId&&!isTriumvir(g.id))}
+  function secondaryGod(){return isMortal()?null:godById(state.lineage?.secondaryGodId)}
+  function eligibleLegacyGods(){return isMortal()?[]:gods.filter(g=>g.id!==state.godId&&!isTriumvir(g.id))}
   function resetLineage(type='normal'){state.lineage=defaultLineage();state.lineage.type=type;if(type!=='normal'&&eligibleLegacyGods()[0])state.lineage.secondaryGodId=eligibleLegacyGods()[0].id;if(type==='direct')state.lineage.structureGodId=state.godId;if(type==='compound')initializeDirectSelections()}
   function initializeDirectSelections(){const a=baseAbilitySet(state.godId),b=baseAbilitySet(state.lineage?.secondaryGodId);if(a)state.lineage.directPrimaryPassives=a.passives.slice(0,4).map(x=>x.id);if(b)state.lineage.directSecondaryPassives=b.passives.slice(0,3).map(x=>x.id)}
   function effectiveAbilitySet(){
@@ -864,7 +868,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     byId('nameInput').oninput=e=>{state.name=e.target.value;save()};byId('playerInput').oninput=e=>{state.player=e.target.value;save()};
     const origin=byId('originType');if(origin)origin.onchange=e=>{
       state.originType=e.target.value==='mortal'?'mortal':'divine';
-      state.initialSkills=[];state.resourceCurrent=0;state.resourceValues={};state.targetResources={};state.abilityChoices={};state.choiceDetails={};state.abilityUses={};
+      state.currentHp=null;state.currentEnergy=null;state.initialSkills=[];state.resourceCurrent=0;state.resourceValues={};state.targetResources={};state.abilityChoices={};state.choiceDetails={};state.abilityUses={};
       if(isMortal()){state.divineSkillChoice='';resetLineage('normal')}else state.originSkillChoice='';
       syncCurrentCaps();save();renderCreation();
     };
@@ -897,39 +901,40 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     return `<div class="core-stat core-resource divine-resource-card" ${themeResourceAttrs('divine',r.id||'',key)} data-resource-scope="${esc(r.scope||'personal')}" data-theme-frame="resource"><div class="core-stat-label">${themeIconSlot('divine')}<span class="theme-resource-label">${esc(r.name)}</span> <small>${scopeLabel}</small></div><div class="core-stat-value">${current}<small>/${max}</small></div><div class="core-stat-meter"><i style="width:${ratio}%"></i></div>${r.thresholds?.length?`<div class="core-stat-caption">limiares ${r.thresholds.join(' · ')}</div>`:''}<div class="core-stat-adjust"><input id="${inputId}" data-divine-resource-input="${esc(key)}" type="number" step="1" placeholder="+/−"><button type="button" data-divine-resource-apply="${esc(key)}" data-manual-input="${inputId}" title="Aplicar">↵</button></div></div>`;
   }
   function renderResourceDock(){
-    const band=sanityBand();
+    const band=sanityBand(),hasEnergy=energyMax()>0;
     const core=(kind,label,current,max,extra='')=>{const inputId=`status-${kind}Manual`,ratio=max?clamp((Number(current)||0)/Number(max)*100,0,100):0;return `<div class="core-stat core-${kind}" ${themeResourceAttrs(kind)} data-theme-frame="resource"><div class="core-stat-label">${themeIconSlot(kind)}<span class="theme-resource-label">${label}</span></div><div class="core-stat-value">${current}<small>/${max}</small></div><div class="core-stat-meter"><i style="width:${ratio}%"></i></div>${extra}<div class="core-stat-adjust"><input id="${inputId}" data-resource-manual-input="${kind}" type="number" step="1" placeholder="+/−"><button type="button" data-manual-resource="${kind}" data-manual-input="${inputId}" title="Aplicar">↵</button></div></div>`};
+    const noEnergy=`<div class="core-stat core-en mortal-no-energy" ${themeResourceAttrs('en')} data-theme-frame="resource"><div class="core-stat-label">${themeIconSlot('en')}<span class="theme-resource-label">Energia</span></div><div class="core-stat-value">—</div><div class="core-stat-caption">sem reserva de EN</div></div>`;
     return `<section class="status-core-strip" data-theme-component="resource-strip">
       ${core('hp','HP',state.currentHp,hpMax())}
       ${core('san','Sanidade',state.currentSanity,100,`<div class="core-stat-caption">${band.name}</div>`)}
       <div class="core-stat core-defense" ${themeResourceAttrs('defense')} data-theme-frame="resource"><div class="core-stat-label">${themeIconSlot('defense')}<span class="theme-resource-label">Defesa</span></div><div class="core-stat-value">${signed(defenseBonus())}</div><div class="core-stat-caption">1d20 ${signed(defenseBonus())}</div><div class="core-stat-caption muted-mini">DES + equipamento</div></div>
-      ${core('en','Energia',state.currentEnergy,energyMax())}
+      ${hasEnergy?core('en','Energia',state.currentEnergy,energyMax()):noEnergy}
       ${hudResources().map(r=>renderDivineResourceCore(r,'status')).join('')}
-      <div class="core-stat core-cast" ${themeResourceAttrs('cast')} data-theme-frame="resource"><div class="core-stat-label">${themeIconSlot('cast')}<span class="theme-resource-label">Conjuração</span></div><div class="core-stat-value">${signed(castAttack())}</div><div class="core-stat-caption">DT ${castDT()} · ${attrName(god().casting)}</div></div>
+      <div class="core-stat core-cast" ${themeResourceAttrs('cast')} data-theme-frame="resource"><div class="core-stat-label">${themeIconSlot('cast')}<span class="theme-resource-label">Conjuração</span></div><div class="core-stat-value">${hasSheetCasting()?signed(castAttack()):'—'}</div><div class="core-stat-caption">${hasSheetCasting()?`DT ${castDT()} · ${attrName(sheetCastingAttr())}`:'sem conjuração'}</div></div>
     </section>`;
   }
   function renderCombatResourceDock(){
-    const g=god(),fDef=fixedDefense();
+    const g=god(),fDef=fixedDefense(),hasEnergy=energyMax()>0;
     const mini=(kind,label,current,max)=>{const inputId=`combat-${kind}Manual`,ratio=max?clamp((Number(current)||0)/Number(max)*100,0,100):0;return `<div class="combat-resource-chip resource-${kind}" ${themeResourceAttrs(kind)} data-theme-frame="resource"><span>${themeIconSlot(kind)}<span class="theme-resource-label">${label}</span></span><strong>${current}<small>/${max}</small></strong><div class="combat-mini-meter"><i style="width:${ratio}%"></i></div><div class="combat-resource-adjust"><input id="${inputId}" data-resource-manual-input="${kind}" type="number" step="1" placeholder="+/−"><button type="button" data-manual-resource="${kind}" data-manual-input="${inputId}" title="Aplicar">↵</button></div></div>`};
     const divine=r=>{const current=resourceValue(r),max=resourceMaxFor(r),ratio=max?clamp(current/max*100,0,100):0,key=resourceKey(r),inputId=`combat-divine-${String(r.id).replace(/[^a-z0-9_-]/gi,'-')}`;return `<div class="combat-resource-chip resource-divine" ${themeResourceAttrs('divine',r.id||'',key)} data-theme-frame="resource"><span>${themeIconSlot('divine')}<span class="theme-resource-label">${esc(r.name)}</span> ${r.scope==='collective'?'<em>COLETIVO</em>':''}</span><strong>${current}<small>/${max}</small></strong><div class="combat-mini-meter"><i style="width:${ratio}%"></i></div><div class="combat-resource-adjust"><input id="${inputId}" data-divine-resource-input="${esc(key)}" type="number" step="1" placeholder="+/−"><button type="button" data-divine-resource-apply="${esc(key)}" data-manual-input="${inputId}">↵</button></div></div>`};
     const readOnly=(kind,label,value,caption='')=>{const resourceKind=kind==='dock-defense'?'defense':kind==='dock-dt'?'dt':kind;return `<div class="combat-resource-chip combat-readonly ${kind}" ${themeResourceAttrs(resourceKind)} data-theme-frame="resource"><span>${themeIconSlot(resourceKind)}<span class="theme-resource-label">${label}</span></span><strong>${value}</strong>${caption?`<small>${caption}</small>`:''}</div>`};
     return `<section class="combat-resource-dock" data-theme-component="combat-resource-dock" aria-label="Recursos de combate">
       ${mini('hp','HP',state.currentHp,hpMax())}
-      ${mini('en','Energia',state.currentEnergy,energyMax())}
+      ${hasEnergy?mini('en','Energia',state.currentEnergy,energyMax()):`<div class="combat-resource-chip resource-en combat-readonly mortal-no-energy" ${themeResourceAttrs('en')} data-theme-frame="resource"><span>${themeIconSlot('en')}<span class="theme-resource-label">Energia</span></span><strong>—</strong><small>sem reserva de EN</small></div>`}
       ${mini('san','Sanidade',state.currentSanity,100)}
       ${hudResources().map(divine).join('')}
       ${readOnly('dock-defense','Defesa',fDef!==null?fDef:signed(defenseBonus()),Number(state.tempMods?.defense)?`ajuste manual ${signed(state.tempMods.defense)}`:'valor atual')}
-      ${readOnly('dock-dt','DT',castDT(),`${attrName(g.casting)} · ataque ${signed(castAttack())}`)}
+      ${readOnly('dock-dt','DT',castDtText(),hasSheetCasting()?`${attrName(sheetCastingAttr())} · ataque ${signed(castAttack())}`:'sem conjuração')}
     </section>`;
   }
   function renderResourceSummaryPanel(){
     const g=god(),band=sanityBand(),energy=energyBand();
     return `<article class="card resource-summary-card"><p class="eyebrow">FOCO DO SISTEMA</p><h2>Combate rápido</h2><div class="resource-summary-grid">
       <div class="stat compact-stat" ${themeResourceAttrs('hp')} data-theme-frame="resource"><span>${themeIconSlot('hp')}<span class="theme-resource-label">HP</span></span><strong>${state.currentHp}/${hpMax()}</strong><small>${Math.round((state.currentHp/Math.max(1,hpMax()))*100)}%</small></div>
-      <div class="stat compact-stat" ${themeResourceAttrs('en')} data-theme-frame="resource"><span>${themeIconSlot('en')}<span class="theme-resource-label">Energia</span></span><strong>${state.currentEnergy}/${energyMax()}</strong><small>${energy.name}</small></div>
+      <div class="stat compact-stat" ${themeResourceAttrs('en')} data-theme-frame="resource"><span>${themeIconSlot('en')}<span class="theme-resource-label">Energia</span></span><strong>${energyValueText()}</strong><small>${energy.name}</small></div>
       <div class="stat compact-stat" ${themeResourceAttrs('san')} data-theme-frame="resource"><span>${themeIconSlot('san')}<span class="theme-resource-label">Sanidade</span></span><strong>${state.currentSanity}/100</strong><small>${band.name}</small></div>
       <div class="stat compact-stat" ${themeResourceAttrs('defense')} data-theme-frame="resource"><span>${themeIconSlot('defense')}<span class="theme-resource-label">Defesa base</span></span><strong>${signed(defenseBonus())}</strong><small>DES + armadura + escudo</small></div>
-      <div class="stat compact-stat" ${themeResourceAttrs('cast')} data-theme-frame="resource"><span>${themeIconSlot('cast')}<span class="theme-resource-label">Conjuração</span></span><strong>${signed(castAttack())}</strong><small>DT ${castDT()} · ${attrName(g.casting)}</small></div>
+      <div class="stat compact-stat" ${themeResourceAttrs('cast')} data-theme-frame="resource"><span>${themeIconSlot('cast')}<span class="theme-resource-label">Conjuração</span></span><strong>${hasSheetCasting()?signed(castAttack()):'—'}</strong><small>${hasSheetCasting()?`DT ${castDT()} · ${attrName(sheetCastingAttr())}`:'sem conjuração'}</small></div>
       ${hudResources().map(r=>{const key=resourceKey(r);return `<div class="stat compact-stat" ${themeResourceAttrs('divine',r.id||'',key)} data-theme-frame="resource"><span>${themeIconSlot('divine')}<span class="theme-resource-label">${esc(r.name)}</span></span><strong>${resourceValue(r)}/${resourceMaxFor(r)}</strong><small>${r.scope==='collective'?'coletivo':'pessoal'}</small></div>`}).join('')}
     </div><div class="subcard compact" style="margin-top:12px"><b>Estado mental:</b> ${band.name}. ${band.text}</div></article>`;
   }
@@ -1012,21 +1017,21 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
       <div class="rail-brandline"><span>LEG · XII · FULMINATA</span><b>${GROUP_LABEL[g.group]||g.group}</b></div>
       <div class="rail-mobile-summary" aria-label="Resumo rápido do personagem">
         <div class="rail-mobile-summary-head">
-          <div class="rail-mobile-summary-copy"><small>${esc(g.name)}${state.lineage?.type!=='normal'?' · LEGADO':''}</small><strong>${esc(state.name||'Sem nome')}</strong></div>
+          <div class="rail-mobile-summary-copy"><small>${esc(g.name)}${!isMortal()&&state.lineage?.type!=='normal'?' · LEGADO':''}</small><strong>${esc(state.name||'Sem nome')}</strong></div>
           <div class="rail-mobile-summary-badges"><span>Nv ${state.level}</span><span>BP ${signed(bp())}</span></div>
         </div>
         <div class="rail-mobile-summary-vitals">
           <div><span>HP</span><b>${state.currentHp}/${hpMax()}</b></div>
-          <div><span>EN</span><b>${state.currentEnergy}/${energyMax()}</b></div>
+          <div><span>EN</span><b>${energyValueText()}</b></div>
           <div><span>SAN</span><b>${state.currentSanity}/100</b></div>
           <div><span>DEF</span><b>${signed(defenseBonus())}</b></div>
         </div>
       </div>
       <button id="railMobileProfileToggle" class="rail-mobile-profile-toggle ghost" type="button" aria-expanded="${mobileProfileExpanded?'true':'false'}">${mobileProfileExpanded?'Ocultar perfil':'Ver perfil completo'}</button>
       <div class="rail-portrait-wrap"><div class="rail-portrait-badges"><label class="rail-orb rail-orb-level" data-theme-component="orb" data-orb="level" data-theme-frame="orb"><span>Nível</span><input id="levelOrbInput" type="number" min="${CORE_LEVEL_MIN}" max="${CORE_LEVEL_MAX}" value="${state.level}"></label><div class="rail-orb rail-orb-bp" data-theme-component="orb" data-orb="bp" data-theme-frame="orb"><span>BP</span><strong>${signed(bp())}</strong></div></div><div class="rail-portrait ${h.portraitUrl?'has-image':''}"${h.portraitUrl?` style="background-image:url('${esc(h.portraitUrl)}')"`:''}>${h.portraitUrl?'':esc(initials(state.name||g.name))}</div><button id="heroPortraitUploadBtn" class="rail-photo-button" type="button">Trocar retrato</button></div>
-      <div class="rail-identity"><p class="eyebrow">${esc(g.name)}${state.lineage?.type!=='normal'?' · LEGADO':''}</p><h2>${esc(state.name||'Sem nome')}</h2>${h.tagline?`<p class="rail-tagline">${esc(h.tagline)}</p>`:''}<div class="rail-meta">${profileBits.length?profileBits.map(x=>`<span>${x}</span>`).join(''):'<span>Perfil sem detalhes adicionais</span>'}</div></div>
-      <div class="rail-level-row" data-theme-component="profile-stats"><div class="rail-defense-stat" ${themeResourceAttrs('defense')}><span>${themeIconSlot('defense')}<span class="theme-resource-label">Defesa</span></span><strong>${signed(defenseBonus())}</strong><label class="rail-defense-adjust" title="Bônus ou penalidade manual de Defesa">manual <input id="railDefenseAdjust" type="number" value="${Number(state.tempMods.defense)||0}"></label></div><div ${themeResourceAttrs('dt')}><span>${themeIconSlot('dt')}<span class="theme-resource-label">DT</span></span><strong>${castDT()}</strong></div></div>
-      <div class="rail-vitals" data-theme-component="profile-vitals"><div ${themeResourceAttrs('hp')}><span>${themeIconSlot('hp')}<span class="theme-resource-label">HP</span></span><b>${state.currentHp}/${hpMax()}</b></div><div ${themeResourceAttrs('en')}><span>${themeIconSlot('en')}<span class="theme-resource-label">EN</span></span><b>${state.currentEnergy}/${energyMax()}</b><small>${energy.name}</small></div><div ${themeResourceAttrs('san')}><span>${themeIconSlot('san')}<span class="theme-resource-label">SAN</span></span><b>${state.currentSanity}/100</b><small>${band.name}</small></div>${hudResources().slice(0,2).map(r=>{const key=resourceKey(r);return `<div ${themeResourceAttrs('divine',r.id||'',key)}><span>${themeIconSlot('divine')}<span class="theme-resource-label">${esc(r.name)}</span>${r.scope==='collective'?'<small>COLETIVO</small>':''}</span><b>${resourceValue(r)}/${resourceMaxFor(r)}</b></div>`}).join('')}</div>
+      <div class="rail-identity"><p class="eyebrow">${esc(g.name)}${!isMortal()&&state.lineage?.type!=='normal'?' · LEGADO':''}</p><h2>${esc(state.name||'Sem nome')}</h2>${h.tagline?`<p class="rail-tagline">${esc(h.tagline)}</p>`:''}<div class="rail-meta">${profileBits.length?profileBits.map(x=>`<span>${x}</span>`).join(''):'<span>Perfil sem detalhes adicionais</span>'}</div></div>
+      <div class="rail-level-row" data-theme-component="profile-stats"><div class="rail-defense-stat" ${themeResourceAttrs('defense')}><span>${themeIconSlot('defense')}<span class="theme-resource-label">Defesa</span></span><strong>${signed(defenseBonus())}</strong><label class="rail-defense-adjust" title="Bônus ou penalidade manual de Defesa">manual <input id="railDefenseAdjust" type="number" value="${Number(state.tempMods.defense)||0}"></label></div><div ${themeResourceAttrs('dt')}><span>${themeIconSlot('dt')}<span class="theme-resource-label">DT</span></span><strong>${castDtText()}</strong></div></div>
+      <div class="rail-vitals" data-theme-component="profile-vitals"><div ${themeResourceAttrs('hp')}><span>${themeIconSlot('hp')}<span class="theme-resource-label">HP</span></span><b>${state.currentHp}/${hpMax()}</b></div><div ${themeResourceAttrs('en')}><span>${themeIconSlot('en')}<span class="theme-resource-label">EN</span></span><b>${energyValueText()}</b><small>${energy.name}</small></div><div ${themeResourceAttrs('san')}><span>${themeIconSlot('san')}<span class="theme-resource-label">SAN</span></span><b>${state.currentSanity}/100</b><small>${band.name}</small></div>${hudResources().slice(0,2).map(r=>{const key=resourceKey(r);return `<div ${themeResourceAttrs('divine',r.id||'',key)}><span>${themeIconSlot('divine')}<span class="theme-resource-label">${esc(r.name)}</span>${r.scope==='collective'?'<small>COLETIVO</small>':''}</span><b>${resourceValue(r)}/${resourceMaxFor(r)}</b></div>`}).join('')}</div>
       <button id="fortunaBlessingToggle" class="${fortunaBlessingIsCurrent()?'primary':'ghost'} small-btn wide-button" type="button" aria-pressed="${fortunaBlessingIsCurrent()?'true':'false'}" title="Bênção mensal de Fortuna: +10 no HP máximo enquanto estiver ativa; reseta automaticamente na virada do mês">${fortunaBlessingIsCurrent()?'✓ Bênção de Fortuna ativa · +10 HP máximo':'Bênção de Fortuna · +10 HP máximo'}<small style="display:block">Reseta automaticamente no fim do mês</small></button>
       ${renderMiniDeath()}
       <details class="rail-editor"><summary>Editar perfil</summary><div class="stack">
@@ -1398,7 +1403,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     return `<article class="card"><div class="row between"><div><h3>Novas perícias em treinamento</h3><p class="muted compact">Treinamentos adicionais nos níveis 21, 41, 61, 81 e 100. A perícia só passa a somar BP quando alcançar 30 estacas.</p></div><span class="pill">${availableSkillTrainingSlots()} vaga(s)</span></div>${availableSkillTrainingSlots()>0&&available.length?`<div class="row"><select id="newTrainingSkill" style="flex:1"><option value="">Escolha uma perícia…</option>${available.map(s=>`<option>${s.name}</option>`).join('')}</select><button id="addSkillTraining" class="primary">Adicionar</button></div>`:''}<div class="stack" style="margin-top:12px">${state.skillTrainings.length?state.skillTrainings.map(t=>`<div class="subcard"><div class="row between"><div><b>${t.name}</b><div class="muted compact">${t.stakes>=30?'Dominada · fonte Treino · BP aplicado':'Em treinamento · ainda sem BP'}</div></div><button data-remove-skill-training="${t.id}" class="danger">Remover</button></div><label><span class="label">Estacas · ${t.stakes}/30</span><input type="range" min="0" max="30" value="${t.stakes}" data-skill-training="${t.id}"></label><div class="row between"><span>Bônus atual</span><b>${signed(skillValue(t.name))}</b></div></div>`).join(''):'<p class="muted">Nenhuma nova perícia em treinamento.</p>'}</div>${state.skillTrainings.length>skillTrainingSlots()?'<div class="notice">Há mais treinamentos salvos do que o nível atual permite. Nada foi apagado ao reduzir o nível, mas novas escolhas ficam bloqueadas.</div>':''}</article>`;
   }
 
-  function lineageAbilityTitle(){const a=primaryGod(),b=secondaryGod(),t=state.lineage?.type||'normal';if(t==='compound'&&b)return `${a.name} · legado de ${b.name}`;if(t==='direct'&&b)return `${a.name} + ${b.name} · Legado Direto`;return a.name}
+  function lineageAbilityTitle(){if(isMortal())return 'Mortal da Névoa';const a=primaryGod(),b=secondaryGod(),t=state.lineage?.type||'normal';if(t==='compound'&&b)return `${a.name} · legado de ${b.name}`;if(t==='direct'&&b)return `${a.name} + ${b.name} · Legado Direto`;return a.name}
   function talentParameterHtml(inst,def){
     const p=inst.params||{};let out='';
     const attrSelect=(key,label,value)=>`<label><span class="label">${label}</span><select data-talent-param="${inst.id}:${key}"><option value="">Selecione…</option>${ATTRS.map(([k,a,l])=>`<option value="${k}" ${value===k?'selected':''}>${l}</option>`).join('')}</select></label>`;
@@ -1420,6 +1425,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     return `<section class="mechanics-section"><div class="section-title"><div><p class="eyebrow">TALENTOS</p><h2>Desenvolvimento do personagem</h2></div><span class="pill">Padrão ${used}/${earned}</span></div><article class="card"><p class="muted">Você recebe um talento nos níveis 1, 30, 60 e 90, então já começa com um talento. Por padrão, cada talento só pode ser escolhido uma vez, a menos que a própria descrição diga o contrário. Selecione um talento para ler a descrição antes de adicionar.</p><div class="talent-picker"><select id="newTalentDef"><option value="">Escolha um talento para consultar…</option>${eligible.map(t=>`<option value="${t.id}" ${state.talentDraftId===t.id?'selected':''}>${t.name}${t.minLevel>1?` · Nv ${t.minLevel}+${state.level<t.minLevel?' · bloqueado':''}`:''}</option>`).join('')}</select><div id="talentPreview">${talentPreviewHtml(preview)}</div><div class="row"><button id="addStandardTalent" class="primary" ${used>=earned||!preview||(preview&&state.level<preview.minLevel)?'disabled':''}>Adicionar padrão</button><button id="addExtraTalent" ${!preview||(preview&&state.level<preview.minLevel)?'disabled':''}>Adicionar extra</button></div></div><div class="talent-grid">${(state.talents||[]).length?(state.talents||[]).map(inst=>{const def=talentDef(inst.talentId)||{name:'Talento desconhecido',description:'',manual:true};return `<div class="subcard talent-card" data-theme-component="talent" data-theme-frame="talent"><div class="row between"><div><b>${def.name}</b><div class="muted compact">${inst.extra?'Extra / concedido':'Slot padrão'}${def.manual?' · controle manual':''}</div></div><button class="danger" data-remove-talent="${inst.id}">Remover</button></div><p class="compact">${def.description}</p><div class="talent-params">${talentParameterHtml(inst,def)}</div><label><span class="label">Notas</span><input data-talent-notes="${inst.id}" value="${esc(inst.notes||'')}" placeholder="Fonte, detalhe, uso aprovado..."></label></div>`}).join(''):'<div class="notice">Nenhum talento selecionado.</div>'}</div>${hasTalent('pau-toda-obra')?`<div class="notice">Pau pra Toda Obra ativo: some <b>+${talentCount('pau-toda-obra')}d4</b> em Testes de Perícia. A ficha não transforma este dado em bônus fixo.</div>`:''}</article></section>`;
   }
   function renderLegacySection(){
+    if(isMortal())return `<section class="mechanics-section mortal-origin-section"><article class="card"><p class="eyebrow">ORIGEM</p><h2>Mortal da Névoa</h2><div class="notice"><b>Sem ascendência divina.</b> Não possui poderes, recursos ou bônus divinos. Perícia de origem: <b>${esc(state.originSkillChoice||'—')}</b>.</div><p class="muted compact">HP: 10 + CON; +3 + CON a cada 10 níveis. Sem Energia natural. Se despertar Magia, recebe +15 EN a cada 10 níveis, além da Energia obtida por sacrifícios.</p></article></section>`;
     const type=state.lineage?.type||'normal',main=primaryGod(),sub=secondaryGod();
     if(isTriumvir(state.godId))return `<section class="mechanics-section"><article class="card"><p class="eyebrow">LEGADO</p><h2>Kit Triunviral</h2><div class="notice">Triúnviros não participam do sistema de mistura de kits por Legado. O kit permanece integral.</div></article></section>`;
     const eligible=eligibleLegacyGods();
