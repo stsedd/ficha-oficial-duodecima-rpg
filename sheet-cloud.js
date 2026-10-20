@@ -10,16 +10,16 @@ function parsePair(selector){
   const match=text.match(/(-?\d+)\s*\/\s*(-?\d+)/);
   return match?{current:Number(match[1]),max:Number(match[2])}:null;
 }
-function syncSignature(d={}){
-  return JSON.stringify({
-    name:d.name||'',level:Number(d.level||1),
-    currentHp:d.currentHp==null?null:Number(d.currentHp),
-    currentEnergy:d.currentEnergy==null?null:Number(d.currentEnergy),
-    currentSanity:Number(d.currentSanity??100),
-    conditions:Array.isArray(d.conditions)?[...d.conditions].sort():[],
-    exhaustion:Number(d.exhaustion||0)
-  });
+function canonical(v){
+  if(Array.isArray(v))return v.map(canonical);
+  if(v&&typeof v==='object'){
+    const out={};
+    Object.keys(v).sort().forEach(k=>{out[k]=canonical(v[k])});
+    return out;
+  }
+  return v;
 }
+function syncSignature(d={}){return JSON.stringify(canonical(d))}
 function cloudPayload(d){
   const hp=parsePair('.core-hp .core-stat-value')||parsePair('.rail-vitals .vital-hp');
   const en=parsePair('.core-en .core-stat-value')||parsePair('.rail-vitals .vital-en');
