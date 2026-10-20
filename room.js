@@ -5,10 +5,16 @@ const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.remove('hidden')
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase||!roomId){location.replace('index.html');return}
 const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
-let me=null,room=null,isMaster=false,channel=null,onlineIds=new Set(),participants=[],combat=null,initiative=[],trackers=[],events=[],briefing=null,refreshTimer=0;
+let me=null,room=null,isMaster=false,channel=null,onlineIds=new Set(),participants=[],combat=null,initiative=[],trackers=[],events=[],briefing=null,refreshTimer=0,durationTimer=0;
 
 function pct(current,max){if(current==null||max==null||!Number.isFinite(Number(max))||Number(max)<=0)return 0;return Math.max(0,Math.min(100,(Number(current)/Number(max))*100))}
 function liveMaster(){return isMaster&&room?.status==='active'}
+function updateDuration(){
+  if(!room?.created_at)return;
+  const start=new Date(room.created_at).getTime(),end=room.status==='ended'&&room.ended_at?new Date(room.ended_at).getTime():Date.now();
+  const mins=Math.max(0,Math.floor((end-start)/60000)),h=Math.floor(mins/60),m=mins%60;
+  $('#roomDuration').textContent=h?h+'h '+m+'min':m+' min';
+}
 function schedule(fn,delay=80){clearTimeout(refreshTimer);refreshTimer=setTimeout(fn,delay)}
 async function logEvent(message,eventType='note',payload={}){
   if(!me)return;
@@ -96,7 +102,7 @@ async function toggleCondition(characterId,condition,enabled){
 async function loadRoom(){
   const {data,error}=await client.from('rooms').select('*').eq('id',roomId).single();
   if(error||!data){alert('Você não tem mais acesso a esta sala ou ela não existe.');location.replace('index.html');return false}
-  room=data;$('#roomName').textContent=room.name;$('#roomCode').textContent=room.code;$('#roomStatus').textContent=room.status==='active'?'Ativa':'Encerrada';
+  room=data;$('#roomName').textContent=room.name;$('#roomCode').textContent=room.code;$('#roomStatus').textContent=room.status==='active'?'Ativa':'Encerrada';updateDuration();
   document.body.classList.toggle('ended',room.status!=='active');
   $('#endRoom').classList.toggle('hidden',!liveMaster());
   $('#reopenRoom').classList.toggle('hidden',!isMaster||room.status==='active');
@@ -297,6 +303,7 @@ async function refresh(){
   $$('.master-only').forEach(x=>x.classList.toggle('hidden',!isMaster));
   $('#roomBoot').classList.add('hidden');$('#roomView').classList.remove('hidden');
   await refresh();if(isMaster)await loadNotes();
+  clearInterval(durationTimer);durationTimer=setInterval(updateDuration,30000);
   channel=client.channel('room-'+roomId,{config:{presence:{key:me.id}}})
     .on('presence',{event:'sync'},()=>{onlineIds=new Set(Object.keys(channel.presenceState()||{}));loadParticipants()})
     .on('postgres_changes',{event:'*',schema:'public',table:'room_members',filter:'room_id=eq.'+roomId},()=>schedule(refresh))
@@ -307,7 +314,12 @@ async function refresh(){
     .on('postgres_changes',{event:'*',schema:'public',table:'room_trackers',filter:'room_id=eq.'+roomId},()=>schedule(loadTrackers))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_briefing',filter:'room_id=eq.'+roomId},()=>schedule(loadBriefing))
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'room_events',filter:'room_id=eq.'+roomId},()=>schedule(loadEvents))
-    .subscribe(async status=>{if(status==='SUBSCRIBED')await channel.track({user_id:me.id,online_at:new Date().toISOString()})});
+    .subscribe(async status=>{
+      const pill=$('#syncStatus');
+      if(status==='SUBSCRIBED'){pill.textContent='Ao vivo';pill.className='sync-pill online';await channel.track({user_id:me.id,online_at:new Date().toISOString()})}
+      else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){pill.textContent='Reconectando…';pill.className='sync-pill warning'}
+      else if(status==='CLOSED'){pill.textContent='Offline';pill.className='sync-pill warning'}
+    });
 })();
 $('#logout').onclick=()=>client.auth.signOut().then(()=>location.replace('index.html'));
 $('#copyCode').onclick=async()=>{try{await navigator.clipboard.writeText(room?.code||'');toast('Código copiado.')}catch{toast('Código: '+(room?.code||''))}};
