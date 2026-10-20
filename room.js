@@ -5,7 +5,7 @@ const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.remove('hidden')
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase||!roomId){location.replace('index.html');return}
 const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
-let me=null,room=null,isMaster=false,channel=null,onlineIds=new Set(),participants=[],combat=null,initiative=[],trackers=[],refreshTimer=0;
+let me=null,room=null,isMaster=false,channel=null,onlineIds=new Set(),participants=[],combat=null,initiative=[],trackers=[],events=[],refreshTimer=0;
 
 function pct(current,max){if(current==null||max==null||!Number.isFinite(Number(max))||Number(max)<=0)return 0;return Math.max(0,Math.min(100,(Number(current)/Number(max))*100))}
 function liveMaster(){return isMaster&&room?.status==='active'}
@@ -215,11 +215,24 @@ async function saveNotes(){
   if(!error)setTimeout(()=>$('#notesState').textContent='Somente você vê isto.',2200);
 }
 
-function eventIcon(type){return ({combat:'⚔',turn:'➜',resource:'◈',condition:'◆',tracker:'◎',roll:'⚄',member_removed:'×',member_join:'+',member_leave:'−',npc_resource:'◇'})[type]||'·'}
+function eventIcon(type){return ({combat:'⚔',turn:'➜',resource:'◈',condition:'◆',tracker:'◎',roll:'⚄',undo:'↶',member_removed:'×',member_join:'+',member_leave:'−',npc_resource:'◇'})[type]||'·'}
 async function loadEvents(){
-  const {data,error}=await client.from('room_events').select('id,event_type,message,created_at').eq('room_id',roomId).order('created_at',{ascending:false}).limit(40);
+  const {data,error}=await client.from('room_events').select('id,event_type,message,payload,created_at').eq('room_id',roomId).order('created_at',{ascending:false}).limit(40);
   if(error)return;
-  $('#eventList').innerHTML=(data||[]).length?(data||[]).map(e=>'<div class="event-row"><span>'+eventIcon(e.event_type)+'</span><div><b>'+esc(e.message)+'</b><small>'+new Date(e.created_at).toLocaleString('pt-BR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})+'</small></div></div>').join(''):'<div class="mini-empty">As ações importantes da sessão aparecerão aqui.</div>';
+  events=data||[];
+  $('#eventList').innerHTML=events.length?events.map(e=>{
+    const canUndo=liveMaster()&&e.event_type==='resource'&&e.payload?.character_id&&e.payload?.resource&&Number.isFinite(Number(e.payload?.old_value))&&Number.isFinite(Number(e.payload?.new_value));
+    return '<div class="event-row"><span>'+eventIcon(e.event_type)+'</span><div><b>'+esc(e.message)+'</b><span class="event-meta"><small>'+new Date(e.created_at).toLocaleString('pt-BR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})+'</small>'+(canUndo?'<button data-undo-event="'+e.id+'">Desfazer</button>':'')+'</span></div></div>';
+  }).join(''):'<div class="mini-empty">As ações importantes da sessão aparecerão aqui.</div>';
+  $('[data-undo-event]').forEach(b=>b.onclick=()=>undoResourceEvent(b.dataset.undoEvent));
+}
+async function undoResourceEvent(eventId){
+  const e=events.find(x=>x.id===eventId),p=e?.payload;if(!p)return;
+  const {data,error}=await client.rpc('master_restore_character_resource',{p_room_id:roomId,p_character_id:p.character_id,p_resource:p.resource,p_expected_current:Number(p.new_value),p_value:Number(p.old_value)});
+  if(error)return toast('Não foi possível desfazer: o valor já mudou depois desta ação.');
+  await logEvent('Ajuste desfeito: '+e.message,'undo',{source_event:eventId,restored_value:data});
+  toast('Alteração desfeita.');
+  await Promise.all([loadParticipants(),loadEvents()]);
 }
 
 async function refresh(){
