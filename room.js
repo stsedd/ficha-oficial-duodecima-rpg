@@ -5,7 +5,7 @@ const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.remove('hidden')
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase||!roomId){location.replace('index.html');return}
 const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
-let me=null,room=null,isMaster=false,channel=null,onlineIds=new Set(),participants=[],combat=null,initiative=[],trackers=[],events=[],briefing=null,refreshTimer=0,durationTimer=0;
+let me=null,room=null,isMaster=false,channel=null,onlineIds=new Set(),participants=[],combat=null,initiative=[],trackers=[],events=[],effects=[],briefing=null,refreshTimer=0,durationTimer=0;
 
 function pct(current,max){if(current==null||max==null||!Number.isFinite(Number(max))||Number(max)<=0)return 0;return Math.max(0,Math.min(100,(Number(current)/Number(max))*100))}
 function liveMaster(){return isMaster&&room?.status==='active'}
@@ -35,7 +35,7 @@ function participantCard(p){
   const cond=canSee?(p.conditions||[]):[],exhaustion=canSee?p.exhaustion:null;
   let conditions='';
   if(canSee){
-    conditions='<div class="conditions">'+(cond.length?cond.map(x=>'<span>'+esc(x)+(liveMaster()?'<button data-remove-condition="'+p.character_id+'" data-condition="'+esc(x)+'" aria-label="Remover condição">×</button>':'')+'</span>').join(''):'<span class="quiet">Sem condições</span>')+(exhaustion?'<span>Exaustão '+exhaustion+'</span>':'')+(liveMaster()?'<button class="condition-add" data-add-condition="'+p.character_id+'">+ condição</button>':'')+'</div>';
+    conditions='<div class="conditions">'+(cond.length?cond.map(x=>{const timed=effects.find(e=>e.character_id===p.character_id&&e.label===x);return '<span>'+esc(x)+(timed?'<small class="effect-duration">'+Number(timed.remaining_rounds)+'r</small>':'')+(liveMaster()?'<button data-remove-condition="'+p.character_id+'" data-condition="'+esc(x)+'" aria-label="Remover condição">×</button>':'')+'</span>'}).join(''):'<span class="quiet">Sem condições</span>')+(exhaustion?'<span>Exaustão '+exhaustion+'</span>':'')+(liveMaster()?'<button class="condition-add" data-add-condition="'+p.character_id+'">+ condição</button>':'')+'</div>';
   }
   let masterExtra='';
   if(liveMaster()){
@@ -75,10 +75,13 @@ function bindParticipantActions(){
     if(!Number.isFinite(delta)||delta===0)return toast('Digite um número diferente de zero.');
     adjustCharacter(b.dataset.customAdjust,b.dataset.resource,Math.trunc(delta));
   });
-  $$('[data-add-condition]').forEach(b=>b.onclick=async()=>{
+  $('[data-add-condition]').forEach(b=>b.onclick=async()=>{
     const condition=(prompt('Nome da condição:','')||'').trim();
     if(!condition)return;
-    await toggleCondition(b.dataset.addCondition,condition,true);
+    const durationRaw=prompt('Duração em rodadas? Deixe vazio para condição permanente.','');
+    if(durationRaw===null)return;
+    const rounds=durationRaw.trim()===''?0:Math.max(1,Math.trunc(Number(durationRaw)||1));
+    await toggleCondition(b.dataset.addCondition,condition,true,rounds);
   });
   $$('[data-remove-condition]').forEach(b=>b.onclick=()=>toggleCondition(b.dataset.removeCondition,b.dataset.condition,false));
 }
@@ -91,11 +94,16 @@ async function adjustCharacter(characterId,res,delta){
   toast(label+' atualizado.');
   loadParticipants();
 }
-async function toggleCondition(characterId,condition,enabled){
+async function toggleCondition(characterId,condition,enabled,rounds=0){
   const p=participants.find(x=>x.character_id===characterId);
   const {error}=await client.rpc('master_toggle_character_condition',{p_room_id:roomId,p_character_id:characterId,p_condition:condition,p_enabled:enabled});
   if(error)return toast('Não foi possível alterar a condição.');
-  await logEvent((p?.character_name||'Personagem')+(enabled?' recebeu ':' perdeu a condição ')+condition+'.','condition',{character_id:characterId,condition,enabled});
+  if(enabled&&rounds>0){
+    await client.from('room_effects').upsert({room_id:roomId,character_id:characterId,label:condition,remaining_rounds:rounds},{onConflict:'room_id,character_id,label'});
+  }else{
+    await client.from('room_effects').delete().eq('room_id',roomId).eq('character_id',characterId).eq('label',condition);
+  }
+  await logEvent((p?.character_name||'Personagem')+(enabled?' recebeu ':' perdeu a condição ')+condition+(enabled&&rounds>0?' por '+rounds+' rodada(s)':'')+'.','condition',{character_id:characterId,condition,enabled,rounds});
   loadParticipants();
 }
 
@@ -114,7 +122,11 @@ async function hasMembership(){const {data}=await client.from('room_members').se
 async function loadParticipants(){
   const {data,error}=await client.rpc('get_room_participants',{p_room_id:roomId});
   if(error){toast('Não foi possível atualizar a mesa.');return}
-  const {data:memberStates}=await client.from('room_members').select('user_id,ready').eq('room_id',roomId);
+  const [{data:memberStates},{data:roomEffects}]=await Promise.all([
+    client.from('room_members').select('user_id,ready').eq('room_id',roomId),
+    client.from('room_effects').select('id,character_id,label,remaining_rounds').eq('room_id',roomId)
+  ]);
+  effects=roomEffects||[];
   const readyMap=new Map((memberStates||[]).map(x=>[x.user_id,!!x.ready]));
   participants=(data||[]).map(x=>({...x,ready:readyMap.get(x.user_id)||false}));
   $('#participantCount').textContent=participants.length;
@@ -175,7 +187,19 @@ async function nextTurn(){
   if(!liveMaster())return toast('Esta sessão está encerrada.');
   if(!combat?.active||!initiative.length)return toast('Inicie o combate primeiro.');
   let next=Number(combat.turn_index||0)+1,round=Number(combat.round||1);
-  if(next>=initiative.length){next=0;round++}
+  let advancedRound=false;
+  if(next>=initiative.length){next=0;round++;advancedRound=true}
+  if(advancedRound){
+    const {data:ticked,error:tickError}=await client.rpc('master_tick_room_effects',{p_room_id:roomId});
+    if(!tickError){
+      for(const effect of ticked||[]){
+        if(effect.expired){
+          const owner=participants.find(p=>p.character_id===effect.character_id);
+          await logEvent((owner?.character_name||'Personagem')+': a condição '+effect.label+' expirou.','condition',{character_id:effect.character_id,condition:effect.label,expired:true});
+        }
+      }
+    }
+  }
   await client.from('room_combat').update({turn_index:next,round}).eq('room_id',roomId);
   const target=initiative[next];
   await logEvent('Rodada '+round+': turno de '+target.label+'.','turn',{round,turn_index:next,label:target.label});
@@ -313,6 +337,7 @@ async function refresh(){
     .on('postgres_changes',{event:'*',schema:'public',table:'room_initiative',filter:'room_id=eq.'+roomId},()=>schedule(loadCombat))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_trackers',filter:'room_id=eq.'+roomId},()=>schedule(loadTrackers))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_briefing',filter:'room_id=eq.'+roomId},()=>schedule(loadBriefing))
+    .on('postgres_changes',{event:'*',schema:'public',table:'room_effects',filter:'room_id=eq.'+roomId},()=>schedule(loadParticipants))
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'room_events',filter:'room_id=eq.'+roomId},()=>schedule(loadEvents))
     .subscribe(async status=>{
       const pill=$('#syncStatus');
