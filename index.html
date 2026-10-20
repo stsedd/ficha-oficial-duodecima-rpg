@@ -4,12 +4,13 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090709">
 <title>SCUTUM Lab · Duodécima · v0.1</title>
-<link rel="stylesheet" href="hub.css?v=0.1.0">
+<link rel="stylesheet" href="hub.css?v=0.2.1">
 </head>
 <body>
 <header class="top"><div><span>LEGIO XII FULMINATA</span><strong>SCUTUM <i>Lab</i></strong></div><div id="sessionActions"></div></header>
 <main>
-<section id="authView" class="auth-wrap">
+<section id="bootView" class="boot-view"><div class="boot-mark">SCUTUM <i>Lab</i></div><span>Carregando seu arquivo…</span></section>
+<section id="authView" class="auth-wrap hidden">
   <article class="auth-brand"><p class="eyebrow">CHARACTER ARCHIVE</p><h1>Suas fichas, em qualquer lugar.</h1><p>Este é o ambiente de testes do novo SCUTUM. A ficha oficial continua separada e intacta.</p><div class="feature"><b>Conta própria</b><span>Várias personagens na mesma conta.</span></div><div class="feature"><b>Ficha online</b><span>Salva na nuvem e abre em outro dispositivo.</span></div><div class="feature"><b>Administração</b><span>Staff acompanha HP, Energia, Sanidade e condições.</span></div></article>
   <article class="auth-card"><div class="tabs"><button class="active" data-auth-tab="login">Entrar</button><button data-auth-tab="signup">Criar conta</button></div>
     <form id="authForm"><label>E-mail<input id="email" type="email" required autocomplete="email"></label><label>Senha<input id="password" type="password" minlength="6" required autocomplete="current-password"></label><button class="primary" type="submit" id="authSubmit">Entrar</button><p id="authHint"></p></form>
@@ -42,5 +43,5 @@
 <div id="toast" class="toast hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="scutum-config.js"></script>
-<script src="hub.js?v=0.1.0"></script>
+<script src="hub.js?v=0.2.1"></script>
 </body></html>
