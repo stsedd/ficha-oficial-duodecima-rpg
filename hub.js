@@ -3,6 +3,8 @@ const cfg=window.SCUTUM_CONFIG||{},ready=cfg.supabaseUrl&&cfg.supabaseAnonKey&&w
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add('hidden'),2800)};
 let mode='login',client=null,profile=null,adminChannel=null,roomChannel=null,myCharacters=[],inviteHandled=false;
+const inviteFromUrl=(new URLSearchParams(location.search).get('join')||'').trim().toUpperCase();
+if(inviteFromUrl)sessionStorage.setItem('scutum_pending_invite',inviteFromUrl);
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function setMode(v){mode=v;$$('[data-auth-tab]').forEach(b=>b.classList.toggle('active',b.dataset.authTab===v));$('#authSubmit').textContent=v==='login'?'Entrar':'Criar conta';$('#password').autocomplete=v==='login'?'current-password':'new-password';$('#authHint').textContent=''}
@@ -74,14 +76,18 @@ async function renderApp(){
   $('#createRoomBtn').classList.toggle('hidden',p?.role!=='admin');
   await Promise.all([loadRooms(user),loadEndedRooms(user)]);
   if(!inviteHandled){
-    const invite=(new URLSearchParams(location.search).get('join')||'').trim().toUpperCase();
+    const invite=(inviteFromUrl||sessionStorage.getItem('scutum_pending_invite')||'').trim().toUpperCase();
     if(invite){
-      inviteHandled=true;
       if(myCharacters.length){
+        inviteHandled=true;
         $('#joinRoomCode').value=invite;
         $('#joinCharacter').innerHTML=myCharacters.map(c=>'<option value="'+c.id+'">'+esc(c.name)+' · Nv '+Number(c.level||1)+'</option>').join('');
         openDialog($('#joinRoomDialog'));
-      }else toast('Importe ou crie uma ficha antes de entrar pelo convite.');
+      }else{
+        inviteHandled=true;
+        sessionStorage.setItem('scutum_pending_invite',invite);
+        toast('Importe ou crie uma ficha; o convite ficará guardado nesta aba.');
+      }
     }
   }
   if(p?.role==='admin')await renderAdmin();else $('#adminPanel').classList.add('hidden');
@@ -133,6 +139,7 @@ $('#joinRoomForm').onsubmit=async e=>{
       const chosen=myCharacters.find(c=>c.id===characterId);
       await client.from('room_events').insert({room_id:room.id,actor_id:user.id,event_type:'member_join',message:(chosen?.name||'Uma personagem')+' entrou na sala.'});
     }
+    sessionStorage.removeItem('scutum_pending_invite');
     $('#joinRoomDialog').close();location.href='room.html?id='+encodeURIComponent(room.id);
   }catch(err){toast(err.message)}finally{btn.disabled=false}
 };
