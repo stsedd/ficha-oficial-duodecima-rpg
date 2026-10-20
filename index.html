@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090709">
 <title>SCUTUM Lab · Duodécima · v0.1</title>
-<link rel="stylesheet" href="hub.css?v=0.3.0">
+<link rel="stylesheet" href="hub.css?v=0.4.0">
 </head>
 <body>
 <header class="top"><div><span>LEGIO XII FULMINATA</span><strong>SCUTUM <i>Lab</i></strong></div><div id="sessionActions"></div></header>
@@ -39,6 +39,10 @@
     <div class="room-count-line"><span id="roomCount">0</span> ativa(s)</div>
     <div id="roomsGrid" class="rooms-grid"></div>
   </section>
+  <section id="endedRoomsSection" class="rooms-section ended-rooms-section hidden">
+    <div class="section-head rooms-head"><div><p class="eyebrow">ARQUIVO DE MISSÕES</p><h2>Sessões encerradas</h2><p>Abra uma missão antiga para consultar participantes, iniciativa preservada e o registro da sessão.</p></div><span id="endedRoomCount">0</span></div>
+    <div id="endedRoomsGrid" class="rooms-grid"></div>
+  </section>
   <section class="dashboard-grid">
     <div><div class="section-head"><h2>Personagens</h2><span id="characterCount">0</span></div><div id="characterGrid" class="character-grid"></div></div>
     <aside id="adminPanel" class="admin-panel hidden"><p class="eyebrow">ADMINISTRAÇÃO</p><h2>Visão da mesa</h2><p>Resumo de todas as fichas cadastradas.</p><div id="adminCharacters"></div></aside>
@@ -51,5 +55,5 @@
 <div id="toast" class="toast hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="scutum-config.js"></script>
-<script src="hub.js?v=0.4.0"></script>
+<script src="hub.js?v=0.5.0"></script>
 </body></html>
