@@ -25,7 +25,7 @@ function resource(label,current,max,characterId,key){
   return '<div class="resource-row"><span>'+label+'</span><div class="bar"><i style="width:'+(visible&&hasMax?pct(current,max):0)+'%"></i></div><b>'+value+'</b>'+adjustButtons(characterId,key,current)+'</div>';
 }
 function participantCard(p){
-  const self=p.user_id===me.id,canSee=isMaster||self,origin=p.origin_type==='mortal'?'Mortal da Névoa':(p.god_id||'—'),portrait=p.portrait_url||'',online=onlineIds.has(p.user_id);
+  const self=p.user_id===me.id,canSee=isMaster||self,origin=p.origin_type==='mortal'?'Mortal da Névoa':(p.god_id||'—'),portrait=p.portrait_url||'',online=onlineIds.has(p.user_id),ready=!!p.ready;
   const cond=canSee?(p.conditions||[]):[],exhaustion=canSee?p.exhaustion:null;
   let conditions='';
   if(canSee){
@@ -36,13 +36,24 @@ function participantCard(p){
     masterExtra='<div class="exhaustion-control"><span>Exaustão</span><button data-adjust="'+p.character_id+'" data-resource="exhaustion" data-delta="-1">−</button><b>'+Number(exhaustion||0)+'</b><button data-adjust="'+p.character_id+'" data-resource="exhaustion" data-delta="1">+</button></div>';
   }
   const actions=[];
-  if(self)actions.push('<button class="primary" data-open-sheet="'+p.character_id+'">Abrir minha ficha</button>');
+  if(self){
+    actions.push('<button class="primary" data-open-sheet="'+p.character_id+'">Abrir minha ficha</button>');
+    if(room?.status==='active')actions.push('<button data-ready="'+p.user_id+'" class="'+(ready?'ready-on':'')+'">'+(ready?'✓ Pronto':'Marcar pronto')+'</button>');
+  }
   if(liveMaster()&&!self)actions.push('<button class="danger" data-remove-member="'+p.user_id+'" data-remove-name="'+esc(p.character_name)+'">Remover da sala</button>');
-  return '<article class="participant-card"><div class="participant-art">'+(portrait?'<img src="'+esc(portrait)+'" alt="">':'')+'</div><div class="participant-copy"><h3>'+esc(p.character_name)+'</h3><p class="sub"><span>'+esc(origin)+' · Nv '+Number(p.level||1)+(self?' · você':'')+'</span><span class="presence '+(online?'online':'offline')+'"><i></i>'+(online?'online':'offline')+'</span></p>'+(canSee?'<div class="resource-stack">'+resource('HP',p.current_hp,p.max_hp,p.character_id,'hp')+resource('EN',p.current_energy,p.max_energy,p.character_id,'energy')+resource('SAN',p.current_sanity,100,p.character_id,'sanity')+'</div>'+conditions+masterExtra:'<div class="privacy-note">Os valores mecânicos desta personagem ficam visíveis ao próprio jogador e ao mestre da sala.</div>')+(actions.length?'<div class="participant-actions">'+actions.join('')+'</div>':'')+'</div></article>';
+  return '<article class="participant-card"><div class="participant-art">'+(portrait?'<img src="'+esc(portrait)+'" alt="">':'')+'</div><div class="participant-copy"><h3>'+esc(p.character_name)+'</h3><p class="sub"><span>'+esc(origin)+' · Nv '+Number(p.level||1)+(self?' · você':'')+'</span><span class="presence-wrap"><span class="presence '+(online?'online':'offline')+'"><i></i>'+(online?'online':'offline')+'</span>'+(ready?'<span class="ready-badge">pronto</span>':'')+'</span></p>'+(canSee?'<div class="resource-stack">'+resource('HP',p.current_hp,p.max_hp,p.character_id,'hp')+resource('EN',p.current_energy,p.max_energy,p.character_id,'energy')+resource('SAN',p.current_sanity,100,p.character_id,'sanity')+'</div>'+conditions+masterExtra:'<div class="privacy-note">Os valores mecânicos desta personagem ficam visíveis ao próprio jogador e ao mestre da sala.</div>')+(actions.length?'<div class="participant-actions">'+actions.join('')+'</div>':'')+'</div></article>';
 }
 function bindParticipantActions(){
   $$('[data-open-sheet]').forEach(b=>b.onclick=()=>location.href='sheet.html?character='+encodeURIComponent(b.dataset.openSheet)+'&return='+encodeURIComponent('room.html?id='+roomId));
-  $$('[data-remove-member]').forEach(b=>b.onclick=async()=>{
+  $('[data-ready]').forEach(b=>b.onclick=async()=>{
+    const p=participants.find(x=>x.user_id===b.dataset.ready);if(!p)return;
+    const next=!p.ready;
+    const {error}=await client.from('room_members').update({ready:next}).eq('room_id',roomId).eq('user_id',me.id);
+    if(error)return toast('Não foi possível atualizar seu status.');
+    await logEvent((p.character_name||'Personagem')+(next?' está pronto(a).':' não está mais pronto(a).'),'ready',{ready:next});
+    loadParticipants();
+  });
+  $('[data-remove-member]').forEach(b=>b.onclick=async()=>{
     const name=b.dataset.removeName||'esta personagem';
     if(!confirm('Remover '+name+' desta sala?'))return;
     b.disabled=true;
@@ -96,7 +107,9 @@ async function hasMembership(){const {data}=await client.from('room_members').se
 async function loadParticipants(){
   const {data,error}=await client.rpc('get_room_participants',{p_room_id:roomId});
   if(error){toast('Não foi possível atualizar a mesa.');return}
-  participants=data||[];
+  const {data:memberStates}=await client.from('room_members').select('user_id,ready').eq('room_id',roomId);
+  const readyMap=new Map((memberStates||[]).map(x=>[x.user_id,!!x.ready]));
+  participants=(data||[]).map(x=>({...x,ready:readyMap.get(x.user_id)||false}));
   $('#participantCount').textContent=participants.length;
   $('#participantGrid').innerHTML=participants.length?participants.map(participantCard).join(''):'<div class="empty">Ainda não há personagens nesta sala. Compartilhe o convite com os jogadores.</div>';
   bindParticipantActions();
@@ -215,7 +228,7 @@ async function saveNotes(){
   if(!error)setTimeout(()=>$('#notesState').textContent='Somente você vê isto.',2200);
 }
 
-function eventIcon(type){return ({combat:'⚔',turn:'➜',resource:'◈',condition:'◆',tracker:'◎',roll:'⚄',undo:'↶',member_removed:'×',member_join:'+',member_leave:'−',npc_resource:'◇'})[type]||'·'}
+function eventIcon(type){return ({combat:'⚔',turn:'➜',resource:'◈',condition:'◆',tracker:'◎',roll:'⚄',undo:'↶',ready:'✓',member_removed:'×',member_join:'+',member_leave:'−',npc_resource:'◇'})[type]||'·'}
 async function loadEvents(){
   const {data,error}=await client.from('room_events').select('id,event_type,message,payload,created_at').eq('room_id',roomId).order('created_at',{ascending:false}).limit(40);
   if(error)return;
