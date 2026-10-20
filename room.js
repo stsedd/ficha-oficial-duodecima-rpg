@@ -358,17 +358,18 @@ $('#reopenRoom').onclick=async()=>{if(!confirm('Reabrir esta sala e permitir nov
 $('#startCombat').onclick=startCombat;$('#prevTurn').onclick=prevTurn;$('#nextTurn').onclick=nextTurn;$('#endCombat').onclick=endCombat;$('#addNpc').onclick=addNpc;$('#addTracker').onclick=addTracker;
 $('#saveNotes').onclick=saveNotes;$('#editBriefing').onclick=editBriefing;$('#refreshEvents').onclick=loadEvents;
 $('#exportSession').onclick=async()=>{
-  const [{data:allEvents},{data:allInitiative},{data:allTrackers}]=await Promise.all([
+  const [{data:allEvents},{data:allInitiative},{data:allTrackers},{data:allEffects}]=await Promise.all([
     client.from('room_events').select('event_type,message,payload,created_at').eq('room_id',roomId).order('created_at',{ascending:true}).limit(1000),
     client.from('room_initiative').select('kind,label,initiative,current_hp,max_hp,conditions').eq('room_id',roomId).order('initiative',{ascending:false}),
-    client.from('room_trackers').select('label,current_value,max_value').eq('room_id',roomId).order('sort_order')
+    client.from('room_trackers').select('label,current_value,max_value').eq('room_id',roomId).order('sort_order'),
+    client.from('room_effects').select('character_id,label,remaining_rounds').eq('room_id',roomId)
   ]);
   const snapshot={
     scutumSessionExport:1,
     exportedAt:new Date().toISOString(),
     room:{name:room?.name,code:room?.code,status:room?.status,created_at:room?.created_at,ended_at:room?.ended_at},
     participants:participants.map(p=>({character_name:p.character_name,level:p.level,origin_type:p.origin_type,god_id:p.god_id,current_hp:p.current_hp,max_hp:p.max_hp,current_energy:p.current_energy,max_energy:p.max_energy,current_sanity:p.current_sanity,conditions:p.conditions,exhaustion:p.exhaustion})),
-    initiative:allInitiative||[],trackers:allTrackers||[],events:allEvents||[]
+    initiative:allInitiative||[],trackers:allTrackers||[],timedEffects:allEffects||[],events:allEvents||[]
   };
   const blob=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
