@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090709">
+<title>SCUTUM Lab · Sala</title>
+<link rel="stylesheet" href="room.css?v=0.1.0">
+</head>
+<body>
+<header class="room-top"><a href="index.html">← Meus personagens</a><div><span>LEGIO XII FULMINATA</span><strong>SCUTUM <i>Lab</i></strong></div><button id="logout">Sair</button></header>
+<main>
+<section id="roomBoot" class="room-boot"><strong>SCUTUM</strong><span>Carregando sala…</span></section>
+<section id="roomView" class="hidden">
+  <div class="room-hero">
+    <div><p class="eyebrow">SALA DE MISSÃO</p><h1 id="roomName">Sala</h1><div class="room-meta"><span id="roomCode">------</span><button id="copyCode">Copiar código</button><span id="roomStatus" class="status-pill">Ativa</span></div></div>
+    <div class="room-hero-actions"><button id="leaveRoom">Sair da sala</button><button id="endRoom" class="danger hidden">Encerrar sala</button></div>
+  </div>
+  <section id="masterNote" class="master-note hidden"><div><p class="eyebrow">PAINEL DO MESTRE</p><h2>Estado mecânico da mesa</h2></div><p>HP, Energia, Sanidade, Exaustão e condições são atualizados a partir das fichas dos participantes.</p></section>
+  <div class="section-head"><div><p class="eyebrow">PARTICIPANTES</p><h2>Mesa</h2></div><span id="participantCount">0</span></div>
+  <div id="participantGrid" class="participant-grid"></div>
+</section>
+</main>
+<div id="toast" class="toast hidden"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="scutum-config.js"></script>
+<script src="room.js?v=0.1.0"></script>
+</body>
+</html>
