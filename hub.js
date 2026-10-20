@@ -36,12 +36,26 @@ async function loadRooms(user){
   }
   $('#roomCount').textContent=(rooms||[]).length;
   $('#roomsGrid').innerHTML=(rooms||[]).length?(rooms||[]).map(r=>roomCard(r,counts[r.id]||0,user.id)).join(''):'<div class="empty room-empty">Nenhuma sala ativa. O mestre pode criar uma quando a missão começar.</div>';
-  $$('[data-open-room]').forEach(b=>b.onclick=()=>location.href='room.html?id='+encodeURIComponent(b.dataset.openRoom));
+  $('[data-open-room]').forEach(b=>b.onclick=()=>location.href='room.html?id='+encodeURIComponent(b.dataset.openRoom));
   if(roomChannel){client.removeChannel(roomChannel);roomChannel=null}
   roomChannel=client.channel('hub-rooms')
     .on('postgres_changes',{event:'*',schema:'public',table:'rooms'},()=>loadRooms(user))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_members'},()=>loadRooms(user))
     .subscribe();
+}
+async function loadEndedRooms(user){
+  const {data:rooms,error}=await client.from('rooms').select('id,name,code,status,created_by,created_at,ended_at').eq('status','ended').order('ended_at',{ascending:false}).limit(12);
+  if(error)return;
+  const ids=(rooms||[]).map(r=>r.id);let counts={};
+  if(ids.length){
+    const {data:members}=await client.from('room_members').select('room_id').in('room_id',ids);
+    for(const m of members||[])counts[m.room_id]=(counts[m.room_id]||0)+1;
+  }
+  const section=$('#endedRoomsSection');
+  section.classList.toggle('hidden',!(rooms||[]).length);
+  $('#endedRoomCount').textContent=(rooms||[]).length;
+  $('#endedRoomsGrid').innerHTML=(rooms||[]).map(r=>roomCard(r,counts[r.id]||0,user.id)).join('');
+  $('#endedRoomsGrid').querySelectorAll('[data-open-room]').forEach(b=>b.onclick=()=>location.href='room.html?id='+encodeURIComponent(b.dataset.openRoom));
 }
 
 async function renderApp(){
@@ -58,7 +72,7 @@ async function renderApp(){
   $('#characterGrid').innerHTML=myCharacters.length?myCharacters.map(card).join(''):'<div class="empty compact-empty">Quando você importar a primeira ficha, ela aparece aqui.</div>';
   bindCards();
   $('#createRoomBtn').classList.toggle('hidden',p?.role!=='admin');
-  await loadRooms(user);
+  await Promise.all([loadRooms(user),loadEndedRooms(user)]);
   if(!inviteHandled){
     const invite=(new URLSearchParams(location.search).get('join')||'').trim().toUpperCase();
     if(invite){
