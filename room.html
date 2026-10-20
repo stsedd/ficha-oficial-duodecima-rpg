@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090709">
 <title>SCUTUM Lab · Sala</title>
-<link rel="stylesheet" href="room.css?v=0.2.0">
+<link rel="stylesheet" href="room.css?v=0.5.0">
 </head>
 <body>
 <header class="room-top"><a href="index.html">← Meus personagens</a><div><span>LEGIO XII FULMINATA</span><strong>SCUTUM <i>Lab</i></strong></div><button id="logout">Sair</button></header>
@@ -12,17 +12,43 @@
 <section id="roomBoot" class="room-boot"><strong>SCUTUM</strong><span>Carregando sala…</span></section>
 <section id="roomView" class="hidden">
   <div class="room-hero">
-    <div><p class="eyebrow">SALA DE MISSÃO</p><h1 id="roomName">Sala</h1><div class="room-meta"><span id="roomCode">------</span><button id="copyCode">Copiar código</button><span id="roomStatus" class="status-pill">Ativa</span></div></div>
+    <div><p class="eyebrow">SALA DE MISSÃO</p><h1 id="roomName">Sala</h1><div class="room-meta"><span id="roomCode">------</span><button id="copyCode">Copiar código</button><button id="copyInvite">Copiar convite</button><span id="roomStatus" class="status-pill">Ativa</span></div></div>
     <div class="room-hero-actions"><button id="leaveRoom">Sair da sala</button><button id="endRoom" class="danger hidden">Encerrar sala</button></div>
   </div>
-  <section id="masterNote" class="master-note hidden"><div><p class="eyebrow">PAINEL DO MESTRE</p><h2>Estado mecânico da mesa</h2></div><p>HP, Energia, Sanidade, Exaustão e condições são atualizados a partir das fichas dos participantes.</p></section>
+
+  <section id="masterNote" class="master-note hidden"><div><p class="eyebrow">PAINEL DO MESTRE</p><h2>Mesa ao vivo</h2></div><p>Você pode acompanhar e ajustar recursos, organizar iniciativa, registrar condições, controlar objetivos e manter notas privadas da sessão.</p></section>
+
+  <section class="tool-grid">
+    <article class="tool-panel combat-panel">
+      <div class="tool-head"><div><p class="eyebrow">COMBATE</p><h2>Iniciativa</h2></div><div class="tool-actions master-only hidden"><button id="startCombat" class="primary">Iniciar</button><button id="nextTurn">Próximo turno</button><button id="addNpc">+ NPC</button><button id="endCombat" class="danger">Encerrar</button></div></div>
+      <div id="combatStatus" class="combat-status">Nenhum combate ativo.</div>
+      <div id="initiativeList" class="initiative-list"></div>
+    </article>
+
+    <article class="tool-panel trackers-panel">
+      <div class="tool-head"><div><p class="eyebrow">OBJETIVOS</p><h2>Contadores</h2></div><div class="tool-actions master-only hidden"><button id="addTracker">+ Contador</button></div></div>
+      <div id="trackerList" class="tracker-list"></div>
+    </article>
+  </section>
+
+  <section id="masterWorkspace" class="tool-panel master-workspace hidden">
+    <div class="tool-head"><div><p class="eyebrow">PRIVADO</p><h2>Notas do mestre</h2></div><span id="notesState" class="quiet-text">Somente você vê isto.</span></div>
+    <textarea id="masterNotes" rows="5" placeholder="Pistas, CD, lembretes, HP oculto, próximos acontecimentos…"></textarea>
+    <div class="notes-actions"><button id="saveNotes" class="primary">Salvar notas</button></div>
+  </section>
+
   <div class="section-head"><div><p class="eyebrow">PARTICIPANTES</p><h2>Mesa</h2></div><span id="participantCount">0</span></div>
   <div id="participantGrid" class="participant-grid"></div>
+
+  <section class="tool-panel event-panel">
+    <div class="tool-head"><div><p class="eyebrow">HISTÓRICO</p><h2>Registro da sessão</h2></div><button id="refreshEvents">Atualizar</button></div>
+    <div id="eventList" class="event-list"></div>
+  </section>
 </section>
 </main>
 <div id="toast" class="toast hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="scutum-config.js"></script>
-<script src="room.js?v=0.2.0"></script>
+<script src="room.js?v=0.5.0"></script>
 </body>
 </html>
