@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090709">
 <title>SCUTUM Lab · Duodécima · v0.1</title>
-<link rel="stylesheet" href="hub.css?v=0.2.1">
+<link rel="stylesheet" href="hub.css?v=0.3.0">
 </head>
 <body>
 <header class="top"><div><span>LEGIO XII FULMINATA</span><strong>SCUTUM <i>Lab</i></strong></div><div id="sessionActions"></div></header>
@@ -34,14 +34,22 @@
       <button id="firstRunNew" type="button">Prefiro criar uma nova</button>
     </div>
   </section>
+  <section class="rooms-section">
+    <div class="section-head rooms-head"><div><p class="eyebrow">SESSÕES</p><h2>Salas ativas</h2><p>Entre na sala da missão com uma personagem. O mestre acompanha os recursos da mesa em tempo real.</p></div><div class="rooms-actions"><button id="joinRoomBtn">Entrar com código</button><button id="createRoomBtn" class="primary hidden">+ Criar sala</button></div></div>
+    <div class="room-count-line"><span id="roomCount">0</span> ativa(s)</div>
+    <div id="roomsGrid" class="rooms-grid"></div>
+  </section>
   <section class="dashboard-grid">
     <div><div class="section-head"><h2>Personagens</h2><span id="characterCount">0</span></div><div id="characterGrid" class="character-grid"></div></div>
     <aside id="adminPanel" class="admin-panel hidden"><p class="eyebrow">ADMINISTRAÇÃO</p><h2>Visão da mesa</h2><p>Resumo de todas as fichas cadastradas.</p><div id="adminCharacters"></div></aside>
   </section>
 </section>
 </main>
+<dialog id="createRoomDialog" class="hub-dialog"><form method="dialog" class="hub-dialog-card" id="createRoomForm"><div class="dialog-head"><div><p class="eyebrow">MESTRE</p><h2>Criar sala</h2><p>Dê um nome para a missão. O código de entrada é gerado automaticamente.</p></div><button value="cancel" type="button" onclick="this.closest('dialog').close()">×</button></div><label>Nome da missão<input id="roomName" maxlength="80" placeholder="Ex.: Ruínas de Tibur" required></label><div class="dialog-actions"><button value="cancel" type="button" onclick="this.closest('dialog').close()">Cancelar</button><button class="primary" id="createRoomSubmit" type="submit">Criar sala</button></div></form></dialog>
+<dialog id="joinRoomDialog" class="hub-dialog"><form method="dialog" class="hub-dialog-card" id="joinRoomForm"><div class="dialog-head"><div><p class="eyebrow">MISSÃO</p><h2>Entrar em uma sala</h2><p>Use o código que o mestre enviou e escolha qual personagem vai participar.</p></div><button value="cancel" type="button" onclick="this.closest('dialog').close()">×</button></div><label>Código da sala<input id="joinRoomCode" maxlength="8" placeholder="ABC123" required></label><label>Personagem<select id="joinCharacter" required></select></label><div class="dialog-actions"><button value="cancel" type="button" onclick="this.closest('dialog').close()">Cancelar</button><button class="primary" id="joinRoomSubmit" type="submit">Entrar na sala</button></div></form></dialog>
+
 <div id="toast" class="toast hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="scutum-config.js"></script>
-<script src="hub.js?v=0.2.1"></script>
+<script src="hub.js?v=0.3.0"></script>
 </body></html>
