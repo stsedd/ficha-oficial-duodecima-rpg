@@ -99,6 +99,7 @@ async function loadRoom(){
   room=data;$('#roomName').textContent=room.name;$('#roomCode').textContent=room.code;$('#roomStatus').textContent=room.status==='active'?'Ativa':'Encerrada';
   document.body.classList.toggle('ended',room.status!=='active');
   $('#endRoom').classList.toggle('hidden',!liveMaster());
+  $('#reopenRoom').classList.toggle('hidden',!isMaster||room.status==='active');
   $('.master-only').forEach(x=>x.classList.toggle('hidden',!liveMaster()));
   $('#leaveRoom').classList.toggle('hidden',isMaster&&!await hasMembership());
   return true;
@@ -316,6 +317,7 @@ $('#copyInvite').onclick=async()=>{
 };
 $('#leaveRoom').onclick=async()=>{if(!confirm('Sair desta sala?'))return;await logEvent('Um participante saiu da sala.','member_leave');const {error}=await client.from('room_members').delete().eq('room_id',roomId).eq('user_id',me.id);if(error)return toast(error.message);location.href='index.html'};
 $('#endRoom').onclick=async()=>{if(!confirm('Encerrar esta sala? Ela deixará de aceitar novos participantes.'))return;await logEvent('A sala foi encerrada.','room');const {error}=await client.from('rooms').update({status:'ended',ended_at:new Date().toISOString()}).eq('id',roomId);if(error)return toast(error.message);toast('Sala encerrada.');refresh()};
+$('#reopenRoom').onclick=async()=>{if(!confirm('Reabrir esta sala e permitir novas entradas?'))return;const {error}=await client.from('rooms').update({status:'active',ended_at:null}).eq('id',roomId);if(error)return toast(error.message);await logEvent('A sala foi reaberta.','room');toast('Sala reaberta.');refresh()};
 $('#startCombat').onclick=startCombat;$('#prevTurn').onclick=prevTurn;$('#nextTurn').onclick=nextTurn;$('#endCombat').onclick=endCombat;$('#addNpc').onclick=addNpc;$('#addTracker').onclick=addTracker;
 $('#saveNotes').onclick=saveNotes;$('#editBriefing').onclick=editBriefing;$('#refreshEvents').onclick=loadEvents;
 $('#exportSession').onclick=async()=>{
