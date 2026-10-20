@@ -5,7 +5,7 @@ const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.remove('hidden')
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 if(!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase||!roomId){location.replace('index.html');return}
 const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
-let me=null,room=null,isMaster=false,channel=null,onlineIds=new Set(),participants=[],combat=null,initiative=[],trackers=[],events=[],refreshTimer=0;
+let me=null,room=null,isMaster=false,channel=null,onlineIds=new Set(),participants=[],combat=null,initiative=[],trackers=[],events=[],briefing=null,refreshTimer=0;
 
 function pct(current,max){if(current==null||max==null||!Number.isFinite(Number(max))||Number(max)<=0)return 0;return Math.max(0,Math.min(100,(Number(current)/Number(max))*100))}
 function liveMaster(){return isMaster&&room?.status==='active'}
@@ -231,6 +231,25 @@ async function addTracker(){
   loadTrackers();
 }
 
+async function loadBriefing(){
+  const {data,error}=await client.from('room_briefing').select('title,body,updated_at').eq('room_id',roomId).maybeSingle();
+  if(error)return;
+  briefing=data||{title:'',body:''};
+  const has=!!((briefing.title||'').trim()||(briefing.body||'').trim());
+  $('#roomBriefing').classList.toggle('hidden',!has&&!isMaster);
+  $('#briefingTitle').textContent=(briefing.title||'').trim()||'Sem comunicado';
+  $('#briefingBody').textContent=(briefing.body||'').trim()||'O mestre ainda não publicou um aviso para a mesa.';
+}
+async function editBriefing(){
+  if(!liveMaster())return toast('Esta sessão está encerrada.');
+  const title=prompt('Título da cena/comunicado:',briefing?.title||'Cena atual');if(title==null)return;
+  const body=prompt('Texto que todos na sala verão:',briefing?.body||'');if(body==null)return;
+  const {error}=await client.from('room_briefing').upsert({room_id:roomId,title:title.trim(),body:body.trim()});
+  if(error)return toast('Não foi possível publicar o comunicado.');
+  await logEvent('Comunicado da mesa atualizado: '+(title.trim()||'sem título')+'.','briefing');
+  loadBriefing();
+}
+
 async function loadNotes(){
   if(!isMaster)return;
   const {data}=await client.from('room_master_notes').select('notes').eq('room_id',roomId).maybeSingle();
@@ -244,7 +263,7 @@ async function saveNotes(){
   if(!error)setTimeout(()=>$('#notesState').textContent='Somente você vê isto.',2200);
 }
 
-function eventIcon(type){return ({combat:'⚔',turn:'➜',resource:'◈',condition:'◆',tracker:'◎',roll:'⚄',undo:'↶',ready:'✓',member_removed:'×',member_join:'+',member_leave:'−',npc_resource:'◇'})[type]||'·'}
+function eventIcon(type){return ({combat:'⚔',turn:'➜',resource:'◈',condition:'◆',tracker:'◎',roll:'⚄',undo:'↶',ready:'✓',briefing:'✦',member_removed:'×',member_join:'+',member_leave:'−',npc_resource:'◇'})[type]||'·'}
 async function loadEvents(){
   const {data,error}=await client.from('room_events').select('id,event_type,message,payload,created_at').eq('room_id',roomId).order('created_at',{ascending:false}).limit(40);
   if(error)return;
@@ -266,7 +285,7 @@ async function undoResourceEvent(eventId){
 
 async function refresh(){
   if(!await loadRoom())return;
-  await Promise.all([loadParticipants(),loadCombat(),loadTrackers(),loadEvents()]);
+  await Promise.all([loadParticipants(),loadCombat(),loadTrackers(),loadEvents(),loadBriefing()]);
 }
 (async()=>{
   const {data:{session}}=await client.auth.getSession();if(!session){location.replace('index.html');return}
@@ -285,6 +304,7 @@ async function refresh(){
     .on('postgres_changes',{event:'*',schema:'public',table:'room_combat',filter:'room_id=eq.'+roomId},()=>schedule(loadCombat))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_initiative',filter:'room_id=eq.'+roomId},()=>schedule(loadCombat))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_trackers',filter:'room_id=eq.'+roomId},()=>schedule(loadTrackers))
+    .on('postgres_changes',{event:'*',schema:'public',table:'room_briefing',filter:'room_id=eq.'+roomId},()=>schedule(loadBriefing))
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'room_events',filter:'room_id=eq.'+roomId},()=>schedule(loadEvents))
     .subscribe(async status=>{if(status==='SUBSCRIBED')await channel.track({user_id:me.id,online_at:new Date().toISOString()})});
 })();
@@ -297,7 +317,7 @@ $('#copyInvite').onclick=async()=>{
 $('#leaveRoom').onclick=async()=>{if(!confirm('Sair desta sala?'))return;await logEvent('Um participante saiu da sala.','member_leave');const {error}=await client.from('room_members').delete().eq('room_id',roomId).eq('user_id',me.id);if(error)return toast(error.message);location.href='index.html'};
 $('#endRoom').onclick=async()=>{if(!confirm('Encerrar esta sala? Ela deixará de aceitar novos participantes.'))return;await logEvent('A sala foi encerrada.','room');const {error}=await client.from('rooms').update({status:'ended',ended_at:new Date().toISOString()}).eq('id',roomId);if(error)return toast(error.message);toast('Sala encerrada.');refresh()};
 $('#startCombat').onclick=startCombat;$('#prevTurn').onclick=prevTurn;$('#nextTurn').onclick=nextTurn;$('#endCombat').onclick=endCombat;$('#addNpc').onclick=addNpc;$('#addTracker').onclick=addTracker;
-$('#saveNotes').onclick=saveNotes;$('#refreshEvents').onclick=loadEvents;
+$('#saveNotes').onclick=saveNotes;$('#editBriefing').onclick=editBriefing;$('#refreshEvents').onclick=loadEvents;
 $('#exportSession').onclick=async()=>{
   const [{data:allEvents},{data:allInitiative},{data:allTrackers}]=await Promise.all([
     client.from('room_events').select('event_type,message,payload,created_at').eq('room_id',roomId).order('created_at',{ascending:true}).limit(1000),
