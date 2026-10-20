@@ -282,6 +282,25 @@ $('#leaveRoom').onclick=async()=>{if(!confirm('Sair desta sala?'))return;await l
 $('#endRoom').onclick=async()=>{if(!confirm('Encerrar esta sala? Ela deixará de aceitar novos participantes.'))return;await logEvent('A sala foi encerrada.','room');const {error}=await client.from('rooms').update({status:'ended',ended_at:new Date().toISOString()}).eq('id',roomId);if(error)return toast(error.message);toast('Sala encerrada.');refresh()};
 $('#startCombat').onclick=startCombat;$('#nextTurn').onclick=nextTurn;$('#endCombat').onclick=endCombat;$('#addNpc').onclick=addNpc;$('#addTracker').onclick=addTracker;
 $('#saveNotes').onclick=saveNotes;$('#refreshEvents').onclick=loadEvents;
+$('#exportSession').onclick=async()=>{
+  const [{data:allEvents},{data:allInitiative},{data:allTrackers}]=await Promise.all([
+    client.from('room_events').select('event_type,message,payload,created_at').eq('room_id',roomId).order('created_at',{ascending:true}).limit(1000),
+    client.from('room_initiative').select('kind,label,initiative,current_hp,max_hp,conditions').eq('room_id',roomId).order('initiative',{ascending:false}),
+    client.from('room_trackers').select('label,current_value,max_value').eq('room_id',roomId).order('sort_order')
+  ]);
+  const snapshot={
+    scutumSessionExport:1,
+    exportedAt:new Date().toISOString(),
+    room:{name:room?.name,code:room?.code,status:room?.status,created_at:room?.created_at,ended_at:room?.ended_at},
+    participants:participants.map(p=>({character_name:p.character_name,level:p.level,origin_type:p.origin_type,god_id:p.god_id,current_hp:p.current_hp,max_hp:p.max_hp,current_energy:p.current_energy,max_energy:p.max_energy,current_sanity:p.current_sanity,conditions:p.conditions,exhaustion:p.exhaustion})),
+    initiative:allInitiative||[],trackers:allTrackers||[],events:allEvents||[]
+  };
+  const blob=new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='scutum-sessao-'+String(room?.name||'missao').toLowerCase().replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'')+'.json';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  toast('Registro da sessão exportado.');
+};
 function secureRoll(sides){
   const max=Math.floor(0x100000000/sides)*sides;
   const a=new Uint32Array(1);let n;
