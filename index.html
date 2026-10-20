@@ -16,7 +16,23 @@
   </article>
 </section>
 <section id="appView" class="hidden">
-  <div class="hero"><div><p class="eyebrow">ARQUIVO PESSOAL</p><h1 id="welcome">Meus personagens</h1><p>Abra uma ficha existente ou importe uma ficha da versão atual.</p></div><div class="hero-actions"><label class="button">Importar JSON<input id="importCharacter" type="file" accept="application/json" hidden></label><button class="primary" id="newCharacter">+ Nova ficha</button></div></div>
+  <div class="hero"><div><p class="eyebrow">ARQUIVO PESSOAL</p><h1 id="welcome">Meus personagens</h1><p>Abra uma ficha existente ou importe uma ficha da versão atual.</p></div><div class="hero-actions"><label class="button">Importar ficha<input id="importCharacter" type="file" accept="application/json" hidden></label><button class="primary" id="newCharacter">+ Nova ficha</button></div></div>
+  <section id="firstRun" class="first-run hidden">
+    <div class="first-run-copy">
+      <p class="eyebrow">PRIMEIRO TESTE</p>
+      <h2>Vamos trazer uma ficha que já existe.</h2>
+      <p>Para este primeiro teste, não precisa criar personagem do zero. Exporte o JSON da ficha oficial e importe aqui. Depois vamos abrir a ficha, alterar alguns valores e conferir se tudo fica salvo na conta.</p>
+    </div>
+    <div class="first-run-steps">
+      <div><span>1</span><b>Na ficha oficial</b><small>Clique em <strong>Exportar JSON</strong>.</small></div>
+      <div><span>2</span><b>Aqui no Lab</b><small>Clique em <strong>Importar ficha existente</strong>.</small></div>
+      <div><span>3</span><b>Abra a personagem</b><small>Mude HP, EN ou Sanidade e volte para o painel.</small></div>
+    </div>
+    <div class="first-run-actions">
+      <label class="primary button first-run-import">Importar ficha existente<input id="firstRunImport" type="file" accept="application/json" hidden></label>
+      <button id="firstRunNew" type="button">Prefiro criar uma nova</button>
+    </div>
+  </section>
   <section class="dashboard-grid">
     <div><div class="section-head"><h2>Personagens</h2><span id="characterCount">0</span></div><div id="characterGrid" class="character-grid"></div></div>
     <aside id="adminPanel" class="admin-panel hidden"><p class="eyebrow">ADMINISTRAÇÃO</p><h2>Visão da mesa</h2><p>Resumo de todas as fichas cadastradas.</p><div id="adminCharacters"></div></aside>
