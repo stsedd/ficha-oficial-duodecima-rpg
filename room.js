@@ -138,7 +138,7 @@ function initiativeRow(x,index){
   const active=combat?.active&&index===Math.min(Number(combat.turn_index||0),Math.max(0,initiative.length-1));
   let detail='';
   if(x.kind==='npc'&&x.current_hp!=null)detail='<span class="npc-hp">HP '+esc(x.current_hp)+(x.max_hp!=null?'/'+esc(x.max_hp):'')+'</span>';
-  const controls=liveMaster()?'<div class="init-controls"><button data-set-turn="'+index+'" title="Definir turno atual">▶</button><label>INI <input data-init-value="'+x.id+'" type="number" value="'+Number(x.initiative||0)+'"></label>'+(x.kind==='npc'&&x.current_hp!=null?'<button data-npc-hp="'+x.id+'" data-npc-delta="-1">−HP</button><button data-npc-hp="'+x.id+'" data-npc-delta="1">+HP</button>':'')+'<button class="danger ghost-danger" data-init-remove="'+x.id+'">×</button></div>':'<b class="init-score">'+Number(x.initiative||0)+'</b>';
+  const controls=liveMaster()?'<div class="init-controls"><button data-set-turn="'+index+'" title="Definir turno atual">▶</button><label>INI <input data-init-value="'+x.id+'" type="number" value="'+Number(x.initiative||0)+'"></label>'+(x.kind==='npc'&&x.current_hp!=null?'<button data-npc-hp="'+x.id+'" data-npc-delta="-1">−HP</button><button data-npc-hp="'+x.id+'" data-npc-delta="1">+HP</button><button data-npc-custom="'+x.id+'">HP…</button>':'')+'<button class="danger ghost-danger" data-init-remove="'+x.id+'">×</button></div>':'<b class="init-score">'+Number(x.initiative||0)+'</b>';
   return '<div class="initiative-row '+(active?'active':'')+'"><span class="turn-number">'+(index+1)+'</span><div><b>'+esc(x.label)+'</b><small>'+(x.kind==='npc'?'NPC':'Personagem')+'</small>'+detail+'</div>'+controls+'</div>';
 }
 async function loadCombat(){
@@ -164,7 +164,15 @@ function bindCombatActions(){
   });
   $('[data-init-value]').forEach(i=>i.onchange=async()=>{await client.from('room_initiative').update({initiative:Number(i.value)||0}).eq('id',i.dataset.initValue);loadCombat()});
   $$('[data-init-remove]').forEach(b=>b.onclick=async()=>{await client.from('room_initiative').delete().eq('id',b.dataset.initRemove);await logEvent('Um participante foi removido da iniciativa.','combat');loadCombat()});
-  $$('[data-npc-hp]').forEach(b=>b.onclick=async()=>{
+  $('[data-npc-custom]').forEach(b=>b.onclick=async()=>{
+    const row=initiative.find(x=>x.id===b.dataset.npcCustom);if(!row)return;
+    const raw=prompt('Novo HP de '+row.label+':',String(row.current_hp??0));if(raw==null)return;
+    const max=row.max_hp==null?2147483647:Number(row.max_hp),next=Math.max(0,Math.min(max,Math.trunc(Number(raw)||0)));
+    await client.from('room_initiative').update({current_hp:next}).eq('id',row.id);
+    await logEvent(row.label+': HP '+row.current_hp+' → '+next+'.','npc_resource',{initiative_id:row.id});
+    loadCombat();
+  });
+  $('[data-npc-hp]').forEach(b=>b.onclick=async()=>{
     const row=initiative.find(x=>x.id===b.dataset.npcHp);if(!row)return;
     const delta=Number(b.dataset.npcDelta),max=row.max_hp==null?2147483647:Number(row.max_hp);
     const next=Math.max(0,Math.min(max,Number(row.current_hp||0)+delta));
@@ -219,6 +227,15 @@ async function endCombat(){
   if(!combat)return;
   await client.from('room_combat').upsert({room_id:roomId,active:false,round:Number(combat.round||1),turn_index:Number(combat.turn_index||0)});
   await logEvent('Combate encerrado.','combat');
+  loadCombat();
+}
+async function clearCombat(){
+  if(!liveMaster())return toast('Esta sessão está encerrada.');
+  if(!confirm('Limpar toda a iniciativa? Isso remove personagens e NPCs da ordem de combate, mas não da sala.'))return;
+  await client.from('room_combat').upsert({room_id:roomId,active:false,round:1,turn_index:0});
+  const {error}=await client.from('room_initiative').delete().eq('room_id',roomId);
+  if(error)return toast('Não foi possível limpar a iniciativa.');
+  await logEvent('A iniciativa foi limpa.','combat');
   loadCombat();
 }
 async function addNpc(){
@@ -355,7 +372,7 @@ $('#copyInvite').onclick=async()=>{
 $('#leaveRoom').onclick=async()=>{if(!confirm('Sair desta sala?'))return;await logEvent('Um participante saiu da sala.','member_leave');const {error}=await client.from('room_members').delete().eq('room_id',roomId).eq('user_id',me.id);if(error)return toast(error.message);location.href='index.html'};
 $('#endRoom').onclick=async()=>{if(!confirm('Encerrar esta sala? Ela deixará de aceitar novos participantes.'))return;await logEvent('A sala foi encerrada.','room');const {error}=await client.from('rooms').update({status:'ended',ended_at:new Date().toISOString()}).eq('id',roomId);if(error)return toast(error.message);toast('Sala encerrada.');refresh()};
 $('#reopenRoom').onclick=async()=>{if(!confirm('Reabrir esta sala e permitir novas entradas?'))return;const {error}=await client.from('rooms').update({status:'active',ended_at:null}).eq('id',roomId);if(error)return toast(error.message);await logEvent('A sala foi reaberta.','room');toast('Sala reaberta.');refresh()};
-$('#startCombat').onclick=startCombat;$('#prevTurn').onclick=prevTurn;$('#nextTurn').onclick=nextTurn;$('#endCombat').onclick=endCombat;$('#addNpc').onclick=addNpc;$('#addTracker').onclick=addTracker;
+$('#startCombat').onclick=startCombat;$('#prevTurn').onclick=prevTurn;$('#nextTurn').onclick=nextTurn;$('#endCombat').onclick=endCombat;$('#clearCombat').onclick=clearCombat;$('#addNpc').onclick=addNpc;$('#addTracker').onclick=addTracker;
 $('#saveNotes').onclick=saveNotes;$('#editBriefing').onclick=editBriefing;$('#refreshEvents').onclick=loadEvents;
 $('#exportSession').onclick=async()=>{
   const [{data:allEvents},{data:allInitiative},{data:allTrackers},{data:allEffects}]=await Promise.all([
