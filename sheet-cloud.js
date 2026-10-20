@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const cfg=window.SCUTUM_CONFIG||{},id=new URLSearchParams(location.search).get('character'),KEY='duodecima_universal_stage4_v24';
+const cfg=window.SCUTUM_CONFIG||{},params=new URLSearchParams(location.search),id=params.get('character'),returnParam=params.get('return')||'',KEY='duodecima_universal_stage4_v24';
 if(!id||!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase){location.replace('index.html');return}
 const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const originalSet=Storage.prototype.setItem;
@@ -64,7 +64,7 @@ function injectBootstrap(){
       clearInterval(waitForToolbar);
       if(!bar.querySelector('.scutum-back-link')){
         const a=document.createElement('a');
-        a.href='index.html';a.className='ghost small-btn scutum-back-link';a.textContent='← Meus personagens';bar.prepend(a);
+        const backTo=returnParam.startsWith('room.html?')?returnParam:'index.html';a.href=backTo;a.className='ghost small-btn scutum-back-link';a.textContent=backTo.startsWith('room.html?')?'← Voltar à sala':'← Meus personagens';bar.prepend(a);
       }
       const note=document.querySelector('.archive-save-note');
       if(note)note.innerHTML='<b>Salvo na nuvem</b> · SCUTUM Lab';
