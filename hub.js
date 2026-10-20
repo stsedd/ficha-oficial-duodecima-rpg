@@ -114,14 +114,16 @@ $('#authForm').onsubmit=async e=>{
   const submit=$('#authSubmit');if(submit.disabled)return;const email=$('#email').value.trim(),password=$('#password').value;
   submit.disabled=true;submit.textContent=mode==='login'?'Entrando…':'Criando…';$('#authHint').textContent='';
   try{
-    const r=mode==='login'?await client.auth.signInWithPassword({email,password}):await client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});
+    const r=mode==='login'?await client.auth.signInWithPassword({email,password}):await client.auth.signUp({email,password});
     if(r.error){
       const msg=String(r.error.message||'');
-      if(mode==='signup'&&(/database error saving new user/i.test(msg)||/already registered|already exists|duplicate/i.test(msg))){$('#authHint').innerHTML='Essa conta já foi criada. <b>Confira o e-mail de confirmação</b> ou mude para “Entrar”.';return}
-      if(mode==='login'&&/email not confirmed/i.test(msg)){ $('#authHint').innerHTML='Seu cadastro existe, mas o e-mail ainda não foi confirmado. <b>Confira sua caixa de entrada e spam.</b>';return}
+      if(/email rate limit exceeded|over_email_send_rate_limit/i.test(msg)){ $('#authHint').textContent='O serviço de confirmação por e-mail atingiu o limite temporário. A administração do Lab precisa liberar o cadastro sem confirmação.';return}
+      if(mode==='signup'&&(/database error saving new user/i.test(msg)||/already registered|already exists|duplicate/i.test(msg))){$('#authHint').innerHTML='Essa conta já existe. Mude para <b>“Entrar”</b> e use a senha cadastrada.';return}
+      if(mode==='login'&&/invalid login credentials/i.test(msg)){ $('#authHint').textContent='E-mail ou senha incorretos. Se você ainda não conseguiu concluir o cadastro, use “Criar conta”.';return}
+      if(mode==='login'&&/email not confirmed/i.test(msg)){ $('#authHint').innerHTML='Seu cadastro existe, mas ainda depende de confirmação de e-mail. Avise a administração do Lab.';return}
       $('#authHint').textContent=msg||'Não foi possível continuar.';return
     }
-    if(mode==='signup'&&!r.data.session){$('#authHint').innerHTML='<b>Conta criada.</b> Enviamos um e-mail de confirmação. Depois de confirmar, volte aqui e use “Entrar”.';return}
+    if(mode==='signup'&&!r.data.session){$('#authHint').innerHTML='<b>Cadastro iniciado.</b> Este projeto ainda está exigindo confirmação de e-mail; avise a administração do Lab se o e-mail não chegar.';return}
     renderApp();
   }finally{submit.disabled=false;submit.textContent=mode==='login'?'Entrar':'Criar conta'}
 };
