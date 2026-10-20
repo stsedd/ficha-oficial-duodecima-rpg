@@ -10,5 +10,35 @@ function bindCards(){$$('[data-open]').forEach(b=>b.onclick=()=>location.href='s
 $('#newCharacter').onclick=async()=>{const {data:{user}}=await client.auth.getUser();const blank={schemaVersion:24,isCreated:false,name:'',player:'',level:1,godId:'iuppiter'};const {data,error}=await client.from('characters').insert({owner_id:user.id,name:'Nova personagem',level:1,origin_type:'divine',god_id:'iuppiter',sheet_data:blank}).select().single();if(error)return toast(error.message);location.href='sheet.html?character='+data.id};
 $('#importCharacter').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const d=JSON.parse(await f.text()),{data:{user}}=await client.auth.getUser();const {data,error}=await client.from('characters').insert({owner_id:user.id,name:d.name||'Personagem importada',level:Number(d.level||1),origin_type:d.originType==='mortal'?'mortal':'divine',god_id:d.godId||null,current_hp:d.currentHp,max_hp:null,current_energy:d.currentEnergy,max_energy:null,current_sanity:d.currentSanity??100,conditions:d.conditions||[],exhaustion:d.exhaustion||0,sheet_data:d}).select().single();if(error)throw error;toast('Ficha importada.');location.href='sheet.html?character='+data.id}catch(err){toast('Não foi possível importar: '+err.message)}};
 function showAuth(){$('#authView').classList.remove('hidden');$('#appView').classList.add('hidden');$('#sessionActions').innerHTML=''}
-$('#authForm').onsubmit=async e=>{e.preventDefault();if(!ready)return toast('Backend do Lab ainda não foi conectado.');const email=$('#email').value.trim(),password=$('#password').value;const r=mode==='login'?await client.auth.signInWithPassword({email,password}):await client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});if(r.error)return $('#authHint').textContent=r.error.message;if(mode==='signup'&&!r.data.session){$('#authHint').textContent='Conta criada. Confira seu e-mail para confirmar o cadastro.';return}renderApp()};
+$('#authForm').onsubmit=async e=>{
+  e.preventDefault();if(!ready)return toast('Backend do Lab ainda não foi conectado.');
+  const submit=$('#authSubmit');if(submit.disabled)return;
+  const email=$('#email').value.trim(),password=$('#password').value;
+  submit.disabled=true;submit.setAttribute('aria-busy','true');submit.textContent=mode==='login'?'Entrando…':'Criando…';$('#authHint').textContent='';
+  try{
+    const r=mode==='login'
+      ?await client.auth.signInWithPassword({email,password})
+      :await client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});
+    if(r.error){
+      const msg=String(r.error.message||'');
+      if(mode==='signup'&&(/database error saving new user/i.test(msg)||/already registered|already exists|duplicate/i.test(msg))){
+        $('#authHint').innerHTML='Essa conta já foi criada. <b>Confira o e-mail de confirmação</b> ou mude para “Entrar”.';
+        return;
+      }
+      if(mode==='login'&&/email not confirmed/i.test(msg)){
+        $('#authHint').innerHTML='Seu cadastro existe, mas o e-mail ainda não foi confirmado. <b>Confira sua caixa de entrada e spam.</b>';
+        return;
+      }
+      $('#authHint').textContent=msg||'Não foi possível continuar.';
+      return;
+    }
+    if(mode==='signup'&&!r.data.session){
+      $('#authHint').innerHTML='<b>Conta criada.</b> Enviamos um e-mail de confirmação. Depois de confirmar, volte aqui e use “Entrar”.';
+      return;
+    }
+    renderApp();
+  }finally{
+    submit.disabled=false;submit.removeAttribute('aria-busy');submit.textContent=mode==='login'?'Entrar':'Criar conta';
+  }
+};
 if(!ready){$('#authHint').textContent='Interface pronta. Falta conectar o projeto Supabase.';return}client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);client.auth.onAuthStateChange(()=>setTimeout(()=>renderApp(),0));renderApp()})();
