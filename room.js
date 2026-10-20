@@ -40,7 +40,7 @@ function participantCard(p){
     actions.push('<button class="primary" data-open-sheet="'+p.character_id+'">Abrir minha ficha</button>');
     if(room?.status==='active')actions.push('<button data-ready="'+p.user_id+'" class="'+(ready?'ready-on':'')+'">'+(ready?'✓ Pronto':'Marcar pronto')+'</button>');
   }
-  if(liveMaster()&&!self)actions.push('<button class="danger" data-remove-member="'+p.user_id+'" data-remove-name="'+esc(p.character_name)+'">Remover da sala</button>');
+  if(liveMaster()&&!self){actions.push('<button data-open-sheet="'+p.character_id+'">Ver ficha</button>');actions.push('<button class="danger" data-remove-member="'+p.user_id+'" data-remove-name="'+esc(p.character_name)+'">Remover da sala</button>');}
   return '<article class="participant-card"><div class="participant-art">'+(portrait?'<img src="'+esc(portrait)+'" alt="">':'')+'</div><div class="participant-copy"><h3>'+esc(p.character_name)+'</h3><p class="sub"><span>'+esc(origin)+' · Nv '+Number(p.level||1)+(self?' · você':'')+'</span><span class="presence-wrap"><span class="presence '+(online?'online':'offline')+'"><i></i>'+(online?'online':'offline')+'</span>'+(ready?'<span class="ready-badge">pronto</span>':'')+'</span></p>'+(canSee?'<div class="resource-stack">'+resource('HP',p.current_hp,p.max_hp,p.character_id,'hp')+resource('EN',p.current_energy,p.max_energy,p.character_id,'energy')+resource('SAN',p.current_sanity,100,p.character_id,'sanity')+'</div>'+conditions+masterExtra:'<div class="privacy-note">Os valores mecânicos desta personagem ficam visíveis ao próprio jogador e ao mestre da sala.</div>')+(actions.length?'<div class="participant-actions">'+actions.join('')+'</div>':'')+'</div></article>';
 }
 function bindParticipantActions(){
