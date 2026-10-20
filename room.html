@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090709">
 <title>SCUTUM Lab · Sala</title>
-<link rel="stylesheet" href="room.css?v=0.5.0">
+<link rel="stylesheet" href="room.css?v=0.6.0">
 </head>
 <body>
 <header class="room-top"><a href="index.html">← Meus personagens</a><div><span>LEGIO XII FULMINATA</span><strong>SCUTUM <i>Lab</i></strong></div><button id="logout">Sair</button></header>
@@ -36,6 +36,10 @@
     <textarea id="masterNotes" rows="5" placeholder="Pistas, CD, lembretes, HP oculto, próximos acontecimentos…"></textarea>
     <div class="notes-actions"><button id="saveNotes" class="primary">Salvar notas</button></div>
   </section>
+  <section class="tool-panel dice-panel">
+    <div><p class="eyebrow">ROLAGENS RÁPIDAS</p><h2>Dados da mesa</h2><p>Use para testes rápidos. O resultado fica registrado no histórico da sessão.</p></div>
+    <div class="dice-controls"><label>Modificador <input id="rollModifier" type="number" value="0"></label><button data-roll="20" class="primary">d20</button><button data-roll="100">d100</button><button data-roll="12">d12</button><button data-roll="10">d10</button><button data-roll="8">d8</button><button data-roll="6">d6</button><strong id="rollResult">—</strong></div>
+  </section>
 
   <div class="section-head"><div><p class="eyebrow">PARTICIPANTES</p><h2>Mesa</h2></div><span id="participantCount">0</span></div>
   <div id="participantGrid" class="participant-grid"></div>
@@ -49,6 +53,6 @@
 <div id="toast" class="toast hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="scutum-config.js"></script>
-<script src="room.js?v=0.5.0"></script>
+<script src="room.js?v=0.6.0"></script>
 </body>
 </html>
