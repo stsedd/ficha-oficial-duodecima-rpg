@@ -2,7 +2,7 @@
 const cfg=window.SCUTUM_CONFIG||{},ready=cfg.supabaseUrl&&cfg.supabaseAnonKey&&window.supabase;
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add('hidden'),2800)};
-let mode='login',client=null,profile=null,adminChannel=null,roomChannel=null,myCharacters=[];
+let mode='login',client=null,profile=null,adminChannel=null,roomChannel=null,myCharacters=[],inviteHandled=false;
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function setMode(v){mode=v;$$('[data-auth-tab]').forEach(b=>b.classList.toggle('active',b.dataset.authTab===v));$('#authSubmit').textContent=v==='login'?'Entrar':'Criar conta';$('#password').autocomplete=v==='login'?'current-password':'new-password';$('#authHint').textContent=''}
@@ -59,6 +59,17 @@ async function renderApp(){
   bindCards();
   $('#createRoomBtn').classList.toggle('hidden',p?.role!=='admin');
   await loadRooms(user);
+  if(!inviteHandled){
+    const invite=(new URLSearchParams(location.search).get('join')||'').trim().toUpperCase();
+    if(invite){
+      inviteHandled=true;
+      if(myCharacters.length){
+        $('#joinRoomCode').value=invite;
+        $('#joinCharacter').innerHTML=myCharacters.map(c=>'<option value="'+c.id+'">'+esc(c.name)+' · Nv '+Number(c.level||1)+'</option>').join('');
+        openDialog($('#joinRoomDialog'));
+      }else toast('Importe ou crie uma ficha antes de entrar pelo convite.');
+    }
+  }
   if(p?.role==='admin')await renderAdmin();else $('#adminPanel').classList.add('hidden');
 }
 async function renderAdmin(){
@@ -103,7 +114,11 @@ $('#joinRoomForm').onsubmit=async e=>{
     const room=found?.[0];if(!room)throw new Error('Não encontrei uma sala ativa com esse código.');
     const {data:{user}}=await client.auth.getUser();
     const {data:existing}=await client.from('room_members').select('room_id').eq('room_id',room.id).eq('user_id',user.id).maybeSingle();
-    if(!existing){const {error}=await client.from('room_members').insert({room_id:room.id,user_id:user.id,character_id:characterId,role:'player'});if(error)throw error}
+    if(!existing){
+      const {error}=await client.from('room_members').insert({room_id:room.id,user_id:user.id,character_id:characterId,role:'player'});if(error)throw error;
+      const chosen=myCharacters.find(c=>c.id===characterId);
+      await client.from('room_events').insert({room_id:room.id,actor_id:user.id,event_type:'member_join',message:(chosen?.name||'Uma personagem')+' entrou na sala.'});
+    }
     $('#joinRoomDialog').close();location.href='room.html?id='+encodeURIComponent(room.id);
   }catch(err){toast(err.message)}finally{btn.disabled=false}
 };
