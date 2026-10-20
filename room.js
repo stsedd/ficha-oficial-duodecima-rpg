@@ -8,6 +8,7 @@ const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 let me=null,room=null,isMaster=false,channel=null,onlineIds=new Set(),participants=[],combat=null,initiative=[],trackers=[],refreshTimer=0;
 
 function pct(current,max){if(current==null||max==null||!Number.isFinite(Number(max))||Number(max)<=0)return 0;return Math.max(0,Math.min(100,(Number(current)/Number(max))*100))}
+function liveMaster(){return isMaster&&room?.status==='active'}
 function schedule(fn,delay=80){clearTimeout(refreshTimer);refreshTimer=setTimeout(fn,delay)}
 async function logEvent(message,eventType='note',payload={}){
   if(!me)return;
@@ -15,7 +16,7 @@ async function logEvent(message,eventType='note',payload={}){
   if(error)console.warn('[SCUTUM] event log',error);
 }
 function adjustButtons(characterId,resource,current){
-  if(!isMaster||current==null)return '';
+  if(!liveMaster()||current==null)return '';
   return '<span class="resource-actions"><button data-adjust="'+characterId+'" data-resource="'+resource+'" data-delta="-1" title="Diminuir 1">−</button><button data-adjust="'+characterId+'" data-resource="'+resource+'" data-delta="1" title="Aumentar 1">+</button><button data-custom-adjust="'+characterId+'" data-resource="'+resource+'" title="Ajuste personalizado">•••</button></span>';
 }
 function resource(label,current,max,characterId,key){
@@ -28,15 +29,15 @@ function participantCard(p){
   const cond=canSee?(p.conditions||[]):[],exhaustion=canSee?p.exhaustion:null;
   let conditions='';
   if(canSee){
-    conditions='<div class="conditions">'+(cond.length?cond.map(x=>'<span>'+esc(x)+(isMaster?'<button data-remove-condition="'+p.character_id+'" data-condition="'+esc(x)+'" aria-label="Remover condição">×</button>':'')+'</span>').join(''):'<span class="quiet">Sem condições</span>')+(exhaustion?'<span>Exaustão '+exhaustion+'</span>':'')+(isMaster?'<button class="condition-add" data-add-condition="'+p.character_id+'">+ condição</button>':'')+'</div>';
+    conditions='<div class="conditions">'+(cond.length?cond.map(x=>'<span>'+esc(x)+(liveMaster()?'<button data-remove-condition="'+p.character_id+'" data-condition="'+esc(x)+'" aria-label="Remover condição">×</button>':'')+'</span>').join(''):'<span class="quiet">Sem condições</span>')+(exhaustion?'<span>Exaustão '+exhaustion+'</span>':'')+(liveMaster()?'<button class="condition-add" data-add-condition="'+p.character_id+'">+ condição</button>':'')+'</div>';
   }
   let masterExtra='';
-  if(isMaster){
+  if(liveMaster()){
     masterExtra='<div class="exhaustion-control"><span>Exaustão</span><button data-adjust="'+p.character_id+'" data-resource="exhaustion" data-delta="-1">−</button><b>'+Number(exhaustion||0)+'</b><button data-adjust="'+p.character_id+'" data-resource="exhaustion" data-delta="1">+</button></div>';
   }
   const actions=[];
   if(self)actions.push('<button class="primary" data-open-sheet="'+p.character_id+'">Abrir minha ficha</button>');
-  if(isMaster&&!self)actions.push('<button class="danger" data-remove-member="'+p.user_id+'" data-remove-name="'+esc(p.character_name)+'">Remover da sala</button>');
+  if(liveMaster()&&!self)actions.push('<button class="danger" data-remove-member="'+p.user_id+'" data-remove-name="'+esc(p.character_name)+'">Remover da sala</button>');
   return '<article class="participant-card"><div class="participant-art">'+(portrait?'<img src="'+esc(portrait)+'" alt="">':'')+'</div><div class="participant-copy"><h3>'+esc(p.character_name)+'</h3><p class="sub"><span>'+esc(origin)+' · Nv '+Number(p.level||1)+(self?' · você':'')+'</span><span class="presence '+(online?'online':'offline')+'"><i></i>'+(online?'online':'offline')+'</span></p>'+(canSee?'<div class="resource-stack">'+resource('HP',p.current_hp,p.max_hp,p.character_id,'hp')+resource('EN',p.current_energy,p.max_energy,p.character_id,'energy')+resource('SAN',p.current_sanity,100,p.character_id,'sanity')+'</div>'+conditions+masterExtra:'<div class="privacy-note">Os valores mecânicos desta personagem ficam visíveis ao próprio jogador e ao mestre da sala.</div>')+(actions.length?'<div class="participant-actions">'+actions.join('')+'</div>':'')+'</div></article>';
 }
 function bindParticipantActions(){
@@ -86,7 +87,8 @@ async function loadRoom(){
   if(error||!data){alert('Você não tem mais acesso a esta sala ou ela não existe.');location.replace('index.html');return false}
   room=data;$('#roomName').textContent=room.name;$('#roomCode').textContent=room.code;$('#roomStatus').textContent=room.status==='active'?'Ativa':'Encerrada';
   document.body.classList.toggle('ended',room.status!=='active');
-  $('#endRoom').classList.toggle('hidden',!isMaster||room.status!=='active');
+  $('#endRoom').classList.toggle('hidden',!liveMaster());
+  $('.master-only').forEach(x=>x.classList.toggle('hidden',!liveMaster()));
   $('#leaveRoom').classList.toggle('hidden',isMaster&&!await hasMembership());
   return true;
 }
@@ -104,7 +106,7 @@ function initiativeRow(x,index){
   const active=combat?.active&&index===Math.min(Number(combat.turn_index||0),Math.max(0,initiative.length-1));
   let detail='';
   if(x.kind==='npc'&&x.current_hp!=null)detail='<span class="npc-hp">HP '+esc(x.current_hp)+(x.max_hp!=null?'/'+esc(x.max_hp):'')+'</span>';
-  const controls=isMaster?'<div class="init-controls"><label>INI <input data-init-value="'+x.id+'" type="number" value="'+Number(x.initiative||0)+'"></label>'+(x.kind==='npc'&&x.current_hp!=null?'<button data-npc-hp="'+x.id+'" data-npc-delta="-1">−HP</button><button data-npc-hp="'+x.id+'" data-npc-delta="1">+HP</button>':'')+'<button class="danger ghost-danger" data-init-remove="'+x.id+'">×</button></div>':'<b class="init-score">'+Number(x.initiative||0)+'</b>';
+  const controls=liveMaster()?'<div class="init-controls"><label>INI <input data-init-value="'+x.id+'" type="number" value="'+Number(x.initiative||0)+'"></label>'+(x.kind==='npc'&&x.current_hp!=null?'<button data-npc-hp="'+x.id+'" data-npc-delta="-1">−HP</button><button data-npc-hp="'+x.id+'" data-npc-delta="1">+HP</button>':'')+'<button class="danger ghost-danger" data-init-remove="'+x.id+'">×</button></div>':'<b class="init-score">'+Number(x.initiative||0)+'</b>';
   return '<div class="initiative-row '+(active?'active':'')+'"><span class="turn-number">'+(index+1)+'</span><div><b>'+esc(x.label)+'</b><small>'+(x.kind==='npc'?'NPC':'Personagem')+'</small>'+detail+'</div>'+controls+'</div>';
 }
 async function loadCombat(){
@@ -134,6 +136,7 @@ function bindCombatActions(){
   });
 }
 async function startCombat(){
+  if(!liveMaster())return toast('Esta sessão está encerrada.');
   const existing=new Set(initiative.filter(x=>x.character_id).map(x=>x.character_id));
   const missing=participants.filter(p=>!existing.has(p.character_id)).map((p,i)=>({room_id:roomId,kind:'player',character_id:p.character_id,label:p.character_name,initiative:0,sort_order:i}));
   if(missing.length){const {error}=await client.from('room_initiative').insert(missing);if(error)return toast('Não foi possível montar a iniciativa.')}
@@ -143,6 +146,7 @@ async function startCombat(){
   loadCombat();
 }
 async function nextTurn(){
+  if(!liveMaster())return toast('Esta sessão está encerrada.');
   if(!combat?.active||!initiative.length)return toast('Inicie o combate primeiro.');
   let next=Number(combat.turn_index||0)+1,round=Number(combat.round||1);
   if(next>=initiative.length){next=0;round++}
@@ -158,6 +162,7 @@ async function endCombat(){
   loadCombat();
 }
 async function addNpc(){
+  if(!liveMaster())return toast('Esta sessão está encerrada.');
   const name=(prompt('Nome do NPC ou criatura:','')||'').trim();if(!name)return;
   const ini=Number(prompt('Iniciativa:','0')||0);
   const hpRaw=prompt('HP máximo (opcional):','');
@@ -187,6 +192,7 @@ async function loadTrackers(){
   $$('[data-tracker-delete]').forEach(b=>b.onclick=async()=>{const t=trackers.find(x=>x.id===b.dataset.trackerDelete);if(!t)return;if(!confirm('Excluir o contador "'+t.label+'"?'))return;await client.from('room_trackers').delete().eq('id',t.id);loadTrackers()});
 }
 async function addTracker(){
+  if(!liveMaster())return toast('Esta sessão está encerrada.');
   const label=(prompt('Nome do objetivo ou contador:','Objetivo')||'').trim();if(!label)return;
   const max=Math.max(1,Math.trunc(Number(prompt('Valor máximo:','4'))||1));
   const current=Math.max(0,Math.min(max,Math.trunc(Number(prompt('Valor atual:','0'))||0)));
@@ -209,7 +215,7 @@ async function saveNotes(){
   if(!error)setTimeout(()=>$('#notesState').textContent='Somente você vê isto.',2200);
 }
 
-function eventIcon(type){return ({combat:'⚔',turn:'➜',resource:'◈',condition:'◆',tracker:'◎',member_removed:'×',member_join:'+',member_leave:'−',npc_resource:'◇'})[type]||'·'}
+function eventIcon(type){return ({combat:'⚔',turn:'➜',resource:'◈',condition:'◆',tracker:'◎',roll:'⚄',member_removed:'×',member_join:'+',member_leave:'−',npc_resource:'◇'})[type]||'·'}
 async function loadEvents(){
   const {data,error}=await client.from('room_events').select('id,event_type,message,created_at').eq('room_id',roomId).order('created_at',{ascending:false}).limit(40);
   if(error)return;
@@ -250,4 +256,18 @@ $('#leaveRoom').onclick=async()=>{if(!confirm('Sair desta sala?'))return;await l
 $('#endRoom').onclick=async()=>{if(!confirm('Encerrar esta sala? Ela deixará de aceitar novos participantes.'))return;await logEvent('A sala foi encerrada.','room');const {error}=await client.from('rooms').update({status:'ended',ended_at:new Date().toISOString()}).eq('id',roomId);if(error)return toast(error.message);toast('Sala encerrada.');refresh()};
 $('#startCombat').onclick=startCombat;$('#nextTurn').onclick=nextTurn;$('#endCombat').onclick=endCombat;$('#addNpc').onclick=addNpc;$('#addTracker').onclick=addTracker;
 $('#saveNotes').onclick=saveNotes;$('#refreshEvents').onclick=loadEvents;
+function secureRoll(sides){
+  const max=Math.floor(0x100000000/sides)*sides;
+  const a=new Uint32Array(1);let n;
+  do{crypto.getRandomValues(a);n=a[0]}while(n>=max);
+  return (n%sides)+1;
+}
+$('[data-roll]').forEach(b=>b.onclick=async()=>{
+  const sides=Math.max(2,Number(b.dataset.roll)||20),mod=Math.trunc(Number($('#rollModifier').value)||0),natural=secureRoll(sides),total=natural+mod;
+  $('#rollResult').textContent=String(total);
+  const who=participants.find(p=>p.user_id===me.id)?.character_name||(isMaster?'Mestre':'Jogador');
+  const modText=mod===0?'':(mod>0?' +'+mod:' '+mod);
+  await logEvent(who+' rolou d'+sides+modText+': '+total+' (dado '+natural+').','roll',{sides,modifier:mod,natural,total});
+  loadEvents();
+});
 })();
