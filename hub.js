@@ -39,8 +39,8 @@ async function loadRooms(user){
   $('[data-open-room]').forEach(b=>b.onclick=()=>location.href='room.html?id='+encodeURIComponent(b.dataset.openRoom));
   if(roomChannel){client.removeChannel(roomChannel);roomChannel=null}
   roomChannel=client.channel('hub-rooms')
-    .on('postgres_changes',{event:'*',schema:'public',table:'rooms'},()=>loadRooms(user))
-    .on('postgres_changes',{event:'*',schema:'public',table:'room_members'},()=>loadRooms(user))
+    .on('postgres_changes',{event:'*',schema:'public',table:'rooms'},()=>Promise.all([loadRooms(user),loadEndedRooms(user)]))
+    .on('postgres_changes',{event:'*',schema:'public',table:'room_members'},()=>Promise.all([loadRooms(user),loadEndedRooms(user)]))
     .subscribe();
 }
 async function loadEndedRooms(user){
