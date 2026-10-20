@@ -3,12 +3,22 @@ const cfg=window.SCUTUM_CONFIG||{},params=new URLSearchParams(location.search),i
 if(!id||!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase){location.replace('index.html');return}
 const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const originalSet=Storage.prototype.setItem;
-let loading=true,timer=0,last='',booted=false;
+let loading=true,timer=0,last='',booted=false,cloudChannel=null,lastSignature='';
 
 function parsePair(selector){
   const text=document.querySelector(selector)?.textContent?.replace(/\s+/g,' ').trim()||'';
   const match=text.match(/(-?\d+)\s*\/\s*(-?\d+)/);
   return match?{current:Number(match[1]),max:Number(match[2])}:null;
+}
+function syncSignature(d={}){
+  return JSON.stringify({
+    name:d.name||'',level:Number(d.level||1),
+    currentHp:d.currentHp==null?null:Number(d.currentHp),
+    currentEnergy:d.currentEnergy==null?null:Number(d.currentEnergy),
+    currentSanity:Number(d.currentSanity??100),
+    conditions:Array.isArray(d.conditions)?[...d.conditions].sort():[],
+    exhaustion:Number(d.exhaustion||0)
+  });
 }
 function cloudPayload(d){
   const hp=parsePair('.core-hp .core-stat-value')||parsePair('.rail-vitals .vital-hp');
@@ -34,6 +44,7 @@ function cloudPayload(d){
 async function pushCloud(raw){
   try{
     const d=JSON.parse(raw);
+    lastSignature=syncSignature(d);
     // Give the sheet a moment to repaint so the quick summary can capture max HP/EN too.
     await new Promise(r=>setTimeout(r,160));
     const {error}=await client.from('characters').update(cloudPayload(d)).eq('id',id);
@@ -79,8 +90,22 @@ function injectBootstrap(){
   const {data,error}=await client.from('characters').select('sheet_data').eq('id',id).single();
   if(error||!data){alert('Não foi possível abrir esta ficha.');location.replace('index.html');return}
   last=JSON.stringify(data.sheet_data||{});
+  lastSignature=syncSignature(data.sheet_data||{});
   originalSet.call(localStorage,KEY,last);
   loading=false;
+  cloudChannel=client.channel('sheet-cloud-'+id)
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'characters',filter:'id=eq.'+id},payload=>{
+      const next=payload.new?.sheet_data||{};
+      const signature=syncSignature(next);
+      if(signature===lastSignature)return;
+      lastSignature=signature;
+      last=JSON.stringify(next);
+      originalSet.call(localStorage,KEY,last);
+      const note=document.querySelector('.archive-save-note');
+      if(note)note.innerHTML='<b>Atualização da mesa recebida</b> · recarregando ficha…';
+      setTimeout(()=>location.reload(),350);
+    })
+    .subscribe();
   injectBootstrap();
 })();
 })();
