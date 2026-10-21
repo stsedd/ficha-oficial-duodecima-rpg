@@ -650,8 +650,8 @@ main{width:min(1380px,94vw);margin:0 auto}
 }
 .initiative-row.hidden-entry.active{box-shadow:inset 3px 0 0 var(--gold-bright)}
 .public-vitals{margin-bottom:7px}
-.public-resource{grid-template-columns:28px minmax(40px,1fr)!important}
-.public-resource>b{display:none}
+.public-resource{grid-template-columns:28px minmax(40px,1fr) auto!important}
+.public-resource>b{display:block;color:var(--muted);font-size:7px;min-width:28px;text-align:right}
 .public-resource .bar{height:7px}
 .shared-card{
   margin:6px 0;
