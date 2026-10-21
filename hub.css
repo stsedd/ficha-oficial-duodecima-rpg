@@ -10,3 +10,46 @@
 @media(max-width:560px){.rooms-grid{grid-template-columns:1fr}.rooms-actions{flex-direction:column}.dialog-actions>*{flex:1}}
 
 .ended-rooms-section{background:linear-gradient(180deg,#100e11,#0b0a0c);border-style:dashed}.ended-rooms-section .room-card{filter:saturate(.72);opacity:.92}.ended-rooms-section .room-card .room-code{color:#b9a6ac}.ended-rooms-section>.rooms-head>span{border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:var(--muted)}
+
+.hero-title-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.hero-title-row h1{margin-right:4px}
+.role-badge,.session-role,.role-pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:5px 8px;font-size:8px;font-weight:800;letter-spacing:.08em}
+.role-badge.player,.session-role.player,.role-pill.player{color:#b7b3ba;background:#111014}
+.role-badge.master,.session-role.master,.role-pill.master{color:#e4c77d;border-color:#5d4b25;background:#18140c}
+.role-badge.admin,.session-role.admin,.role-pill.admin{color:#ff91a2;border-color:#6e2b38;background:#210d13}
+.role-badge.preview{color:#9fd0ab;border-color:#31523c;background:#0d1711}
+#sessionActions{display:flex;align-items:center;gap:7px}
+.characters-section{padding-bottom:34px}
+.admin-console{margin:0 0 54px;border:1px solid #46333a;border-radius:16px;background:linear-gradient(180deg,#151115,#0b0a0c);overflow:hidden}
+.admin-console-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:19px 20px;border-bottom:1px solid var(--line)}
+.admin-console-head h2{margin:3px 0 5px;font:600 30px Georgia,serif}
+.admin-console-head p:not(.eyebrow){margin:0;color:var(--muted);font-size:12px}
+.admin-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:14px 20px;border-bottom:1px solid var(--line)}
+.admin-stats>div{padding:10px;border:1px solid #2d272e;border-radius:10px;background:#0d0b0e}
+.admin-stats span{display:block;color:var(--muted);font-size:8px;text-transform:uppercase;letter-spacing:.08em}
+.admin-stats b{font:600 22px Georgia,serif}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:20px}
+.admin-block{min-width:0}
+.admin-block-head{margin-bottom:10px}
+.admin-block-head h3{margin:3px 0 0;font:600 22px Georgia,serif}
+.role-grant-form{display:grid;grid-template-columns:minmax(0,1.5fr) 150px auto;gap:7px;align-items:end;margin-bottom:8px}
+.role-grant-form select{width:100%;background:#0c0a0d;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:12px}
+.admin-help{margin:0 0 12px;color:var(--muted);font-size:10px;line-height:1.45}
+.admin-list{display:grid;border-top:1px solid var(--line);max-height:430px;overflow:auto}
+.admin-row{padding:10px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.admin-row small{display:block;margin-top:3px;color:var(--muted);font-size:9px;line-height:1.35}
+.admin-row.pending{opacity:.78}
+.room-admin-row button{padding:6px 9px;font-size:9px}
+@media(max-width:900px){
+  .admin-grid{grid-template-columns:1fr}
+  .admin-stats{grid-template-columns:repeat(3,1fr)}
+  .role-grant-form{grid-template-columns:1fr 130px}
+  .role-grant-form button{grid-column:1/-1}
+}
+@media(max-width:560px){
+  #sessionActions .session-role{display:none}
+  .admin-console-head{flex-direction:column}
+  .admin-stats{grid-template-columns:1fr 1fr}
+  .role-grant-form{grid-template-columns:1fr}
+  .role-grant-form button{grid-column:auto}
+}
