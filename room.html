@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="room.css?v=2.0.1">
+<link rel="stylesheet" href="room.css?v=2.1.0">
 </head>
 <body>
 <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -79,10 +79,12 @@
             <h2>Iniciativa</h2>
           </div>
           <div class="panel-actions master-only hidden">
-            <button id="startCombat" class="primary">Iniciar</button>
+            <button id="pullInitiative">Puxar iniciativa</button>
+            <button id="startCombat" class="primary">Iniciar combate</button>
             <button id="prevTurn">← Turno</button>
             <button id="nextTurn">Turno →</button>
-            <button id="addNpc">+ NPC</button>
+            <button id="addNpc">+ Monstro</button>
+            <button id="addHiddenNpc">+ Oculto</button>
             <button id="clearCombat">Limpar</button>
             <button id="endCombat" class="danger">Encerrar</button>
           </div>
@@ -183,11 +185,19 @@
         <div id="diceMode" class="dice-mode">
           <div class="dice-expression-row">
             <label>
-              <span>Expressão</span>
+              <span>Expressão base</span>
               <input id="rollExpression" inputmode="text" value="1d20" placeholder="1d20+5" autocomplete="off">
+            </label>
+            <label>
+              <span>Bônus extra</span>
+              <input id="rollExtraModifier" type="number" inputmode="numeric" value="0" placeholder="+0">
             </label>
             <button id="submitRoll" class="primary roll-submit" type="submit">Rolar</button>
           </div>
+          <label class="roll-context-field">
+            <span>Origem do bônus / observação</span>
+            <input id="rollNote" maxlength="120" placeholder="ex.: +3 Prole · alvo Caído · +2 Herança">
+          </label>
           <div class="quick-dice" aria-label="Dados rápidos">
             <button type="button" data-die="1d20">d20</button>
             <button type="button" data-die="1d12">d12</button>
@@ -233,6 +243,6 @@
 <div id="toast" class="toast hidden" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="scutum-config.js"></script>
-<script src="room.js?v=2.0.1"></script>
+<script src="room.js?v=2.1.0"></script>
 </body>
 </html>
