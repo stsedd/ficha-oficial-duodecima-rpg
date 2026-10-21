@@ -638,3 +638,80 @@ main{width:min(1380px,94vw);margin:0 auto}
   .room-hero-actions button{flex:1}
   .roll-result-line>strong{font-size:28px}
 }
+
+/* SCUTUM tabletop functional layer */
+.hidden-init-badge{
+  display:inline-flex;align-items:center;padding:2px 5px;border:1px solid #654b22;border-radius:999px;
+  color:#e5c77f;background:#171209;font-size:6px;letter-spacing:.08em;font-weight:800
+}
+.initiative-row.hidden-entry{
+  border-style:dashed;
+  background:linear-gradient(90deg,rgba(204,159,74,.055),#101216)
+}
+.initiative-row.hidden-entry.active{box-shadow:inset 3px 0 0 var(--gold-bright)}
+.public-vitals{margin-bottom:7px}
+.public-resource{grid-template-columns:28px minmax(40px,1fr)!important}
+.public-resource>b{display:none}
+.public-resource .bar{height:7px}
+.shared-card{
+  margin:6px 0;
+  border:1px solid #4a3d25;
+  border-radius:12px;
+  background:linear-gradient(135deg,rgba(204,159,74,.10),rgba(16,17,20,.76))
+}
+.shared-card-body{margin-top:8px;padding:10px;border:1px solid #393121;border-radius:10px;background:#100f0c}
+.shared-card-body h3{margin:5px 0 3px;font:600 17px var(--serif);color:var(--gold-bright)}
+.shared-card-body>small{display:block;color:#a69883;font-size:7px;text-transform:uppercase;letter-spacing:.08em}
+.shared-card-body p{margin:9px 0 0;color:#d3cbc0;font-size:9px;line-height:1.55}
+.shared-type{
+  display:inline-flex;padding:3px 6px;border:1px solid #594925;border-radius:999px;
+  color:#e8c775;font-size:6px;font-weight:800;letter-spacing:.1em
+}
+.roll-extra{display:inline-flex;padding:3px 6px;border:1px solid #4d633c;border-radius:999px;color:#bada9b;font-size:6px;text-transform:uppercase}
+.roll-note{margin:6px 0 0;color:#b8afa5;font-size:7px;line-height:1.4}
+.roll-context-field{display:grid!important;margin-top:7px}
+.dice-expression-row{grid-template-columns:minmax(0,1fr) 92px auto}
+.participant-grid{
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  align-items:start
+}
+.participant-card{
+  display:grid;
+  grid-template-columns:1fr;
+  grid-template-rows:3fr 2fr;
+  aspect-ratio:4/7;
+  min-height:0
+}
+.participant-art{
+  min-height:0;
+  height:100%;
+  border-right:0;
+  border-bottom:1px solid var(--line-soft)
+}
+.participant-copy{overflow:auto}
+.participant-art img{object-position:center 28%}
+
+@media(max-width:900px){
+  .participant-grid{
+    display:flex;
+    overflow-x:auto;
+    gap:12px;
+    padding:2px 1px 12px;
+    scroll-snap-type:x mandatory;
+    scrollbar-width:thin
+  }
+  .participant-card{
+    min-width:min(76vw,330px);
+    flex:0 0 min(76vw,330px);
+    scroll-snap-align:center
+  }
+}
+@media(max-width:680px){
+  .dice-expression-row{grid-template-columns:minmax(0,1fr) 78px}
+  .dice-expression-row .roll-submit{grid-column:1/-1;width:100%}
+  .participant-card{
+    grid-template-columns:1fr;
+    grid-template-rows:3fr 2fr
+  }
+  .participant-art{height:auto}
+}
