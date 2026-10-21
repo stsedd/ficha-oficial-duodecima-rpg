@@ -4,245 +4,167 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#08090b">
-<title>SCUTUM Lab · Sala de missão</title>
+<title>SCUTUM Lab · Sala</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="room.css?v=2.2.1">
+<link rel="stylesheet" href="room.css?v=3.0.0">
 </head>
 <body>
-<div class="ambient ambient-one" aria-hidden="true"></div>
-<div class="ambient ambient-two" aria-hidden="true"></div>
-
 <header class="room-top">
   <a class="back-link" href="index.html">← Arquivo</a>
-  <div class="brand-lockup">
-    <span>LEGIO XII FULMINATA</span>
-    <strong>SCUTUM <i>Lab</i></strong>
-  </div>
+  <div class="brand-lockup"><span>LEGIO XII FULMINATA</span><strong>SCUTUM <i>LAB</i></strong></div>
   <button id="logout" class="top-ghost">Sair</button>
 </header>
 
 <main>
-<section id="roomBoot" class="room-boot">
-  <div class="boot-sigil">XII</div>
-  <strong>SCUTUM</strong>
-  <span>Preparando a mesa…</span>
-</section>
+  <section id="roomBoot" class="room-boot"><strong>SCUTUM</strong><span>Preparando a mesa…</span></section>
 
-<section id="roomView" class="hidden">
-  <header class="room-hero">
-    <div class="hero-copy">
-      <p class="eyebrow">SCUTUM MAGISTRI · SALA DE MISSÃO</p>
-      <h1 id="roomName">Sala</h1>
-      <div class="room-meta">
-        <button id="copyCode" class="code-chip" title="Copiar código"><span>CÓDIGO</span><b id="roomCode">------</b></button>
-        <button id="copyInvite" class="meta-action">Copiar convite</button>
-        <span id="roomStatus" class="status-pill">Ativa</span>
-        <span id="roomDuration" class="duration-pill">0 min</span>
-        <span id="syncStatus" class="sync-pill">Conectando…</span>
+  <section id="roomView" class="room-view hidden">
+    <div class="mission-bar">
+      <div class="mission-title">
+        <p class="eyebrow">SALA DE MISSÃO</p>
+        <h1 id="roomName">Sala</h1>
+      </div>
+      <div class="mission-actions">
+        <button id="initiativeQuick" class="mission-action primary-soft"><span>Iniciativa</span><b id="initiativeQuickStatus">—</b></button>
+        <button id="liveButton" class="live-button" title="Status da sala"><i></i><span id="syncStatus">Conectando…</span></button>
       </div>
     </div>
-    <div class="room-hero-actions">
-      <button id="leaveRoom">Sair da sala</button>
-      <button id="reopenRoom" class="hidden">Reabrir sala</button>
-      <button id="endRoom" class="danger hidden">Encerrar sala</button>
-    </div>
-  </header>
 
-  <section id="masterNote" class="master-banner hidden">
-    <div class="master-banner-mark">M</div>
-    <div>
-      <p class="eyebrow">PAINEL DO MESTRE</p>
-      <h2>Mesa ao vivo</h2>
-      <p>Recursos, iniciativa, condições, objetivos e rolagens sincronizados com os jogadores.</p>
-    </div>
-  </section>
+    <div class="table-layout">
+      <nav class="tool-dock" aria-label="Ferramentas da mesa">
+        <button id="dockTable" class="dock-button active" data-panel="table" title="Mesa"><span>◫</span><small>Mesa</small></button>
+        <button id="dockInitiative" class="dock-button" data-panel="initiativePanel" title="Iniciativa"><span>≡</span><small>Inic.</small></button>
+        <button id="dockChat" class="dock-button" title="Chat"><span>◌</span><small>Chat</small></button>
+        <button id="dockSheet" class="dock-button" title="Ficha"><span>▤</span><small>Ficha</small></button>
+        <button id="dockTrackers" class="dock-button" data-panel="trackersPanel" title="Objetivos"><span>◎</span><small>Objet.</small></button>
+        <button id="dockNotes" class="dock-button master-only hidden" data-panel="notesPanel" title="Notas do mestre"><span>✎</span><small>Notas</small></button>
+        <button id="dockLog" class="dock-button" data-panel="logPanel" title="Histórico"><span>≣</span><small>Log</small></button>
+        <button id="dockSettings" class="dock-button" data-panel="settingsPanel" title="Sala"><span>⚙</span><small>Sala</small></button>
+      </nav>
 
-  <section id="roomBriefing" class="briefing-panel hidden">
-    <div class="briefing-ornament" aria-hidden="true">✦</div>
-    <div class="briefing-copy">
-      <p class="eyebrow">CENA ATUAL</p>
-      <h2 id="briefingTitle">Sem comunicado</h2>
-      <p id="briefingBody">O mestre ainda não publicou um aviso para a mesa.</p>
-    </div>
-    <button id="editBriefing" class="master-only hidden">Editar comunicado</button>
-  </section>
-
-  <div class="room-workspace">
-    <div class="mission-column">
-
-      <section class="panel combat-panel">
-        <div class="panel-head">
+      <section class="table-surface">
+        <div class="table-toolbar">
           <div>
-            <p class="eyebrow">ORDO PROELII</p>
-            <h2>Iniciativa</h2>
+            <p class="eyebrow">PERSONAGENS NA MESA</p>
+            <span><b id="participantCount">0</b> participantes</span>
           </div>
-          <div class="panel-actions master-only hidden">
+          <div class="table-toolbar-actions">
+            <button id="openInitiativeFloat">Iniciativa <span id="roundMini">—</span></button>
+            <button id="openChatFloat" class="mobile-chat-button">Chat</button>
+          </div>
+        </div>
+
+        <div id="participantGrid" class="participant-grid"></div>
+
+        <section id="initiativePanel" class="tool-window hidden">
+          <div class="window-head">
+            <div><p class="eyebrow">ORDEM DE COMBATE</p><h2>Iniciativa</h2></div>
+            <button class="window-close" data-close-panel="initiativePanel">×</button>
+          </div>
+          <div id="combatStatus" class="combat-status">Nenhum combate ativo.</div>
+          <div id="initiativeList" class="initiative-list"></div>
+          <div class="window-footer master-only hidden">
             <button id="pullInitiative">Puxar iniciativa</button>
-            <button id="startCombat" class="primary">Iniciar combate</button>
-            <button id="prevTurn">← Turno</button>
-            <button id="nextTurn">Turno →</button>
             <button id="addNpc">+ Monstro</button>
             <button id="addHiddenNpc">+ Oculto</button>
+            <span class="spacer"></span>
+            <button id="prevTurn">←</button>
+            <button id="startCombat" class="primary">Iniciar</button>
+            <button id="nextTurn">→</button>
             <button id="clearCombat">Limpar</button>
             <button id="endCombat" class="danger">Encerrar</button>
           </div>
-        </div>
-        <div id="combatStatus" class="combat-status">Nenhum combate ativo.</div>
-        <div id="initiativeList" class="initiative-list"></div>
+        </section>
+
+        <section id="trackersPanel" class="tool-window hidden">
+          <div class="window-head">
+            <div><p class="eyebrow">PROGRESSO</p><h2>Objetivos</h2></div>
+            <button class="window-close" data-close-panel="trackersPanel">×</button>
+          </div>
+          <div id="trackerList" class="tracker-list"></div>
+          <div class="window-footer master-only hidden"><button id="addTracker">+ Contador</button></div>
+        </section>
+
+        <section id="notesPanel" class="tool-window hidden master-only">
+          <div class="window-head">
+            <div><p class="eyebrow">PRIVADO</p><h2>Notas do mestre</h2></div>
+            <button class="window-close" data-close-panel="notesPanel">×</button>
+          </div>
+          <div id="masterWorkspace" class="notes-body">
+            <textarea id="masterNotes" rows="10" placeholder="Pistas, CDs, HP oculto, próximos acontecimentos…"></textarea>
+            <div class="notes-actions"><span id="notesState">Somente você vê isto.</span><button id="saveNotes" class="primary">Salvar</button></div>
+          </div>
+        </section>
+
+        <section id="logPanel" class="tool-window hidden">
+          <div class="window-head">
+            <div><p class="eyebrow">SESSÃO</p><h2>Histórico</h2></div>
+            <button class="window-close" data-close-panel="logPanel">×</button>
+          </div>
+          <div id="eventList" class="event-list"></div>
+          <div class="window-footer"><button id="refreshEvents">Atualizar</button><button id="exportSession">Exportar sessão</button></div>
+        </section>
+
+        <section id="settingsPanel" class="tool-window settings-window hidden">
+          <div class="window-head">
+            <div><p class="eyebrow">SALA</p><h2>Configurações</h2></div>
+            <button class="window-close" data-close-panel="settingsPanel">×</button>
+          </div>
+          <div class="settings-body">
+            <div class="setting-row"><span>Código</span><button id="copyCode"><b id="roomCode">------</b> · copiar</button></div>
+            <div class="setting-row"><span>Convite</span><button id="copyInvite">Copiar link</button></div>
+            <div class="setting-row"><span>Status</span><span id="roomStatus" class="status-pill">Ativa</span></div>
+            <div class="setting-row"><span>Duração</span><span id="roomDuration">0 min</span></div>
+            <div class="settings-actions">
+              <button id="leaveRoom">Sair da sala</button>
+              <button id="reopenRoom" class="hidden">Reabrir sala</button>
+              <button id="endRoom" class="danger hidden">Encerrar sala</button>
+            </div>
+          </div>
+        </section>
       </section>
 
-      <section class="panel trackers-panel">
-        <div class="panel-head">
-          <div>
-            <p class="eyebrow">PROGRESSUS</p>
-            <h2>Objetivos & contadores</h2>
-          </div>
-          <div class="panel-actions master-only hidden"><button id="addTracker">+ Contador</button></div>
+      <aside id="rollConsole" class="roll-console">
+        <div class="roll-console-head">
+          <div><p class="eyebrow">CHAT</p><h2>Rolagens</h2></div>
+          <div class="roll-head-actions"><span id="rollCount">0</span><button id="clearRolls" class="master-only hidden">Limpar</button><button id="closeChat">×</button></div>
         </div>
-        <div id="trackerList" class="tracker-list"></div>
-      </section>
-
-      <section class="participants-section">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">CONTUBERNIUM</p>
-            <h2>Participantes</h2>
-          </div>
-          <span id="participantCount">0</span>
+        <div id="rollFeed" class="roll-feed" aria-live="polite">
+          <div class="roll-empty"><b>Nenhuma rolagem ainda.</b><small>Rolagens e habilidades aparecem aqui.</small></div>
         </div>
-        <div id="participantGrid" class="participant-grid"></div>
-      </section>
-
-      <section id="masterWorkspace" class="panel master-workspace hidden">
-        <div class="panel-head">
-          <div>
-            <p class="eyebrow">TABULAE PRIVATAE</p>
-            <h2>Notas do mestre</h2>
+        <form id="rollForm" class="roll-composer">
+          <div class="roll-form-top">
+            <label><span>Tipo</span><select id="rollKind"><option>Perícia</option><option>Iniciativa</option><option>Ataque</option><option>Defesa</option><option>Resistência</option><option>Dano</option><option selected>Rolagem livre</option></select></label>
+            <label><span>Descrição</span><input id="rollLabel" maxlength="80" placeholder="Percepção, ataque…"></label>
           </div>
-          <span id="notesState" class="quiet-text">Somente você vê isto.</span>
-        </div>
-        <textarea id="masterNotes" rows="6" placeholder="Pistas, CDs, HP oculto, próximos acontecimentos…"></textarea>
-        <div class="notes-actions"><button id="saveNotes" class="primary">Salvar notas</button></div>
-      </section>
-
-      <section class="panel event-panel">
-        <div class="panel-head">
-          <div>
-            <p class="eyebrow">ACTA SESSIONIS</p>
-            <h2>Registro da sessão</h2>
+          <div id="diceMode" class="dice-mode">
+            <div class="dice-expression-row">
+              <label><span>Expressão</span><input id="rollExpression" value="1d20" placeholder="1d20+5"></label>
+              <label><span>Extra</span><input id="rollExtraModifier" type="number" value="0"></label>
+              <button id="submitRoll" class="primary" type="submit">Rolar</button>
+            </div>
+            <label class="roll-context-field"><span>Origem do bônus / observação</span><input id="rollNote" maxlength="120" placeholder="+3 Prole · alvo Caído"></label>
+            <div class="quick-dice"><button type="button" data-die="1d20">d20</button><button type="button" data-die="1d12">d12</button><button type="button" data-die="1d10">d10</button><button type="button" data-die="1d8">d8</button><button type="button" data-die="1d6">d6</button><button type="button" data-die="1d4">d4</button><button type="button" data-die="1d100">d100</button></div>
           </div>
-          <div class="panel-actions">
-            <button id="exportSession">Exportar sessão</button>
-            <button id="refreshEvents">Atualizar</button>
+          <div id="manualMode" class="manual-mode hidden">
+            <label><span>Resultado manual</span><input id="manualTotal" type="number" placeholder="Total"></label>
+            <button id="submitManualRoll" class="primary" type="button">Registrar</button>
           </div>
-        </div>
-        <div id="eventList" class="event-list"></div>
-      </section>
+          <div class="roll-options">
+            <label><input id="manualToggle" type="checkbox"><span>Manual</span></label>
+            <label id="secretRollOption" class="master-only hidden"><input id="secretRoll" type="checkbox"><span>Somente mestre</span></label>
+          </div>
+        </form>
+      </aside>
     </div>
-
-    <aside class="roll-console">
-      <div class="roll-console-head">
-        <div>
-          <p class="eyebrow">ALEA · CHAT DE ROLAGENS</p>
-          <h2>Mesa de dados</h2>
-        </div>
-        <div class="roll-head-actions">
-          <span id="rollCount">0</span>
-          <button id="clearRolls" class="master-only hidden" title="Limpar chat de rolagens">Limpar</button>
-        </div>
-      </div>
-
-      <div id="rollFeed" class="roll-feed" aria-live="polite">
-        <div class="roll-empty">
-          <span>✦</span>
-          <b>Nenhuma rolagem ainda.</b>
-          <small>Os dados da mesa aparecerão aqui em tempo real.</small>
-        </div>
-      </div>
-
-      <form id="rollForm" class="roll-composer">
-        <div class="roll-form-top">
-          <label class="roll-label-field">
-            <span>Tipo</span>
-            <select id="rollKind">
-              <option>Perícia</option>
-              <option>Iniciativa</option>
-              <option>Ataque</option>
-              <option>Defesa</option>
-              <option>Resistência</option>
-              <option>Dano</option>
-              <option selected>Rolagem livre</option>
-            </select>
-          </label>
-          <label class="roll-note-field">
-            <span>Descrição</span>
-            <input id="rollLabel" maxlength="80" placeholder="ex.: Percepção, Mordida do Basilisco…">
-          </label>
-        </div>
-
-        <div id="diceMode" class="dice-mode">
-          <div class="dice-expression-row">
-            <label>
-              <span>Expressão base</span>
-              <input id="rollExpression" inputmode="text" value="1d20" placeholder="1d20+5" autocomplete="off">
-            </label>
-            <label>
-              <span>Bônus extra</span>
-              <input id="rollExtraModifier" type="number" inputmode="numeric" value="0" placeholder="+0">
-            </label>
-            <button id="submitRoll" class="primary roll-submit" type="submit">Rolar</button>
-          </div>
-          <label class="roll-context-field">
-            <span>Origem do bônus / observação</span>
-            <input id="rollNote" maxlength="120" placeholder="ex.: +3 Prole · alvo Caído · +2 Herança">
-          </label>
-          <div class="quick-dice" aria-label="Dados rápidos">
-            <button type="button" data-die="1d20">d20</button>
-            <button type="button" data-die="1d12">d12</button>
-            <button type="button" data-die="1d10">d10</button>
-            <button type="button" data-die="1d8">d8</button>
-            <button type="button" data-die="1d6">d6</button>
-            <button type="button" data-die="1d4">d4</button>
-            <button type="button" data-die="1d100">d100</button>
-          </div>
-        </div>
-
-        <div id="manualMode" class="manual-mode hidden">
-          <label>
-            <span>Resultado manual</span>
-            <input id="manualTotal" type="number" inputmode="numeric" placeholder="Digite o total">
-          </label>
-          <button id="submitManualRoll" class="primary" type="button">Registrar</button>
-          <p>Resultados manuais ficam marcados no chat para não serem confundidos com dados rolados pelo sistema.</p>
-        </div>
-
-        <div class="roll-options">
-          <label class="switch-line">
-            <input id="manualToggle" type="checkbox">
-            <span>Inserir resultado manual</span>
-          </label>
-          <label id="secretRollOption" class="switch-line master-only hidden">
-            <input id="secretRoll" type="checkbox">
-            <span>Rolagem oculta · somente mestre</span>
-          </label>
-        </div>
-      </form>
-
-      <div class="roll-legend">
-        <span><i class="legend-critical"></i> crítico natural</span>
-        <span><i class="legend-fumble"></i> falha crítica</span>
-        <span><i class="legend-manual"></i> resultado manual</span>
-      </div>
-    </aside>
-  </div>
-</section>
+  </section>
 </main>
 
 <div id="toast" class="toast hidden" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="scutum-config.js"></script>
-<script src="room.js?v=2.2.1"></script>
+<script src="room.js?v=3.0.0"></script>
 </body>
 </html>
