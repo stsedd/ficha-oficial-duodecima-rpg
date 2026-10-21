@@ -745,7 +745,7 @@ function renderRoll(r){
   const cls=rollClass(r);
   const mod=Number(r.modifier||0);
   const breakdown=r.breakdown||{};
-  const baseMod=Number(breakdown.base_modifier||0);
+  const baseMod=breakdown.base_modifier!=null?Number(breakdown.base_modifier||0):Number(r.modifier||0);
   const extraMod=Number(breakdown.extra_modifier||0);
 
   let detail='';
