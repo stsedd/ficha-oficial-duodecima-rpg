@@ -286,10 +286,12 @@ async function loadParticipants(){
 /* ---------- COMBAT ---------- */
 
 function initiativeRow(x,index){
-  const active=combat?.active&&index===Math.min(Number(combat.turn_index||0),Math.max(0,initiative.length-1));
+  const active=combat?.active&&combat?.current_entry_id===x.id;
+  const hidden=isMaster&&x.visibility==='master';
   const npcHp=x.kind==='npc'&&x.current_hp!=null
     ?'<span class="npc-hp">HP '+esc(x.current_hp)+(x.max_hp!=null?'/'+esc(x.max_hp):'')+'</span>'
     :'';
+  const hiddenBadge=hidden?'<span class="hidden-init-badge">OCULTO</span>':'';
 
   const controls=liveMaster()
     ?'<div class="init-controls">'+
@@ -302,35 +304,49 @@ function initiativeRow(x,index){
     '</div>'
     :'<b class="init-score">'+Number(x.initiative||0)+'</b>';
 
-  return '<div class="initiative-row '+(active?'active':'')+'">'+
+  return '<div class="initiative-row '+(active?'active ':'')+(hidden?'hidden-entry':'')+'">'+
     '<span class="turn-number">'+(index+1)+'</span>'+
-    '<div class="initiative-name"><b>'+esc(x.label)+'</b><small>'+(x.kind==='npc'?'NPC':'Personagem')+'</small>'+npcHp+'</div>'+
+    '<div class="initiative-name"><b>'+esc(x.label)+'</b><small>'+(x.kind==='npc'?'NPC':'Personagem')+'</small>'+hiddenBadge+npcHp+'</div>'+
     controls+
   '</div>';
 }
+
 async function loadCombat(){
   const [{data:state},{data,error}]=await Promise.all([
     client.from('room_combat').select('*').eq('room_id',roomId).maybeSingle(),
-    client.from('room_initiative').select('*').eq('room_id',roomId).order('initiative',{ascending:false}).order('sort_order',{ascending:true}).order('created_at',{ascending:true})
+    client.from('room_initiative').select('*').eq('room_id',roomId)
+      .order('initiative',{ascending:false})
+      .order('sort_order',{ascending:true})
+      .order('created_at',{ascending:true})
   ]);
   if(error)return;
-  combat=state||{room_id:roomId,active:false,round:1,turn_index:0};
+
+  combat=state||{room_id:roomId,active:false,round:1,turn_index:0,current_entry_id:null};
   initiative=data||[];
 
-  if(combat.active&&initiative.length){
-    const idx=Math.min(Number(combat.turn_index||0),initiative.length-1);
-    const current=initiative[idx];
-    $('#combatStatus').innerHTML='<div><span>RODADA</span><b>'+Number(combat.round||1)+'</b></div><div><span>TURNO</span><strong>'+esc(current.label)+'</strong></div>';
+  if(combat.active){
+    let current=initiative.find(x=>x.id===combat.current_entry_id);
+    if(!current&&!combat.current_entry_id&&initiative.length){
+      current=initiative[Math.min(Number(combat.turn_index||0),initiative.length-1)];
+    }
+    const currentLabel=current
+      ?current.label
+      :(combat.current_entry_id?'Ação do mestre':'Turno em andamento');
+    $('#combatStatus').innerHTML=
+      '<div><span>RODADA</span><b>'+Number(combat.round||1)+'</b></div>'+
+      '<div><span>TURNO</span><strong>'+esc(currentLabel)+'</strong></div>';
   }else{
-    $('#combatStatus').innerHTML='<span>'+(initiative.length?'Combate pausado. A ordem está preservada.':'Nenhum combate ativo.')+'</span>';
+    $('#combatStatus').innerHTML='<span>'+(initiative.length?'Iniciativa preparada. O combate ainda não começou.':'Nenhum combate ativo.')+'</span>';
   }
 
   $('#initiativeList').innerHTML=initiative.length
     ?initiative.map(initiativeRow).join('')
     :'<div class="mini-empty">A iniciativa ainda está vazia.</div>';
-  $('#startCombat').textContent=combat.active?'Reiniciar':'Iniciar';
+
+  $('#startCombat').textContent=combat.active?'Reiniciar combate':'Iniciar combate';
   bindCombatActions();
 }
+
 function bindCombatActions(){
   $$('[data-set-turn]').forEach(b=>b.onclick=async()=>{
     if(!liveMaster())return;
@@ -338,11 +354,17 @@ function bindCombatActions(){
     const target=initiative[index];
     if(!target)return;
     await client.from('room_combat').upsert({
-      room_id:roomId,active:true,round:Number(combat?.round||1),turn_index:index
+      room_id:roomId,
+      active:true,
+      round:Number(combat?.round||1),
+      turn_index:index,
+      current_entry_id:target.id
     });
-    await logEvent('Turno definido para '+target.label+'.','turn',{
-      round:Number(combat?.round||1),turn_index:index,label:target.label
-    });
+    await logEvent(
+      target.visibility==='master'?'O mestre avançou para uma ação oculta.':'Turno definido para '+target.label+'.',
+      'turn',
+      {round:Number(combat?.round||1),turn_index:index,hidden:target.visibility==='master'}
+    );
     loadCombat();
   });
 
@@ -354,8 +376,12 @@ function bindCombatActions(){
 
   $$('[data-init-remove]').forEach(b=>b.onclick=async()=>{
     if(!liveMaster())return;
+    const row=initiative.find(x=>x.id===b.dataset.initRemove);
     await client.from('room_initiative').delete().eq('id',b.dataset.initRemove);
-    await logEvent('Um participante foi removido da iniciativa.','combat');
+    if(row?.visibility!=='master')await logEvent('Um participante foi removido da iniciativa.','combat');
+    if(combat?.current_entry_id===b.dataset.initRemove){
+      await client.from('room_combat').update({current_entry_id:null}).eq('room_id',roomId);
+    }
     loadCombat();
   });
 
@@ -368,7 +394,9 @@ function bindCombatActions(){
     const max=row.max_hp==null?2147483647:Number(row.max_hp);
     const next=Math.max(0,Math.min(max,Math.trunc(Number(raw)||0)));
     await client.from('room_initiative').update({current_hp:next}).eq('id',row.id);
-    await logEvent(row.label+': HP '+row.current_hp+' → '+next+'.','npc_resource',{initiative_id:row.id});
+    if(row.visibility!=='master'){
+      await logEvent(row.label+': HP '+row.current_hp+' → '+next+'.','npc_resource',{initiative_id:row.id});
+    }
     loadCombat();
   });
 
@@ -380,31 +408,69 @@ function bindCombatActions(){
     const max=row.max_hp==null?2147483647:Number(row.max_hp);
     const next=Math.max(0,Math.min(max,Number(row.current_hp||0)+delta));
     await client.from('room_initiative').update({current_hp:next}).eq('id',row.id);
-    await logEvent(row.label+': HP '+row.current_hp+' → '+next+'.','npc_resource',{initiative_id:row.id});
+    if(row.visibility!=='master'){
+      await logEvent(row.label+': HP '+row.current_hp+' → '+next+'.','npc_resource',{initiative_id:row.id});
+    }
     loadCombat();
   });
 }
-async function startCombat(){
-  if(!liveMaster())return toast('Esta sessão está encerrada.');
+
+async function pullInitiative(showToast=true){
+  if(!liveMaster())return;
   const existing=new Set(initiative.filter(x=>x.character_id).map(x=>x.character_id));
   const missing=participants
     .filter(p=>!existing.has(p.character_id))
-    .map((p,i)=>({room_id:roomId,kind:'player',character_id:p.character_id,label:p.character_name,initiative:0,sort_order:i}));
+    .map((p,i)=>({
+      room_id:roomId,
+      kind:'player',
+      character_id:p.character_id,
+      label:p.character_name,
+      initiative:0,
+      sort_order:i,
+      visibility:'public'
+    }));
 
   if(missing.length){
     const {error}=await client.from('room_initiative').insert(missing);
-    if(error)return toast('Não foi possível montar a iniciativa.');
+    if(error){toast('Não foi possível puxar os personagens para a iniciativa.');return false}
   }
-  const {error}=await client.from('room_combat').upsert({room_id:roomId,active:true,round:1,turn_index:0});
+  if(showToast)toast(missing.length?'Personagens adicionados à iniciativa.':'Todos os personagens já estão na iniciativa.');
+  await loadCombat();
+  return true;
+}
+
+async function startCombat(){
+  if(!liveMaster())return toast('Esta sessão está encerrada.');
+  const ok=await pullInitiative(false);
+  if(ok===false)return;
+
+  const {data:list,error:listError}=await client.from('room_initiative').select('*').eq('room_id',roomId)
+    .order('initiative',{ascending:false})
+    .order('sort_order',{ascending:true})
+    .order('created_at',{ascending:true});
+  if(listError||!(list||[]).length)return toast('Adicione alguém à iniciativa antes de começar.');
+
+  const first=list[0];
+  const {error}=await client.from('room_combat').upsert({
+    room_id:roomId,
+    active:true,
+    round:1,
+    turn_index:0,
+    current_entry_id:first.id
+  });
   if(error)return toast('Não foi possível iniciar o combate.');
   await logEvent('Combate iniciado.','combat');
   loadCombat();
 }
+
 async function nextTurn(){
   if(!liveMaster())return toast('Esta sessão está encerrada.');
   if(!combat?.active||!initiative.length)return toast('Inicie o combate primeiro.');
 
-  let next=Number(combat.turn_index||0)+1;
+  let currentIndex=initiative.findIndex(x=>x.id===combat.current_entry_id);
+  if(currentIndex<0)currentIndex=Math.min(Number(combat.turn_index||0),initiative.length-1);
+
+  let next=currentIndex+1;
   let round=Number(combat.round||1);
   let advancedRound=false;
 
@@ -428,51 +494,99 @@ async function nextTurn(){
     }
   }
 
-  await client.from('room_combat').update({turn_index:next,round}).eq('room_id',roomId);
   const target=initiative[next];
-  await logEvent('Rodada '+round+': turno de '+target.label+'.','turn',{round,turn_index:next,label:target.label});
+  await client.from('room_combat').update({
+    turn_index:next,
+    round,
+    current_entry_id:target.id
+  }).eq('room_id',roomId);
+
+  await logEvent(
+    target.visibility==='master'
+      ?'Rodada '+round+': ação oculta do mestre.'
+      :'Rodada '+round+': turno de '+target.label+'.',
+    'turn',
+    {round,turn_index:next,label:target.visibility==='master'?null:target.label,hidden:target.visibility==='master'}
+  );
   await Promise.all([loadCombat(),loadParticipants()]);
 }
+
 async function prevTurn(){
   if(!liveMaster())return toast('Esta sessão está encerrada.');
   if(!combat?.active||!initiative.length)return toast('Inicie o combate primeiro.');
-  let prev=Number(combat.turn_index||0)-1;
+
+  let currentIndex=initiative.findIndex(x=>x.id===combat.current_entry_id);
+  if(currentIndex<0)currentIndex=Math.min(Number(combat.turn_index||0),initiative.length-1);
+
+  let prev=currentIndex-1;
   let round=Number(combat.round||1);
-  if(prev<0){prev=initiative.length-1;round=Math.max(1,round-1)}
-  await client.from('room_combat').update({turn_index:prev,round}).eq('room_id',roomId);
+  if(prev<0){
+    prev=initiative.length-1;
+    round=Math.max(1,round-1);
+  }
+
   const target=initiative[prev];
-  await logEvent('Turno voltou para '+target.label+'.','turn',{round,turn_index:prev,label:target.label});
+  await client.from('room_combat').update({
+    turn_index:prev,
+    round,
+    current_entry_id:target.id
+  }).eq('room_id',roomId);
+
+  await logEvent(
+    target.visibility==='master'?'Turno voltou para uma ação oculta.':'Turno voltou para '+target.label+'.',
+    'turn',
+    {round,turn_index:prev,hidden:target.visibility==='master'}
+  );
   loadCombat();
 }
+
 async function endCombat(){
   if(!liveMaster()||!combat)return;
   await client.from('room_combat').upsert({
-    room_id:roomId,active:false,round:Number(combat.round||1),turn_index:Number(combat.turn_index||0)
+    room_id:roomId,
+    active:false,
+    round:Number(combat.round||1),
+    turn_index:Number(combat.turn_index||0),
+    current_entry_id:combat.current_entry_id||null
   });
   await logEvent('Combate encerrado.','combat');
   loadCombat();
 }
+
 async function clearCombat(){
   if(!liveMaster())return toast('Esta sessão está encerrada.');
   if(!confirm('Limpar toda a iniciativa? Isso não remove ninguém da sala.'))return;
-  await client.from('room_combat').upsert({room_id:roomId,active:false,round:1,turn_index:0});
+  await client.from('room_combat').upsert({
+    room_id:roomId,active:false,round:1,turn_index:0,current_entry_id:null
+  });
   const {error}=await client.from('room_initiative').delete().eq('room_id',roomId);
   if(error)return toast('Não foi possível limpar a iniciativa.');
   await logEvent('A iniciativa foi limpa.','combat');
   loadCombat();
 }
-async function addNpc(){
+
+async function addNpc(hidden=false){
   if(!liveMaster())return toast('Esta sessão está encerrada.');
-  const name=(prompt('Nome do NPC ou criatura:','')||'').trim();
+  const name=(prompt(hidden?'Nome interno do monstro oculto:':'Nome do NPC ou criatura:','')||'').trim();
   if(!name)return;
   const ini=Math.trunc(Number(prompt('Iniciativa:','0'))||0);
   const hpRaw=prompt('HP máximo (opcional):','');
   const hp=hpRaw==null||hpRaw.trim()===''?null:Math.max(0,Math.trunc(Number(hpRaw)||0));
+  const visibility=hidden?'master':'public';
+
   const {error}=await client.from('room_initiative').insert({
-    room_id:roomId,kind:'npc',label:name,initiative:ini,current_hp:hp,max_hp:hp
+    room_id:roomId,
+    kind:'npc',
+    label:name,
+    initiative:ini,
+    current_hp:hp,
+    max_hp:hp,
+    visibility
   });
   if(error)return toast('Não foi possível adicionar o NPC.');
-  await logEvent(name+' foi adicionado(a) à iniciativa.','combat',{kind:'npc'});
+
+  if(!hidden)await logEvent(name+' foi adicionado(a) à iniciativa.','combat',{kind:'npc'});
+  toast(hidden?'Monstro oculto adicionado apenas à iniciativa do mestre.':name+' adicionado à iniciativa.');
   loadCombat();
 }
 
@@ -896,12 +1010,14 @@ $('#reopenRoom').onclick=async()=>{
   refresh();
 };
 
+$('#pullInitiative').onclick=()=>pullInitiative(true);
 $('#startCombat').onclick=startCombat;
 $('#prevTurn').onclick=prevTurn;
 $('#nextTurn').onclick=nextTurn;
 $('#endCombat').onclick=endCombat;
 $('#clearCombat').onclick=clearCombat;
-$('#addNpc').onclick=addNpc;
+$('#addNpc').onclick=()=>addNpc(false);
+$('#addHiddenNpc').onclick=()=>addNpc(true);
 $('#addTracker').onclick=addTracker;
 $('#saveNotes').onclick=saveNotes;
 $('#editBriefing').onclick=editBriefing;
