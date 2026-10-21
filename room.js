@@ -925,12 +925,13 @@ function toggleManualMode(){
 /* ---------- EXPORT ---------- */
 
 async function exportSession(){
-  const [{data:allEvents},{data:allInitiative},{data:allTrackers},{data:allEffects},{data:allRolls}]=await Promise.all([
+  const [{data:allEvents},{data:allInitiative},{data:allTrackers},{data:allEffects},{data:allRolls},{data:allMessages}]=await Promise.all([
     client.from('room_events').select('event_type,message,payload,created_at').eq('room_id',roomId).order('created_at',{ascending:true}).limit(1000),
-    client.from('room_initiative').select('kind,label,initiative,current_hp,max_hp,conditions').eq('room_id',roomId).order('initiative',{ascending:false}),
+    client.from('room_initiative').select('kind,label,initiative,current_hp,max_hp,conditions,visibility').eq('room_id',roomId).order('initiative',{ascending:false}),
     client.from('room_trackers').select('label,current_value,max_value').eq('room_id',roomId).order('sort_order'),
     client.from('room_effects').select('character_id,label,remaining_rounds').eq('room_id',roomId),
-    client.from('room_rolls').select('author_name,label,expression,dice,modifier,total,natural_roll,is_manual,visibility,created_at').eq('room_id',roomId).order('created_at',{ascending:true}).limit(2000)
+    client.from('room_rolls').select('author_name,label,expression,dice,modifier,total,natural_roll,is_manual,visibility,breakdown,note,created_at').eq('room_id',roomId).order('created_at',{ascending:true}).limit(2000),
+    client.from('room_messages').select('message_type,author_name,title,subtitle,body,metadata,visibility,created_at').eq('room_id',roomId).order('created_at',{ascending:true}).limit(2000)
   ]);
 
   const snapshot={
@@ -946,6 +947,7 @@ async function exportSession(){
     trackers:allTrackers||[],
     timedEffects:allEffects||[],
     rolls:allRolls||[],
+    sharedMessages:allMessages||[],
     events:allEvents||[]
   };
 
