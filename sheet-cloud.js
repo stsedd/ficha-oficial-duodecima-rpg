@@ -192,16 +192,23 @@ function ensureRollDialog(){
   };
 }
 let pendingRoll=null;
-function openRollDialog(label,baseModifier=0){
+function normalizeExpression(text){
+  return String(text||'1d20').replace(/−/g,'-').replace(/s+/g,'').toLowerCase();
+}
+function expressionWithModifier(base='1d20',modifier=0){
+  const mod=Number(modifier)||0;
+  return normalizeExpression(base)+(mod===0?'':mod>0?'+'+mod:String(mod));
+}
+function openRollDialog(label,expression='1d20'){
   if(!activeRoomId){
     scutumToast('Entre em uma sala de missão para enviar a rolagem ao chat.');
     return;
   }
   ensureRollDialog();
-  pendingRoll={label,baseModifier:Number(baseModifier)||0};
+  pendingRoll={label,expression:normalizeExpression(expression)};
   const dialog=document.querySelector('#scutumRollDialog');
   dialog.querySelector('#scutumRollTitle').textContent=label;
-  dialog.querySelector('#scutumRollBase').textContent='1d20 '+(pendingRoll.baseModifier>=0?'+ ':'− ')+Math.abs(pendingRoll.baseModifier);
+  dialog.querySelector('#scutumRollBase').textContent=pendingRoll.expression.replace(/-/g,'−');
   dialog.querySelector('#scutumRollExtra').value='0';
   dialog.querySelector('#scutumRollNote').value='';
   if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
@@ -212,8 +219,7 @@ async function submitSheetRoll(){
   const dialog=document.querySelector('#scutumRollDialog');
   const extra=Math.trunc(Number(dialog.querySelector('#scutumRollExtra').value)||0);
   const note=dialog.querySelector('#scutumRollNote').value.trim();
-  const base=pendingRoll.baseModifier;
-  const expr='1d20'+(base===0?'':base>0?'+'+base:String(base));
+  const expr=pendingRoll.expression;
   const submit=dialog.querySelector('button[type="submit"]');
   submit.disabled=true;
   submit.textContent='Rolando…';
@@ -256,8 +262,35 @@ function bindSheetRollTriggers(){
     btn.className='scutum-skill-roll';
     btn.textContent='Rolar';
     btn.title='Rolar '+name+' no chat da mesa';
-    btn.onclick=e=>{e.preventDefault();e.stopPropagation();openRollDialog('Perícia · '+name,mod)};
+    btn.onclick=e=>{e.preventDefault();e.stopPropagation();openRollDialog('Perícia · '+name,expressionWithModifier('1d20',mod))};
     row.querySelector('.skill-row-main')?.appendChild(btn);
+  });
+}
+
+function bindWeaponRollTriggers(){
+  if(!activeRoomId)return;
+  document.querySelectorAll('.weapon-card').forEach(card=>{
+    const results=card.querySelector('.weapon-results');
+    if(!results||results.querySelector('.scutum-weapon-rolls'))return;
+    const name=card.querySelector('.weapon-name')?.value?.trim()||'Arma';
+    const pills=[...results.querySelectorAll('.pill')].map(x=>x.textContent.trim());
+    const attackText=pills.find(x=>/^Ataque\s/i.test(x))||'Ataque +0';
+    const damageText=pills.find(x=>/^Dano\s/i.test(x))||'Dano 1d4';
+    const attackMod=parseSigned(attackText.replace(/^Ataque\s*/i,''));
+    const damageExpr=normalizeExpression(damageText.replace(/^Dano\s*/i,''));
+
+    const wrap=document.createElement('span');
+    wrap.className='scutum-weapon-rolls';
+    const attack=document.createElement('button');
+    attack.type='button';attack.className='scutum-weapon-roll';
+    attack.textContent='Rolar ataque';
+    attack.onclick=e=>{e.preventDefault();e.stopPropagation();openRollDialog('Ataque · '+name,expressionWithModifier('1d20',attackMod))};
+    const damage=document.createElement('button');
+    damage.type='button';damage.className='scutum-weapon-roll';
+    damage.textContent='Rolar dano';
+    damage.onclick=e=>{e.preventDefault();e.stopPropagation();openRollDialog('Dano · '+name,damageExpr)};
+    wrap.append(attack,damage);
+    results.appendChild(wrap);
   });
 }
 let captureBound=false;
@@ -274,7 +307,7 @@ function bindCombatCapture(){
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
-    openRollDialog(defense?'Defesa':'Iniciativa',parseSigned(text.replace(/1d20/i,'')));
+    openRollDialog(defense?'Defesa':'Iniciativa',normalizeExpression(text));
   },true);
 }
 
@@ -337,6 +370,7 @@ function bindAbilityShare(){
 function enhanceSheet(){
   ensureSwitcherShell();
   bindSheetRollTriggers();
+  bindWeaponRollTriggers();
   bindAbilityShare();
   bindCombatCapture();
 }
