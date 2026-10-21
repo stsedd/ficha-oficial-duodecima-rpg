@@ -183,7 +183,7 @@ function bindParticipantActions(){
       if(e.target.closest('button,input,select'))return;
       if(!isMaster&&card.dataset.cardUser!==me.id)return;
       selectedCharacterId=card.dataset.cardCharacter;
-      $('[data-card-character]').forEach(x=>x.classList.toggle('selected',x.dataset.cardCharacter===selectedCharacterId));
+      $$('[data-card-character]').forEach(x=>x.classList.toggle('selected',x.dataset.cardCharacter===selectedCharacterId));
     };
     card.ondblclick=e=>{
       if(e.target.closest('button,input,select'))return;
