@@ -275,6 +275,12 @@ async function hasMembership(){
 async function loadRoom(){
   const {data,error}=await client.from('rooms').select('*').eq('id',roomId).single();
   if(error||!data){
+    const accessLost=error?.code==='PGRST116'||error?.code==='42501';
+    if(room&&!accessLost){
+      console.warn('[SCUTUM] falha temporária ao atualizar a sala',error);
+      toast('Conexão instável. Mantendo a mesa aberta e tentando sincronizar novamente.');
+      return true;
+    }
     alert('Você não tem mais acesso a esta sala ou ela não existe.');
     location.replace('index.html');
     return false;
