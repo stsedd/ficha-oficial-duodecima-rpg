@@ -39,3 +39,6 @@
   .scutum-weapon-rolls{width:100%;margin-left:0}
   .scutum-weapon-roll{flex:1}
 }
+.scutum-attr-roll,.scutum-quick-roll{margin-top:7px;padding:5px 8px!important;font-size:9px!important}
+.combat-quick-values>div .scutum-quick-roll{width:100%}
+.attr .scutum-attr-roll{width:100%}
