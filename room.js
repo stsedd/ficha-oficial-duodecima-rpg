@@ -179,11 +179,11 @@ function participantCard(p){
   '</article>';
 }
 function bindParticipantActions(){
-  $('[data-card-character]').forEach(card=>{
+  $$('[data-card-character]').forEach(card=>{
     card.onclick=e=>{
       if(e.target.closest('button,input,select'))return;
       selectedCharacterId=card.dataset.cardCharacter;
-      $('[data-card-character]').forEach(x=>x.classList.toggle('selected',x.dataset.cardCharacter===selectedCharacterId));
+      $$('[data-card-character]').forEach(x=>x.classList.toggle('selected',x.dataset.cardCharacter===selectedCharacterId));
     };
     card.ondblclick=e=>{
       if(e.target.closest('button,input,select'))return;
@@ -285,7 +285,7 @@ async function loadRoom(){
   document.body.classList.toggle('ended',room.status!=='active');
   $('#endRoom').classList.toggle('hidden',!liveMaster());
   $('#reopenRoom').classList.toggle('hidden',!isMaster||room.status==='active');
-  $('.master-only').forEach(x=>x.classList.toggle('hidden',!isMaster));
+  $$('.master-only').forEach(x=>x.classList.toggle('hidden',!isMaster));
   $('#leaveRoom').classList.toggle('hidden',isMaster&&!await hasMembership());
   $('#rollForm').classList.toggle('disabled',!roomLive());
   updateDuration();
@@ -1079,7 +1079,7 @@ $('#reopenRoom').onclick=async()=>{
   refresh();
 };
 
-$('.dock-button[data-panel]').forEach(b=>b.onclick=()=>openToolPanel(b.dataset.panel));
+$$('.dock-button[data-panel]').forEach(b=>b.onclick=()=>openToolPanel(b.dataset.panel));
 $('#dockTable').onclick=()=>closeToolPanels();
 $('#dockChat').onclick=()=>toggleChat();
 $('#dockSheet').onclick=openSelectedSheet;
@@ -1088,7 +1088,7 @@ $('#openInitiativeFloat').onclick=()=>openToolPanel('initiativePanel');
 $('#openChatFloat').onclick=()=>toggleChat(true);
 $('#closeChat').onclick=()=>toggleChat(false);
 $('#liveButton').onclick=()=>openToolPanel('settingsPanel');
-$('[data-close-panel]').forEach(b=>b.onclick=()=>openToolPanel(b.dataset.closePanel));
+$$('[data-close-panel]').forEach(b=>b.onclick=()=>openToolPanel(b.dataset.closePanel));
 if(matchMedia('(max-width:900px)').matches)document.body.classList.add('chat-hidden');
 
 $('#pullInitiative').onclick=()=>pullInitiative(true);
