@@ -12,8 +12,9 @@ $$('[data-auth-tab]').forEach(b=>b.onclick=()=>setMode(b.dataset.authTab));
 
 function summary(d={}){return {hp:Number(d.currentHp??0),en:d.currentEnergy==null?'—':Number(d.currentEnergy),san:Number(d.currentSanity??100),conditions:Array.isArray(d.conditions)?d.conditions:[],exhaustion:Number(d.exhaustion||0)}}
 function card(c){
-  const d=c.sheet_data||{},s=summary(d),portrait=d.history?.portraitUrl||c.portrait_url||'',god=c.origin_type==='mortal'?'Mortal da Névoa':(c.god_id||'—');
-  return '<article class="character-card"><div class="char-cover">'+(portrait?'<img src="'+esc(portrait)+'" alt="">':'')+'</div><div class="char-copy"><h3>'+esc(c.name||'Sem nome')+'</h3><p>'+esc(god)+' · Nv '+Number(c.level||1)+'</p><div class="vitals"><div><span>HP</span><b>'+s.hp+'/'+(c.max_hp??'?')+'</b></div><div><span>EN</span><b>'+s.en+(s.en==='—'?'':'/'+(c.max_energy??'?'))+'</b></div><div><span>SAN</span><b>'+s.san+'</b></div></div><div class="char-actions"><button class="primary" data-open="'+c.id+'">Abrir ficha</button><button data-delete="'+c.id+'">Arquivar</button></div></div></article>'
+  const portrait=c.portrait_url||'',god=c.origin_type==='mortal'?'Mortal da Névoa':(c.god_id||'—');
+  const hp=c.current_hp==null?'—':c.current_hp,en=c.current_energy==null?'—':c.current_energy,san=c.current_sanity==null?'—':c.current_sanity;
+  return '<article class="character-card"><div class="char-cover">'+(portrait?'<img src="'+esc(portrait)+'" alt="">':'')+'</div><div class="char-copy"><h3>'+esc(c.name||'Sem nome')+'</h3><p>'+esc(god)+' · Nv '+Number(c.level||1)+'</p><div class="vitals"><div><span>HP</span><b>'+hp+(hp==='—'?'':'/'+(c.max_hp??'?'))+'</b></div><div><span>EN</span><b>'+en+(en==='—'?'':'/'+(c.max_energy??'?'))+'</b></div><div><span>SAN</span><b>'+san+'</b></div></div><div class="char-actions"><button class="primary" data-open="'+c.id+'">Abrir ficha</button><button data-delete="'+c.id+'">Arquivar</button></div></div></article>'
 }
 function bindCards(){
   $$('[data-open]').forEach(b=>b.onclick=()=>location.href='sheet.html?character='+encodeURIComponent(b.dataset.open));
@@ -67,7 +68,7 @@ async function renderApp(){
   $('#authView').classList.add('hidden');$('#appView').classList.remove('hidden');
   $('#sessionActions').innerHTML='<button id="logout">Sair</button>';$('#logout').onclick=()=>client.auth.signOut();
   $('#welcome').textContent='Meus personagens';
-  const {data:chars,error}=await client.from('characters').select('*').eq('owner_id',user.id).eq('archived',false).order('updated_at',{ascending:false});
+  const {data:chars,error}=await client.from('characters').select('id,name,level,origin_type,god_id,portrait_url,current_hp,max_hp,current_energy,max_energy,current_sanity,conditions,exhaustion,updated_at').eq('owner_id',user.id).eq('archived',false).order('updated_at',{ascending:false});
   if(error){toast(error.message);return}
   myCharacters=chars||[];
   $('#characterCount').textContent=myCharacters.length;$('#firstRun')?.classList.toggle('hidden',myCharacters.length>0);
