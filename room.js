@@ -95,8 +95,7 @@ function toggleChat(force){
   $('#dockChat')?.classList.toggle('active',!hidden);
 }
 function openSelectedSheet(){
-  let characterId=selectedCharacterId;
-  if(!characterId&&!isMaster)characterId=ownParticipant()?.character_id||null;
+  let characterId=isMaster?selectedCharacterId:(ownParticipant()?.character_id||null);
   if(!characterId&&isMaster){
     const first=participants[0];
     if(first){characterId=first.character_id;selectedCharacterId=characterId}
@@ -182,11 +181,13 @@ function bindParticipantActions(){
   $$('[data-card-character]').forEach(card=>{
     card.onclick=e=>{
       if(e.target.closest('button,input,select'))return;
+      if(!isMaster&&card.dataset.cardUser!==me.id)return;
       selectedCharacterId=card.dataset.cardCharacter;
-      $$('[data-card-character]').forEach(x=>x.classList.toggle('selected',x.dataset.cardCharacter===selectedCharacterId));
+      $('[data-card-character]').forEach(x=>x.classList.toggle('selected',x.dataset.cardCharacter===selectedCharacterId));
     };
     card.ondblclick=e=>{
       if(e.target.closest('button,input,select'))return;
+      if(!isMaster&&card.dataset.cardUser!==me.id)return;
       selectedCharacterId=card.dataset.cardCharacter;
       openSelectedSheet();
     };
@@ -1104,11 +1105,7 @@ $('#saveNotes').onclick=saveNotes;
 $('#refreshEvents').onclick=loadEvents;
 $('#exportSession').onclick=exportSession;
 
-$('#rollForm').onsubmit=e=>{
-  e.preventDefault();
-  if($('#manualToggle').checked)return submitManualRoll();
-  submitSystemRoll();
-};
+$('#submitRoll').onclick=()=>$('#manualToggle').checked?submitManualRoll():submitSystemRoll();
 $('#submitManualRoll').onclick=submitManualRoll;
 $('#manualToggle').onchange=toggleManualMode;
 $('#clearRolls').onclick=clearRollChat;
