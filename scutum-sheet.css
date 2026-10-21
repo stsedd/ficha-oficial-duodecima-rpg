@@ -1,0 +1,35 @@
+.scutum-character-switcher{font-weight:700}
+.scutum-character-dialog,.scutum-roll-dialog{border:1px solid #3a343a;border-radius:18px;background:#0d0c0f;color:#f4f1f2;padding:0;max-width:min(560px,92vw);width:100%;box-shadow:0 30px 90px rgba(0,0,0,.55)}
+.scutum-character-dialog::backdrop,.scutum-roll-dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(6px)}
+.scutum-character-dialog-card,.scutum-roll-card{padding:18px}
+.scutum-dialog-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px}
+.scutum-dialog-head small{display:block;color:#a89ba1;font-size:10px;letter-spacing:.14em}
+.scutum-dialog-head h2{margin:3px 0 0}
+.scutum-dialog-head button{width:34px;height:34px;border-radius:50%;padding:0}
+.scutum-character-list{display:grid;gap:8px;max-height:60vh;overflow:auto}
+.scutum-character-option{display:grid;grid-template-columns:46px 1fr auto;gap:10px;align-items:center;padding:9px;border:1px solid #302a30;border-radius:12px;color:inherit;text-decoration:none;background:#151216}
+.scutum-character-option:hover,.scutum-character-option.active{border-color:#71404b;background:#1b1216}
+.scutum-character-thumb{width:46px;height:46px;border-radius:10px;overflow:hidden;display:grid;place-items:center;background:#21151a;font:700 18px Georgia,serif}
+.scutum-character-thumb img{width:100%;height:100%;object-fit:cover}
+.scutum-character-option span:nth-child(2){display:grid;gap:3px}
+.scutum-character-option small{color:#9e9599}
+.scutum-character-option em{font-size:9px;color:#caa56f;font-style:normal;text-transform:uppercase}
+.scutum-switcher-loading{color:#9e9599;text-align:center;padding:24px}
+.scutum-roll-card label{display:grid;gap:5px;margin-top:10px}
+.scutum-roll-card label>span,.scutum-roll-base>span{font-size:10px;color:#9e9599;text-transform:uppercase;letter-spacing:.08em}
+.scutum-roll-card input{width:100%;padding:10px 11px;background:#111014;border:1px solid #332d34;border-radius:10px;color:#f4f1f2}
+.scutum-roll-base{display:flex;justify-content:space-between;align-items:center;padding:12px;border:1px solid #3a3035;border-radius:12px;background:#111014}
+.scutum-roll-base strong{font-size:20px}
+.scutum-roll-presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.scutum-roll-presets button{padding:6px 10px}
+.scutum-roll-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.scutum-skill-roll,.scutum-share-ability{flex:0 0 auto}
+.scutum-skill-roll{margin-left:auto;padding:5px 8px!important;font-size:10px!important}
+.scutum-share-ability{margin-left:auto;font-size:10px!important;padding:6px 9px!important;white-space:nowrap}
+@media(max-width:700px){
+  .scutum-character-dialog,.scutum-roll-dialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;border:0;margin:0}
+  .scutum-character-dialog-card,.scutum-roll-card{min-height:100dvh;padding:18px 16px}
+  .scutum-character-list{max-height:calc(100dvh - 100px)}
+  .scutum-roll-actions{margin-top:auto}
+  .scutum-share-ability{width:100%;margin:8px 0 0}
+}
