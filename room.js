@@ -34,6 +34,7 @@ let events=[];
 let effects=[];
 let briefing=null;
 let rolls=[];
+let messages=[];
 let refreshTimer=0;
 let durationTimer=0;
 
@@ -85,6 +86,14 @@ function resource(label,current,max,characterId,key){
     '<div class="bar"><i style="width:'+(visible&&hasMax?pct(current,max):0)+'%"></i></div>'+
     '<b>'+value+'</b>'+
     adjustButtons(characterId,key,current)+
+  '</div>';
+}
+function publicResource(label,percent){
+  const visible=percent!=null&&Number.isFinite(Number(percent));
+  return '<div class="resource-row public-resource">'+
+    '<span>'+label+'</span>'+
+    '<div class="bar"><i style="width:'+(visible?Math.max(0,Math.min(100,Number(percent))):0)+'%"></i></div>'+
+    '<b aria-label="valor oculto">'+(visible?'':'—')+'</b>'+
   '</div>';
 }
 function participantCard(p){
@@ -141,7 +150,11 @@ function participantCard(p){
         resource('HP',p.current_hp,p.max_hp,p.character_id,'hp')+
         resource('EN',p.current_energy,p.max_energy,p.character_id,'energy')+
         resource('SAN',p.current_sanity,100,p.character_id,'sanity')+
-      '</div>'+conditionHtml+masterExtra:'<div class="privacy-note">Recursos mecânicos visíveis apenas ao jogador e ao mestre.</div>')+
+      '</div>'+conditionHtml+masterExtra:'<div class="resource-stack public-vitals">'+
+        publicResource('HP',p.hp_percent)+
+        publicResource('EN',p.energy_percent)+
+        publicResource('SAN',p.sanity_percent)+
+      '</div><div class="privacy-note">Os valores exatos ficam ocultos; a mesa vê apenas as barras.</div>')+
       (actions.length?'<div class="participant-actions">'+actions.join('')+'</div>':'')+
     '</div>'+
   '</article>';
@@ -251,7 +264,7 @@ async function loadRoom(){
   return true;
 }
 async function loadParticipants(){
-  const {data,error}=await client.rpc('get_room_participants',{p_room_id:roomId});
+  const {data,error}=await client.rpc('get_room_table_participants',{p_room_id:roomId});
   if(error){toast('Não foi possível atualizar a mesa.');return}
 
   const [{data:memberStates},{data:roomEffects}]=await Promise.all([
