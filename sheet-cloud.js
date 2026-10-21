@@ -128,15 +128,18 @@ function ensureSwitcherShell(){
 async function loadSwitcherCharacters(){
   if(!currentUser)return [];
   if(activeRoomId){
-    const {data,error}=await client.rpc('get_room_table_participants',{p_room_id:activeRoomId});
-    if(!error&&data?.length){
-      return data.map(x=>({
-        id:x.character_id,
-        name:x.character_name,
-        level:x.level,
-        portrait_url:x.portrait_url,
-        context:'Mesa'
-      }));
+    const {data:master}=await client.rpc('is_room_master',{p_room_id:activeRoomId});
+    if(master){
+      const {data,error}=await client.rpc('get_room_table_participants',{p_room_id:activeRoomId});
+      if(!error&&data?.length){
+        return data.map(x=>({
+          id:x.character_id,
+          name:x.character_name,
+          level:x.level,
+          portrait_url:x.portrait_url,
+          context:'Mesa'
+        }));
+      }
     }
   }
   const {data}=await client.from('characters')
