@@ -32,7 +32,6 @@ let initiative=[];
 let trackers=[];
 let events=[];
 let effects=[];
-let briefing=null;
 let rolls=[];
 let messages=[];
 let selectedCharacterId=null;
@@ -675,30 +674,8 @@ async function addTracker(){
   loadTrackers();
 }
 
-/* ---------- BRIEFING / NOTES ---------- */
+/* ---------- NOTES ---------- */
 
-async function loadBriefing(){
-  const {data,error}=await client.from('room_briefing').select('title,body,updated_at').eq('room_id',roomId).maybeSingle();
-  if(error)return;
-  briefing=data||{title:'',body:''};
-  const has=!!((briefing.title||'').trim()||(briefing.body||'').trim());
-  $('#roomBriefing').classList.toggle('hidden',!has&&!isMaster);
-  $('#briefingTitle').textContent=(briefing.title||'').trim()||'Sem comunicado';
-  $('#briefingBody').textContent=(briefing.body||'').trim()||'O mestre ainda não publicou um aviso para a mesa.';
-}
-async function editBriefing(){
-  if(!liveMaster())return toast('Esta sessão está encerrada.');
-  const title=prompt('Título da cena/comunicado:',briefing?.title||'Cena atual');
-  if(title==null)return;
-  const body=prompt('Texto que todos na sala verão:',briefing?.body||'');
-  if(body==null)return;
-  const {error}=await client.from('room_briefing').upsert({
-    room_id:roomId,title:title.trim(),body:body.trim()
-  });
-  if(error)return toast('Não foi possível publicar o comunicado.');
-  await logEvent('Comunicado da mesa atualizado: '+(title.trim()||'sem título')+'.','briefing');
-  loadBriefing();
-}
 async function loadNotes(){
   if(!isMaster)return;
   const {data}=await client.from('room_master_notes').select('notes').eq('room_id',roomId).maybeSingle();
