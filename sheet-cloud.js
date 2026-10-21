@@ -14,7 +14,7 @@ if(!id||!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase){
 const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const originalSet=Storage.prototype.setItem;
 let loading=true,timer=0,last='',booted=false,cloudChannel=null,lastSignature='';
-let currentUser=null,enhanceTimer=0;
+let currentUser=null,enhanceTimer=0,roomChatChannel=null,roomChatOpen=false;
 
 function roomContextId(){
   if(!returnParam)return null;
@@ -246,6 +246,7 @@ async function submitSheetRoll(){
   dialog.close();
   const result=Array.isArray(data)?data[0]:data;
   scutumToast(pendingRoll.label+': '+(result?.total??'rolado')+' · enviado ao chat');
+  loadSheetRoomChat(true);
   pendingRoll=null;
 }
 function combatQuickValue(label){
@@ -350,6 +351,100 @@ function bindCombatCapture(){
   },true);
 }
 
+/* ---------- room chat inside the sheet ---------- */
+
+function ensureRoomChatShell(){
+  if(!activeRoomId||document.querySelector('#scutumSheetChatButton'))return;
+  const bar=document.querySelector('.archive-toolbar-copy');
+  if(!bar)return;
+
+  const btn=document.createElement('button');
+  btn.type='button';
+  btn.id='scutumSheetChatButton';
+  btn.className='primary small-btn scutum-sheet-chat-button';
+  btn.innerHTML='Chat da mesa <span id="scutumSheetChatBadge">●</span>';
+  btn.onclick=()=>openSheetRoomChat();
+  bar.appendChild(btn);
+
+  const dialog=document.createElement('dialog');
+  dialog.id='scutumSheetChatDialog';
+  dialog.className='scutum-sheet-chat-dialog';
+  dialog.innerHTML='<div class="scutum-sheet-chat-card">'+
+    '<div class="scutum-dialog-head"><div><small>SALA DE MISSÃO</small><h2>Chat da mesa</h2></div><div class="scutum-chat-head-actions"><a href="'+htmlEsc(returnParam)+'">Abrir mesa</a><button type="button" data-close-sheet-chat>×</button></div></div>'+
+    '<div id="scutumSheetChatFeed" class="scutum-sheet-chat-feed"><p>Carregando…</p></div>'+
+  '</div>';
+  document.body.appendChild(dialog);
+  dialog.querySelector('[data-close-sheet-chat]').onclick=()=>dialog.close();
+  dialog.addEventListener('close',()=>{roomChatOpen=false});
+  dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+}
+function sheetChatRollHtml(r){
+  const dice=Array.isArray(r.dice)?r.dice:[];
+  const breakdown=r.breakdown||{};
+  const extra=Number(breakdown.extra_modifier||0);
+  const critical=!r.is_manual&&/^1d20/i.test(r.expression||'')&&Number(r.natural_roll)===20;
+  const fumble=!r.is_manual&&/^1d20/i.test(r.expression||'')&&Number(r.natural_roll)===1;
+  return '<article class="scutum-sheet-chat-entry roll '+(critical?'critical ':fumble?'fumble ':'')+'">'+
+    '<header><b>'+htmlEsc(r.author_name)+'</b><time>'+new Date(r.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</time></header>'+
+    '<span class="scutum-chat-label">'+htmlEsc(r.label)+'</span>'+
+    '<div class="scutum-chat-result"><strong>'+Number(r.total)+'</strong><span>'+(r.is_manual?'manual':htmlEsc(r.expression||''))+(extra?(' · '+(extra>0?'+':'')+extra+' extra'):'')+'</span></div>'+
+    (dice.length?'<small>['+dice.map(htmlEsc).join(', ')+']</small>':'')+
+    (r.note?'<p>'+htmlEsc(r.note)+'</p>':'')+
+    (r.visibility==='master'?'<em>somente mestre</em>':'')+
+  '</article>';
+}
+function sheetChatMessageHtml(m){
+  return '<article class="scutum-sheet-chat-entry ability">'+
+    '<header><b>'+htmlEsc(m.author_name)+'</b><time>'+new Date(m.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</time></header>'+
+    '<span class="scutum-chat-label">HABILIDADE COMPARTILHADA</span>'+
+    '<h3>'+htmlEsc(m.title)+'</h3>'+
+    (m.subtitle?'<small>'+htmlEsc(m.subtitle)+'</small>':'')+
+    (m.body?'<p>'+htmlEsc(m.body).replace(/\n/g,'<br>')+'</p>':'')+
+  '</article>';
+}
+async function loadSheetRoomChat(scroll=true){
+  if(!activeRoomId)return;
+  const feed=document.querySelector('#scutumSheetChatFeed');
+  const badge=document.querySelector('#scutumSheetChatBadge');
+  const [rollRes,messageRes]=await Promise.all([
+    client.from('room_rolls')
+      .select('id,author_name,label,expression,dice,modifier,total,natural_roll,is_manual,visibility,breakdown,note,created_at')
+      .eq('room_id',activeRoomId).order('created_at',{ascending:false}).limit(50),
+    client.from('room_messages')
+      .select('id,message_type,author_name,title,subtitle,body,visibility,created_at')
+      .eq('room_id',activeRoomId).order('created_at',{ascending:false}).limit(50)
+  ]);
+  if(rollRes.error||messageRes.error)return;
+  const rows=[
+    ...(rollRes.data||[]).map(x=>({...x,_type:'roll'})),
+    ...(messageRes.data||[]).map(x=>({...x,_type:'message'}))
+  ].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at)).slice(-60);
+
+  if(badge)badge.textContent=rows.length?String(Math.min(rows.length,99)):'0';
+  if(feed){
+    feed.innerHTML=rows.length
+      ?rows.map(x=>x._type==='roll'?sheetChatRollHtml(x):sheetChatMessageHtml(x)).join('')
+      :'<div class="scutum-sheet-chat-empty">Nenhuma rolagem ou habilidade compartilhada ainda.</div>';
+    if(scroll)requestAnimationFrame(()=>{feed.scrollTop=feed.scrollHeight});
+  }
+}
+function openSheetRoomChat(){
+  ensureRoomChatShell();
+  const dialog=document.querySelector('#scutumSheetChatDialog');
+  if(!dialog)return;
+  roomChatOpen=true;
+  if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
+  loadSheetRoomChat(true);
+}
+function startRoomChatRealtime(){
+  if(!activeRoomId||roomChatChannel)return;
+  roomChatChannel=client.channel('sheet-room-chat-'+activeRoomId+'-'+id)
+    .on('postgres_changes',{event:'*',schema:'public',table:'room_rolls',filter:'room_id=eq.'+activeRoomId},()=>loadSheetRoomChat(roomChatOpen))
+    .on('postgres_changes',{event:'*',schema:'public',table:'room_messages',filter:'room_id=eq.'+activeRoomId},()=>loadSheetRoomChat(roomChatOpen))
+    .subscribe();
+  loadSheetRoomChat(false);
+}
+
 /* ---------- ability pings ---------- */
 
 function abilitySharePayload(card){
@@ -388,6 +483,7 @@ async function shareAbility(card,button){
     return scutumToast('Não foi possível compartilhar a habilidade.');
   }
   scutumToast(payload.title+' enviada ao chat.');
+  loadSheetRoomChat(true);
 }
 function bindAbilityShare(){
   if(!activeRoomId)return;
@@ -408,6 +504,7 @@ function bindAbilityShare(){
 
 function enhanceSheet(){
   ensureSwitcherShell();
+  ensureRoomChatShell();
   bindSheetRollTriggers();
   bindAttributeRollTriggers();
   bindCombatQuickRolls();
@@ -449,6 +546,8 @@ function injectBootstrap(){
       const note=document.querySelector('.archive-save-note');
       if(note)note.innerHTML='<b>Salvo na nuvem</b> · SCUTUM Lab';
       ensureSwitcherShell();
+      ensureRoomChatShell();
+      startRoomChatRealtime();
       startEnhancer();
     },80);
   };
