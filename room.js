@@ -35,6 +35,7 @@ let effects=[];
 let briefing=null;
 let rolls=[];
 let messages=[];
+let selectedCharacterId=null;
 let refreshTimer=0;
 let durationTimer=0;
 
@@ -67,6 +68,43 @@ async function logEvent(message,eventType='note',payload={}){
   if(error)console.warn('[SCUTUM] event log',error);
 }
 
+
+function closeToolPanels(){
+  $$('.tool-window').forEach(p=>p.classList.add('hidden'));
+  $$('.dock-button[data-panel]').forEach(b=>b.classList.remove('active'));
+  $('#dockTable')?.classList.add('active');
+}
+function openToolPanel(id){
+  if(!id||id==='table'){closeToolPanels();return}
+  const panel=$('#'+id);
+  if(!panel)return;
+  const wasOpen=!panel.classList.contains('hidden');
+  $$('.tool-window').forEach(p=>p.classList.add('hidden'));
+  $$('.dock-button[data-panel]').forEach(b=>b.classList.remove('active'));
+  if(!wasOpen){
+    panel.classList.remove('hidden');
+    const trigger=$$('.dock-button[data-panel]').find(b=>b.dataset.panel===id);
+    trigger?.classList.add('active');
+    $('#dockTable')?.classList.remove('active');
+  }else{
+    $('#dockTable')?.classList.add('active');
+  }
+}
+function toggleChat(force){
+  const hidden=typeof force==='boolean'?!force:!document.body.classList.contains('chat-hidden');
+  document.body.classList.toggle('chat-hidden',hidden);
+  $('#dockChat')?.classList.toggle('active',!hidden);
+}
+function openSelectedSheet(){
+  let characterId=selectedCharacterId;
+  if(!characterId&&!isMaster)characterId=ownParticipant()?.character_id||null;
+  if(!characterId&&isMaster){
+    const first=participants[0];
+    if(first){characterId=first.character_id;selectedCharacterId=characterId}
+  }
+  if(!characterId)return toast('Selecione uma personagem primeiro.');
+  location.href='sheet.html?character='+encodeURIComponent(characterId)+'&return='+encodeURIComponent('room.html?id='+roomId);
+}
 /* ---------- PARTICIPANTS ---------- */
 
 function adjustButtons(characterId,resource,current){
@@ -105,64 +143,54 @@ function participantCard(p){
   const online=onlineIds.has(p.user_id);
   const ready=!!p.ready;
   const cond=canSee?(p.conditions||[]):[];
-  const exhaustion=canSee?p.exhaustion:null;
 
   let conditionHtml='';
   if(canSee){
-    const chips=cond.length?cond.map(x=>{
+    const chips=cond.length?cond.slice(0,2).map(x=>{
       const timed=effects.find(e=>e.character_id===p.character_id&&e.label===x);
-      return '<span>'+esc(x)+
-        (timed?'<small class="effect-duration">'+Number(timed.remaining_rounds)+'r</small>':'')+
-        (liveMaster()?'<button data-remove-condition="'+p.character_id+'" data-condition="'+esc(x)+'" aria-label="Remover condição">×</button>':'')+
-      '</span>';
+      return '<span>'+esc(x)+(timed?'<small class="effect-duration">'+Number(timed.remaining_rounds)+'r</small>':'')+
+        (liveMaster()?'<button data-remove-condition="'+p.character_id+'" data-condition="'+esc(x)+'">×</button>':'')+'</span>';
     }).join(''):'<span class="quiet">Sem condições</span>';
-
     conditionHtml='<div class="conditions">'+chips+
-      (exhaustion?'<span>Exaustão '+Number(exhaustion)+'</span>':'')+
-      (liveMaster()?'<button class="condition-add" data-add-condition="'+p.character_id+'">+ condição</button>':'')+
+      (liveMaster()?'<button class="condition-add" data-add-condition="'+p.character_id+'">+</button>':'')+
     '</div>';
   }
 
-  let masterExtra='';
-  if(liveMaster()){
-    masterExtra='<div class="exhaustion-control"><span>Exaustão</span>'+
-      '<button data-adjust="'+p.character_id+'" data-resource="exhaustion" data-delta="-1">−</button>'+
-      '<b>'+Number(exhaustion||0)+'</b>'+
-      '<button data-adjust="'+p.character_id+'" data-resource="exhaustion" data-delta="1">+</button>'+
+  const vitals=canSee
+    ?'<div class="resource-stack">'+
+      resource('HP',p.current_hp,p.max_hp,p.character_id,'hp')+
+      resource('EN',p.current_energy,p.max_energy,p.character_id,'energy')+
+      resource('SAN',p.current_sanity,100,p.character_id,'sanity')+
+    '</div>'
+    :'<div class="resource-stack public-vitals">'+
+      publicResource('HP',p.hp_percent)+
+      publicResource('EN',p.energy_percent)+
+      publicResource('SAN',p.sanity_percent)+
     '</div>';
-  }
 
-  const actions=[];
-  if(self){
-    actions.push('<button class="primary" data-open-sheet="'+p.character_id+'">Abrir minha ficha</button>');
-    if(roomLive())actions.push('<button data-ready="'+p.user_id+'" class="'+(ready?'ready-on':'')+'">'+(ready?'✓ Pronto':'Marcar pronto')+'</button>');
-  }
-  if(liveMaster()&&!self){
-    actions.push('<button data-open-sheet="'+p.character_id+'">Ver ficha</button>');
-    actions.push('<button class="danger" data-remove-member="'+p.user_id+'" data-remove-name="'+esc(p.character_name)+'">Remover</button>');
-  }
-
-  return '<article class="participant-card">'+
+  return '<article class="participant-card '+(selectedCharacterId===p.character_id?'selected':'')+'" data-card-character="'+p.character_id+'" data-card-user="'+p.user_id+'">'+
     '<div class="participant-art">'+(portrait?'<img src="'+esc(portrait)+'" alt="">':'<span class="portrait-fallback">'+esc((p.character_name||'?').slice(0,1).toUpperCase())+'</span>')+'</div>'+
     '<div class="participant-copy">'+
-      '<div class="participant-title"><div><h3>'+esc(p.character_name)+'</h3><p>'+esc(origin)+' · Nv '+Number(p.level||1)+(self?' · você':'')+'</p></div>'+
+      '<div class="participant-title"><div><h3>'+esc(p.character_name)+'</h3><p>'+esc(origin)+' · Nv '+Number(p.level||1)+'</p></div>'+
       '<span class="presence-wrap"><span class="presence '+(online?'online':'offline')+'"><i></i>'+(online?'online':'offline')+'</span>'+(ready?'<span class="ready-badge">pronto</span>':'')+'</span></div>'+
-      (canSee?'<div class="resource-stack">'+
-        resource('HP',p.current_hp,p.max_hp,p.character_id,'hp')+
-        resource('EN',p.current_energy,p.max_energy,p.character_id,'energy')+
-        resource('SAN',p.current_sanity,100,p.character_id,'sanity')+
-      '</div>'+conditionHtml+masterExtra:'<div class="resource-stack public-vitals">'+
-        publicResource('HP',p.hp_percent)+
-        publicResource('EN',p.energy_percent)+
-        publicResource('SAN',p.sanity_percent)+
-      '</div><div class="privacy-note">Os valores exatos ficam ocultos; a mesa vê apenas as barras.</div>')+
-      (actions.length?'<div class="participant-actions">'+actions.join('')+'</div>':'')+
+      vitals+
+      conditionHtml+
+      (self&&roomLive()?'<button class="card-ready-action '+(ready?'ready-on':'')+'" data-ready="'+p.user_id+'">'+(ready?'✓ Pronto':'Marcar pronto')+'</button>':'')+
     '</div>'+
   '</article>';
 }
 function bindParticipantActions(){
-  $$('[data-open-sheet]').forEach(b=>b.onclick=()=>{
-    location.href='sheet.html?character='+encodeURIComponent(b.dataset.openSheet)+'&return='+encodeURIComponent('room.html?id='+roomId);
+  $('[data-card-character]').forEach(card=>{
+    card.onclick=e=>{
+      if(e.target.closest('button,input,select'))return;
+      selectedCharacterId=card.dataset.cardCharacter;
+      $('[data-card-character]').forEach(x=>x.classList.toggle('selected',x.dataset.cardCharacter===selectedCharacterId));
+    };
+    card.ondblclick=e=>{
+      if(e.target.closest('button,input,select'))return;
+      selectedCharacterId=card.dataset.cardCharacter;
+      openSelectedSheet();
+    };
   });
   $$('[data-ready]').forEach(b=>b.onclick=async()=>{
     const p=participants.find(x=>x.user_id===b.dataset.ready);
@@ -344,7 +372,10 @@ async function loadCombat(){
     ?initiative.map(initiativeRow).join('')
     :'<div class="mini-empty">A iniciativa ainda está vazia.</div>';
 
-  $('#startCombat').textContent=combat.active?'Reiniciar combate':'Iniciar combate';
+  $('#startCombat').textContent=combat.active?'Reiniciar':'Iniciar';
+  const quick=$('#initiativeQuickStatus'),roundMini=$('#roundMini');
+  if(quick)quick.textContent=combat.active?'R'+Number(combat.round||1):initiative.length?initiative.length+' na ordem':'—';
+  if(roundMini)roundMini.textContent=combat.active?'R'+Number(combat.round||1):'—';
   bindCombatActions();
 }
 
@@ -971,8 +1002,7 @@ async function refresh(){
     loadParticipants(),
     loadCombat(),
     loadTrackers(),
-    loadEvents(),
-    loadBriefing()
+    loadEvents()
   ]);
   await loadRolls({stick:false});
 }
@@ -985,8 +1015,8 @@ async function refresh(){
   const {data:master}=await client.rpc('is_room_master',{p_room_id:roomId});
   isMaster=!!master;
 
-  $('#masterNote').classList.toggle('hidden',!isMaster);
-  $('#masterWorkspace').classList.toggle('hidden',!isMaster);
+  $('#notesPanel')?.classList.toggle('master-only',true);
+  if(!isMaster)$('#notesPanel')?.classList.add('hidden');
 
   $('#roomBoot').classList.add('hidden');
   $('#roomView').classList.remove('hidden');
@@ -1008,7 +1038,6 @@ async function refresh(){
     .on('postgres_changes',{event:'*',schema:'public',table:'room_combat',filter:'room_id=eq.'+roomId},()=>schedule(loadCombat))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_initiative',filter:'room_id=eq.'+roomId},()=>schedule(loadCombat))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_trackers',filter:'room_id=eq.'+roomId},()=>schedule(loadTrackers))
-    .on('postgres_changes',{event:'*',schema:'public',table:'room_briefing',filter:'room_id=eq.'+roomId},()=>schedule(loadBriefing))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_effects',filter:'room_id=eq.'+roomId},()=>schedule(loadParticipants))
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'room_events',filter:'room_id=eq.'+roomId},()=>schedule(loadEvents))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_rolls',filter:'room_id=eq.'+roomId},()=>loadRolls({stick:true}))
@@ -1067,6 +1096,18 @@ $('#reopenRoom').onclick=async()=>{
   refresh();
 };
 
+$('.dock-button[data-panel]').forEach(b=>b.onclick=()=>openToolPanel(b.dataset.panel));
+$('#dockTable').onclick=()=>closeToolPanels();
+$('#dockChat').onclick=()=>toggleChat();
+$('#dockSheet').onclick=openSelectedSheet;
+$('#initiativeQuick').onclick=()=>openToolPanel('initiativePanel');
+$('#openInitiativeFloat').onclick=()=>openToolPanel('initiativePanel');
+$('#openChatFloat').onclick=()=>toggleChat(true);
+$('#closeChat').onclick=()=>toggleChat(false);
+$('#liveButton').onclick=()=>openToolPanel('settingsPanel');
+$('[data-close-panel]').forEach(b=>b.onclick=()=>openToolPanel(b.dataset.closePanel));
+if(matchMedia('(max-width:900px)').matches)document.body.classList.add('chat-hidden');
+
 $('#pullInitiative').onclick=()=>pullInitiative(true);
 $('#startCombat').onclick=startCombat;
 $('#prevTurn').onclick=prevTurn;
@@ -1077,7 +1118,6 @@ $('#addNpc').onclick=()=>addNpc(false);
 $('#addHiddenNpc').onclick=()=>addNpc(true);
 $('#addTracker').onclick=addTracker;
 $('#saveNotes').onclick=saveNotes;
-$('#editBriefing').onclick=editBriefing;
 $('#refreshEvents').onclick=loadEvents;
 $('#exportSession').onclick=exportSession;
 
