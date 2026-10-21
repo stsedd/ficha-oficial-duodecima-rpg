@@ -163,3 +163,6 @@ body.chat-hidden .roll-console{display:none}
   .dock-button small{font-size:5.5px}
   .dice-expression-row{grid-template-columns:1fr 56px}.dice-expression-row button{grid-column:1/-1}
 }
+
+.room-state-chip{display:inline-flex;align-items:center;padding:5px 8px;border:1px solid #31523c;border-radius:999px;background:#0d1711;color:#9fd0ab;font-size:7px;font-weight:800;letter-spacing:.08em}
+.room-state-chip.ended{border-color:#69303b;background:#1f0d12;color:#e58a99}
