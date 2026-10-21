@@ -42,3 +42,34 @@
 .scutum-attr-roll,.scutum-quick-roll{margin-top:7px;padding:5px 8px!important;font-size:9px!important}
 .combat-quick-values>div .scutum-quick-roll{width:100%}
 .attr .scutum-attr-roll{width:100%}
+
+.scutum-sheet-chat-button{display:inline-flex!important;align-items:center;gap:7px}
+.scutum-sheet-chat-button span{min-width:18px;height:18px;display:grid;place-items:center;border-radius:999px;background:rgba(0,0,0,.24);font-size:8px}
+.scutum-sheet-chat-dialog{border:1px solid #3a343a;border-radius:18px;background:#0d0c0f;color:#f4f1f2;padding:0;width:min(520px,94vw);max-width:94vw;height:min(760px,88vh);max-height:88vh;box-shadow:0 30px 90px rgba(0,0,0,.58)}
+.scutum-sheet-chat-dialog::backdrop{background:rgba(0,0,0,.62);backdrop-filter:blur(5px)}
+.scutum-sheet-chat-card{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);padding:16px}
+.scutum-chat-head-actions{display:flex;gap:7px;align-items:center}
+.scutum-chat-head-actions a{padding:7px 10px;border:1px solid #332d34;border-radius:999px;color:#f4f1f2;text-decoration:none;font-size:10px}
+.scutum-sheet-chat-feed{overflow:auto;display:grid;align-content:start;gap:7px;padding-right:4px}
+.scutum-sheet-chat-entry{padding:11px;border:1px solid #302b31;border-radius:12px;background:#141216}
+.scutum-sheet-chat-entry header{display:flex;justify-content:space-between;gap:10px;margin-bottom:4px}
+.scutum-sheet-chat-entry header b{font-size:10px}
+.scutum-sheet-chat-entry time{font-size:8px;color:#776f73}
+.scutum-chat-label{display:block;color:#a89ba1;font-size:8px;letter-spacing:.08em;text-transform:uppercase}
+.scutum-chat-result{display:flex;gap:10px;align-items:baseline;margin-top:6px}
+.scutum-chat-result strong{font:700 28px Georgia,serif}
+.scutum-chat-result span,.scutum-sheet-chat-entry small{color:#a79da2;font-size:9px}
+.scutum-sheet-chat-entry p{margin:7px 0 0;color:#cfc7ca;font-size:10px;line-height:1.5}
+.scutum-sheet-chat-entry em{display:inline-block;margin-top:6px;color:#d5b76e;font-size:8px;font-style:normal;text-transform:uppercase}
+.scutum-sheet-chat-entry.critical{border-color:#6a5428;background:#19150d}
+.scutum-sheet-chat-entry.fumble{border-color:#6a2532;background:#1a0f13}
+.scutum-sheet-chat-entry.ability{border-color:#554424;background:#15120d}
+.scutum-sheet-chat-entry.ability h3{margin:5px 0 2px;font:600 16px Georgia,serif;color:#e4c87e}
+.scutum-sheet-chat-empty{padding:36px 14px;text-align:center;color:#9e9599;font-size:10px}
+@media(min-width:1000px){
+  .scutum-sheet-chat-dialog{margin-right:20px;margin-left:auto}
+}
+@media(max-width:700px){
+  .scutum-sheet-chat-dialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;border:0;margin:0}
+  .scutum-sheet-chat-card{padding:16px}
+}
