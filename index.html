@@ -2,58 +2,132 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090709">
-<title>SCUTUM Lab · Duodécima · v0.1</title>
-<link rel="stylesheet" href="hub.css?v=0.4.1">
+<meta name="theme-color" content="#030304">
+<title>SCUTUM Lab · Duodécima</title>
+<link rel="stylesheet" href="hub.css?v=0.6.0">
 </head>
 <body>
-<header class="top"><div><span>LEGIO XII FULMINATA</span><strong>SCUTUM <i>Lab</i></strong></div><div id="sessionActions"></div></header>
+<header class="top">
+  <div><span>LEGIO XII FULMINATA</span><strong>SCUTUM <i>Lab</i></strong></div>
+  <div id="sessionActions"></div>
+</header>
 <main>
 <section id="bootView" class="boot-view"><div class="boot-mark">SCUTUM <i>Lab</i></div><span>Carregando seu arquivo…</span></section>
+
 <section id="authView" class="auth-wrap hidden">
-  <article class="auth-brand"><p class="eyebrow">CHARACTER ARCHIVE</p><h1>Suas fichas, em qualquer lugar.</h1><p>Este é o ambiente de testes do novo SCUTUM. A ficha oficial continua separada e intacta.</p><div class="feature"><b>Conta própria</b><span>Várias personagens na mesma conta.</span></div><div class="feature"><b>Ficha online</b><span>Salva na nuvem e abre em outro dispositivo.</span></div><div class="feature"><b>Administração</b><span>Staff acompanha HP, Energia, Sanidade e condições.</span></div></article>
-  <article class="auth-card"><div class="tabs"><button class="active" data-auth-tab="login">Entrar</button><button data-auth-tab="signup">Criar conta</button></div>
-    <form id="authForm"><label>E-mail<input id="email" type="email" required autocomplete="email"></label><label>Senha<input id="password" type="password" minlength="6" required autocomplete="current-password"></label><button class="primary" type="submit" id="authSubmit">Entrar</button><p id="authHint"></p></form>
+  <article class="auth-brand">
+    <p class="eyebrow">CHARACTER ARCHIVE</p>
+    <h1>Suas fichas, em qualquer lugar.</h1>
+    <p>Arquivo oficial de personagens e mesas da Duodécima.</p>
+    <div class="feature"><b>Jogador</b><span>Cria e administra as próprias fichas.</span></div>
+    <div class="feature"><b>Mestre</b><span>Cria e conduz as próprias salas de missão.</span></div>
+    <div class="feature"><b>Administrador</b><span>Gerencia permissões e acompanha o sistema inteiro.</span></div>
+  </article>
+  <article class="auth-card">
+    <div class="tabs"><button class="active" data-auth-tab="login">Entrar</button><button data-auth-tab="signup">Criar conta</button></div>
+    <form id="authForm">
+      <label>E-mail<input id="email" type="email" required autocomplete="email"></label>
+      <label>Senha<input id="password" type="password" minlength="6" required autocomplete="current-password"></label>
+      <button class="primary" type="submit" id="authSubmit">Entrar</button>
+      <p id="authHint"></p>
+    </form>
   </article>
 </section>
+
 <section id="appView" class="hidden">
-  <div class="hero"><div><p class="eyebrow">ARQUIVO PESSOAL</p><h1 id="welcome">Meus personagens</h1><p>Abra uma ficha existente ou importe uma ficha da versão atual.</p></div><div class="hero-actions"><label class="button">Importar ficha<input id="importCharacter" type="file" accept="application/json" hidden></label><button class="primary" id="newCharacter">+ Nova ficha</button></div></div>
+  <div class="hero">
+    <div>
+      <p class="eyebrow">ARQUIVO PESSOAL</p>
+      <div class="hero-title-row"><h1 id="welcome">Meus personagens</h1><span id="roleBadge" class="role-badge">JOGADOR</span></div>
+      <p id="roleDescription">Abra uma ficha existente ou importe uma personagem.</p>
+    </div>
+    <div class="hero-actions">
+      <label class="button">Importar ficha<input id="importCharacter" type="file" accept="application/json" hidden></label>
+      <button class="primary" id="newCharacter">+ Nova ficha</button>
+    </div>
+  </div>
+
   <section id="firstRun" class="first-run hidden">
     <div class="first-run-copy">
-      <p class="eyebrow">PRIMEIRO TESTE</p>
-      <h2>Vamos trazer uma ficha que já existe.</h2>
-      <p>Para este primeiro teste, não precisa criar personagem do zero. Exporte o JSON da ficha oficial e importe aqui. Depois vamos abrir a ficha, alterar alguns valores e conferir se tudo fica salvo na conta.</p>
-    </div>
-    <div class="first-run-steps">
-      <div><span>1</span><b>Na ficha oficial</b><small>Clique em <strong>Exportar JSON</strong>.</small></div>
-      <div><span>2</span><b>Aqui no Lab</b><small>Clique em <strong>Importar ficha existente</strong>.</small></div>
-      <div><span>3</span><b>Abra a personagem</b><small>Mude HP, EN ou Sanidade e volte para o painel.</small></div>
+      <p class="eyebrow">PRIMEIRO ACESSO</p>
+      <h2>Traga uma ficha que já existe.</h2>
+      <p>Exporte o JSON da ficha atual e importe aqui. Depois disso ela fica ligada à sua conta.</p>
     </div>
     <div class="first-run-actions">
       <label class="primary button first-run-import">Importar ficha existente<input id="firstRunImport" type="file" accept="application/json" hidden></label>
-      <button id="firstRunNew" type="button">Prefiro criar uma nova</button>
+      <button id="firstRunNew" type="button">Criar uma nova</button>
     </div>
   </section>
+
   <section class="rooms-section">
-    <div class="section-head rooms-head"><div><p class="eyebrow">SESSÕES</p><h2>Salas ativas</h2><p>Entre na sala da missão com uma personagem. O mestre acompanha os recursos da mesa em tempo real.</p></div><div class="rooms-actions"><button id="joinRoomBtn">Entrar com código</button><button id="createRoomBtn" class="primary hidden">+ Criar sala</button></div></div>
+    <div class="section-head rooms-head">
+      <div><p class="eyebrow">SESSÕES</p><h2>Salas ativas</h2><p id="roomsHelp">Entre com um código enviado pelo mestre.</p></div>
+      <div class="rooms-actions"><button id="joinRoomBtn">Entrar com código</button><button id="createRoomBtn" class="primary hidden">+ Criar sala</button></div>
+    </div>
     <div class="room-count-line"><span id="roomCount">0</span> ativa(s)</div>
     <div id="roomsGrid" class="rooms-grid"></div>
   </section>
+
   <section id="endedRoomsSection" class="rooms-section ended-rooms-section hidden">
-    <div class="section-head rooms-head"><div><p class="eyebrow">ARQUIVO DE MISSÕES</p><h2>Sessões encerradas</h2><p>Abra uma missão antiga para consultar participantes, iniciativa preservada e o registro da sessão.</p></div><span id="endedRoomCount">0</span></div>
+    <div class="section-head rooms-head">
+      <div><p class="eyebrow">ARQUIVO DE MISSÕES</p><h2>Sessões encerradas</h2><p>Histórico das mesas que você pode consultar.</p></div>
+      <span id="endedRoomCount">0</span>
+    </div>
     <div id="endedRoomsGrid" class="rooms-grid"></div>
   </section>
-  <section class="dashboard-grid">
-    <div><div class="section-head"><h2>Personagens</h2><span id="characterCount">0</span></div><div id="characterGrid" class="character-grid"></div></div>
-    <aside id="adminPanel" class="admin-panel hidden"><p class="eyebrow">ADMINISTRAÇÃO</p><h2>Visão da mesa</h2><p>Resumo de todas as fichas cadastradas.</p><div id="adminCharacters"></div></aside>
+
+  <section class="characters-section">
+    <div class="section-head"><div><p class="eyebrow">FICHAS</p><h2>Personagens</h2></div><span id="characterCount">0</span></div>
+    <div id="characterGrid" class="character-grid"></div>
+  </section>
+
+  <section id="adminPanel" class="admin-console hidden">
+    <div class="admin-console-head">
+      <div><p class="eyebrow">ADMINISTRAÇÃO</p><h2>Controle do SCUTUM</h2><p>Permissões, mestres e histórico global de mesas.</p></div>
+      <button id="refreshAdminBtn">Atualizar</button>
+    </div>
+    <div id="adminStats" class="admin-stats"></div>
+
+    <div class="admin-grid">
+      <section class="admin-block">
+        <div class="admin-block-head"><div><p class="eyebrow">PERMISSÕES</p><h3>Liberar e-mails</h3></div></div>
+        <form id="roleGrantForm" class="role-grant-form">
+          <label>E-mail<input id="roleEmail" type="email" required placeholder="mestre@exemplo.com"></label>
+          <label>Permissão<select id="roleGrantRole"><option value="master">Mestre</option><option value="admin">Administrador</option><option value="player">Jogador</option></select></label>
+          <button id="roleGrantSubmit" class="primary" type="submit">Salvar permissão</button>
+        </form>
+        <p class="admin-help">Você pode liberar o e-mail antes do cadastro. Quando a pessoa criar a conta, a permissão entra automaticamente.</p>
+        <div id="adminUsers" class="admin-list"></div>
+      </section>
+
+      <section class="admin-block">
+        <div class="admin-block-head"><div><p class="eyebrow">MESAS</p><h3>Histórico global</h3></div></div>
+        <div id="adminRooms" class="admin-list"></div>
+      </section>
+    </div>
   </section>
 </section>
 </main>
-<dialog id="createRoomDialog" class="hub-dialog"><form method="dialog" class="hub-dialog-card" id="createRoomForm"><div class="dialog-head"><div><p class="eyebrow">MESTRE</p><h2>Criar sala</h2><p>Dê um nome para a missão. O código de entrada é gerado automaticamente.</p></div><button value="cancel" type="button" onclick="this.closest('dialog').close()">×</button></div><label>Nome da missão<input id="roomName" maxlength="80" placeholder="Ex.: Ruínas de Tibur" required></label><div class="dialog-actions"><button value="cancel" type="button" onclick="this.closest('dialog').close()">Cancelar</button><button class="primary" id="createRoomSubmit" type="submit">Criar sala</button></div></form></dialog>
-<dialog id="joinRoomDialog" class="hub-dialog"><form method="dialog" class="hub-dialog-card" id="joinRoomForm"><div class="dialog-head"><div><p class="eyebrow">MISSÃO</p><h2>Entrar em uma sala</h2><p>Use o código que o mestre enviou e escolha qual personagem vai participar.</p></div><button value="cancel" type="button" onclick="this.closest('dialog').close()">×</button></div><label>Código da sala<input id="joinRoomCode" maxlength="8" placeholder="ABC123" required></label><label>Personagem<select id="joinCharacter" required></select></label><div class="dialog-actions"><button value="cancel" type="button" onclick="this.closest('dialog').close()">Cancelar</button><button class="primary" id="joinRoomSubmit" type="submit">Entrar na sala</button></div></form></dialog>
+
+<dialog id="createRoomDialog" class="hub-dialog">
+  <form method="dialog" class="hub-dialog-card" id="createRoomForm">
+    <div class="dialog-head"><div><p class="eyebrow">MESTRE</p><h2>Criar sala</h2><p>O código de entrada é gerado automaticamente.</p></div><button value="cancel" type="button" onclick="this.closest('dialog').close()">×</button></div>
+    <label>Nome da missão<input id="roomName" maxlength="80" placeholder="Ex.: Ruínas de Tibur" required></label>
+    <div class="dialog-actions"><button value="cancel" type="button" onclick="this.closest('dialog').close()">Cancelar</button><button class="primary" id="createRoomSubmit" type="submit">Criar sala</button></div>
+  </form>
+</dialog>
+
+<dialog id="joinRoomDialog" class="hub-dialog">
+  <form method="dialog" class="hub-dialog-card" id="joinRoomForm">
+    <div class="dialog-head"><div><p class="eyebrow">MISSÃO</p><h2>Entrar em uma sala</h2><p>Use o código do mestre e escolha uma personagem.</p></div><button value="cancel" type="button" onclick="this.closest('dialog').close()">×</button></div>
+    <label>Código da sala<input id="joinRoomCode" maxlength="8" placeholder="ABC123" required></label>
+    <label>Personagem<select id="joinCharacter" required></select></label>
+    <div class="dialog-actions"><button value="cancel" type="button" onclick="this.closest('dialog').close()">Cancelar</button><button class="primary" id="joinRoomSubmit" type="submit">Entrar na sala</button></div>
+  </form>
+</dialog>
 
 <div id="toast" class="toast hidden"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="scutum-config.js"></script>
-<script src="hub.js?v=0.5.4"></script>
+<script src="hub.js?v=0.6.0"></script>
 </body></html>
