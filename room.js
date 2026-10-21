@@ -744,10 +744,18 @@ function renderRoll(r){
   const dice=Array.isArray(r.dice)?r.dice:[];
   const cls=rollClass(r);
   const mod=Number(r.modifier||0);
-  const detail=r.is_manual
-    ?'<span class="manual-mark">resultado manual</span>'
-    :'<span class="roll-expression">'+esc(r.expression)+'</span>'+
-      (dice.length?'<span class="dice-breakdown">['+dice.map(esc).join(', ')+']'+(mod?(' '+(mod>0?'+':'')+mod):'')+'</span>':'');
+  const breakdown=r.breakdown||{};
+  const baseMod=Number(breakdown.base_modifier||0);
+  const extraMod=Number(breakdown.extra_modifier||0);
+
+  let detail='';
+  if(r.is_manual){
+    detail='<span class="manual-mark">resultado manual</span>';
+  }else{
+    detail='<span class="roll-expression">'+esc(r.expression)+'</span>'+
+      (dice.length?'<span class="dice-breakdown">['+dice.map(esc).join(', ')+']'+(baseMod?(' '+(baseMod>0?'+':'')+baseMod):'')+'</span>':'')+
+      (extraMod?'<span class="roll-extra">'+(extraMod>0?'+':'')+extraMod+' extra</span>':'');
+  }
 
   const special=cls==='critical'
     ?'<span class="roll-special">ACERTO CRÍTICO</span>'
@@ -760,7 +768,27 @@ function renderRoll(r){
     '<div class="roll-message-main">'+
       '<header><div><b>'+esc(r.author_name)+'</b><span>'+esc(r.label)+'</span></div><time>'+new Date(r.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</time></header>'+
       '<div class="roll-result-line"><strong>'+Number(r.total)+'</strong><div>'+special+detail+'</div></div>'+
+      (r.note?'<p class="roll-note">'+esc(r.note)+'</p>':'')+
       (r.visibility==='master'?'<span class="secret-badge">OCULTA · SOMENTE MESTRE</span>':'')+
+    '</div>'+
+  '</article>';
+}
+function renderChatMessage(m){
+  const p=participants.find(x=>x.character_id===m.character_id);
+  const portrait=p?.portrait_url
+    ?'<img src="'+esc(p.portrait_url)+'" alt="">'
+    :'<span>'+esc((m.author_name||'?').trim().slice(0,1).toUpperCase())+'</span>';
+  const body=esc(m.body||'').replace(/\n/g,'<br>');
+  return '<article class="roll-message shared-card '+esc(m.message_type||'ability')+'">'+
+    '<div class="roll-avatar">'+portrait+'</div>'+
+    '<div class="roll-message-main">'+
+      '<header><div><b>'+esc(m.author_name)+'</b><span>compartilhou uma habilidade</span></div><time>'+new Date(m.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</time></header>'+
+      '<div class="shared-card-body">'+
+        '<span class="shared-type">HABILIDADE</span>'+
+        '<h3>'+esc(m.title)+'</h3>'+
+        (m.subtitle?'<small>'+esc(m.subtitle)+'</small>':'')+
+        (body?'<p>'+body+'</p>':'')+
+      '</div>'+
     '</div>'+
   '</article>';
 }
@@ -768,21 +796,35 @@ async function loadRolls({stick=true}={}){
   const feed=$('#rollFeed');
   const nearBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<100;
 
-  const {data,error}=await client.from('room_rolls')
-    .select('id,room_id,actor_id,character_id,author_name,label,expression,dice,modifier,total,natural_roll,is_manual,visibility,created_at')
-    .eq('room_id',roomId)
-    .order('created_at',{ascending:false})
-    .limit(80);
-  if(error){
-    console.warn('[SCUTUM] rolls',error);
+  const [{data:rollData,error:rollError},{data:messageData,error:messageError}]=await Promise.all([
+    client.from('room_rolls')
+      .select('id,room_id,actor_id,character_id,author_name,label,expression,dice,modifier,total,natural_roll,is_manual,visibility,breakdown,note,created_at')
+      .eq('room_id',roomId)
+      .order('created_at',{ascending:false})
+      .limit(80),
+    client.from('room_messages')
+      .select('id,room_id,actor_id,character_id,message_type,author_name,title,subtitle,body,metadata,visibility,created_at')
+      .eq('room_id',roomId)
+      .order('created_at',{ascending:false})
+      .limit(80)
+  ]);
+
+  if(rollError||messageError){
+    console.warn('[SCUTUM] chat',rollError||messageError);
     return;
   }
 
-  rolls=(data||[]).reverse();
-  $('#rollCount').textContent=rolls.length;
-  feed.innerHTML=rolls.length
-    ?rolls.map(renderRoll).join('')
-    :'<div class="roll-empty"><span>✦</span><b>Nenhuma rolagem ainda.</b><small>Os dados da mesa aparecerão aqui em tempo real.</small></div>';
+  rolls=rollData||[];
+  messages=messageData||[];
+  const feedRows=[
+    ...rolls.map(x=>({...x,_feedType:'roll'})),
+    ...messages.map(x=>({...x,_feedType:'message'}))
+  ].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at)).slice(-100);
+
+  $('#rollCount').textContent=feedRows.length;
+  feed.innerHTML=feedRows.length
+    ?feedRows.map(x=>x._feedType==='roll'?renderRoll(x):renderChatMessage(x)).join('')
+    :'<div class="roll-empty"><span>✦</span><b>Nenhuma mensagem ainda.</b><small>Rolagens e habilidades compartilhadas aparecerão aqui em tempo real.</small></div>';
 
   if(stick||nearBottom)requestAnimationFrame(()=>{feed.scrollTop=feed.scrollHeight});
 }
@@ -801,15 +843,20 @@ async function submitSystemRoll(){
     return toast('Use uma expressão como 1d20+5, 2d6 ou 1d100.');
   }
 
+  const extra=Math.trunc(Number($('#rollExtraModifier')?.value)||0);
+  const note=($('#rollNote')?.value||'').trim();
+
   const btn=$('#submitRoll');
   btn.disabled=true;
   btn.textContent='Rolando…';
 
-  const {error}=await client.rpc('roll_room_dice',{
+  const {error}=await client.rpc('roll_room_dice_with_modifiers',{
     p_room_id:roomId,
     p_character_id:currentRollCharacterId(),
     p_label:rollLabel(),
     p_expression:raw,
+    p_extra_modifier:extra,
+    p_note:note,
     p_visibility:rollVisibility()
   });
 
@@ -821,6 +868,8 @@ async function submitSystemRoll(){
     return toast('Não foi possível realizar a rolagem.');
   }
   $('#rollLabel').value='';
+  if($('#rollExtraModifier'))$('#rollExtraModifier').value='0';
+  if($('#rollNote'))$('#rollNote').value='';
   loadRolls({stick:true});
 }
 async function submitManualRoll(){
@@ -855,10 +904,14 @@ async function submitManualRoll(){
 }
 async function clearRollChat(){
   if(!liveMaster())return;
-  if(!confirm('Limpar todo o chat de rolagens desta sala? Esta ação não pode ser desfeita.'))return;
-  const {error}=await client.from('room_rolls').delete().eq('room_id',roomId);
-  if(error)return toast('Não foi possível limpar as rolagens.');
-  toast('Chat de rolagens limpo.');
+  if(!confirm('Limpar rolagens e habilidades compartilhadas desta sala? Esta ação não pode ser desfeita.'))return;
+
+  const [{error:rollError},{error:messageError}]=await Promise.all([
+    client.from('room_rolls').delete().eq('room_id',roomId),
+    client.from('room_messages').delete().eq('room_id',roomId)
+  ]);
+  if(rollError||messageError)return toast('Não foi possível limpar o chat.');
+  toast('Chat limpo.');
   loadRolls({stick:true});
 }
 function toggleManualMode(){
@@ -956,6 +1009,7 @@ async function refresh(){
     .on('postgres_changes',{event:'*',schema:'public',table:'room_effects',filter:'room_id=eq.'+roomId},()=>schedule(loadParticipants))
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'room_events',filter:'room_id=eq.'+roomId},()=>schedule(loadEvents))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_rolls',filter:'room_id=eq.'+roomId},()=>loadRolls({stick:true}))
+    .on('postgres_changes',{event:'*',schema:'public',table:'room_messages',filter:'room_id=eq.'+roomId},()=>loadRolls({stick:true}))
     .subscribe(async status=>{
       const pill=$('#syncStatus');
       if(status==='SUBSCRIBED'){
