@@ -267,6 +267,42 @@ function bindSheetRollTriggers(){
   });
 }
 
+function bindAttributeRollTriggers(){
+  if(!activeRoomId)return;
+  document.querySelectorAll('.attr').forEach(card=>{
+    if(card.querySelector('.scutum-attr-roll'))return;
+    const name=card.querySelector('.attr-name')?.textContent?.replace(/\s+/g,' ').trim();
+    if(!name)return;
+    const total=Number(card.querySelector('.attr-total')?.textContent?.trim());
+    if(!Number.isFinite(total))return;
+    const breakText=card.querySelector('.attr-break')?.textContent||'';
+    const effective=breakText.match(/efetivo\s+(-?\d+)/i);
+    const mod=effective?Number(effective[1]):total;
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='scutum-attr-roll';
+    btn.textContent='Rolar';
+    btn.onclick=e=>{e.preventDefault();e.stopPropagation();openRollDialog('Atributo · '+name,expressionWithModifier('1d20',mod))};
+    card.appendChild(btn);
+  });
+}
+
+function bindCombatQuickRolls(){
+  if(!activeRoomId)return;
+  document.querySelectorAll('.combat-quick-values > div').forEach(row=>{
+    if(row.querySelector('.scutum-quick-roll'))return;
+    const label=row.querySelector('span')?.textContent?.trim();
+    const value=row.querySelector('b')?.textContent?.trim()||'';
+    if(!label||!/^1d20/i.test(normalizeExpression(value)))return;
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='scutum-quick-roll';
+    btn.textContent='Rolar';
+    btn.onclick=e=>{e.preventDefault();e.stopPropagation();openRollDialog(label,normalizeExpression(value))};
+    row.appendChild(btn);
+  });
+}
+
 function bindWeaponRollTriggers(){
   if(!activeRoomId)return;
   document.querySelectorAll('.weapon-card').forEach(card=>{
@@ -370,6 +406,8 @@ function bindAbilityShare(){
 function enhanceSheet(){
   ensureSwitcherShell();
   bindSheetRollTriggers();
+  bindAttributeRollTriggers();
+  bindCombatQuickRolls();
   bindWeaponRollTriggers();
   bindAbilityShare();
   bindCombatCapture();
