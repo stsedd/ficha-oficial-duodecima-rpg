@@ -286,7 +286,7 @@ async function loadRoom(){
   document.body.classList.toggle('ended',room.status!=='active');
   $('#endRoom').classList.toggle('hidden',!liveMaster());
   $('#reopenRoom').classList.toggle('hidden',!isMaster||room.status==='active');
-  $$('.master-only').forEach(x=>x.classList.toggle('hidden',!liveMaster()));
+  $('.master-only').forEach(x=>x.classList.toggle('hidden',!isMaster));
   $('#leaveRoom').classList.toggle('hidden',isMaster&&!await hasMembership());
   $('#rollForm').classList.toggle('disabled',!roomLive());
   updateDuration();
@@ -304,6 +304,11 @@ async function loadParticipants(){
   effects=roomEffects||[];
   const readyMap=new Map((memberStates||[]).map(x=>[x.user_id,!!x.ready]));
   participants=(data||[]).map(x=>({...x,ready:readyMap.get(x.user_id)||false}));
+  if(selectedCharacterId&&!participants.some(x=>x.character_id===selectedCharacterId))selectedCharacterId=null;
+  if(!selectedCharacterId){
+    const preferred=isMaster?participants[0]:participants.find(x=>x.user_id===me.id);
+    if(preferred)selectedCharacterId=preferred.character_id;
+  }
 
   $('#participantCount').textContent=participants.length;
   $('#participantGrid').innerHTML=participants.length
@@ -1023,6 +1028,7 @@ async function refresh(){
 
   await refresh();
   if(isMaster)await loadNotes();
+  $('#dockChat')?.classList.toggle('active',!document.body.classList.contains('chat-hidden'));
 
   clearInterval(durationTimer);
   durationTimer=setInterval(updateDuration,30000);
