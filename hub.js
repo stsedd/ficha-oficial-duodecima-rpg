@@ -39,7 +39,7 @@ async function loadRooms(user){
   }
   $('#roomCount').textContent=(rooms||[]).length;
   $('#roomsGrid').innerHTML=(rooms||[]).length?(rooms||[]).map(r=>roomCard(r,counts[r.id]||0,user.id)).join(''):'<div class="empty room-empty">Nenhuma sala ativa. O mestre pode criar uma quando a missão começar.</div>';
-  $('[data-open-room]').forEach(b=>b.onclick=()=>location.href='room.html?id='+encodeURIComponent(b.dataset.openRoom));
+  $$('[data-open-room]').forEach(b=>b.onclick=()=>location.href='room.html?id='+encodeURIComponent(b.dataset.openRoom));
   if(roomChannel){client.removeChannel(roomChannel);roomChannel=null}
   roomChannel=client.channel('hub-rooms')
     .on('postgres_changes',{event:'*',schema:'public',table:'rooms'},()=>Promise.all([loadRooms(user),loadEndedRooms(user)]))
