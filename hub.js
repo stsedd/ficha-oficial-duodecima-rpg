@@ -157,7 +157,7 @@ function renderSessionActions(){
     '<span class="session-role '+role+'">'+(preview?'VISÃO: JOGADOR':roleLabel(role))+'</span>'+
     (role==='admin'?'<button id="previewToggle">'+(preview?'Voltar ao admin':'Ver como jogador')+'</button>':'')+
     '<button id="logout">Sair</button>';
-  $('#logout').onclick=()=>client.auth.signOut();
+  $('#logout').onclick=()=>{sessionStorage.removeItem(VIEW_KEY);client.auth.signOut();};
   const previewBtn=$('#previewToggle');
   if(previewBtn)previewBtn.onclick=()=>{
     if(preview)sessionStorage.removeItem(VIEW_KEY);
