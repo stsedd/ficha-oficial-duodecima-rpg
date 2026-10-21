@@ -134,7 +134,7 @@
         <div id="rollFeed" class="roll-feed" aria-live="polite">
           <div class="roll-empty"><b>Nenhuma rolagem ainda.</b><small>Rolagens e habilidades aparecem aqui.</small></div>
         </div>
-        <form id="rollForm" class="roll-composer">
+        <div id="rollForm" class="roll-composer">
           <div class="roll-form-top">
             <label><span>Tipo</span><select id="rollKind"><option>Perícia</option><option>Iniciativa</option><option>Ataque</option><option>Defesa</option><option>Resistência</option><option>Dano</option><option selected>Rolagem livre</option></select></label>
             <label><span>Descrição</span><input id="rollLabel" maxlength="80" placeholder="Percepção, ataque…"></label>
@@ -143,7 +143,7 @@
             <div class="dice-expression-row">
               <label><span>Expressão</span><input id="rollExpression" value="1d20" placeholder="1d20+5"></label>
               <label><span>Extra</span><input id="rollExtraModifier" type="number" value="0"></label>
-              <button id="submitRoll" class="primary" type="submit">Rolar</button>
+              <button id="submitRoll" class="primary" type="button">Rolar</button>
             </div>
             <label class="roll-context-field"><span>Origem do bônus / observação</span><input id="rollNote" maxlength="120" placeholder="+3 Prole · alvo Caído"></label>
             <div class="quick-dice"><button type="button" data-die="1d20">d20</button><button type="button" data-die="1d12">d12</button><button type="button" data-die="1d10">d10</button><button type="button" data-die="1d8">d8</button><button type="button" data-die="1d6">d6</button><button type="button" data-die="1d4">d4</button><button type="button" data-die="1d100">d100</button></div>
@@ -156,7 +156,7 @@
             <label><input id="manualToggle" type="checkbox"><span>Manual</span></label>
             <label id="secretRollOption" class="master-only hidden"><input id="secretRoll" type="checkbox"><span>Somente mestre</span></label>
           </div>
-        </form>
+        </div>
       </aside>
     </div>
   </section>
