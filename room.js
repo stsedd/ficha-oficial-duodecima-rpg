@@ -292,10 +292,16 @@ async function loadRoom(){
   $('#roomName').textContent=room.name;
   $('#roomCode').textContent=room.code;
   $('#roomStatus').textContent=room.status==='active'?'Ativa':'Encerrada';
+  const stateChip=$('#roomStateChip');
+  if(stateChip){
+    stateChip.textContent=room.status==='active'?'ATIVA':'ENCERRADA';
+    stateChip.classList.toggle('ended',room.status!=='active');
+  }
   document.body.classList.toggle('ended',room.status!=='active');
   $('#endRoom').classList.toggle('hidden',!liveMaster());
   $('#reopenRoom').classList.toggle('hidden',!isMaster||room.status==='active');
-  $$('.master-only').forEach(x=>x.classList.toggle('hidden',!isMaster));
+  $('.master-only').forEach(x=>x.classList.toggle('hidden',!isMaster));
+  $('.window-footer.master-only').forEach(x=>x.classList.toggle('hidden',!liveMaster()));
   $('#leaveRoom').classList.toggle('hidden',isMaster&&!await hasMembership());
   $('#rollForm').classList.toggle('disabled',!roomLive());
   updateDuration();
