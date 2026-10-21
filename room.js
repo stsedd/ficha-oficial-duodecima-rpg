@@ -90,10 +90,11 @@ function resource(label,current,max,characterId,key){
 }
 function publicResource(label,percent){
   const visible=percent!=null&&Number.isFinite(Number(percent));
+  const safe=visible?Math.max(0,Math.min(100,Number(percent))):null;
   return '<div class="resource-row public-resource">'+
     '<span>'+label+'</span>'+
-    '<div class="bar"><i style="width:'+(visible?Math.max(0,Math.min(100,Number(percent))):0)+'%"></i></div>'+
-    '<b aria-label="valor oculto">'+(visible?'':'—')+'</b>'+
+    '<div class="bar"><i style="width:'+(safe??0)+'%"></i></div>'+
+    '<b aria-label="porcentagem">'+(safe==null?'—':Math.round(safe)+'%')+'</b>'+
   '</div>';
 }
 function participantCard(p){
