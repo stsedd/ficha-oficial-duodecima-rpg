@@ -24,6 +24,9 @@ const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 let me=null;
 let room=null;
 let isMaster=false;
+let actualMaster=false;
+let accountRole='player';
+let previewPlayer=false;
 let channel=null;
 let onlineIds=new Set();
 let participants=[];
@@ -362,7 +365,7 @@ async function loadCombat(){
   if(error)return;
 
   combat=state||{room_id:roomId,active:false,round:1,turn_index:0,current_entry_id:null};
-  initiative=data||[];
+  initiative=(data||[]).filter(x=>!previewPlayer||x.visibility==='public');
 
   if(combat.active){
     let current=initiative.find(x=>x.id===combat.current_entry_id);
@@ -835,8 +838,8 @@ async function loadRolls({stick=true}={}){
     return;
   }
 
-  rolls=rollData||[];
-  messages=messageData||[];
+  rolls=(rollData||[]).filter(x=>!previewPlayer||x.visibility==='public');
+  messages=(messageData||[]).filter(x=>!previewPlayer||x.visibility==='public');
   const feedRows=[
     ...rolls.map(x=>({...x,_feedType:'roll'})),
     ...messages.map(x=>({...x,_feedType:'message'}))
@@ -1001,8 +1004,24 @@ async function refresh(){
   if(!session){location.replace('index.html');return}
   me=session.user;
 
-  const {data:master}=await client.rpc('is_room_master',{p_room_id:roomId});
-  isMaster=!!master;
+  const [{data:master},{data:account}]=await Promise.all([
+    client.rpc('is_room_master',{p_room_id:roomId}),
+    client.from('profiles').select('role').eq('id',me.id).maybeSingle()
+  ]);
+  actualMaster=!!master;
+  accountRole=account?.role||'player';
+  previewPlayer=accountRole==='admin'&&sessionStorage.getItem('scutum_view_mode')==='player';
+
+  if(previewPlayer){
+    const {data:membership}=await client.from('room_members').select('room_id').eq('room_id',roomId).eq('user_id',me.id).maybeSingle();
+    if(!membership){
+      alert('No modo jogador, entre na sala usando o código e uma personagem.');
+      location.replace('index.html');
+      return;
+    }
+  }
+
+  isMaster=actualMaster&&!previewPlayer;
 
   $('#notesPanel')?.classList.toggle('master-only',true);
   if(!isMaster)$('#notesPanel')?.classList.add('hidden');
@@ -1011,6 +1030,7 @@ async function refresh(){
   $('#roomView').classList.remove('hidden');
 
   await refresh();
+  if(previewPlayer)toast('Modo de teste: visualização como jogador.');
   if(isMaster)await loadNotes();
   $('#dockChat')?.classList.toggle('active',!document.body.classList.contains('chat-hidden'));
 
@@ -1035,7 +1055,7 @@ async function refresh(){
     .subscribe(async status=>{
       const pill=$('#syncStatus');
       if(status==='SUBSCRIBED'){
-        pill.textContent='Ao vivo';
+        pill.textContent='Conectado';
         pill.className='sync-pill online';
         await channel.track({user_id:me.id,online_at:new Date().toISOString()});
       }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
