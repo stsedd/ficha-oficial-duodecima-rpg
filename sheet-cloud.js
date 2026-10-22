@@ -528,7 +528,7 @@ function injectBootstrap(){
   if(booted)return;
   booted=true;
   const script=document.createElement('script');
-  script.src='bootstrap-v511.js?v=v5.21.1-ability-deck-polish-lab';
+  script.src='bootstrap-v511.js?v=v5.21.2-scutum-sync';
   script.onload=()=>{
     let toolbarAttempts=0;
     const waitForToolbar=setInterval(()=>{
