@@ -311,6 +311,19 @@ async function loadRoom(){
   updateDuration();
   return true;
 }
+function renderParticipants(){
+  if(selectedCharacterId&&!participants.some(x=>x.character_id===selectedCharacterId))selectedCharacterId=null;
+  if(!selectedCharacterId){
+    const preferred=isMaster?participants[0]:participants.find(x=>x.user_id===me.id);
+    if(preferred)selectedCharacterId=preferred.character_id;
+  }
+
+  $('#participantCount').textContent=participants.length;
+  $('#participantGrid').innerHTML=participants.length
+    ?participants.map(participantCard).join('')
+    :'<div class="empty">Ainda não há personagens nesta sala. Compartilhe o convite com os jogadores.</div>';
+  bindParticipantActions();
+}
 async function loadParticipants(){
   const {data,error}=await client.rpc('get_room_table_participants',{p_room_id:roomId});
   if(error){toast('Não foi possível atualizar a mesa.');return}
@@ -323,17 +336,7 @@ async function loadParticipants(){
   effects=roomEffects||[];
   const readyMap=new Map((memberStates||[]).map(x=>[x.user_id,!!x.ready]));
   participants=(data||[]).map(x=>({...x,ready:readyMap.get(x.user_id)||false}));
-  if(selectedCharacterId&&!participants.some(x=>x.character_id===selectedCharacterId))selectedCharacterId=null;
-  if(!selectedCharacterId){
-    const preferred=isMaster?participants[0]:participants.find(x=>x.user_id===me.id);
-    if(preferred)selectedCharacterId=preferred.character_id;
-  }
-
-  $('#participantCount').textContent=participants.length;
-  $('#participantGrid').innerHTML=participants.length
-    ?participants.map(participantCard).join('')
-    :'<div class="empty">Ainda não há personagens nesta sala. Compartilhe o convite com os jogadores.</div>';
-  bindParticipantActions();
+  renderParticipants();
 }
 
 /* ---------- COMBAT ---------- */
@@ -1051,7 +1054,7 @@ async function refresh(){
   channel
     .on('presence',{event:'sync'},()=>{
       onlineIds=new Set(Object.keys(channel.presenceState()||{}));
-      schedule(loadParticipants);
+      renderParticipants();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'room_members',filter:'room_id=eq.'+roomId},()=>schedule(refresh))
     .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+roomId},()=>schedule(refresh))
