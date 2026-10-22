@@ -1,5 +1,7 @@
 (()=>{
   'use strict';
+  if(window.__DUODECIMA_QOL_5171_ACTIVE__)return;
+  window.__DUODECIMA_QOL_5171_ACTIVE__=true;
   const STORAGE_KEY='duodecima_universal_stage4_v24';
   let queued=false;
 
