@@ -2,12 +2,12 @@
   "manifest": {
     "core": "Duodécima Core",
     "schemaVersion": 2,
-    "contentVersion": "2026.10.02.2",
-    "updatedAt": "2026-10-02",
+    "contentVersion": "2026.10.21.1",
+    "updatedAt": "2026-10-21",
     "status": "canonical-phase-2",
     "counts": {
-      "deities": 52,
-      "kits": 51,
+      "deities": 54,
+      "kits": 53,
       "skills": 26,
       "talents": 32,
       "conditions": 28
@@ -24,9 +24,11 @@
       "system": "data/sistema.json",
       "equipment": "data/equipamentos.json",
       "aliases": "data/aliases.json",
-      "magic": "data/magia.json"
+      "magic": "data/magia.json",
+      "godsSupplement": "data/proles-2026-10.json"
     },
     "notes": [
+      "Tempestas e Cloacina adicionadas em 2026-10-21 via dados complementares canônicos, consumidos por Guia e Ficha.",
       "Talentos revisados em 2026-10-02: o padrão passa a ser uma única aquisição, salvo quando o próprio talento autoriza repetição; Adepto Elemental, Campeão e Aumento de Atributo são repetíveis conforme suas descrições.",
       "Combate recebe estrutura canônica de 2 ações, 10 m de deslocamento e 1 ação livre, além de Disparada, Defender, Ajudar, Preparar, Furtividade, Percepção Passiva, manobras, cobertura e quedas.",
       "Iniciativa passa a usar 1d20 + Agilidade; sem a perícia Agilidade, usa-se Destreza pura.",
@@ -57831,5 +57833,918 @@
       "Bônus divinos e os +1 concedidos por Rebento de Roma não podem ser sacrificados no despertar mágico."
     ]
   },
-  "generatedAt": "2026-10-21T10:08:57.000Z"
+  "godsSupplement": {
+    "schemaVersion": 2,
+    "updatedAt": "2026-10-21",
+    "deities": [
+      {
+        "id": "tempestas",
+        "name": "Tempestas",
+        "group": "numina",
+        "groupLabel": "Numina",
+        "kitAvailable": true,
+        "selectable": true,
+        "castingAttribute": "fe",
+        "hp": {
+          "base": 20,
+          "perDecade": 5,
+          "constitutionApplies": true
+        },
+        "attributeBonuses": {
+          "fe": 2,
+          "for": 1
+        },
+        "grantedSkills": [],
+        "skillChoices": [
+          "intimidacao",
+          "percepcao"
+        ],
+        "resource": {
+          "id": "cargas-tempesta",
+          "name": "Cargas de Tempesta",
+          "scope": "personal",
+          "max": {
+            "type": "levelFormula",
+            "formula": "5 + floor(nível/10)"
+          },
+          "maxFormula": "5 + floor(nível/10)",
+          "sourceAbilityId": "cargas-de-tempesta",
+          "reset": "Fim da cena"
+        },
+        "resources": [
+          {
+            "id": "cargas-tempesta",
+            "name": "Cargas de Tempesta",
+            "scope": "personal",
+            "max": {
+              "type": "levelFormula",
+              "formula": "5 + floor(nível/10)"
+            },
+            "maxFormula": "5 + floor(nível/10)",
+            "sourceAbilityId": "cargas-de-tempesta",
+            "reset": "Fim da cena"
+          }
+        ],
+        "description": "Tempestas era uma divindade romana ligada às tempestades, aos ventos violentos, à chuva, aos raios e às mudanças bruscas do céu. Seu domínio não é o céu como trono, nem o trovão como sentença divina. Tempestas é o momento em que o ar vira ameaça, a pressão muda, as nuvens fecham e todo mundo entende que alguma coisa está prestes a cair. ",
+        "playstyle": "O kit de Tempestas é para quem quer jogar com controle de campo, dano elétrico, mobilidade aérea e manipulação climática. A prole cria zonas de tempestade, voa com correntes de ar, sente presságios no ambiente, acumula Cargas de Tempesta e fica mais perigosa quando luta dentro do próprio domo. Em combate, funciona melhor atrapalhando deslocamento, criando área perigosa, espalhando dano elétrico e usando vento, chuva e raio para controlar o ritmo da cena. Fora dele, é muito boa para prever mudanças climáticas, atravessar tempestades, voar, intimidar com manifestação divina e perceber quando o ambiente está prestes a virar contra alguém. ",
+        "notes": [],
+        "passives": [
+          {
+            "id": "sangue-tempestuoso",
+            "name": "Sangue Tempestuoso",
+            "type": "passive",
+            "slot": 1,
+            "summary": "A prole é resistente a dano elétrico. Também não sofre consequências comuns de exposição a tempestades, chuvas intensas ou ventos fortes. Também é imune à condição de paralisia causada por eletricidade.",
+            "tiers": [],
+            "note": "O sangue divino de Tempestas percorre o corpo da prole como uma corrente elétrica constante. Pequenas faíscas podem surgir na pele quando ela está agitada, e o ar ao redor parece entender antes dos outros que alguma coisa vai dar errado.\nEfeitos divinos, absolutos ou narrativos maiores ainda podem exigir teste ou autorização do narrador."
+          },
+          {
+            "id": "filha-dos-ventos",
+            "name": "Filha dos Ventos",
+            "type": "passive",
+            "slot": 2,
+            "summary": "Pode utilizar correntes de ar para voar, sem precisar estar em local tempestuoso.\nEm locais tempestuosos ou dentro do próprio Domo de Tempestade, acrescenta +1d4 de dano em ataques físicos e habilidades.",
+            "tiers": [],
+            "note": "O vento nunca está completamente parado ao redor da prole. Mesmo em ambiente fechado, uma corrente de ar parece acompanhar seus movimentos como se o céu tivesse decidido abrir espaço.\nO voo ainda depende de espaço para se mover. Ambientes apertados, selados ou sem circulação podem limitar manobras."
+          },
+          {
+            "id": "pressagio-celeste",
+            "name": "Presságio Celeste",
+            "type": "passive",
+            "slot": 3,
+            "summary": "O corpo da prole sente o céu antes que o céu aconteça. A pressão muda, o vento vira, a umidade pesa e, do nada, ela sabe que alguma coisa está se formando.\nPercebe naturalmente mudanças climáticas e a aproximação de tempestades. Pode identificar a direção de onde fenômenos atmosféricos estão se formando.\nEm ambientes tempestuosos ou dentro do próprio Domo de Tempestade, recebe vantagem em testes relacionados à percepção de mudanças no clima, pressão, vento, chuva ou condições meteorológicas.",
+            "tiers": [],
+            "note": ""
+          },
+          {
+            "id": "cargas-de-tempesta",
+            "name": "Cargas de Tempesta",
+            "type": "passive",
+            "slot": 4,
+            "summary": "A eletricidade divina nunca desaparece completamente depois de ser manifestada. Parte dela fica no corpo da cria de Tempestas, acumulando como uma tempestade que ainda não achou onde cair.",
+            "tiers": [],
+            "note": ":setinha: Acúmulo\n:setinha: Sempre que causar dano com uma habilidade do kit de Tempestas: +1 Carga de Tempesta.\n:setinha: Quando causar dano com uma habilidade do kit, pode voluntariamente receber 2 de dano para ganhar +1 Carga de Tempesta adicional.\n:setinha: Quando for atingida por eletricidade, pode ganhar +1 Carga de Tempesta.\n:setinha: Limites\nA cria de Tempestas só pode ganhar até 3 Cargas de Tempesta por rodada.\nAs Cargas de Tempesta permanecem até serem consumidas por uma habilidade ou até o fim da cena.\nA cria pode manter até 5 Cargas de Tempesta + 1 a cada 10 níveis."
+          },
+          {
+            "id": "coracao-da-tempestade",
+            "name": "Coração da Tempestade",
+            "type": "passive",
+            "slot": 5,
+            "summary": "Enquanto seu Domo de Tempestade estiver ativo, a prole sente naturalmente quando uma criatura entra ou sai dele.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "ainda não dá nenhum benefício."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "ainda não dá nenhum benefício."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "uma vez por missão/evento, enquanto estiver dentro do próprio domo, pode usar uma habilidade de Tempestas sem gastar energia."
+              }
+            ],
+            "note": "O coração da cria funciona como o centro de uma tempestade que ainda não despertou completamente. Quando o domo se ergue ao redor dela, não é só uma área de efeito. É território.\nNão pode ser usado para reduzir o custo das habilidade 9 e 10."
+          },
+          {
+            "id": "presenca-da-tempestade",
+            "name": "Presença da Tempestade",
+            "type": "passive",
+            "slot": 6,
+            "summary": "Existe algo inquietante na presença da cria. Quando sua divindade aparece, o ambiente responde junto: faísca no olho, vento no cabelo, trovão longe demais para ser coincidência. Bem sutil. Claramente normal.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "recebe proficiência em Intimidação. Caso já possua, recebe +2 em testes de Intimidação feitos com manifestação de Tempestas."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "recebe expertise em Intimidação. Se já possuir expertise, recebe +2 adicional em cenas em que use vento, chuva, eletricidade, pressão atmosférica ou manifestações divinas para impor presença."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "uma vez por missão/evento, pode fazer um teste de Intimidação com vantagem ao manifestar claramente sua natureza divina. Nessa cena, pequenas nuvens, correntes de vento, queda de pressão e descargas elétricas podem surgir ao redor dela sem causar dano."
+              }
+            ],
+            "note": ""
+          },
+          {
+            "id": "olho-da-tempestade",
+            "name": "Olho da Tempestade",
+            "type": "passive",
+            "slot": 7,
+            "summary": "O caos ao redor não perturba a prole com a mesma facilidade. Chuva forte, trovão, vento, gritaria, medo, pressão. Tudo isso vira só mais uma tempestade para atravessar. Às vezes fora do corpo. Às vezes dentro da cabeça.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "recebe +1 em resistências contra confusão, medo, pânico, pressão mental, distração extrema e efeitos que tentem quebrar sua concentração em combate."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "o bônus aumenta para +2. Enquanto estiver em ambiente tempestuoso ou dentro do próprio Domo de Tempestade, também recebe vantagem contra efeitos que tentem deixá-la Abalada, Apavorada ou mentalmente desorientada."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "uma vez por cena, pode perceber quando uma emboscada, criatura hostil ou violência iminente está próxima, como um mau presságio no ar."
+              }
+            ],
+            "note": "Isso não revela automaticamente a origem do perigo, a direção exata, a identidade da criatura ou o que vai acontecer.\nA habilidade apenas indica que algo hostil está prestes a irromper por perto."
+          }
+        ],
+        "actives": [
+          {
+            "id": "domo-da-tempestade",
+            "name": "Domo da Tempestade",
+            "type": "active",
+            "slot": 1,
+            "level": 1,
+            "cost": 20,
+            "summary": "A cria de Tempestas invoca uma tempestade ao redor do próprio corpo, fechando o campo em chuva intensa, ventos violentos, nuvens carregadas e descargas elétricas. O domo acompanha seus movimentos, mantendo-a como centro da área, e serve como base para várias habilidades do kit.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "cria um domo de tempestade com raio de até 10 metros, tendo a cria como centro. A área fica sob chuva forte e ventos instáveis. Criaturas dentro do domo sofrem -1 em testes de Percepção baseados em visão, audição ou precisão à distância, exceto a própria descendente de Tempestas. O domo dura até 3 turnos."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "o raio aumenta para 12,5 metros e a duração máxima aumenta para 4 turnos. Além dos efeitos anteriores, inimigos dentro do domo sofrem -1 em testes para resistir a empurrões, quedas, deslocamento forçado e efeitos de vento ou eletricidade causados pela cria."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "o raio aumenta para 15 metros e a duração máxima aumenta para 5 turnos. Além dos efeitos anteriores, uma vez por rodada, quando a cria causar dano elétrico ou de vento dentro do domo, pode causar +1d6 de dano elétrico adicional a um alvo atingido."
+              }
+            ],
+            "note": ":stormcloud: Regras do Domo\n:setinha: Só pode existir um Domo da Tempestade ativo por vez, e ele acompanha a cria de Tempestas, mantendo-a como centro da área.\n:setinha: No início de cada turno da cria, ela deve gastar 1 Carga de Tempesta para manter o domo ativo. Se não pagar a Carga, ou se escolher encerrá-lo voluntariamente, o domo termina.\n:setinha: A cria pode gastar 3 Cargas de Tempesta para reativar o domo sem pagar o custo de energia da habilidade.\nO domo não bloqueia passagem, não impede criaturas de sair e não funciona como uma barreira física. Ambientes fechados, subterrâneos, selados ou pequenos demais podem reduzir o tamanho do domo, a critério do narrador.\nLegados não podem escolher esta habilidade."
+          },
+          {
+            "id": "vortice-devastador",
+            "name": "Vórtice Devastador",
+            "type": "active",
+            "slot": 2,
+            "level": 10,
+            "cost": 20,
+            "summary": "A cria de Tempestas manipula os ventos da tempestade, transformando o ar em uma força capaz de arrastar inimigos, afastá-los violentamente ou reunir alvos em um único ponto. No começo, é controle. Depois, é pressão suficiente para machucar.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "libera uma rajada em área à frente. Alvos fazem resistência de Força; em falha, são puxados ou empurrados por uma curta distância. Não causa dano. Uma vez a cada 5 rodadas, pode puxar 1 aliado para evitar um golpe ou efeito. Se o Domo da Tempestade estiver ativo há pelo menos 3 turnos, esse intervalo cai para 3 rodadas."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "a rajada causa 2d4 + Fé de dano de impacto. Em falha de resistência, também são puxados ou empurrados."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "cria um vórtice em área. Em falha, são puxados para um ponto escolhido e sofrem 2d6 + Fé de dano de impacto. Em sucesso, não são puxados e sofrem apenas metade do dano."
+              }
+            ],
+            "note": "A habilidade não pode puxar alvos para dentro de objetos sólidos ou para situações de morte instantânea. Criaturas muito maiores ou firmemente ancoradas podem receber vantagem ou outros benefícios na resistência, conforme o narrador."
+          },
+          {
+            "id": "corpo-de-cumulonimbus",
+            "name": "Corpo de Cumulonimbus",
+            "type": "active",
+            "slot": 3,
+            "level": 15,
+            "cost": 45,
+            "summary": "A descendente de Tempestas desfaz parte da própria forma física, assumindo uma consistência de nuvem viva. Golpes físicos atravessam sua pele dispersa com mais dificuldade, mas habilidades e poderes mágicos se tornam mais perigosos contra ela.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "por 2 turnos, reduz em 3 o dano de armas, ataques físicos diretos, projéteis comuns e impactos. Recebe +6 de dano de habilidades, poderes mágicos e efeitos sobrenaturais. Seu deslocamento é dobrado."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "por 2 turnos, a redução física aumenta para 5. O dano adicional mágico diminui para +4. Seu deslocamento continua dobrado."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "por 2 turnos, recebe apenas metade do dano físico direto. O dano adicional mágico diminui para +3. Seu deslocamento continua dobrado."
+              }
+            ],
+            "note": "Enquanto estiver nessa forma dentro do Domo da Tempestade, uma vez por rodada, pode reduzir 1d6 de dano recebido de qualquer fonte.\nEsta habilidade não torna a cria intangível por completo."
+          },
+          {
+            "id": "correntes-ascendentes",
+            "name": "Correntes Ascendentes",
+            "type": "active",
+            "slot": 4,
+            "level": 20,
+            "cost": 45,
+            "summary": "A cria de Tempestas chama correntes de ar sob os pés de seus aliados, erguendo corpos no vento como se a tempestade tivesse decidido carregar gente junto.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "concede voo temporário para 1 criatura voluntária por 1 rodada. Fora de combate, dura até 5 minutos."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "concede voo temporário para até 2 criaturas voluntárias por 2 rodadas. Fora de combate, dura até 10 minutos."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "concede voo temporário para até 3 criaturas voluntárias por 3 rodadas. Fora de combate, dura até 15 minutos."
+              }
+            ],
+            "note": "Se o efeito terminar enquanto uma criatura estiver no ar, ela começa a cair normalmente, salvo se tiver outro meio de se sustentar."
+          },
+          {
+            "id": "presenca-do-trovao",
+            "name": "Presença do Trovão",
+            "type": "active",
+            "slot": 5,
+            "level": 20,
+            "cost": 70,
+            "summary": "A cria de Tempestas deixa a tempestade aparecer na própria presença. O ar vibra, trovões estalam perto demais e pequenas descargas correm pelo corpo. Não é só ameaça. É o instinto do inimigo entendendo que talvez fosse melhor estar em outro lugar.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "por 2 turnos, recebe +2 em testes de Intimidação. Ao intimidar uma criatura durante um confronto, o alvo faz resistência de Fé; em falha, fica Abalado por 1 turno."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "alvos que falharem na resistência de Fé ficam Abalados por 2 turnos."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "o bônus de Intimidação permanece. Inimigos escolhidos em área curta fazem resistência de Fé. Em falha, ficam Abalados por 3 turnos. Se falharem por 5 ou mais, ficam Apavorados por 1 turno."
+              }
+            ],
+            "note": "A criatura pode refazer a resistência de Fé no fim de cada turno, encerrando o efeito em caso de sucesso.\nA criatura precisa conseguir perceber a manifestação da cria de Tempestas.\nCriaturas imunes a medo podem receber vantagem ou ignorar parte do efeito, a critério do narrador."
+          },
+          {
+            "id": "passo-do-relampago",
+            "name": "Passo do Relâmpago",
+            "type": "active",
+            "slot": 6,
+            "level": 25,
+            "cost": 70,
+            "summary": "O corpo da cria de Tempestas se desfaz em um clarão elétrico, atravessando o espaço em uma fração de segundo. Por um instante, ela deixa de ter forma física comum, percorrendo o caminho como um relâmpago antes de se recompor no destino escolhido.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "transforma-se em raio e reaparece em um ponto visível dentro do próprio alcance de movimento. Durante esse deslocamento, não pode ser atingida por ataques que exijam contato físico direto com seu corpo."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "pode percorrer até o dobro do próprio deslocamento normal. Caso o Domo da Tempestade esteja ativo há pelo menos 2 turnos, pode se deslocar entre dois pontos dentro dele mesmo sem visão direta do destino, desde que conheça sua localização e o caminho não esteja bloqueado."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "pode percorrer até três vezes o próprio deslocamento normal. Ao se recompor, libera uma descarga breve ao redor do ponto de chegada, causando 1d4 + Fé de dano elétrico aos inimigos próximos. Caso o Domo da Tempestade esteja ativo há pelo menos 5 turnos, pode usar esta habilidade sem gastar uma de suas ações até 2 vezes por missão/evento."
+              }
+            ],
+            "note": "A habilidade não permite atravessar barreiras mágicas, selos, paredes, portas fechadas, campos protegidos ou obstáculos que bloqueiem completamente o percurso."
+          },
+          {
+            "id": "para-raios",
+            "name": "Para-raios",
+            "type": "active",
+            "slot": 7,
+            "level": 30,
+            "cost": 95,
+            "summary": "A cria de Tempestas puxa a violência do campo para si e conduz o impacto pelo próprio corpo. Raio, explosão, projétil, golpe ou poder: por um instante, o dano encontra outro caminho. Um caminho bem menos saudável para ela, mas bem útil para quem ia apanhar.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "quando um aliado próximo sofrer dano, pode usar esta habilidade como reação. Reduz 1d8 + Fé do dano do aliado e recebe esse mesmo valor como dano em si."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "a redução aumenta para 2d8 + Fé. Ao usar esta habilidade, também ganha 1 Carga de Tempesta."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "a redução aumenta para 3d8 + Fé. A cria recebe apenas metade do valor reduzido como dano. Se estiver dentro do Domo da Tempestade, a criatura que causou o dano faz resistência de Constituição; em falha, sofre dano elétrico igual ao dano que a cria recebeu."
+              }
+            ],
+            "note": "Deve ser declarada no momento em que o dano acontece."
+          },
+          {
+            "id": "raio-fulminante",
+            "name": "Raio Fulminante",
+            "type": "active",
+            "slot": 8,
+            "level": 35,
+            "cost": 95,
+            "summary": "A cria de Tempestas concentra a energia elétrica da tempestade e a libera em uma descarga violenta. Quanto mais tempo o domo permanece ativo, mais fácil é para o raio saltar, travar músculos e transformar um alvo em problema resolvido por eletricidade.\nEnquanto estiver dentro do Domo da Tempestade, a cria pode consumir 4 Cargas de Tempesta para adicionar +1 dado de dano à habilidade. O dado adicional é do mesmo tipo usado pela estaca da habilidade.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "dispara um raio contra 1 alvo, causando 1d8 + Fé de dano elétrico. Se o Domo da Tempestade estiver ativo há pelo menos 3 turnos, o alvo faz resistência de Constituição; em falha, fica Paralisado por 1 turno."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "o dano aumenta para 2d8 + Fé. Se o domo estiver ativo há pelo menos 2 turnos, o alvo faz resistência de Constituição; em falha, fica Paralisado por 1 turno."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "o raio atinge até 2 inimigos, causando 2d10 + Fé de dano elétrico em cada um. Se o domo estiver ativo há pelo menos 2 turnos, um dos alvos atingidos faz resistência de Constituição; em falha, fica Paralisado por 1 turno. A partir do segundo turno do domo, cada turno adicional aumenta em +1 o número máximo de alvos."
+              }
+            ],
+            "note": ""
+          },
+          {
+            "id": "ruptura-atmosferica",
+            "name": "Ruptura Atmosférica",
+            "type": "active",
+            "slot": 9,
+            "level": 40,
+            "cost": 130,
+            "summary": "A cria de Tempestas comprime o ar ao redor até a pressão ficar insustentável. Então solta tudo de uma vez. A onda de choque explode em todas as direções, o som rasga o campo e, por alguns segundos, respirar parece uma escolha difícil.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "libera uma onda de choque ao redor de si. Inimigos próximos fazem resistência de Força. Em falha, sofrem 2d8 + Fé de dano de impacto e ficam Caídos."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "o dano aumenta para 3d8 + Fé. Em falha na resistência de Força, ficam Caídos e Lentos por 1 turno."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "o dano aumenta para 4d8 + Fé. Em falha na resistência de Força, ficam Caídos e Lentos por 1 turno. Além disso, fazem resistência de Constituição; em falha, ficam Queimando."
+              }
+            ],
+            "note": "Na última estaca, se o Domo da Tempestade estiver ativo, criaturas que passarem na resistência ainda sofrem metade do dano e não recebem condições.\n:2white_exclamationmarkbubble: Habilidade com limite de uso."
+          },
+          {
+            "id": "colera-de-tempestas",
+            "name": "Cólera de Tempestas",
+            "type": "active",
+            "slot": 10,
+            "level": 50,
+            "cost": 200,
+            "summary": "A cria de Tempestas libera o verdadeiro poder da tempestade. Nuvens, ventos e relâmpagos se condensam ao redor do corpo, formando um avatar colossal que reproduz seus movimentos em escala monstruosa. Conforme os turnos passam, a manifestação se completa, até que a descendente se torna o núcleo de um titã de tempestade.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "Fase 1 — Braços: no primeiro turno, braços enormes feitos de nuvens densas e eletricidade se manifestam ao redor da cria. Seus ataques corpo a corpo e habilidades de vento ou eletricidade recebem +1d8 de dano e alcance aumentado, quando fizer sentido na cena."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "Fase 2 — Meio corpo: no segundo turno, o avatar manifesta o torso e envolve a cria em uma estrutura colossal de vento e relâmpagos. Uma vez durante esta fase, pode realizar um ataque de arma em uma área curta de 15ft / 5m de diâmetro. Role um único ataque contra a CA/Defesa de todos os inimigos no alcance."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "Fase 3 — Corpo completo: no terceiro turno, o avatar assume sua forma completa. Seus ataques corpo a corpo e habilidades de vento ou eletricidade recebem +2d8 de dano. Ao alcançar esta fase, o avatar concede uma última proteção: se a cria de Tempestas cair a 0 HP enquanto a Cólera estiver ativa, o avatar absorve o golpe, se desfaz e ela permanece com 1 HP."
+              }
+            ],
+            "note": ":setinha: Fases da Cólera\n:setinha: Regras\n:setinha: A habilidade exige que o Domo da Tempestade esteja ativo. Se o domo terminar antes da Fase 3, a transformação termina imediatamente.\n:setinha: Após atingir a Fase 3, o avatar permanece por mais 1 turno.\n:setinha: Enquanto o avatar estiver ativo, o Domo da Tempestade não precisa gastar Cargas para se manter.\nA proteção de 1 HP não recupera vida perdida anteriormente, e não impede efeitos de morte instantânea, execução narrativa, banimento, selamento ou efeitos que ignorem HP.\nAo final da habilidade, a cria de Tempestas fica Fatigada.\n:2white_exclamationmarkbubble: Habilidade com limite de uso.\n:2white_exclamationmarkbubble: Essa habilidade gasta 200 de energia."
+          }
+        ]
+      },
+      {
+        "id": "cloacina",
+        "name": "Cloacina",
+        "group": "numina",
+        "groupLabel": "Numina",
+        "kitAvailable": true,
+        "selectable": true,
+        "castingAttribute": "fe",
+        "hp": {
+          "base": 20,
+          "perDecade": 5,
+          "constitutionApplies": true
+        },
+        "attributeBonuses": {
+          "fe": 2,
+          "con": 1
+        },
+        "grantedSkills": [
+          "medicina"
+        ],
+        "skillChoices": [],
+        "resource": {
+          "id": "cargas-purificacao",
+          "name": "Cargas de Purificação",
+          "scope": "personal",
+          "max": {
+            "type": "levelFormula",
+            "formula": "5 + floor(nível/10)"
+          },
+          "maxFormula": "5 + floor(nível/10)",
+          "sourceAbilityId": "purificacao",
+          "reset": "Fim da cena"
+        },
+        "resources": [
+          {
+            "id": "cargas-purificacao",
+            "name": "Cargas de Purificação",
+            "scope": "personal",
+            "max": {
+              "type": "levelFormula",
+              "formula": "5 + floor(nível/10)"
+            },
+            "maxFormula": "5 + floor(nível/10)",
+            "sourceAbilityId": "purificacao",
+            "reset": "Fim da cena"
+          }
+        ],
+        "description": "Cloacina era uma deusa romana ligada à purificação, ao saneamento, às cloacas, aos escoamentos e à remoção daquilo que não deveria permanecer. O domínio dela não é a água bonita do templo, nem o mar aberto, nem a cura delicada. É a água que leva embora sujeira, doença, veneno, sangue, fumaça, podridão, maldição e tudo que Roma precisa rejeitar para continuar de pé. ",
+        "playstyle": "Cloacina é para quem quer jogar como suporte agressivo, controle de campo e utilidade absurda em cenas de contaminação, doença, veneno, corrupção, gás, fumaça, esgoto, ruína e cidade. O kit limpa condições, remove efeitos nocivos, drena impurezas, protege aliados e depois usa tudo que foi retirado como combustível. Ela não é só uma healer. Ela pega a nojeira da cena, guarda, filtra e devolve quando necessário. ",
+        "notes": [
+          "Personagens escatológicos serão barrados e, caso já tenham sido criados, resetados pela administração."
+        ],
+        "passives": [
+          {
+            "id": "aquela-que-reconhece-a-impureza",
+            "name": "Aquela que Reconhece a Impureza",
+            "type": "passive",
+            "slot": 1,
+            "summary": "Filhas de Cloacina não precisam ver a sujeira para saber que ela está ali. Um gosto estranho na água, um cheiro errado na comida, um toque de doença em pele limpa demais, uma maldição escondida em objeto bonitinho. A impureza sempre deixa rastro.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "ao tocar uma criatura, alimento, líquido ou objeto, percebe venenos, doenças, putrefação, sujeira nociva, decomposição e contaminações mundanas."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "também consegue perceber corrupção mágica, maldições menores, contaminação sobrenatural, resíduos alquímicos e efeitos que alterem corpo, sangue, água ou matéria orgânica."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "uma vez por cena, ao identificar uma impureza, pode pedir ao narrador uma informação útil sobre origem, risco principal, forma de transmissão, fraqueza ou método de purificação."
+              }
+            ],
+            "note": "Esta passiva não revela automaticamente todos os detalhes de maldições maiores, efeitos divinos ou contaminações protegidas."
+          },
+          {
+            "id": "corpo-imaculado",
+            "name": "Corpo Imaculado",
+            "type": "passive",
+            "slot": 2,
+            "summary": "O corpo da prole não é intocado porque evita sujeira. É intocado porque sabe expulsar o que não presta. Veneno, doença, gás, comida ruim e podridão entram em conflito direto com uma biologia que aprendeu a rejeitar desaforo.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "recebe vantagem contra venenos, doenças, gases, alimentos contaminados e efeitos causados por matéria em decomposição."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "também recebe +2 contra efeitos de corrupção, profanação corporal, toxinas mágicas e contaminações sobrenaturais que afetem o corpo."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "quando fizer uma resistência de Constituição contra veneno, doença, gás, toxina, decomposição ou contaminação corporal, pode usar a perícia de Tolerância."
+              }
+            ],
+            "note": ""
+          },
+          {
+            "id": "tudo-encontra-uma-saida",
+            "name": "Tudo Encontra uma Saída",
+            "type": "passive",
+            "slot": 3,
+            "summary": "Cloacina ensina que toda cidade tem um segundo corpo por baixo do primeiro. Ralo, galeria, aqueduto, esgoto, túnel de manutenção, viela esquecida, escada de serviço, saída que ninguém menciona porque admitir que ela existe já seria feio.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "percebe intuitivamente fluxos de água, drenagem, fumaça, gás e possíveis conexões entre túneis, galerias, aquedutos, esgotos e sistemas subterrâneos."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "recebe vantagem em Intuição, Investigação, Sobrevivência ou orientação quando estiver procurando rotas de escoamento, passagens urbanas, galerias, entradas de manutenção, caminhos subterrâneos ou saídas pouco óbvias."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "fora de combate, dentro de uma cidade ou estrutura urbana grande, a prole conhece o fluxo secreto do lugar. Ela e os companheiros que estiver guiando podem viajar entre dois pontos da cidade em metade do tempo normal, usando atalhos, galerias, passagens de serviço, drenagens, becos e rotas que outras pessoas dificilmente notariam."
+              }
+            ],
+            "note": "Esta passiva não cria passagem onde não existe.\nRotas bloqueadas, seladas, vigiadas, desabadas ou protegidas magicamente ainda podem exigir teste, cena ou desvio."
+          },
+          {
+            "id": "purificacao-continua",
+            "name": "Purificação Contínua",
+            "type": "passive",
+            "slot": 4,
+            "summary": "A água nas mãos da prole não fica pura porque é bonita. Fica pura porque Cloacina não tem paciência para coisa inútil boiando onde não deve.\nÁgua manipulada diretamente pela prole é naturalmente limpa de sujeira, mau cheiro, resíduos, contaminações mundanas e impurezas simples enquanto permanecer sob seu controle.",
+            "tiers": [],
+            "note": "Esta passiva não purifica lagos, rios, oceanos ou reservatórios inteiros apenas por contato.\nVenenos fortes, corrupção mágica, doenças sobrenaturais e maldições exigem habilidades específicas ou testes."
+          },
+          {
+            "id": "filha-das-profundezas",
+            "name": "Filha das Profundezas",
+            "type": "passive",
+            "slot": 5,
+            "summary": "Tem gente que olha para um túnel alagado e vê problema. Filha de Cloacina vê caminho, risco, cheiro suspeito e três jeitos diferentes de sair dali caso tudo dê errado. O que, honestamente, costuma dar.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "recebe +1 em Percepção, Sobrevivência e orientação em ambientes subterrâneos, alagados, contaminados, urbanos degradados ou ligados a saneamento."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "o bônus aumenta para +2 em esgotos, aquedutos, cisternas, túneis, ruínas úmidas, galerias, cloacas, catacumbas e áreas tomadas por gás, fumaça, lodo ou resíduos."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "uma vez por cena, nesses ambientes, pode pedir ao narrador uma pista útil sobre risco ambiental, rota segura, foco de contaminação, origem do fluxo ou ponto de drenagem."
+              }
+            ],
+            "note": ""
+          },
+          {
+            "id": "aquilo-que-foi-limpo",
+            "name": "Aquilo que Foi Limpo",
+            "type": "passive",
+            "slot": 6,
+            "summary": "Quando Cloacina remove uma impureza, ela não só limpa o estrago. Ela deixa o corpo avisado. Aquilo pode até tentar voltar, mas agora encontra a porta fechada, lavada e com alguém muito irritado do outro lado.\nQuando uma criatura é purificada por uma habilidade de Cloacina, ela recebe resistência temporária contra o mesmo tipo de condição, veneno, doença, corrupção ou efeito nocivo que acabou de ser removido.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "a resistência dura até o início do próximo turno da criatura purificada."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "a resistência dura 2 turnos."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "a resistência dura 3 turnos. Se o mesmo efeito tentar retornar durante esse período, a criatura recebe +2 na resistência contra ele."
+              }
+            ],
+            "note": "Resistência, aqui, significa vantagem ou bônus defensivo contra a reaplicação do mesmo tipo de efeito, conforme o sistema usado.\nNão impede efeitos divinos, absolutos ou narrativamente inevitáveis."
+          },
+          {
+            "id": "purificacao",
+            "name": "Purificação",
+            "type": "passive",
+            "slot": 7,
+            "summary": "Cloacina não desperdiça sujeira. Tudo que é retirado, drenado, lavado ou expulso pode virar recurso nas mãos certas. É nojento? Sim. É útil? Também. Roma não foi feita só de mármore.",
+            "tiers": [],
+            "note": ":setinha~1: Acúmulo\n:setinha~1: Remover uma condição negativa de uma criatura: +1 carga de Purificação.\n:setinha~1: Remover veneno, doença, corrupção, maldição menor ou contaminação sobrenatural: +1 carga de Purificação.\n:setinha~1: Drenar uma área contaminada, gás, fumaça, fogo, lodo, veneno, sangue, secreção ou efeito persistente nocivo: +1 carga de Purificação.\n:setinha~1: Remover um efeito mágico forte ou uma condição de risco real em combate: +2 cargas de Purificação, a critério do narrador.\n:setinha~1: Limites\nA prole só pode ganhar até 2 cargas de Purificação por rodada.\nO máximo de cargas de Purificação é 5 + 1 a cada 10 níveis.\nAs cargas desaparecem ao final da cena ou após 2 rodadas sem purificar, drenar, remover efeito nocivo ou lidar com contaminação real.\nAlgumas habilidades de Cloacina podem consumir cargas de Purificação para aumentar dano, cura, redução, alcance, área ou dificuldade de resistência."
+          }
+        ],
+        "actives": [
+          {
+            "id": "ablucao",
+            "name": "Ablução",
+            "type": "active",
+            "slot": 1,
+            "level": 1,
+            "cost": 20,
+            "summary": "A prole lava o que não deveria estar grudado no corpo, na mente ou na alma de alguém. Não é carinho. É água fria na cara do desastre.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "remove de uma criatura uma condição negativa leve, como Envenenado, Intoxicado, Enjoado, Abalado, Amedrontado, Sangrando ou efeito semelhante."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "também pode remover uma condição moderada ou reduzir em 2 turnos a duração de uma condição mais forte, desde que ela não seja divina, absoluta ou sustentada por uma entidade maior."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "pode afetar até 2 criaturas próximas ou remover até 2 condições da mesma criatura."
+              }
+            ],
+            "note": "Quando remove uma condição real, pode gerar cargas de Purificação.\nEfeitos divinos, maldições maiores ou condições de lore podem exigir teste, rito ou autorização do narrador."
+          },
+          {
+            "id": "agua-segura",
+            "name": "Água Segura",
+            "type": "active",
+            "slot": 2,
+            "level": 5,
+            "cost": 20,
+            "summary": "Cloacina torna aquilo próprio para uso. Água que não deveria ser bebida, comida que não deveria ser comida, líquido com gosto de má decisão. A prole limpa, filtra e manda a sujeira embora.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "purifica água, comida ou bebida suficiente para um pequeno grupo, removendo sujeira, venenos mundanos, doenças comuns e contaminações simples."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "pode purificar um recipiente grande, mesa de alimentos, pequena fonte, poço menor, banheira, barril, trecho de canal ou suprimento de um grupo por uma cena. Também remove toxinas alquímicas e contaminações mágicas menores."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "pode purificar uma área maior de abastecimento, como parte de uma cisterna, fonte, cozinha, canal, reservatório pequeno ou trecho de aqueduto. Contaminações sobrenaturais fortes exigem disputa contra a CD da prole ou autorização do narrador."
+              }
+            ],
+            "note": "Não desfaz maldições divinas, pragas antigas ou contaminações ligadas a entidades maiores automaticamente.\nCaso purifique uma contaminação relevante, pode gerar cargas de Purificação."
+          },
+          {
+            "id": "dreno",
+            "name": "Dreno",
+            "type": "active",
+            "slot": 3,
+            "level": 10,
+            "cost": 45,
+            "summary": "A prole puxa o que está errado para fora. Veneno, febre, medo grudado no peito, corrupção no sangue, magia suja escondida na pele. Sai tudo pelo caminho menos bonito, mas sai.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "toca uma criatura e reduz em 1 turno a duração de uma condição negativa, veneno, doença ou efeito nocivo. Se o efeito for removido com isso, ganha 1 carga de Purificação."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "pode remover uma condição leve ou reduzir em 2 turnos uma condição moderada. Se remover veneno, doença, corrupção ou efeito mágico nocivo, ganha 1 carga de Purificação."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "pode afetar até 2 criaturas próximas ou drenar um efeito mais forte de uma única criatura. Se o efeito drenado for mágico, sobrenatural ou de risco real, pode ganhar 2 cargas de Purificação, respeitando o limite por rodada."
+              }
+            ],
+            "note": "Dreno é mais arriscado e mais voltado para gerar Purificação. Ablução é mais limpa e mais direta.\nEfeitos divinos, maldições maiores ou possessões não são removidos automaticamente por esta habilidade."
+          },
+          {
+            "id": "refluxo",
+            "name": "Refluxo",
+            "type": "active",
+            "slot": 4,
+            "level": 15,
+            "cost": 45,
+            "summary": "Cloacina ensina que algumas coisas, quando voltam pelo cano errado, ficam muito piores. A prole absorve uma impureza, segura por pouco tempo e devolve para quem merece lidar com ela.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "quando a prole ou um aliado próximo sofrer uma condição, veneno, doença, gás, corrupção ou efeito nocivo menor, pode absorver parte do efeito. O alvo reduz a duração em 1 turno, e a prole armazena o refluxo até o fim do próximo turno. Ao descarregar, um alvo a até 9 metros faz resistência de Constituição; em falha, sofre 1d8 + Fé de dano ácido, venenoso ou necrótico e fica Enjoado ou Abalado por 1 turno."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "pode absorver o efeito por completo se ele for leve ou reduzir em 2 turnos se for moderado. O dano da descarga aumenta para 2d8 + Fé. Se descarregar contra a origem do efeito, o alvo faz a resistência com -1."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "pode usar Refluxo contra um efeito que atinja a prole ou um aliado a até 9 metros. O dano aumenta para 3d8 + Fé. Se descarregar contra a origem do efeito e ela falhar na resistência, também fica Desorientada por 1 turno."
+              }
+            ],
+            "note": "A prole só pode manter um refluxo armazenado por vez.\nSe não descarregar até o fim do próximo turno, o refluxo se perde e a prole sofre 1d6 de dano que não pode ser reduzido.\nSe o efeito absorvido for relevante, pode gerar cargas de Purificação."
+          },
+          {
+            "id": "toque-da-imundicie",
+            "name": "Toque da Imundície",
+            "type": "active",
+            "slot": 5,
+            "level": 20,
+            "cost": 70,
+            "summary": "A prole concentra tudo aquilo que Cloacina rejeita em um único toque. É uma limpeza ao contrário: em vez de tirar a sujeira de alguém, ela lembra ao corpo do alvo que a sujeira existe.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "faz um ataque mágico de toque. Em acerto, causa 3d8 + Fé de dano ácido, venenoso ou necrótico, à escolha da prole. Essa habilidade pode ser usada 1 vez por combate."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "o dano aumenta para 4d8 + Fé. O alvo deve fazer resistência de Constituição; em falha, fica Enjoado ou Envenenado por 1 turno, à escolha da prole."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "o dano aumenta para 5d8 + Fé. Em falha na resistência de Constituição, o alvo fica Envenenado e Lento por 1 turno. Essa habilidade pode ser usada 2 vezes por combate."
+              }
+            ],
+            "note": "A prole pode consumir até 3 cargas de Purificação ao conjurar esta habilidade. Cada carga consumida adiciona +1d8 de dano.\nCriaturas sem corpo, imunes a veneno, construtos ou mortos-vivos podem sofrer o dano como necrótico, mas podem resistir às condições conforme o narrador."
+          },
+          {
+            "id": "corrente-de-arrasto",
+            "name": "Corrente de Arrasto",
+            "type": "active",
+            "slot": 6,
+            "level": 25,
+            "cost": 70,
+            "summary": "A prole chama uma corrente de água que não vem para ser bonita. Ela arrasta, empurra, puxa, apaga fogo e leva embora o que estiver sujando a cena.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "cria uma corrente em linha ou área curta. Criaturas atingidas fazem resistência de Força. Em falha, sofrem 1d8 + Fé de dano contundente e são empurradas ou puxadas até 3 metros. A corrente também pode apagar fogo comum e remover sangue, odores, pegadas, secreções, venenos mundanos e resíduos simples do caminho."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "o dano aumenta para 2d8 + Fé. Em falha na resistência, além de serem empurradas ou puxadas, as criaturas podem ficar Caídas se baterem contra obstáculo, parede ou terreno instável."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "o dano aumenta para 3d8 + Fé. A corrente pode limpar uma área maior, apagar fogo persistente menor, dispersar gás ou fumaça leve e remover contaminações de terreno não mágicas."
+              }
+            ],
+            "note": "Se a corrente remover uma contaminação relevante, pode gerar cargas de Purificação.\nA habilidade não apaga fogo divino, gás mágico forte ou contaminação sobrenatural maior sem disputa ou autorização do narrador."
+          },
+          {
+            "id": "barreira-de-decantacao",
+            "name": "Barreira de Decantação",
+            "type": "active",
+            "slot": 7,
+            "level": 30,
+            "cost": 95,
+            "summary": "A água sobe ao redor do alvo e separa o que presta do que mata. Dano fica de um lado, impureza fica do outro. Pelo menos essa é a intenção. Às vezes a intenção precisa apanhar um pouco antes de funcionar.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "quando a prole ou um aliado próximo sofrer dano, pode usar esta habilidade como reação. Reduz o dano recebido em 1d8 + Fé. Se o dano vier acompanhado de veneno, doença, fogo, ácido, necrose, corrupção, gás ou efeito nocivo físico, a prole ganha 1 carga de Purificação."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "a redução aumenta para 2d8 + Fé. Pode proteger até 2 criaturas próximas se ambas estiverem dentro da mesma área de efeito."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "a redução aumenta para 3d8 + Fé. Se bloquear um efeito nocivo junto do dano, a criatura protegida recebe +2 na próxima resistência contra o mesmo tipo de efeito até o fim da cena."
+              }
+            ],
+            "note": "Pode consumir cargas de Purificação ao ativar esta habilidade. Cada carga consumida aumenta a redução em +1d8.\nDeve ser declarada no momento em que o dano acontece."
+          },
+          {
+            "id": "escoamento",
+            "name": "Escoamento",
+            "type": "active",
+            "slot": 8,
+            "level": 35,
+            "cost": 95,
+            "summary": "A prole abre caminho para aquilo que precisa sair. Água, fumaça, gás, veneno, vapor, lodo, sangue, óleo, ácido, sujeira. Não é portal. É drenagem com má vontade.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "cria um fluxo entre dois pontos a até 9 metros. Pode conduzir água, fumaça, gases, líquidos, lama, vapor, veneno mundano ou substâncias semelhantes para fora de uma área ou até um ponto livre."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "a distância aumenta para 18 metros. Se direcionar uma substância nociva contra uma criatura, ela faz resistência de Constituição. Em falha, sofre 2d8 + Fé de dano adequado à substância e fica Enjoada, Ofuscada ou Lenta por 1 turno, conforme o efeito."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "a distância aumenta para 30 metros. O fluxo pode permanecer por 2 turnos, drenando continuamente gases, fumaça, líquidos, venenos, fogo comum, lodo e contaminações de área."
+              }
+            ],
+            "note": "Escoamento não teleporta criaturas.\nA substância precisa conseguir fluir, escorrer, evaporar, vazar ou ser conduzida.\nBarreiras mágicas, selos, recipientes fechados ou efeitos divinos podem impedir a drenagem."
+          },
+          {
+            "id": "cloaca-maxima",
+            "name": "Cloaca Maxima",
+            "type": "active",
+            "slot": 9,
+            "level": 40,
+            "cost": 130,
+            "summary": "A prole transforma a área em um grande sistema de drenagem. Tudo que está sobrando começa a ser puxado: fumaça, gás, veneno, sangue, lodo, fogo, água suja, corrupção de terreno, resto de magia ruim e decisões ambientais péssimas. Roma sobreviveu porque sabia para onde mandar o que não prestava.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "cria uma área média de drenagem por 2 turnos. Ao ativar e no início do turno da prole, a área remove ou reduz um efeito persistente, como fumaça, gás, veneno, líquido perigoso, fogo comum, lodo, odor, sangue, sujeira ou contaminação de terreno. Inimigos dentro da área fazem resistência de Constituição. Em falha, sofrem 2d8 + Fé de dano ácido, venenoso ou necrótico e ficam Lentos por 1 turno."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "a área dura 3 turnos. Pode remover ou reduzir até 2 efeitos persistentes por rodada. O dano aumenta para 3d8 + Fé. Inimigos que falharem na resistência também ficam Enjoados por 1 turno."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "a área dura 3 turnos. Pode remover ou reduzir múltiplos efeitos persistentes, desde que estejam dentro da área e possam ser drenados. O dano aumenta para 4d8 + Fé. Inimigos que falharem por 5 ou mais também ficam Desorientados por 1 turno."
+              }
+            ],
+            "note": "Cada efeito relevante drenado pode gerar cargas de Purificação, respeitando o limite por rodada.\nA prole pode consumir cargas de Purificação ao ativar esta habilidade. Cada carga consumida aumenta o dano em +1d6 ou amplia levemente a área, à escolha da prole.\nNão remove efeitos divinos, maldições maiores, fogo sagrado, corrupção de entidade maior ou alterações permanentes de terreno sem disputa ou cena própria.\n:2white_exclamationmarkbubble: Habilidade com limite de uso."
+          },
+          {
+            "id": "aquilo-que-roma-rejeita",
+            "name": "Aquilo que Roma Rejeita",
+            "type": "active",
+            "slot": 10,
+            "level": 50,
+            "cost": 200,
+            "summary": "Cloacina decide que algo não pertence mais àquele corpo. Possessão, parasita, controle mental, corrupção, maldição, transformação forçada. A prole não pede licença. Ela abre o caminho de saída e manda embora.",
+            "tiers": [
+              {
+                "id": "0-15",
+                "label": "0-15",
+                "text": "escolhe uma criatura afetada por influência externa, como possessão, parasita, controle mental, maldição, corrupção ou transformação forçada. A influência deve fazer resistência de Fé contra a CD da prole. Em falha, o efeito é suspenso por 1 turno e a fonte sofre 3d8 + Fé de dano radiante, ácido ou necrótico, à escolha da prole."
+              },
+              {
+                "id": "16-29",
+                "label": "16-29",
+                "text": "em falha, o efeito é suspenso por até 2 turnos. Se for uma possessão, controle mental, parasita ou corrupção sustentada, a fonte também fica Desorientada por 1 turno. O dano aumenta para 4d8 + Fé."
+              },
+              {
+                "id": "30",
+                "label": "30+",
+                "text": "em falha, o efeito pode ser expulso da criatura afetada, encerrando sua presença na cena se não for divino, absoluto ou sustentado por uma entidade maior. Se a fonte falhar por 5 ou mais, sofre 5d8 + Fé de dano e não pode tentar reassumir o mesmo hospedeiro até o fim da cena."
+              }
+            ],
+            "note": "Esta habilidade não mata automaticamente o hospedeiro e não destrói a fonte se ela for uma entidade maior.\nMaldições divinas, possessões de deuses, parasitas de lore, corrupção antiga ou transformações essenciais ao personagem podem exigir cena própria.\nA prole pode consumir até 3 cargas de Purificação ao ativar esta habilidade. Cada carga consumida impõe -1 na resistência da influência ou adiciona +1d8 ao dano, à escolha da prole.\nAo final, a prole fica Fatigada.\n:2white_exclamationmarkbubble: Habilidade com limite de uso.\n:2white_exclamationmarkbubble: Essa habilidade gasta 200 de energia."
+          }
+        ]
+      }
+    ]
+  },
+  "generatedAt": "2026-10-22T10:11:30.556Z"
 }
