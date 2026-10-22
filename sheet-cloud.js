@@ -565,7 +565,7 @@ function injectBootstrap(){
   if(booted)return;
   booted=true;
   const script=document.createElement('script');
-  script.src='bootstrap-v511.js?v=v5.21.4-observer-fix';
+  script.src='bootstrap-v511.js?v=v5.21.5-observer-fix';
   script.onload=()=>{
     let toolbarAttempts=0;
     const waitForToolbar=setInterval(()=>{
