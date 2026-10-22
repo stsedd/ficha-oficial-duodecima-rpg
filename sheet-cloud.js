@@ -196,7 +196,7 @@ function ensureRollDialog(){
 }
 let pendingRoll=null;
 function normalizeExpression(text){
-  return String(text||'1d20').replace(/−/g,'-').replace(/\\s+/g,'').toLowerCase();
+  return String(text||'1d20').replace(/−/g,'-').replace(/\s+/g,'').toLowerCase();
 }
 function expressionWithModifier(base='1d20',modifier=0){
   const mod=Number(modifier)||0;
