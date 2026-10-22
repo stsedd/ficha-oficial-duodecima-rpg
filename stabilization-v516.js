@@ -35,8 +35,13 @@
 
   function syncDisplayedVersion(){
     if(/v\d+\.\d+(?:\.\d+)?(?:[-\w.]*)?/i.test(document.title))document.title=document.title.replace(/v\d+\.\d+(?:\.\d+)?(?:[-\w.]*)?/i,DISPLAY_VERSION);
-    const chip=document.querySelector('.version-chip');if(chip)chip.textContent=DISPLAY_VERSION;
-    document.querySelectorAll('footer p').forEach(p=>{if(/v\d+\.\d+/i.test(p.textContent||''))p.textContent=(p.textContent||'').replace(/v\d+\.\d+(?:\.\d+)?(?:[-\w.]*)?/i,DISPLAY_VERSION)});
+    const chip=document.querySelector('.version-chip');if(chip&&chip.textContent!==DISPLAY_VERSION)chip.textContent=DISPLAY_VERSION;
+    document.querySelectorAll('footer p').forEach(p=>{
+      const current=p.textContent||'';
+      if(!/v\d+\.\d+/i.test(current))return;
+      const next=current.replace(/v\d+\.\d+(?:\.\d+)?(?:[-\w.]*)?/i,DISPLAY_VERSION);
+      if(next!==current)p.textContent=next;
+    });
   }
 
   function closestEquipmentCard(el){return el?.closest?.('.weapon-card,.equipment-editor-card,[data-theme-component="equipment-card"],article.card,article')||null}
@@ -53,7 +58,8 @@
       const restricted=text&&!/^Sem restrição especial/i.test(text);
       if(!restricted){old?.remove();continue;}
       const box=old||document.createElement('div');box.className='core-material-rule';
-      box.innerHTML=`<b>Regra do material · Core</b>${escapeHtml(text)}`;
+      const html=`<b>Regra do material · Core</b>${escapeHtml(text)}`;
+      if(box.innerHTML!==html)box.innerHTML=html;
       if(!old)card.appendChild(box);
     }
   }
