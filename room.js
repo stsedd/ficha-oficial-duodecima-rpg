@@ -38,7 +38,7 @@ let effects=[];
 let rolls=[];
 let messages=[];
 let selectedCharacterId=null;
-let refreshTimer=0;
+const refreshTimers=new Map();
 let durationTimer=0;
 
 function pct(current,max){
@@ -48,8 +48,12 @@ function pct(current,max){
 function liveMaster(){return isMaster&&room?.status==='active'}
 function roomLive(){return room?.status==='active'}
 function schedule(fn,delay=90){
-  clearTimeout(refreshTimer);
-  refreshTimer=setTimeout(fn,delay);
+  const key=fn?.name||'anonymous';
+  clearTimeout(refreshTimers.get(key));
+  refreshTimers.set(key,setTimeout(()=>{
+    refreshTimers.delete(key);
+    Promise.resolve(fn()).catch(err=>console.warn('[SCUTUM] atualização em tempo real',err));
+  },delay));
 }
 function updateDuration(){
   if(!room?.created_at)return;
@@ -300,8 +304,8 @@ async function loadRoom(){
   document.body.classList.toggle('ended',room.status!=='active');
   $('#endRoom').classList.toggle('hidden',!liveMaster());
   $('#reopenRoom').classList.toggle('hidden',!isMaster||room.status==='active');
-  $('.master-only').forEach(x=>x.classList.toggle('hidden',!isMaster));
-  $('.window-footer.master-only').forEach(x=>x.classList.toggle('hidden',!liveMaster()));
+  $$('.master-only').forEach(x=>x.classList.toggle('hidden',!isMaster));
+  $$('.window-footer.master-only').forEach(x=>x.classList.toggle('hidden',!liveMaster()));
   $('#leaveRoom').classList.toggle('hidden',isMaster&&!await hasMembership());
   $('#rollForm').classList.toggle('disabled',!roomLive());
   updateDuration();
