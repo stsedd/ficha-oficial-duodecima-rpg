@@ -107,7 +107,7 @@
   try{
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`rebento-fresh-creation-v5161.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`rebento-fresh-creation-v5161.js?v=5.16.4-observer-fix-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar inicialização de sucessor'));
       document.body.appendChild(patch);
     });
@@ -116,7 +116,7 @@
   try{
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`rebento-mechanics-v516.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`rebento-mechanics-v516.js?v=5.16.4-observer-fix-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar mecânicas de Rebento'));
       document.body.appendChild(patch);
     });
