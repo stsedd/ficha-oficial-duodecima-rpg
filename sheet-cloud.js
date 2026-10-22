@@ -588,9 +588,14 @@ function injectBootstrap(){
       lastSignature=signature;
       last=JSON.stringify(next);
       originalSet.call(localStorage,KEY,last);
+      const applied=typeof window.__DUODECIMA_APPLY_CLOUD_STATE==='function'
+        ?window.__DUODECIMA_APPLY_CLOUD_STATE(next)
+        :false;
       const note=document.querySelector('.archive-save-note');
-      if(note)note.innerHTML='<b>Atualização da mesa recebida</b> · será aplicada ao reabrir a ficha';
-      scutumToast('A mesa atualizou esta personagem. Os novos valores já foram salvos na nuvem.');
+      if(note)note.innerHTML=applied
+        ?'<b>Atualização da mesa aplicada</b> · SCUTUM Lab'
+        :'<b>Atualização da mesa recebida</b> · reabra a ficha para aplicar';
+      scutumToast(applied?'Atualização da mesa aplicada à ficha.':'A mesa atualizou esta personagem.');
     })
     .subscribe();
 
