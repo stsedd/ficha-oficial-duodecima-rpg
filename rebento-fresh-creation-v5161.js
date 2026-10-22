@@ -58,12 +58,18 @@
     if(active){
       const pointsLabel=[...first.querySelectorAll('.row.between .label')].find(x=>/8 pontos de atributos/i.test(x.textContent||''));
       if(pointsLabel){
-        pointsLabel.textContent=`${limit} pontos de atributos`;
-        const sibling=pointsLabel.parentElement?.querySelector('b');if(sibling)sibling.textContent=`${limit} restante(s)`;
+        const pointsText=`${limit} pontos de atributos`;
+        if(pointsLabel.textContent!==pointsText)pointsLabel.textContent=pointsText;
+        const sibling=pointsLabel.parentElement?.querySelector('b');
+        const remainingText=`${limit} restante(s)`;
+        if(sibling&&sibling.textContent!==remainingText)sibling.textContent=remainingText;
         const bar=pointsLabel.closest('div')?.parentElement?.querySelector('.progress i');if(bar)bar.style.width='0%';
       }
       const notice=root.querySelector('#finishBtn')?.parentElement?.querySelector('.notice');
-      if(notice)notice.innerHTML=notice.innerHTML.replace('exatamente 8 pontos',`exatamente ${limit} pontos`);
+      if(notice){
+        const next=notice.innerHTML.replace('exatamente 8 pontos',`exatamente ${limit} pontos`);
+        if(next!==notice.innerHTML)notice.innerHTML=next;
+      }
     }
   }
 
