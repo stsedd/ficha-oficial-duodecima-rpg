@@ -1055,6 +1055,10 @@ async function refresh(){
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'room_members',filter:'room_id=eq.'+roomId},()=>schedule(refresh))
     .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+roomId},()=>schedule(refresh))
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'characters'},payload=>{
+      const changedId=payload.new?.id||payload.old?.id;
+      if(changedId&&participants.some(p=>p.character_id===changedId))schedule(loadParticipants);
+    })
     .on('postgres_changes',{event:'*',schema:'public',table:'room_combat',filter:'room_id=eq.'+roomId},()=>schedule(loadCombat))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_initiative',filter:'room_id=eq.'+roomId},()=>schedule(loadCombat))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_trackers',filter:'room_id=eq.'+roomId},()=>schedule(loadTrackers))
@@ -1062,15 +1066,6 @@ async function refresh(){
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'room_events',filter:'room_id=eq.'+roomId},()=>schedule(loadEvents))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_rolls',filter:'room_id=eq.'+roomId},()=>loadRolls({stick:true}))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_messages',filter:'room_id=eq.'+roomId},()=>loadRolls({stick:true}));
-
-  const roomCharacterIds=[...new Set(participants.map(p=>p.character_id).filter(Boolean))].slice(0,100);
-  if(roomCharacterIds.length){
-    channel.on(
-      'postgres_changes',
-      {event:'UPDATE',schema:'public',table:'characters',filter:'id=in.('+roomCharacterIds.join(',')+')'},
-      ()=>schedule(loadParticipants)
-    );
-  }
 
   channel.subscribe(async status=>{
     const pill=$('#syncStatus');
