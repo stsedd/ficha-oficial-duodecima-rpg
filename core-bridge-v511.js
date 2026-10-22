@@ -219,7 +219,12 @@
     const manifest = await getJson(`${coreBase}manifest.json`, 'no-cache');
     const q = encodeURIComponent(manifest.contentVersion || manifest.updatedAt || 'current');
     const pairs = await Promise.all(Object.entries(manifest.files || {}).map(async ([key,file]) => [key,await getJson(`${coreBase}${file}?v=${q}`,'default')]));
-    return { manifest, ...Object.fromEntries(pairs) };
+    const bundle={ manifest, ...Object.fromEntries(pairs) };
+    if(bundle.godsSupplement?.deities?.length){
+      const ids=new Set(bundle.gods.deities.map(d=>d.id));
+      bundle.gods.deities.push(...bundle.godsSupplement.deities.filter(d=>!ids.has(d.id)));
+    }
+    return bundle;
   }
 
   async function loadSnapshot(){
