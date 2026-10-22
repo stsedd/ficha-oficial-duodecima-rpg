@@ -81,13 +81,14 @@ async function pushCloud(raw){
   try{
     const d=JSON.parse(raw);
     const localSignature=syncSignature(d);
+    const expectedServerUpdatedAt=lastServerUpdatedAt;
     lastSignature=localSignature;
     await new Promise(r=>setTimeout(r,120));
 
     let query=client.from('characters')
       .update(cloudPayload(d))
       .eq('id',id);
-    if(lastServerUpdatedAt)query=query.eq('updated_at',lastServerUpdatedAt);
+    if(expectedServerUpdatedAt)query=query.eq('updated_at',expectedServerUpdatedAt);
 
     const {data,error}=await query
       .select('sheet_data,updated_at')
