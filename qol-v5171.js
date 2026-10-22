@@ -41,7 +41,10 @@
     let strip=status.querySelector('.qol-rest-strip');
     if(!strip){strip=document.createElement('article');strip.className='qol-rest-strip';strip.innerHTML='<div class="qol-rest-copy"><b>Descansos</b><small></small></div><div class="qol-rest-actions"></div>';const anchor=status.querySelector('.overview-grid')||status.firstElementChild;anchor?status.insertBefore(strip,anchor):status.prepend(strip)}
     const copy=strip.querySelector('.qol-rest-copy small');if(copy&&copy.textContent!==restText)copy.textContent=restText;
-    strip.querySelector('.qol-rest-actions').append(a,b);
+    const actions=strip.querySelector('.qol-rest-actions');
+    if(actions&&(a.parentElement!==actions||b.parentElement!==actions||actions.firstElementChild!==a||a.nextElementSibling!==b)){
+      actions.append(a,b);
+    }
     const card=combat.querySelector('.combat-rest-card');if(card){const eyebrow=card.querySelector('.eyebrow');if(eyebrow&&eyebrow.textContent!=='MODS DE COMBATE')eyebrow.textContent='MODS DE COMBATE';card.querySelector('.subcard.compact')?.remove()}
   }
 
