@@ -1102,14 +1102,14 @@ $('#leaveRoom').onclick=async()=>{
 $('#endRoom').onclick=async()=>{
   if(!confirm('Encerrar esta sala? Ela deixará de aceitar novos participantes.'))return;
   await logEvent('A sala foi encerrada.','room');
-  const {error}=await client.from('rooms').update({status:'ended',ended_at:new Date().toISOString()}).eq('id',roomId);
+  const {error}=await client.from('rooms').update({status:'ended'}).eq('id',roomId);
   if(error)return toast(error.message);
   toast('Sala encerrada.');
   refresh();
 };
 $('#reopenRoom').onclick=async()=>{
   if(!confirm('Reabrir esta sala e permitir novas entradas?'))return;
-  const {error}=await client.from('rooms').update({status:'active',ended_at:null}).eq('id',roomId);
+  const {error}=await client.from('rooms').update({status:'active'}).eq('id',roomId);
   if(error)return toast(error.message);
   await logEvent('A sala foi reaberta.','room');
   toast('Sala reaberta.');
