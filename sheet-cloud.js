@@ -13,7 +13,7 @@ if(!id||!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase){
 
 const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
 const originalSet=Storage.prototype.setItem;
-let loading=true,timer=0,last='',booted=false,cloudChannel=null,lastSignature='';
+let loading=true,timer=0,last='',booted=false,cloudChannel=null,lastSignature='',lastServerUpdatedAt=null;
 let currentUser=null,enhanceTimer=0,roomChatChannel=null,roomChatOpen=false;
 
 function roomContextId(){
@@ -62,13 +62,49 @@ function cloudPayload(d){
     updated_at:new Date().toISOString()
   };
 }
+async function applyServerSheet(next,updatedAt,{toastMessage=false}={}){
+  const signature=syncSignature(next||{});
+  lastSignature=signature;
+  last=JSON.stringify(next||{});
+  if(updatedAt)lastServerUpdatedAt=updatedAt;
+  originalSet.call(localStorage,KEY,last);
+  const applied=typeof window.__DUODECIMA_APPLY_CLOUD_STATE==='function'
+    ?window.__DUODECIMA_APPLY_CLOUD_STATE(next||{})
+    :false;
+  const note=document.querySelector('.archive-save-note');
+  if(note)note.innerHTML=applied
+    ?'<b>Atualização da nuvem aplicada</b> · SCUTUM Lab'
+    :'<b>Atualização da nuvem recebida</b> · reabra a ficha para aplicar';
+  if(toastMessage)scutumToast(applied?'Atualização mais recente aplicada à ficha.':'A ficha mudou na nuvem.');
+}
 async function pushCloud(raw){
   try{
     const d=JSON.parse(raw);
-    lastSignature=syncSignature(d);
-    await new Promise(r=>setTimeout(r,160));
-    const {error}=await client.from('characters').update(cloudPayload(d)).eq('id',id);
+    const localSignature=syncSignature(d);
+    lastSignature=localSignature;
+    await new Promise(r=>setTimeout(r,120));
+
+    let query=client.from('characters')
+      .update(cloudPayload(d))
+      .eq('id',id);
+    if(lastServerUpdatedAt)query=query.eq('updated_at',lastServerUpdatedAt);
+
+    const {data,error}=await query
+      .select('sheet_data,updated_at')
+      .maybeSingle();
     if(error)throw error;
+
+    if(!data){
+      const {data:fresh,error:freshError}=await client.from('characters')
+        .select('sheet_data,updated_at').eq('id',id).single();
+      if(freshError)throw freshError;
+      await applyServerSheet(fresh.sheet_data||{},fresh.updated_at,{toastMessage:true});
+      return;
+    }
+
+    lastServerUpdatedAt=data.updated_at||lastServerUpdatedAt;
+    lastSignature=syncSignature(data.sheet_data||d);
+    last=JSON.stringify(data.sheet_data||d);
     const note=document.querySelector('.archive-save-note');
     if(note)note.innerHTML='<b>Salvo na nuvem</b> · SCUTUM Lab';
   }catch(e){
@@ -568,7 +604,7 @@ function injectBootstrap(){
   if(!session){location.replace('index.html');return}
   currentUser=session.user;
 
-  const {data,error}=await client.from('characters').select('sheet_data').eq('id',id).single();
+  const {data,error}=await client.from('characters').select('sheet_data,updated_at').eq('id',id).single();
   if(error||!data){
     alert('Não foi possível abrir esta ficha.');
     location.replace('index.html');
@@ -577,25 +613,18 @@ function injectBootstrap(){
 
   last=JSON.stringify(data.sheet_data||{});
   lastSignature=syncSignature(data.sheet_data||{});
+  lastServerUpdatedAt=data.updated_at||null;
   originalSet.call(localStorage,KEY,last);
   loading=false;
 
   cloudChannel=client.channel('sheet-cloud-'+id)
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'characters',filter:'id=eq.'+id},payload=>{
       const next=payload.new?.sheet_data||{};
+      const updatedAt=payload.new?.updated_at||null;
       const signature=syncSignature(next);
+      if(updatedAt)lastServerUpdatedAt=updatedAt;
       if(signature===lastSignature)return;
-      lastSignature=signature;
-      last=JSON.stringify(next);
-      originalSet.call(localStorage,KEY,last);
-      const applied=typeof window.__DUODECIMA_APPLY_CLOUD_STATE==='function'
-        ?window.__DUODECIMA_APPLY_CLOUD_STATE(next)
-        :false;
-      const note=document.querySelector('.archive-save-note');
-      if(note)note.innerHTML=applied
-        ?'<b>Atualização da mesa aplicada</b> · SCUTUM Lab'
-        :'<b>Atualização da mesa recebida</b> · reabra a ficha para aplicar';
-      scutumToast(applied?'Atualização da mesa aplicada à ficha.':'A mesa atualizou esta personagem.');
+      applyServerSheet(next,updatedAt,{toastMessage:true});
     })
     .subscribe();
 
