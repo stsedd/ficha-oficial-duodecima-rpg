@@ -196,7 +196,7 @@ function ensureRollDialog(){
 }
 let pendingRoll=null;
 function normalizeExpression(text){
-  return String(text||'1d20').replace(/−/g,'-').replace(/s+/g,'').toLowerCase();
+  return String(text||'1d20').replace(/−/g,'-').replace(/\\s+/g,'').toLowerCase();
 }
 function expressionWithModifier(base='1d20',modifier=0){
   const mod=Number(modifier)||0;
@@ -530,9 +530,17 @@ function injectBootstrap(){
   const script=document.createElement('script');
   script.src='bootstrap-v511.js?v=v5.21.1-ability-deck-polish-lab';
   script.onload=()=>{
+    let toolbarAttempts=0;
     const waitForToolbar=setInterval(()=>{
+      toolbarAttempts++;
       const bar=document.querySelector('.archive-toolbar-copy');
-      if(!bar)return;
+      if(!bar){
+        if(toolbarAttempts>=150){
+          clearInterval(waitForToolbar);
+          console.warn('[SCUTUM] barra da ficha não ficou disponível.');
+        }
+        return;
+      }
       clearInterval(waitForToolbar);
 
       if(!bar.querySelector('.scutum-back-link')){
@@ -581,8 +589,8 @@ function injectBootstrap(){
       last=JSON.stringify(next);
       originalSet.call(localStorage,KEY,last);
       const note=document.querySelector('.archive-save-note');
-      if(note)note.innerHTML='<b>Atualização da mesa recebida</b> · recarregando ficha…';
-      setTimeout(()=>location.reload(),350);
+      if(note)note.innerHTML='<b>Atualização da mesa recebida</b> · será aplicada ao reabrir a ficha';
+      scutumToast('A mesa atualizou esta personagem. Os novos valores já foram salvos na nuvem.');
     })
     .subscribe();
 
