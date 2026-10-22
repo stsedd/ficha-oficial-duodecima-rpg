@@ -2163,6 +2163,16 @@ function longRest(){
     if(byId('bannerCropCancel'))byId('bannerCropCancel').onclick=()=>{byId('bannerCropDialog')?.close();bannerDraft=null};
   }
   function render(){syncShellChrome();creationView.classList.toggle('hidden',state.isCreated);sheetView.classList.toggle('hidden',!state.isCreated);if(state.isCreated)renderSheet();else renderCreation()}
+  window.__DUODECIMA_APPLY_CLOUD_STATE=(incoming)=>{
+    try{
+      state=migrate(incoming||{});
+      render();
+      return true;
+    }catch(err){
+      console.warn('[Ficha] Falha ao aplicar atualização externa.',err);
+      return false;
+    }
+  };
   function byId(id){return document.getElementById(id)}
   function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
   function initials(name=''){const parts=String(name||'').trim().split(/\s+/).filter(Boolean);if(!parts.length)return 'XII';return (parts[0][0]||'').concat(parts.length>1?(parts[parts.length-1][0]||''):'').toUpperCase()}
