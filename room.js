@@ -1047,35 +1047,45 @@ async function refresh(){
   clearInterval(durationTimer);
   durationTimer=setInterval(updateDuration,30000);
 
-  channel=client.channel('room-'+roomId,{config:{presence:{key:me.id}}})
+  channel=client.channel('room-'+roomId,{config:{presence:{key:me.id}}});
+  channel
     .on('presence',{event:'sync'},()=>{
       onlineIds=new Set(Object.keys(channel.presenceState()||{}));
-      loadParticipants();
+      schedule(loadParticipants);
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'room_members',filter:'room_id=eq.'+roomId},()=>schedule(refresh))
     .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+roomId},()=>schedule(refresh))
-    .on('postgres_changes',{event:'*',schema:'public',table:'characters'},()=>schedule(loadParticipants))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_combat',filter:'room_id=eq.'+roomId},()=>schedule(loadCombat))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_initiative',filter:'room_id=eq.'+roomId},()=>schedule(loadCombat))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_trackers',filter:'room_id=eq.'+roomId},()=>schedule(loadTrackers))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_effects',filter:'room_id=eq.'+roomId},()=>schedule(loadParticipants))
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'room_events',filter:'room_id=eq.'+roomId},()=>schedule(loadEvents))
     .on('postgres_changes',{event:'*',schema:'public',table:'room_rolls',filter:'room_id=eq.'+roomId},()=>loadRolls({stick:true}))
-    .on('postgres_changes',{event:'*',schema:'public',table:'room_messages',filter:'room_id=eq.'+roomId},()=>loadRolls({stick:true}))
-    .subscribe(async status=>{
-      const pill=$('#syncStatus');
-      if(status==='SUBSCRIBED'){
-        pill.textContent='Conectado';
-        pill.className='sync-pill online';
-        await channel.track({user_id:me.id,online_at:new Date().toISOString()});
-      }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
-        pill.textContent='Reconectando…';
-        pill.className='sync-pill warning';
-      }else if(status==='CLOSED'){
-        pill.textContent='Offline';
-        pill.className='sync-pill warning';
-      }
-    });
+    .on('postgres_changes',{event:'*',schema:'public',table:'room_messages',filter:'room_id=eq.'+roomId},()=>loadRolls({stick:true}));
+
+  const roomCharacterIds=[...new Set(participants.map(p=>p.character_id).filter(Boolean))].slice(0,100);
+  if(roomCharacterIds.length){
+    channel.on(
+      'postgres_changes',
+      {event:'UPDATE',schema:'public',table:'characters',filter:'id=in.('+roomCharacterIds.join(',')+')'},
+      ()=>schedule(loadParticipants)
+    );
+  }
+
+  channel.subscribe(async status=>{
+    const pill=$('#syncStatus');
+    if(status==='SUBSCRIBED'){
+      pill.textContent='Conectado';
+      pill.className='sync-pill online';
+      await channel.track({user_id:me.id,online_at:new Date().toISOString()});
+    }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+      pill.textContent='Reconectando…';
+      pill.className='sync-pill warning';
+    }else if(status==='CLOSED'){
+      pill.textContent='Offline';
+      pill.className='sync-pill warning';
+    }
+  });
 })();
 
 /* ---------- STATIC BINDINGS ---------- */
