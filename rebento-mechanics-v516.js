@@ -86,7 +86,16 @@
     const spent=spentBase(data),left=limit-spent;
     const labels=[...first.querySelectorAll('.row.between .label')];
     const pointsLabel=labels.find(x=>/8 pontos de atributos/i.test(x.textContent||''));
-    if(pointsLabel){pointsLabel.textContent=`${limit} pontos de atributos`;const sibling=pointsLabel.parentElement?.querySelector('b');if(sibling)sibling.textContent=`${left} restante(s)`;const bar=pointsLabel.closest('div')?.parentElement?.querySelector('.progress i');if(bar)bar.style.width=`${Math.max(0,Math.min(100,spent/limit*100))}%`}
+    if(pointsLabel){
+      const pointsText=`${limit} pontos de atributos`;
+      if(pointsLabel.textContent!==pointsText)pointsLabel.textContent=pointsText;
+      const sibling=pointsLabel.parentElement?.querySelector('b');
+      const remainingText=`${left} restante(s)`;
+      if(sibling&&sibling.textContent!==remainingText)sibling.textContent=remainingText;
+      const bar=pointsLabel.closest('div')?.parentElement?.querySelector('.progress i');
+      const width=`${Math.max(0,Math.min(100,spent/limit*100))}%`;
+      if(bar&&bar.style.width!==width)bar.style.width=width;
+    }
     first.querySelectorAll('[data-base-inc]').forEach(btn=>{const k=btn.dataset.baseInc;btn.disabled=!baseCanIncrease(data,k,limit)});
 
     if(!root.dataset.rebentoCapture){
