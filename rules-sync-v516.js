@@ -12,7 +12,11 @@
     const value=agi.querySelector('.skill-roll-value')?.textContent?.trim();if(!value)return;
     document.querySelectorAll('#sheetView .quick-fact-list > div, #sheetView .combat-quick-values > div').forEach(row=>{
       if((row.querySelector('span')?.textContent||'').trim()!=='Iniciativa')return;
-      const out=row.querySelector('b');if(out){out.textContent=`1d20 ${signedText(value)}`;out.title='Iniciativa usa Agilidade quando a perícia é treinada.'}
+      const out=row.querySelector('b');if(out){
+        const next=`1d20 ${signedText(value)}`;
+        if(out.textContent!==next)out.textContent=next;
+        if(out.title!=='Iniciativa usa Agilidade quando a perícia é treinada.')out.title='Iniciativa usa Agilidade quando a perícia é treinada.';
+      }
     });
   }
 
