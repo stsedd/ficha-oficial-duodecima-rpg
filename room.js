@@ -90,7 +90,7 @@ function openToolPanel(id){
   if(!wasOpen){
     panel.classList.remove('hidden');
     if(id==='initiativePanel')restoreInitiativePosition();
-    const trigger=$('.dock-button[data-panel]').find(b=>b.dataset.panel===id);
+    const trigger=$$('.dock-button[data-panel]').find(b=>b.dataset.panel===id);
     trigger?.classList.add('active');
     $('#dockTable')?.classList.remove('active');
   }else{
@@ -1063,7 +1063,7 @@ function toggleManualMode(){
   $('#manualMode').classList.toggle('hidden',!manual);
   $('#rollExpression').disabled=manual;
   $('#submitRoll').disabled=manual;
-  $('.quick-dice button').forEach(b=>b.disabled=manual);
+  $$('.quick-dice button').forEach(b=>b.disabled=manual);
   if(manual)setTimeout(()=>$('#manualTotal').focus(),0);
   else setTimeout(()=>$('#rollExpression').focus(),0);
 }
