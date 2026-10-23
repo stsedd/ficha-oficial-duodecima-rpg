@@ -166,34 +166,94 @@ body.chat-hidden .roll-console{display:none}
 
 .room-state-chip{display:inline-flex;align-items:center;padding:5px 8px;border:1px solid #31523c;border-radius:999px;background:#0d1711;color:#9fd0ab;font-size:7px;font-weight:800;letter-spacing:.08em}
 .room-state-chip.ended{border-color:#69303b;background:#1f0d12;color:#e58a99}
-
-.resource-editor{
-  width:min(430px,calc(100vw - 28px));
-  max-width:430px;
-  padding:0;
-  border:1px solid #3b3f46;
-  border-radius:14px;
-  background:#060608;
-  color:var(--text);
-  box-shadow:0 28px 90px rgba(0,0,0,.68)
-}
-.resource-editor::backdrop{background:rgba(0,0,0,.66);backdrop-filter:blur(5px)}
-.resource-editor-card{padding:14px}
-.resource-editor-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding-bottom:11px;border-bottom:1px solid #23262c}
-.resource-editor-head h2{margin:2px 0 3px;font:600 22px var(--serif)}
-.resource-editor-head p:not(.eyebrow){margin:0;color:var(--muted);font-size:9px}
-.resource-editor-head button{width:30px;height:30px;padding:0;border-radius:50%}
-.resource-current{display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px;padding:10px 11px;border:1px solid #2c3036;border-radius:10px;background:#090a0d}
-.resource-current span{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.resource-current b{font:700 22px var(--serif)}
-.resource-quick{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:11px}
-.resource-quick button{padding:7px 4px;font-size:9px}
-.resource-custom-field{display:grid;gap:5px}
-.resource-custom-field>span{font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
-.resource-custom-field>div{display:grid;grid-template-columns:1fr auto;gap:6px}
-.resource-custom-field input{min-width:0;background:#08090b;border:1px solid #343840;border-radius:9px;color:var(--text);padding:9px 10px}
-.resource-custom-field button{min-width:88px}
-@media(max-width:520px){
-  .resource-editor{width:calc(100vw - 18px)}
   .resource-quick{grid-template-columns:repeat(3,1fr)}
+}
+
+/* Larger character cards + inline resource editing */
+.participant-grid{
+  grid-template-columns:repeat(auto-fill,220px);
+  gap:14px
+}
+.participant-card{
+  width:220px;
+  height:338px;
+  grid-template-rows:190px 148px
+}
+.participant-copy{padding:10px}
+.participant-title h3{font-size:16px;max-width:140px}
+.participant-title p{font-size:7.5px;max-width:145px}
+.presence{font-size:6px}
+.ready-badge{font-size:6px}
+.resource-stack{gap:7px;margin:9px 0}
+.resource-row{
+  grid-template-columns:22px minmax(54px,1fr) auto;
+  gap:6px;
+  min-height:25px
+}
+.resource-row>span:first-child{font-size:6.5px}
+.resource-row>b{
+  font-size:8.5px;
+  min-width:45px;
+  text-align:right
+}
+.resource-row .bar{height:6px;grid-column:2/4}
+.resource-actions{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:26px minmax(54px,1fr) 28px 26px;
+  gap:4px;
+  align-items:center
+}
+.resource-actions button{
+  width:26px;
+  height:26px;
+  min-width:26px;
+  padding:0;
+  font-size:12px;
+  border-radius:7px
+}
+.resource-actions .resource-apply{
+  width:28px;
+  min-width:28px;
+  font-size:10px;
+  color:#fff;
+  border-color:#71303b;
+  background:#260910
+}
+.resource-inline-input{
+  width:100%;
+  height:26px;
+  min-width:0;
+  padding:3px 6px;
+  border:1px solid #363a42;
+  border-radius:7px;
+  background:#07080a;
+  color:var(--text);
+  font-size:9px;
+  text-align:center;
+  outline:none
+}
+.resource-inline-input:focus{
+  border-color:var(--red2);
+  box-shadow:0 0 0 2px rgba(255,35,71,.12)
+}
+.resource-inline-input::placeholder{color:#6d6b70}
+.public-resource{grid-template-columns:22px minmax(54px,1fr) 34px!important}
+.public-resource .bar{grid-column:auto}
+.conditions span,.condition-add{font-size:6px;padding:3px 5px}
+.card-ready-action{font-size:7px;padding:5px}
+
+@media(max-width:900px){
+  .participant-card{
+    flex:0 0 200px;
+    width:200px;
+    height:318px;
+    grid-template-rows:178px 140px
+  }
+}
+@media(max-width:430px){
+  .participant-grid{
+    padding-left:calc((100vw - 200px)/2);
+    padding-right:calc((100vw - 200px)/2)
+  }
 }
