@@ -229,15 +229,21 @@
   }
 
   function installCore(bundle, source){
-    const {manifest,attributes,skills,talents,talentPolicies,conditions,gods,system,equipment,aliases,origins}=bundle;
+    const {manifest,attributes,skills,talents,talentPolicies,conditions,gods,system,equipment,aliases,origins,godsSupplement}=bundle;
     if(!manifest||!attributes||!skills||!talents||!conditions||!gods||!system||!equipment)throw new Error('Pacote do Core incompleto.');
     state.version = manifest.contentVersion || manifest.updatedAt || 'online';
     const skillMap = byId(skills.skills || []);
-    const deityList = (gods.deities || []).filter(d => d.kitAvailable && d.selectable !== false);
+    const mergedDeities=[...(gods.deities||[])];
+    for(const deity of (godsSupplement?.deities||[])){
+      const i=mergedDeities.findIndex(x=>x.id===deity.id);
+      if(i>=0)mergedDeities[i]=deity;else mergedDeities.push(deity);
+    }
+    const mergedGods={...gods,deities:mergedDeities};
+    const deityList = mergedDeities.filter(d => d.kitAvailable && d.selectable !== false);
     window.DUODECIMA_SKILLS = (skills.skills || []).map(s => ({ name:s.name, attr:s.attribute, id:s.id, description:s.description || '' }));
     window.DUODECIMA_TALENTS = mapTalents(talents,talentPolicies);
     window.DUODECIMA_GODS = deityList.map(d => mapGod(d,skillMap));
-    window.DUODECIMA_EXCLUDED_GODS = (gods.deities || []).filter(d => !d.kitAvailable || d.selectable === false).map(d => ({id:d.id,name:d.name,group:d.groupLabel || d.group}));
+    window.DUODECIMA_EXCLUDED_GODS = mergedDeities.filter(d => !d.kitAvailable || d.selectable === false).map(d => ({id:d.id,name:d.name,group:d.groupLabel || d.group}));
     window.DUODECIMA_ABILITIES = mapAbilities(deityList);
     window.DUODECIMA_SYSTEM = mapSystem({conditions:conditions.conditions || [], system, equipment});
     window.DUODECIMA_LINEAGE = system.lineage || {};
@@ -253,7 +259,7 @@
         sacrificialAttributes:[...(magicCore.sacrificialAttributes || ['for','des','con'])]
       };
     }
-    window.DUODECIMA_CORE_DATA = {manifest,attributes,skills,talents,talentPolicies,conditions,gods,system,equipment,aliases,origins};
+    window.DUODECIMA_CORE_DATA = {manifest,attributes,skills,talents,talentPolicies,conditions,gods:mergedGods,system,equipment,aliases,origins,godsSupplement};
     state.manifest=manifest;
     state.source=source;
     state.status=source==='core'?'online':'fallback';
