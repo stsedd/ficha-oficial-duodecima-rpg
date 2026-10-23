@@ -6,7 +6,10 @@
   const SHEET_BACKUP_DB = 'duodecima_sheet_backups_v1';
   const SHEET_BACKUP_STORE = 'snapshots';
   const SHEET_BACKUP_LIMIT = 8;
-  const SHEET_BACKUP_FALLBACK_KEY = 'duodecima_sheet_backup_fallback_v1';
+  const SHEET_CHARACTER_ID = String(window.__SCUTUM_CHARACTER_ID__||'');
+  const SHEET_BACKUP_FALLBACK_KEY = SHEET_CHARACTER_ID
+    ? `duodecima_sheet_backup_fallback_v1_${SHEET_CHARACTER_ID}`
+    : 'duodecima_sheet_backup_fallback_v1';
     const LEGACY_KEYS = [
     'duodecima_universal_stage4_v23','duodecima_universal_stage4_v22','duodecima_universal_stage4_v21','duodecima_universal_stage3a_v20','duodecima_universal_stage2m_v19','duodecima_universal_stage2l_v18','duodecima_universal_stage2k_v17','duodecima_universal_stage2h_v14','duodecima_universal_stage2g_v13','duodecima_universal_stage2f_v12','duodecima_universal_stage2e_v11','duodecima_universal_stage2d_v10','duodecima_universal_stage2c_v9','duodecima_universal_stage2b_v8','duodecima_universal_stage2a_v7','duodecima_universal_stage1f_v6','duodecima_universal_stage1e_v5','duodecima_universal_stage1d_v4',
     'duodecima_universal_stage1c_v3','duodecima_universal_stage1b_v2','duodecima_universal_stage1a_v1'
@@ -270,11 +273,18 @@
     }
     return out;
   }
+  function backupBelongsToCurrent(item){
+    if(!SHEET_CHARACTER_ID)return true;
+    if(item?.characterId)return item.characterId===SHEET_CHARACTER_ID;
+    const backupName=String(item?.state?.name||item?.name||'').trim();
+    const currentName=String(state?.name||'').trim();
+    return !!backupName&&!!currentName&&backupName===currentName;
+  }
   async function listSheetBackups(){
     let records=[];
-    try{records=await sheetBackupDbAction('list')}catch(_){ }
-    try{const raw=safeStorage.getItem(SHEET_BACKUP_FALLBACK_KEY);if(raw){const item=JSON.parse(raw);if(item?.state)records.push({...item,fallback:true})}}catch(_){ }
-    records.push(...legacyRecoveryCandidates());
+    try{records=(await sheetBackupDbAction('list')).filter(backupBelongsToCurrent)}catch(_){ }
+    try{const raw=safeStorage.getItem(SHEET_BACKUP_FALLBACK_KEY);if(raw){const item=JSON.parse(raw);if(item?.state&&backupBelongsToCurrent(item))records.push({...item,fallback:true})}}catch(_){ }
+    records.push(...legacyRecoveryCandidates().filter(backupBelongsToCurrent));
     records.sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
     const seen=new Set();
     return records.filter(item=>{const key=item.id||item.signature;if(!key||seen.has(key))return false;seen.add(key);return true});
@@ -282,9 +292,9 @@
   async function storeSheetBackup(data,reason='Backup automático',force=false){
     if(!hasMeaningfulSheetData(data))return false;
     const snapshot=deepCloneJson(data),signature=sheetBackupSignature(snapshot);
-    const record={id:`backup-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,savedAt:new Date().toISOString(),reason,name:snapshot.name||'Ficha sem nome',signature,state:snapshot};
+    const record={id:`backup-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,characterId:SHEET_CHARACTER_ID||null,savedAt:new Date().toISOString(),reason,name:snapshot.name||'Ficha sem nome',signature,state:snapshot};
     try{
-      const current=(await sheetBackupDbAction('list')).sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
+      const current=(await sheetBackupDbAction('list')).filter(backupBelongsToCurrent).sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
       if(!force&&current[0]?.signature===signature)return false;
       await sheetBackupDbAction('put',record);
       const all=[record,...current.filter(x=>x.id!==record.id)].sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
