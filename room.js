@@ -89,7 +89,8 @@ function openToolPanel(id){
   $$('.dock-button[data-panel]').forEach(b=>b.classList.remove('active'));
   if(!wasOpen){
     panel.classList.remove('hidden');
-    const trigger=$$('.dock-button[data-panel]').find(b=>b.dataset.panel===id);
+    if(id==='initiativePanel')restoreInitiativePosition();
+    const trigger=$('.dock-button[data-panel]').find(b=>b.dataset.panel===id);
     trigger?.classList.add('active');
     $('#dockTable')?.classList.remove('active');
   }else{
@@ -100,6 +101,81 @@ function toggleChat(force){
   const hidden=typeof force==='boolean'?!force:!document.body.classList.contains('chat-hidden');
   document.body.classList.toggle('chat-hidden',hidden);
   $('#dockChat')?.classList.toggle('active',!hidden);
+}
+
+const INIT_POS_KEY='scutum_initiative_position_'+roomId;
+function clampInitiativeWindow(){
+  const panel=$('#initiativePanel');
+  if(!panel||panel.classList.contains('hidden')||matchMedia('(max-width:900px)').matches)return;
+  const rect=panel.getBoundingClientRect();
+  const margin=10;
+  const maxLeft=Math.max(margin,window.innerWidth-rect.width-margin);
+  const maxTop=Math.max(62,window.innerHeight-rect.height-margin);
+  const left=Math.min(Math.max(margin,rect.left),maxLeft);
+  const top=Math.min(Math.max(62,rect.top),maxTop);
+  panel.style.left=left+'px';
+  panel.style.top=top+'px';
+  panel.style.right='auto';
+}
+function restoreInitiativePosition(){
+  const panel=$('#initiativePanel');
+  if(!panel||matchMedia('(max-width:900px)').matches)return;
+  try{
+    const saved=JSON.parse(localStorage.getItem(INIT_POS_KEY)||'null');
+    if(saved&&Number.isFinite(saved.left)&&Number.isFinite(saved.top)){
+      panel.style.left=saved.left+'px';
+      panel.style.top=saved.top+'px';
+      panel.style.right='auto';
+    }
+  }catch{}
+  requestAnimationFrame(clampInitiativeWindow);
+}
+function setupInitiativeDragging(){
+  const panel=$('#initiativePanel');
+  const handle=$('#initiativeDragHandle');
+  if(!panel||!handle||handle.dataset.dragReady)return;
+  handle.dataset.dragReady='1';
+
+  let dragging=false,startX=0,startY=0,startLeft=0,startTop=0;
+  handle.addEventListener('pointerdown',e=>{
+    if(matchMedia('(max-width:900px)').matches||e.target.closest('button,input,select'))return;
+    const rect=panel.getBoundingClientRect();
+    dragging=true;
+    startX=e.clientX;startY=e.clientY;
+    startLeft=rect.left;startTop=rect.top;
+    panel.style.left=rect.left+'px';
+    panel.style.top=rect.top+'px';
+    panel.style.right='auto';
+    handle.setPointerCapture?.(e.pointerId);
+    panel.classList.add('dragging');
+    e.preventDefault();
+  });
+  handle.addEventListener('pointermove',e=>{
+    if(!dragging)return;
+    const rect=panel.getBoundingClientRect();
+    const margin=10;
+    const left=Math.min(
+      Math.max(margin,startLeft+(e.clientX-startX)),
+      Math.max(margin,window.innerWidth-rect.width-margin)
+    );
+    const top=Math.min(
+      Math.max(62,startTop+(e.clientY-startY)),
+      Math.max(62,window.innerHeight-rect.height-margin)
+    );
+    panel.style.left=left+'px';
+    panel.style.top=top+'px';
+  });
+  const finish=e=>{
+    if(!dragging)return;
+    dragging=false;
+    panel.classList.remove('dragging');
+    handle.releasePointerCapture?.(e.pointerId);
+    const rect=panel.getBoundingClientRect();
+    localStorage.setItem(INIT_POS_KEY,JSON.stringify({left:rect.left,top:rect.top}));
+  };
+  handle.addEventListener('pointerup',finish);
+  handle.addEventListener('pointercancel',finish);
+  window.addEventListener('resize',clampInitiativeWindow);
 }
 function openSelectedSheet(){
   let characterId=isMaster?selectedCharacterId:(ownParticipant()?.character_id||null);
@@ -1176,8 +1252,12 @@ $('#prevTurn').onclick=prevTurn;
 $('#nextTurn').onclick=nextTurn;
 $('#endCombat').onclick=endCombat;
 $('#clearCombat').onclick=clearCombat;
-$('#addNpc').onclick=()=>addNpc(false);
-$('#addHiddenNpc').onclick=()=>addNpc(true);
+$('#addNpc').onclick=()=>openNpcForm(false);
+$('#addHiddenNpc').onclick=()=>openNpcForm(true);
+$('#saveNpc').onclick=saveNpcFromForm;
+$('#cancelNpc').onclick=closeNpcForm;
+$('#npcName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();saveNpcFromForm()}});
+setupInitiativeDragging();
 $('#addTracker').onclick=addTracker;
 $('#saveNotes').onclick=saveNotes;
 $('#refreshEvents').onclick=loadEvents;
