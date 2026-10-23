@@ -359,41 +359,43 @@ async function loadParticipants(){
 function initiativeRow(x,index){
   const active=combat?.active&&combat?.current_entry_id===x.id;
   const hidden=isMaster&&x.visibility==='master';
-  const npcHp=x.kind==='npc'&&x.current_hp!=null
-    ?'<span class="npc-hp">HP '+esc(x.current_hp)+(x.max_hp!=null?'/'+esc(x.max_hp):'')+'</span>'
-    :'';
   const hiddenBadge=hidden?'<span class="hidden-init-badge">OCULTO</span>':'';
 
   const controls=liveMaster()
     ?'<div class="init-controls">'+
-      '<button data-set-turn="'+index+'" title="Definir turno atual">▶</button>'+
-      '<label>INI <input data-init-value="'+x.id+'" type="number" value="'+Number(x.initiative||0)+'"></label>'+
+      '<button class="turn-pick" data-set-turn="'+index+'" title="Definir turno atual">▶</button>'+
+      '<label>INI<input data-init-value="'+x.id+'" type="number" inputmode="numeric" value="'+Number(x.initiative||0)+'"></label>'+
       (x.kind==='npc'&&x.current_hp!=null
-        ?'<button data-npc-hp="'+x.id+'" data-npc-delta="-1">−HP</button><button data-npc-hp="'+x.id+'" data-npc-delta="1">+HP</button><button data-npc-custom="'+x.id+'">HP…</button>'
+        ?'<label>HP<input data-npc-hp-value="'+x.id+'" type="number" inputmode="numeric" min="0" '+(x.max_hp!=null?'max="'+Number(x.max_hp)+'" ':'')+'value="'+Number(x.current_hp||0)+'"></label>'
         :'')+
-      '<button class="danger ghost-danger" data-init-remove="'+x.id+'" aria-label="Remover da iniciativa">×</button>'+
+      '<button class="danger ghost-danger init-remove" data-init-remove="'+x.id+'" aria-label="Remover da iniciativa">×</button>'+
     '</div>'
     :'<b class="init-score">'+Number(x.initiative||0)+'</b>';
 
   return '<div class="initiative-row '+(active?'active ':'')+(hidden?'hidden-entry':'')+'">'+
     '<span class="turn-number">'+(index+1)+'</span>'+
-    '<div class="initiative-name"><b>'+esc(x.label)+'</b><small>'+(x.kind==='npc'?'NPC':'Personagem')+'</small>'+hiddenBadge+npcHp+'</div>'+
+    '<div class="initiative-name"><b>'+esc(x.label)+'</b><small>'+(x.kind==='npc'?'NPC':'Personagem')+'</small>'+hiddenBadge+
+      (x.kind==='npc'&&x.current_hp!=null?'<span class="npc-hp">HP '+Number(x.current_hp)+(x.max_hp!=null?'/'+Number(x.max_hp):'')+'</span>':'')+
+    '</div>'+
     controls+
   '</div>';
 }
 
 async function loadCombat(){
-  const [{data:state},{data,error}]=await Promise.all([
+  const [stateRes,initRes]=await Promise.all([
     client.from('room_combat').select('*').eq('room_id',roomId).maybeSingle(),
     client.from('room_initiative').select('*').eq('room_id',roomId)
       .order('initiative',{ascending:false})
       .order('sort_order',{ascending:true})
       .order('created_at',{ascending:true})
   ]);
-  if(error)return;
+  if(stateRes.error||initRes.error){
+    console.warn('[SCUTUM] iniciativa',stateRes.error||initRes.error);
+    return toast('Não foi possível atualizar a iniciativa.');
+  }
 
-  combat=state||{room_id:roomId,active:false,round:1,turn_index:0,current_entry_id:null};
-  initiative=(data||[]).filter(x=>!previewPlayer||x.visibility==='public');
+  combat=stateRes.data||{room_id:roomId,active:false,round:1,turn_index:0,current_entry_id:null};
+  initiative=(initRes.data||[]).filter(x=>!previewPlayer||x.visibility==='public');
 
   if(combat.active){
     let current=initiative.find(x=>x.id===combat.current_entry_id);
@@ -407,7 +409,7 @@ async function loadCombat(){
       '<div><span>RODADA</span><b>'+Number(combat.round||1)+'</b></div>'+
       '<div><span>TURNO</span><strong>'+esc(currentLabel)+'</strong></div>';
   }else{
-    $('#combatStatus').innerHTML='<span>'+(initiative.length?'Iniciativa preparada. O combate ainda não começou.':'Nenhum combate ativo.')+'</span>';
+    $('#combatStatus').innerHTML='<span>'+(initiative.length?'Ordem preparada. Inicie o combate quando quiser.':'Nenhum combate ativo.')+'</span>';
   }
 
   $('#initiativeList').innerHTML=initiative.length
@@ -427,13 +429,14 @@ function bindCombatActions(){
     const index=Number(b.dataset.setTurn)||0;
     const target=initiative[index];
     if(!target)return;
-    await client.from('room_combat').upsert({
+    const {error}=await client.from('room_combat').upsert({
       room_id:roomId,
       active:true,
       round:Number(combat?.round||1),
       turn_index:index,
       current_entry_id:target.id
     });
+    if(error)return toast('Não foi possível definir o turno.');
     await logEvent(
       target.visibility==='master'?'O mestre avançou para uma ação oculta.':'Turno definido para '+target.label+'.',
       'turn',
@@ -444,46 +447,33 @@ function bindCombatActions(){
 
   $$('[data-init-value]').forEach(i=>i.onchange=async()=>{
     if(!liveMaster())return;
-    await client.from('room_initiative').update({initiative:Number(i.value)||0}).eq('id',i.dataset.initValue);
+    const {error}=await client.from('room_initiative').update({initiative:Math.trunc(Number(i.value)||0)}).eq('id',i.dataset.initValue);
+    if(error)return toast('Não foi possível alterar a iniciativa.');
+    loadCombat();
+  });
+
+  $$('[data-npc-hp-value]').forEach(i=>i.onchange=async()=>{
+    if(!liveMaster())return;
+    const row=initiative.find(x=>x.id===i.dataset.npcHpValue);
+    if(!row)return;
+    const max=row.max_hp==null?2147483647:Number(row.max_hp);
+    const next=Math.max(0,Math.min(max,Math.trunc(Number(i.value)||0)));
+    const {error}=await client.from('room_initiative').update({current_hp:next}).eq('id',row.id);
+    if(error)return toast('Não foi possível alterar o HP.');
+    if(row.visibility!=='master'&&next!==Number(row.current_hp)){
+      await logEvent(row.label+': HP '+row.current_hp+' → '+next+'.','npc_resource',{initiative_id:row.id});
+    }
     loadCombat();
   });
 
   $$('[data-init-remove]').forEach(b=>b.onclick=async()=>{
     if(!liveMaster())return;
     const row=initiative.find(x=>x.id===b.dataset.initRemove);
-    await client.from('room_initiative').delete().eq('id',b.dataset.initRemove);
+    const {error}=await client.from('room_initiative').delete().eq('id',b.dataset.initRemove);
+    if(error)return toast('Não foi possível remover da iniciativa.');
     if(row?.visibility!=='master')await logEvent('Um participante foi removido da iniciativa.','combat');
     if(combat?.current_entry_id===b.dataset.initRemove){
       await client.from('room_combat').update({current_entry_id:null}).eq('room_id',roomId);
-    }
-    loadCombat();
-  });
-
-  $$('[data-npc-custom]').forEach(b=>b.onclick=async()=>{
-    if(!liveMaster())return;
-    const row=initiative.find(x=>x.id===b.dataset.npcCustom);
-    if(!row)return;
-    const raw=prompt('Novo HP de '+row.label+':',String(row.current_hp??0));
-    if(raw==null)return;
-    const max=row.max_hp==null?2147483647:Number(row.max_hp);
-    const next=Math.max(0,Math.min(max,Math.trunc(Number(raw)||0)));
-    await client.from('room_initiative').update({current_hp:next}).eq('id',row.id);
-    if(row.visibility!=='master'){
-      await logEvent(row.label+': HP '+row.current_hp+' → '+next+'.','npc_resource',{initiative_id:row.id});
-    }
-    loadCombat();
-  });
-
-  $$('[data-npc-hp]').forEach(b=>b.onclick=async()=>{
-    if(!liveMaster())return;
-    const row=initiative.find(x=>x.id===b.dataset.npcHp);
-    if(!row)return;
-    const delta=Number(b.dataset.npcDelta);
-    const max=row.max_hp==null?2147483647:Number(row.max_hp);
-    const next=Math.max(0,Math.min(max,Number(row.current_hp||0)+delta));
-    await client.from('room_initiative').update({current_hp:next}).eq('id',row.id);
-    if(row.visibility!=='master'){
-      await logEvent(row.label+': HP '+row.current_hp+' → '+next+'.','npc_resource',{initiative_id:row.id});
     }
     loadCombat();
   });
@@ -639,13 +629,26 @@ async function clearCombat(){
   loadCombat();
 }
 
-async function addNpc(hidden=false){
+function openNpcForm(hidden=false){
   if(!liveMaster())return toast('Esta sessão está encerrada.');
-  const name=(prompt(hidden?'Nome interno do monstro oculto:':'Nome do NPC ou criatura:','')||'').trim();
-  if(!name)return;
-  const ini=Math.trunc(Number(prompt('Iniciativa:','0'))||0);
-  const hpRaw=prompt('HP máximo (opcional):','');
-  const hp=hpRaw==null||hpRaw.trim()===''?null:Math.max(0,Math.trunc(Number(hpRaw)||0));
+  $('#npcName').value='';
+  $('#npcInitiative').value='0';
+  $('#npcHp').value='';
+  $('#npcHidden').checked=!!hidden;
+  $('#npcQuickForm').classList.remove('hidden');
+  setTimeout(()=>$('#npcName').focus(),0);
+}
+function closeNpcForm(){
+  $('#npcQuickForm').classList.add('hidden');
+}
+async function saveNpcFromForm(){
+  if(!liveMaster())return toast('Esta sessão está encerrada.');
+  const name=$('#npcName').value.trim();
+  if(!name)return toast('Digite o nome da criatura.');
+  const ini=Math.trunc(Number($('#npcInitiative').value)||0);
+  const hpText=$('#npcHp').value.trim();
+  const hp=hpText===''?null:Math.max(0,Math.trunc(Number(hpText)||0));
+  const hidden=$('#npcHidden').checked;
   const visibility=hidden?'master':'public';
 
   const {error}=await client.from('room_initiative').insert({
@@ -657,10 +660,14 @@ async function addNpc(hidden=false){
     max_hp:hp,
     visibility
   });
-  if(error)return toast('Não foi possível adicionar o NPC.');
+  if(error){
+    console.warn('[SCUTUM] add npc',error);
+    return toast('Não foi possível adicionar a criatura.');
+  }
 
   if(!hidden)await logEvent(name+' foi adicionado(a) à iniciativa.','combat',{kind:'npc'});
-  toast(hidden?'Monstro oculto adicionado apenas à iniciativa do mestre.':name+' adicionado à iniciativa.');
+  closeNpcForm();
+  toast(hidden?'Criatura oculta adicionada apenas ao mestre.':name+' foi adicionada à iniciativa.');
   loadCombat();
 }
 
