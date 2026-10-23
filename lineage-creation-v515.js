@@ -5,7 +5,6 @@
   const ATTR_LABEL={for:'Força',des:'Destreza',con:'Constituição',int:'Inteligência',fe:'Fé',car:'Carisma'};
   let originals=new Map();
   let appliedRuntimeSignature='';
-  let reloadScheduled=false;
 
   const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const uniq=arr=>[...new Set((arr||[]).filter(Boolean))];
@@ -133,20 +132,16 @@ function seedMigratedCompoundChoices(data){
   }
 
   function checkRuntimeSignature(){
-    if(reloadScheduled)return;
-    const current=runtimeSignature(readState());
+    const data=readState();
+    const current=runtimeSignature(data);
     if(current===appliedRuntimeSignature)return;
-    reloadScheduled=true;
-    // Importar, resetar ou substituir a origem pode trocar o personagem sem reiniciar a aba.
-    // Como o Legado Composto recompõe os dados canônicos do deus em memória, um reload curto
-    // garante que a nova ficha sempre parta dos valores originais do Core antes de aplicar seu Legado.
-    setTimeout(()=>location.reload(),0);
+    applyRuntimeLineage(data);
   }
 
   function observeRuntimeLifecycle(){
     let queued=false;
     const scheduleCheck=()=>{
-      if(queued||reloadScheduled)return;
+      if(queued)return;
       queued=true;
       queueMicrotask(()=>{queued=false;checkRuntimeSignature()});
     };
@@ -253,9 +248,7 @@ function seedMigratedCompoundChoices(data){
     view.addEventListener('change',event=>{
       const id=event.target?.id;
       if(!['godSelect','creationLineageType','creationSecondaryGod'].includes(id))return;
-      // O app base salva a troca e re-renderiza de forma síncrona. Recarregar logo depois
-      // garante que HP, bônus e perícias sejam reconstruídos a partir das novas origens.
-      setTimeout(()=>location.reload(),0);
+      queueMicrotask(()=>{checkRuntimeSignature();decorateCreation()});
     });
     run();
   }
