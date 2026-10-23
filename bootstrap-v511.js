@@ -97,7 +97,7 @@
   try {
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`lineage-creation-v515.js?v=5.16.4-no-reload-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`lineage-creation-v515.js?v=5.16.5-multisheet-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar automação de Legados'));
       document.body.appendChild(patch);
     });
@@ -107,7 +107,7 @@
   try{
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`rebento-fresh-creation-v5161.js?v=5.16.4-observer-fix-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`rebento-fresh-creation-v5161.js?v=5.16.5-multisheet-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar inicialização de sucessor'));
       document.body.appendChild(patch);
     });
@@ -116,7 +116,7 @@
   try{
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`rebento-mechanics-v516.js?v=5.16.4-observer-fix-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`rebento-mechanics-v516.js?v=5.16.5-multisheet-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar mecânicas de Rebento'));
       document.body.appendChild(patch);
     });
@@ -125,20 +125,20 @@
   try{
     await new Promise((resolve,reject)=>{
       const visual=document.createElement('script');
-      visual.src='rebento-visual-v5163.js?v=5.16.3';
+      visual.src='rebento-visual-v5163.js?v=5.16.5-multisheet';
       visual.onload=resolve;visual.onerror=()=>reject(new Error('Falha ao carregar visual de Rebento'));
       document.body.appendChild(visual);
     });
   }catch(err){console.warn('[Ficha] Camada visual de Rebento indisponível.',err)}
 
   const script=document.createElement('script');
-  script.src=`app-v511.js?v=5.21.2-scutum-sync-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src=`app-v511.js?v=5.21.7-multisheet-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer=false;
   script.onload=async()=>{
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src=`rules-sync-v516.js?v=5.16.4-observer-fix-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.src=`rules-sync-v516.js?v=5.16.5-multisheet-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
         patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar sincronização das regras de combate'));
         document.body.appendChild(patch);
       });
@@ -155,7 +155,7 @@
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src='qol-v5171.js?v=5.20.2-observer-fix';
+        patch.src='qol-v5171.js?v=5.20.3-multisheet';
         patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar ajustes de reset, descansos e Sanidade'));
         document.body.appendChild(patch);
       });
