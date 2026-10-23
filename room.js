@@ -1297,8 +1297,8 @@ async function refresh(){
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'room_members',filter:'room_id=eq.'+roomId},()=>schedule(refresh))
     .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+roomId},()=>schedule(refresh))
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'characters'},payload=>{
-      const changedId=payload.new?.id||payload.old?.id;
+    .on('postgres_changes',{event:'*',schema:'public',table:'character_sync_state'},payload=>{
+      const changedId=payload.new?.character_id||payload.old?.character_id;
       if(changedId&&participants.some(p=>p.character_id===changedId))schedule(loadParticipants);
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'room_combat',filter:'room_id=eq.'+roomId},()=>schedule(loadCombat))
