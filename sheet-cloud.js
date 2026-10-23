@@ -607,8 +607,10 @@ function injectBootstrap(){
       if(note)note.innerHTML='<b>Salvo na nuvem</b> · SCUTUM Lab';
       ensureSwitcherShell();
       ensureRoomChatShell();
-      startRoomChatRealtime();
-      startEnhancer();
+      if(activeRoomId){
+        startRoomChatRealtime();
+        startEnhancer();
+      }
     },80);
   };
   script.onerror=()=>alert('Não foi possível carregar a ficha. Tente novamente.');
@@ -635,16 +637,18 @@ function injectBootstrap(){
   originalSet.call(localStorage,CHARACTER_KEY,last);
   loading=false;
 
-  cloudChannel=client.channel('sheet-cloud-'+id)
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'characters',filter:'id=eq.'+id},payload=>{
-      const next=payload.new?.sheet_data||{};
-      const updatedAt=payload.new?.updated_at||null;
-      const signature=syncSignature(next);
-      if(updatedAt)lastServerUpdatedAt=updatedAt;
-      if(signature===lastSignature)return;
-      applyServerSheet(next,updatedAt,{toastMessage:true});
-    })
-    .subscribe();
+  if(activeRoomId){
+    cloudChannel=client.channel('sheet-cloud-'+id)
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'characters',filter:'id=eq.'+id},payload=>{
+        const next=payload.new?.sheet_data||{};
+        const updatedAt=payload.new?.updated_at||null;
+        const signature=syncSignature(next);
+        if(updatedAt)lastServerUpdatedAt=updatedAt;
+        if(signature===lastSignature)return;
+        applyServerSheet(next,updatedAt,{toastMessage:true});
+      })
+      .subscribe();
+  }
 
   injectBootstrap();
 })();
