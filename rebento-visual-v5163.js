@@ -1,6 +1,6 @@
 (()=>{
   'use strict';
-  const STORAGE_KEY='duodecima_universal_stage4_v24';
+  const STORAGE_KEY = window.__DUODECIMA_STORAGE_KEY__ || 'duodecima_universal_stage4_v24';
 
   function isRebento(){
     try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')?.roma?.rebentoApproved===true}
