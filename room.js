@@ -213,7 +213,7 @@ function restoreSheetFloatGeometry(){
 }
 function saveSheetFloatGeometry(){
   const panel=$('#sheetFloat');
-  if(!panel||panel.classList.contains('maximized')||matchMedia('(max-width:900px)').matches)return;
+  if(!panel||panel.classList.contains('hidden')||panel.classList.contains('minimized')||panel.classList.contains('maximized')||matchMedia('(max-width:900px)').matches)return;
   const r=panel.getBoundingClientRect();
   localStorage.setItem(SHEET_POS_KEY,JSON.stringify({left:r.left,top:r.top,width:r.width,height:r.height}));
 }
@@ -225,6 +225,7 @@ async function openSelectedSheet(){
   if(!panel||!frame)return;
 
   panel.classList.remove('hidden','minimized');
+  $('#dockSheet')?.classList.add('active');
   $('#sheetFloatName').textContent=target.character_name||'Personagem';
   $('#sheetFloatMode').textContent='carregando…';
   restoreSheetFloatGeometry();
@@ -241,6 +242,7 @@ async function closeFloatingSheet(){
   await flushFloatingSheet();
   saveSheetFloatGeometry();
   $('#sheetFloat')?.classList.add('hidden');
+  $('#dockSheet')?.classList.remove('active');
 }
 function toggleSheetMinimize(){
   const panel=$('#sheetFloat');
@@ -1369,6 +1371,11 @@ $('#sheetFloatClose').onclick=closeFloatingSheet;
 $('#sheetFloatMinimize').onclick=toggleSheetMinimize;
 $('#sheetFloatMaximize').onclick=toggleSheetMaximize;
 setupSheetFloat();
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&!$('#sheetFloat')?.classList.contains('hidden')){
+    closeFloatingSheet();
+  }
+});
 $('#initiativeQuick').onclick=()=>openToolPanel('initiativePanel');
 $('#openInitiativeFloat').onclick=()=>openToolPanel('initiativePanel');
 $('#openChatFloat').onclick=()=>toggleChat(true);
