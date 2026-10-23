@@ -894,9 +894,12 @@ function renderRoll(r){
   if(r.is_manual){
     math='<span class="manual-mark">resultado manual</span>';
   }else if(keepMode){
-    math='<span class="dice-breakdown">['+dice.map(esc).join(', ')+'] → mantém '+kept.map(esc).join(', ')+(mod?' '+signed(mod):'')+'</span>';
+    math='<span class="dice-breakdown">['+dice.map(esc).join(', ')+'] → mantém</span>'+
+      '<span class="roll-kept">'+kept.map(esc).join(' + ')+'</span>'+
+      (mod?'<span class="roll-modifier">'+signed(mod)+'</span>':'');
   }else{
-    math='<span class="dice-breakdown">'+(dice.length?dice.map(esc).join(' + '):'')+(mod?' '+signed(mod):'')+'</span>';
+    math=(dice.length?'<span class="roll-kept">'+dice.map(esc).join(' + ')+'</span>':'')+
+      (mod?'<span class="roll-modifier">'+signed(mod)+'</span>':'');
   }
 
   const special=cls==='critical'
