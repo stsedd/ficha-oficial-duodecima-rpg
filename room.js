@@ -985,8 +985,8 @@ function rollVisibility(){
 async function submitSystemRoll(){
   if(!roomLive())return toast('Esta sessão está encerrada.');
   const raw=$('#rollExpression').value.trim().toLowerCase().replace(/\s+/g,'');
-  if(!/^(?:[1-9]\d?#)?[1-9]\d?d[1-9]\d{0,3}(?:(?:kh|kl)[1-9]\d?)?(?:[+-]\d{1,5})?$/i.test(raw)){
-    return toast('Use 1d20, 1d20+5, 2#1d20, 2d20, 2d20kh1+5 ou 2d20kl1+5.');
+  if(!/^(?:[1-9]\d?#)?[1-9]\d?d[1-9]\d{0,3}(?:(?:kh|hk|kl|lk)[1-9]\d?)?(?:[+-]\d{1,5})?$/i.test(raw)){
+    return toast('Use 1d20, 1d20+5, 2#1d20, 2d20, 2d20kh1+5 (ou hk1) e 2d20kl1+5.');
   }
 
   const btn=$('#submitRoll');
