@@ -38,6 +38,7 @@ let effects=[];
 let rolls=[];
 let messages=[];
 let selectedCharacterId=null;
+let resourceEditorState=null;
 const refreshTimers=new Map();
 let durationTimer=0;
 
@@ -217,13 +218,10 @@ function bindParticipantActions(){
     if(error){toast('Não foi possível remover: '+error.message);b.disabled=false}
   });
   $$('[data-adjust]').forEach(b=>b.onclick=()=>adjustCharacter(b.dataset.adjust,b.dataset.resource,Number(b.dataset.delta)));
-  $$('[data-custom-adjust]').forEach(b=>b.onclick=()=>{
-    const raw=prompt('Quanto deseja alterar? Use número negativo para diminuir.','-5');
-    if(raw==null)return;
-    const delta=Number(raw);
-    if(!Number.isFinite(delta)||delta===0)return toast('Digite um número diferente de zero.');
-    adjustCharacter(b.dataset.customAdjust,b.dataset.resource,Math.trunc(delta));
-  });
+  $('[data-custom-adjust]').forEach(b=>b.onclick=()=>openResourceEditor(
+    b.dataset.customAdjust,
+    b.dataset.resource
+  ));
   $$('[data-add-condition]').forEach(b=>b.onclick=async()=>{
     const condition=(prompt('Nome da condição:','')||'').trim();
     if(!condition)return;
@@ -234,6 +232,39 @@ function bindParticipantActions(){
   });
   $$('[data-remove-condition]').forEach(b=>b.onclick=()=>toggleCondition(b.dataset.removeCondition,b.dataset.condition,false));
 }
+function openResourceEditor(characterId,res){
+  if(!liveMaster())return;
+  const p=participants.find(x=>x.character_id===characterId);
+  if(!p)return;
+  const label={hp:'HP',energy:'Energia',sanity:'Sanidade',exhaustion:'Exaustão'}[res]||res;
+  const current={hp:p.current_hp,energy:p.current_energy,sanity:p.current_sanity,exhaustion:p.exhaustion}[res];
+
+  resourceEditorState={characterId,res};
+  $('#resourceEditorTitle').textContent='Ajustar '+label;
+  $('#resourceEditorMeta').textContent=p.character_name||'Personagem';
+  $('#resourceEditorCurrent').textContent=current==null?'—':String(current);
+  $('#resourceEditorDelta').value='-5';
+
+  const dialog=$('#resourceEditor');
+  if(typeof dialog.showModal==='function')dialog.showModal();
+  else dialog.setAttribute('open','');
+  setTimeout(()=>$('#resourceEditorDelta')?.select(),30);
+}
+function closeResourceEditor(){
+  resourceEditorState=null;
+  const dialog=$('#resourceEditor');
+  if(dialog?.open&&typeof dialog.close==='function')dialog.close();
+  else dialog?.removeAttribute('open');
+}
+async function applyResourceEditor(delta){
+  if(!resourceEditorState)return;
+  delta=Math.trunc(Number(delta));
+  if(!Number.isFinite(delta)||delta===0)return toast('Digite um ajuste diferente de zero.');
+  const {characterId,res}=resourceEditorState;
+  await adjustCharacter(characterId,res,delta);
+  closeResourceEditor();
+}
+
 async function adjustCharacter(characterId,res,delta){
   if(!liveMaster())return;
   const p=participants.find(x=>x.character_id===characterId);
@@ -1135,6 +1166,12 @@ $('#closeChat').onclick=()=>toggleChat(false);
 $('#liveButton').onclick=()=>openToolPanel('settingsPanel');
 $$('[data-close-panel]').forEach(b=>b.onclick=()=>openToolPanel(b.dataset.closePanel));
 if(matchMedia('(max-width:900px)').matches)document.body.classList.add('chat-hidden');
+
+$('#resourceEditorClose').onclick=closeResourceEditor;
+$('#resourceEditor').addEventListener('click',e=>{if(e.target===$('#resourceEditor'))closeResourceEditor()});
+$('#resourceEditorApply').onclick=()=>applyResourceEditor($('#resourceEditorDelta').value);
+$('#resourceEditorDelta').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyResourceEditor(e.currentTarget.value)}});
+$('[data-resource-preset]').forEach(b=>b.onclick=()=>applyResourceEditor(b.dataset.resourcePreset));
 
 $('#pullInitiative').onclick=()=>pullInitiative(true);
 $('#startCombat').onclick=startCombat;
