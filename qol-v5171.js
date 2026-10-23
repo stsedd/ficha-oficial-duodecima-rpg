@@ -2,7 +2,7 @@
   'use strict';
   if(window.__DUODECIMA_QOL_5171_ACTIVE__)return;
   window.__DUODECIMA_QOL_5171_ACTIVE__=true;
-  const STORAGE_KEY='duodecima_universal_stage4_v24';
+  const STORAGE_KEY = window.__DUODECIMA_STORAGE_KEY__ || 'duodecima_universal_stage4_v24';
   let queued=false;
 
   const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
