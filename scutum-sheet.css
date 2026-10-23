@@ -73,3 +73,51 @@
   .scutum-sheet-chat-dialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;border:0;margin:0}
   .scutum-sheet-chat-card{padding:16px}
 }
+
+.scutum-readonly-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 8px;
+  border:1px solid #665328;
+  border-radius:999px;
+  background:#1b160d;
+  color:#e8cf8a;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.05em;
+  text-transform:uppercase
+}
+.scutum-embedded .scutum-embed-hidden{display:none!important}
+.scutum-embedded .shell{
+  max-width:none!important;
+  width:100%!important;
+  margin:0!important;
+  padding:14px 16px 28px!important
+}
+.scutum-embedded .archive-toolbar{
+  position:sticky;
+  top:0;
+  z-index:40;
+  margin-top:0!important;
+  background:rgba(5,5,6,.96);
+  backdrop-filter:blur(12px)
+}
+.scutum-embedded .profile-cover{
+  margin-top:0!important;
+  border-top-left-radius:0!important;
+  border-top-right-radius:0!important
+}
+.scutum-readonly .archive-actions{
+  display:none!important
+}
+.scutum-readonly .archive-save-note{
+  color:#d6c27f!important
+}
+@media(max-width:700px){
+  .scutum-embedded .shell{padding:8px 8px 22px!important}
+  .scutum-embedded .archive-toolbar{
+    top:0;
+    border-radius:0!important
+  }
+}
