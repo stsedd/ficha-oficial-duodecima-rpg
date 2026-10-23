@@ -566,7 +566,7 @@ function injectBootstrap(){
   if(booted)return;
   booted=true;
   const script=document.createElement('script');
-  script.src='bootstrap-v511.js?v=v5.21.6-multisheet';
+  script.src='bootstrap-v511.js?v=v5.21.7-multisheet';
   script.onload=()=>{
     let toolbarAttempts=0;
     const waitForToolbar=setInterval(()=>{
