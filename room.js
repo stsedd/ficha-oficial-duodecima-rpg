@@ -1143,11 +1143,6 @@ $('#liveButton').onclick=()=>openToolPanel('settingsPanel');
 $$('[data-close-panel]').forEach(b=>b.onclick=()=>openToolPanel(b.dataset.closePanel));
 if(matchMedia('(max-width:900px)').matches)document.body.classList.add('chat-hidden');
 
-$('#resourceEditorClose').onclick=closeResourceEditor;
-$('#resourceEditor').addEventListener('click',e=>{if(e.target===$('#resourceEditor'))closeResourceEditor()});
-$('#resourceEditorApply').onclick=()=>applyResourceEditor($('#resourceEditorDelta').value);
-$('#resourceEditorDelta').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyResourceEditor(e.currentTarget.value)}});
-$('[data-resource-preset]').forEach(b=>b.onclick=()=>applyResourceEditor(b.dataset.resourcePreset));
 
 $('#pullInitiative').onclick=()=>pullInitiative(true);
 $('#startCombat').onclick=startCombat;
