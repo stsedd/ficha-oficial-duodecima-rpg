@@ -38,6 +38,8 @@ let effects=[];
 let rolls=[];
 let messages=[];
 let selectedCharacterId=null;
+let sheetFloatCharacterId=null;
+let sheetFloatRestoreRect=null;
 const refreshTimers=new Map();
 let durationTimer=0;
 
@@ -177,14 +179,137 @@ function setupInitiativeDragging(){
   handle.addEventListener('pointercancel',finish);
   window.addEventListener('resize',clampInitiativeWindow);
 }
-function openSelectedSheet(){
+const SHEET_POS_KEY='scutum_sheet_float_'+roomId;
+async function flushFloatingSheet(){
+  const frame=$('#sheetFrame');
+  try{
+    const fn=frame?.contentWindow?.__SCUTUM_SYNC_NOW;
+    if(typeof fn==='function')await fn({reason:'room-float'});
+  }catch(err){
+    console.warn('[SCUTUM] não foi possível confirmar o save da ficha antes de trocar/fechar',err);
+  }
+}
+function sheetTarget(){
   let characterId=isMaster?selectedCharacterId:(ownParticipant()?.character_id||null);
   if(!characterId&&isMaster){
     const first=participants[0];
     if(first){characterId=first.character_id;selectedCharacterId=characterId}
   }
-  if(!characterId)return toast('Selecione uma personagem primeiro.');
-  location.href='sheet.html?character='+encodeURIComponent(characterId)+'&return='+encodeURIComponent('room.html?id='+roomId);
+  if(!characterId)return null;
+  return participants.find(p=>p.character_id===characterId)||{character_id:characterId,character_name:'Personagem'};
+}
+function restoreSheetFloatGeometry(){
+  const panel=$('#sheetFloat');
+  if(!panel||matchMedia('(max-width:900px)').matches)return;
+  try{
+    const g=JSON.parse(localStorage.getItem(SHEET_POS_KEY)||'null');
+    if(g&&[g.left,g.top,g.width,g.height].every(Number.isFinite)){
+      panel.style.left=Math.max(8,Math.min(g.left,window.innerWidth-320))+'px';
+      panel.style.top=Math.max(56,Math.min(g.top,window.innerHeight-160))+'px';
+      panel.style.width=Math.min(Math.max(640,g.width),window.innerWidth-16)+'px';
+      panel.style.height=Math.min(Math.max(480,g.height),window.innerHeight-64)+'px';
+    }
+  }catch{}
+}
+function saveSheetFloatGeometry(){
+  const panel=$('#sheetFloat');
+  if(!panel||panel.classList.contains('maximized')||matchMedia('(max-width:900px)').matches)return;
+  const r=panel.getBoundingClientRect();
+  localStorage.setItem(SHEET_POS_KEY,JSON.stringify({left:r.left,top:r.top,width:r.width,height:r.height}));
+}
+async function openSelectedSheet(){
+  const target=sheetTarget();
+  if(!target)return toast('Selecione uma personagem primeiro.');
+  const panel=$('#sheetFloat');
+  const frame=$('#sheetFrame');
+  if(!panel||!frame)return;
+
+  panel.classList.remove('hidden','minimized');
+  $('#sheetFloatName').textContent=target.character_name||'Personagem';
+  $('#sheetFloatMode').textContent='carregando…';
+  restoreSheetFloatGeometry();
+
+  if(sheetFloatCharacterId!==target.character_id){
+    await flushFloatingSheet();
+    sheetFloatCharacterId=target.character_id;
+    $('#sheetFloatLoading').classList.remove('hidden');
+    frame.src='sheet.html?character='+encodeURIComponent(target.character_id)+
+      '&return='+encodeURIComponent('room.html?id='+roomId)+'&embed=1';
+  }
+}
+async function closeFloatingSheet(){
+  await flushFloatingSheet();
+  saveSheetFloatGeometry();
+  $('#sheetFloat')?.classList.add('hidden');
+}
+function toggleSheetMinimize(){
+  const panel=$('#sheetFloat');
+  if(!panel)return;
+  panel.classList.toggle('minimized');
+  $('#sheetFloatMinimize').textContent=panel.classList.contains('minimized')?'▢':'—';
+  if(!panel.classList.contains('minimized'))restoreSheetFloatGeometry();
+}
+function toggleSheetMaximize(){
+  const panel=$('#sheetFloat');
+  if(!panel||matchMedia('(max-width:900px)').matches)return;
+  if(!panel.classList.contains('maximized')){
+    const r=panel.getBoundingClientRect();
+    sheetFloatRestoreRect={left:r.left,top:r.top,width:r.width,height:r.height};
+    panel.classList.add('maximized');
+    $('#sheetFloatMaximize').textContent='❐';
+  }else{
+    panel.classList.remove('maximized');
+    $('#sheetFloatMaximize').textContent='□';
+    if(sheetFloatRestoreRect){
+      Object.assign(panel.style,{
+        left:sheetFloatRestoreRect.left+'px',
+        top:sheetFloatRestoreRect.top+'px',
+        width:sheetFloatRestoreRect.width+'px',
+        height:sheetFloatRestoreRect.height+'px'
+      });
+    }
+  }
+}
+function setupSheetFloat(){
+  const panel=$('#sheetFloat'),handle=$('#sheetFloatHandle'),frame=$('#sheetFrame');
+  if(!panel||!handle||handle.dataset.dragReady)return;
+  handle.dataset.dragReady='1';
+
+  frame.addEventListener('load',()=>{
+    $('#sheetFloatLoading')?.classList.add('hidden');
+  });
+  window.addEventListener('message',e=>{
+    if(e.origin!==location.origin||e.data?.type!=='scutum-sheet-ready')return;
+    if(e.data.characterId!==sheetFloatCharacterId)return;
+    $('#sheetFloatMode').textContent=e.data.readOnly?'somente leitura':'sincronizada';
+    $('#sheetFloatLoading')?.classList.add('hidden');
+  });
+
+  let dragging=false,startX=0,startY=0,startLeft=0,startTop=0;
+  handle.addEventListener('pointerdown',e=>{
+    if(matchMedia('(max-width:900px)').matches||panel.classList.contains('maximized')||e.target.closest('button'))return;
+    const r=panel.getBoundingClientRect();
+    dragging=true;startX=e.clientX;startY=e.clientY;startLeft=r.left;startTop=r.top;
+    panel.style.left=r.left+'px';panel.style.top=r.top+'px';
+    handle.setPointerCapture?.(e.pointerId);
+    panel.classList.add('dragging');
+    e.preventDefault();
+  });
+  handle.addEventListener('pointermove',e=>{
+    if(!dragging)return;
+    const r=panel.getBoundingClientRect();
+    panel.style.left=Math.min(Math.max(8,startLeft+e.clientX-startX),Math.max(8,window.innerWidth-r.width-8))+'px';
+    panel.style.top=Math.min(Math.max(56,startTop+e.clientY-startY),Math.max(56,window.innerHeight-r.height-8))+'px';
+  });
+  const finish=e=>{
+    if(!dragging)return;
+    dragging=false;panel.classList.remove('dragging');
+    handle.releasePointerCapture?.(e.pointerId);
+    saveSheetFloatGeometry();
+  };
+  handle.addEventListener('pointerup',finish);
+  handle.addEventListener('pointercancel',finish);
+  new ResizeObserver(()=>saveSheetFloatGeometry()).observe(panel);
 }
 /* ---------- PARTICIPANTS ---------- */
 
@@ -1240,6 +1365,10 @@ $$('.dock-button[data-panel]').forEach(b=>b.onclick=()=>openToolPanel(b.dataset.
 $('#dockTable').onclick=()=>closeToolPanels();
 $('#dockChat').onclick=()=>toggleChat();
 $('#dockSheet').onclick=openSelectedSheet;
+$('#sheetFloatClose').onclick=closeFloatingSheet;
+$('#sheetFloatMinimize').onclick=toggleSheetMinimize;
+$('#sheetFloatMaximize').onclick=toggleSheetMaximize;
+setupSheetFloat();
 $('#initiativeQuick').onclick=()=>openToolPanel('initiativePanel');
 $('#openInitiativeFloat').onclick=()=>openToolPanel('initiativePanel');
 $('#openChatFloat').onclick=()=>toggleChat(true);
