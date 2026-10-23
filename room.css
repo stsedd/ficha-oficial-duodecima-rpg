@@ -166,3 +166,34 @@ body.chat-hidden .roll-console{display:none}
 
 .room-state-chip{display:inline-flex;align-items:center;padding:5px 8px;border:1px solid #31523c;border-radius:999px;background:#0d1711;color:#9fd0ab;font-size:7px;font-weight:800;letter-spacing:.08em}
 .room-state-chip.ended{border-color:#69303b;background:#1f0d12;color:#e58a99}
+
+.resource-editor{
+  width:min(430px,calc(100vw - 28px));
+  max-width:430px;
+  padding:0;
+  border:1px solid #3b3f46;
+  border-radius:14px;
+  background:#060608;
+  color:var(--text);
+  box-shadow:0 28px 90px rgba(0,0,0,.68)
+}
+.resource-editor::backdrop{background:rgba(0,0,0,.66);backdrop-filter:blur(5px)}
+.resource-editor-card{padding:14px}
+.resource-editor-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding-bottom:11px;border-bottom:1px solid #23262c}
+.resource-editor-head h2{margin:2px 0 3px;font:600 22px var(--serif)}
+.resource-editor-head p:not(.eyebrow){margin:0;color:var(--muted);font-size:9px}
+.resource-editor-head button{width:30px;height:30px;padding:0;border-radius:50%}
+.resource-current{display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px;padding:10px 11px;border:1px solid #2c3036;border-radius:10px;background:#090a0d}
+.resource-current span{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.resource-current b{font:700 22px var(--serif)}
+.resource-quick{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:11px}
+.resource-quick button{padding:7px 4px;font-size:9px}
+.resource-custom-field{display:grid;gap:5px}
+.resource-custom-field>span{font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.resource-custom-field>div{display:grid;grid-template-columns:1fr auto;gap:6px}
+.resource-custom-field input{min-width:0;background:#08090b;border:1px solid #343840;border-radius:9px;color:var(--text);padding:9px 10px}
+.resource-custom-field button{min-width:88px}
+@media(max-width:520px){
+  .resource-editor{width:calc(100vw - 18px)}
+  .resource-quick{grid-template-columns:repeat(3,1fr)}
+}
