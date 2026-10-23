@@ -243,13 +243,20 @@ function handleRemoteRow(row){
 }
 function startRealtime(){
   if(channel)return;
-  channel=client.channel('sheet-character-'+id)
+  channel=client.channel('sheet-sync-'+id)
     .on('postgres_changes',{
-      event:'UPDATE',
+      event:'*',
       schema:'public',
-      table:'characters',
-      filter:'id=eq.'+id
-    },payload=>handleRemoteRow(payload.new))
+      table:'character_sync_state',
+      filter:'character_id=eq.'+id
+    },async()=>{
+      try{
+        const fresh=await fetchLatest();
+        handleRemoteRow(fresh);
+      }catch(err){
+        console.warn('[SCUTUM] não foi possível buscar a versão mais recente da ficha',err);
+      }
+    })
     .subscribe();
 }
 function startPersistence(){
