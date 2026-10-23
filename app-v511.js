@@ -1463,6 +1463,9 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     if(type==='normal')return `<section class="mechanics-section"><article class="card"><p class="eyebrow">LEGADO</p><h2>Linhagem</h2>${controls}<p class="muted">Nenhuma mistura de kits ativa.</p></article></section>`;
     if(!sub)return `<section class="mechanics-section"><article class="card"><p class="eyebrow">LEGADO</p><h2>Linhagem</h2>${controls}<div class="notice">Escolha um segundo deus para configurar o Legado.</div></article></section>`;
     const a=baseAbilitySet(state.godId),b=baseAbilitySet(sub.id);
+    if(!a||!b){
+      return `<section class="mechanics-section"><article class="card"><p class="eyebrow">LEGADO</p><h2>${esc(main.name)} + ${esc(sub.name)}</h2>${controls}<div class="notice warn-note"><b>Dados de habilidades temporariamente indisponíveis.</b> A ficha continua acessível e os dados do personagem permanecem salvos. Reabra quando o Core estiver disponível para editar o Legado.</div></article></section>`;
+    }
     if(type==='direct'){
       const reps=state.lineage.compoundPassiveReplacements||[];
       const activeReps=state.lineage.compoundActiveReplacements||[];
