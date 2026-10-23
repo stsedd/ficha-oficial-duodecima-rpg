@@ -5,6 +5,7 @@ const params=new URLSearchParams(location.search);
 const id=params.get('character');
 const returnParam=params.get('return')||'';
 const KEY='duodecima_universal_stage4_v24';
+const CHARACTER_KEY='scutum_character_'+id+'_stage4_v24';
 
 if(!id||!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase){
   location.replace('index.html');
@@ -12,7 +13,9 @@ if(!id||!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase){
 }
 
 const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+const originalGet=Storage.prototype.getItem;
 const originalSet=Storage.prototype.setItem;
+const originalRemove=Storage.prototype.removeItem;
 let loading=true,timer=0,last='',booted=false,cloudChannel=null,lastSignature='',lastServerUpdatedAt=null;
 let currentUser=null,enhanceTimer=0,roomChatChannel=null,roomChatOpen=false;
 
@@ -67,7 +70,7 @@ async function applyServerSheet(next,updatedAt,{toastMessage=false}={}){
   lastSignature=signature;
   last=JSON.stringify(next||{});
   if(updatedAt)lastServerUpdatedAt=updatedAt;
-  originalSet.call(localStorage,KEY,last);
+  originalSet.call(localStorage,CHARACTER_KEY,last);
   const applied=typeof window.__DUODECIMA_APPLY_CLOUD_STATE==='function'
     ?window.__DUODECIMA_APPLY_CLOUD_STATE(next||{})
     :false;
@@ -114,13 +117,25 @@ async function pushCloud(raw){
     if(note)note.innerHTML='<b>Falha ao sincronizar</b> · sua cópia local continua salva';
   }
 }
+Storage.prototype.getItem=function(k){
+  if(this===localStorage&&k===KEY)return originalGet.call(this,CHARACTER_KEY);
+  return originalGet.call(this,k);
+};
 Storage.prototype.setItem=function(k,v){
-  originalSet.call(this,k,v);
-  if(this===localStorage&&k===KEY&&!loading&&v!==last){
-    last=v;
-    clearTimeout(timer);
-    timer=setTimeout(()=>pushCloud(v),650);
+  if(this===localStorage&&k===KEY){
+    originalSet.call(this,CHARACTER_KEY,v);
+    if(!loading&&v!==last){
+      last=v;
+      clearTimeout(timer);
+      timer=setTimeout(()=>pushCloud(v),650);
+    }
+    return;
   }
+  return originalSet.call(this,k,v);
+};
+Storage.prototype.removeItem=function(k){
+  if(this===localStorage&&k===KEY)return originalRemove.call(this,CHARACTER_KEY);
+  return originalRemove.call(this,k);
 };
 
 function parseSigned(text){
@@ -615,7 +630,9 @@ function injectBootstrap(){
   last=JSON.stringify(data.sheet_data||{});
   lastSignature=syncSignature(data.sheet_data||{});
   lastServerUpdatedAt=data.updated_at||null;
-  originalSet.call(localStorage,KEY,last);
+  window.__DUODECIMA_PRELOAD__=data.sheet_data||{};
+  window.__SCUTUM_CHARACTER_ID__=id;
+  originalSet.call(localStorage,CHARACTER_KEY,last);
   loading=false;
 
   cloudChannel=client.channel('sheet-cloud-'+id)
