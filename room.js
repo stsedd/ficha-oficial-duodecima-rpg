@@ -112,39 +112,38 @@ function openSelectedSheet(){
 }
 /* ---------- PARTICIPANTS ---------- */
 
-function adjustButtons(characterId,resource,current){
-  if(!liveMaster()||current==null)return '';
+function adjustButtons(characterId,resource,current,allowed){
+  if(!allowed||current==null)return '';
   const key=characterId+'-'+resource;
-  return '<span class="resource-actions">'+
+  return '<div class="resource-actions">'+
     '<button data-adjust="'+characterId+'" data-resource="'+resource+'" data-delta="-1" title="Diminuir 1">−</button>'+
-    '<input class="resource-inline-input" data-resource-input="'+key+'" inputmode="numeric" type="number" placeholder="± valor" aria-label="Ajuste manual">'+
-    '<button class="resource-apply" data-inline-apply="'+characterId+'" data-resource="'+resource+'" data-input-key="'+key+'" title="Aplicar ajuste">✓</button>'+
+    '<input class="resource-inline-input" data-resource-input="'+key+'" inputmode="numeric" type="number" placeholder="-5 ou +5" aria-label="Ajuste manual">'+
+    '<button class="resource-apply" data-inline-apply="'+characterId+'" data-resource="'+resource+'" data-input-key="'+key+'" title="Aplicar ajuste">Aplicar</button>'+
     '<button data-adjust="'+characterId+'" data-resource="'+resource+'" data-delta="1" title="Aumentar 1">+</button>'+
-  '</span>';
+  '</div>';
 }
-function resource(label,current,max,characterId,key){
+function resource(label,current,max,characterId,key,allowed){
   const visible=current!=null;
   const hasMax=max!=null&&Number.isFinite(Number(max))&&Number(max)>0;
   const value=visible?(hasMax?esc(current)+'/'+esc(max):esc(current)):'—';
   return '<div class="resource-row">'+
-    '<span>'+label+'</span>'+
+    '<div class="resource-head"><span>'+label+'</span><b>'+value+'</b></div>'+
     '<div class="bar"><i style="width:'+(visible&&hasMax?pct(current,max):0)+'%"></i></div>'+
-    '<b>'+value+'</b>'+
-    adjustButtons(characterId,key,current)+
+    adjustButtons(characterId,key,current,allowed)+
   '</div>';
 }
 function publicResource(label,percent){
   const visible=percent!=null&&Number.isFinite(Number(percent));
   const safe=visible?Math.max(0,Math.min(100,Number(percent))):null;
   return '<div class="resource-row public-resource">'+
-    '<span>'+label+'</span>'+
+    '<div class="resource-head"><span>'+label+'</span><b>'+(safe==null?'—':Math.round(safe)+'%')+'</b></div>'+
     '<div class="bar"><i style="width:'+(safe??0)+'%"></i></div>'+
-    '<b aria-label="porcentagem">'+(safe==null?'—':Math.round(safe)+'%')+'</b>'+
   '</div>';
 }
 function participantCard(p){
   const self=p.user_id===me.id;
   const canSee=isMaster||self;
+  const canAdjust=roomLive()&&(liveMaster()||self);
   const origin=p.origin_type==='mortal'?'Mortal da Névoa':(p.god_id||'—');
   const portrait=p.portrait_url||'';
   const online=onlineIds.has(p.user_id);
@@ -165,9 +164,9 @@ function participantCard(p){
 
   const vitals=canSee
     ?'<div class="resource-stack">'+
-      resource('HP',p.current_hp,p.max_hp,p.character_id,'hp')+
-      resource('EN',p.current_energy,p.max_energy,p.character_id,'energy')+
-      resource('SAN',p.current_sanity,100,p.character_id,'sanity')+
+      resource('HP',p.current_hp,p.max_hp,p.character_id,'hp',canAdjust)+
+      resource('EN',p.current_energy,p.max_energy,p.character_id,'energy',canAdjust)+
+      resource('SAN',p.current_sanity,100,p.character_id,'sanity',canAdjust)+
     '</div>'
     :'<div class="resource-stack public-vitals">'+
       publicResource('HP',p.hp_percent)+
@@ -176,7 +175,9 @@ function participantCard(p){
     '</div>';
 
   return '<article class="participant-card '+(selectedCharacterId===p.character_id?'selected':'')+'" data-card-character="'+p.character_id+'" data-card-user="'+p.user_id+'">'+
-    '<div class="participant-art">'+(portrait?'<img src="'+esc(portrait)+'" alt="">':'<span class="portrait-fallback">'+esc((p.character_name||'?').slice(0,1).toUpperCase())+'</span>')+'</div>'+
+    '<div class="participant-art">'+(portrait?'<img src="'+esc(portrait)+'" alt="">':'<span class="portrait-fallback">'+esc((p.character_name||'?').slice(0,1).toUpperCase())+'</span>')+
+      '<div class="portrait-shade"></div>'+
+    '</div>'+
     '<div class="participant-copy">'+
       '<div class="participant-title"><div><h3>'+esc(p.character_name)+'</h3><p>'+esc(origin)+' · Nv '+Number(p.level||1)+'</p></div>'+
       '<span class="presence-wrap"><span class="presence '+(online?'online':'offline')+'"><i></i>'+(online?'online':'offline')+'</span>'+(ready?'<span class="ready-badge">pronto</span>':'')+'</span></div>'+
@@ -218,18 +219,19 @@ function bindParticipantActions(){
     const {error}=await client.from('room_members').delete().eq('room_id',roomId).eq('user_id',b.dataset.removeMember);
     if(error){toast('Não foi possível remover: '+error.message);b.disabled=false}
   });
-  $('[data-adjust]').forEach(b=>b.onclick=()=>adjustCharacter(b.dataset.adjust,b.dataset.resource,Number(b.dataset.delta)));
-  $('[data-inline-apply]').forEach(b=>b.onclick=()=>{
+  $$('[data-adjust]').forEach(b=>b.onclick=()=>adjustCharacter(b.dataset.adjust,b.dataset.resource,Number(b.dataset.delta)));
+  $$('[data-inline-apply]').forEach(b=>b.onclick=()=>{
     const input=$('[data-resource-input="'+b.dataset.inputKey+'"]');
-    const delta=Math.trunc(Number(input?.value));
-    if(!Number.isFinite(delta)||delta===0)return toast('Digite um ajuste como -5 ou +5.');
-    adjustCharacter(b.dataset.inlineApply,b.dataset.resource,delta).then(()=>{if(input)input.value=''});
+    const raw=(input?.value||'').trim();
+    if(!/^[+-]?\d+$/.test(raw))return toast('Digite um ajuste como -5 ou +5.');
+    const delta=Math.trunc(Number(raw));
+    if(!delta)return toast('Digite um valor diferente de zero.');
+    adjustCharacter(b.dataset.inlineApply,b.dataset.resource,delta).then(ok=>{if(ok&&input)input.value=''});
   });
-  $('[data-resource-input]').forEach(input=>input.addEventListener('keydown',e=>{
+  $$('[data-resource-input]').forEach(input=>input.addEventListener('keydown',e=>{
     if(e.key!=='Enter')return;
     e.preventDefault();
-    const apply=$('[data-inline-apply][data-input-key="'+input.dataset.resourceInput+'"]');
-    apply?.click();
+    $('[data-inline-apply][data-input-key="'+input.dataset.resourceInput+'"]')?.click();
   }));
   $$('[data-add-condition]').forEach(b=>b.onclick=async()=>{
     const condition=(prompt('Nome da condição:','')||'').trim();
@@ -242,19 +244,25 @@ function bindParticipantActions(){
   $$('[data-remove-condition]').forEach(b=>b.onclick=()=>toggleCondition(b.dataset.removeCondition,b.dataset.condition,false));
 }
 async function adjustCharacter(characterId,res,delta){
-  if(!liveMaster())return;
+  if(!roomLive())return false;
   const p=participants.find(x=>x.character_id===characterId);
-  const label={hp:'HP',energy:'Energia',sanity:'Sanidade',exhaustion:'Exaustão'}[res]||res;
-  const {data,error}=await client.rpc('master_adjust_character_resource',{
+  const self=p?.user_id===me?.id;
+  if(!liveMaster()&&!self)return false;
+  const label={hp:'HP',energy:'Energia',sanity:'Sanidade'}[res]||res;
+  const {data,error}=await client.rpc('adjust_room_character_resource',{
     p_room_id:roomId,p_character_id:characterId,p_resource:res,p_delta:delta
   });
-  if(error)return toast('Não foi possível ajustar '+label+'.');
+  if(error){
+    console.warn('[SCUTUM] resource adjust',error);
+    toast('Não foi possível ajustar '+label+'.');
+    return false;
+  }
   const row=data?.[0];
-  if(row)await logEvent((p?.character_name||'Personagem')+': '+label+' '+row.old_value+' → '+row.new_value+'.','resource',{
+  if(row&&liveMaster())await logEvent((p?.character_name||'Personagem')+': '+label+' '+row.old_value+' → '+row.new_value+'.','resource',{
     character_id:characterId,resource:res,old_value:row.old_value,new_value:row.new_value
   });
-  toast(label+' atualizado.');
-  loadParticipants();
+  await loadParticipants();
+  return true;
 }
 async function toggleCondition(characterId,condition,enabled,rounds=0){
   if(!liveMaster())return;
