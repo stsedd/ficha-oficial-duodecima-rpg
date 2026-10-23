@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="room.css?v=3.4.2">
+<link rel="stylesheet" href="room.css?v=4.0.0">
 </head>
 <body>
 <header class="room-top">
@@ -58,21 +58,29 @@
 
         <div id="participantGrid" class="participant-grid"></div>
 
-        <section id="initiativePanel" class="tool-window hidden">
-          <div class="window-head">
+        <section id="initiativePanel" class="tool-window initiative-window hidden" role="dialog" aria-label="Iniciativa">
+          <div class="window-head initiative-drag-handle" id="initiativeDragHandle">
             <div><p class="eyebrow">ORDEM DE COMBATE</p><h2>Iniciativa</h2></div>
-            <button class="window-close" data-close-panel="initiativePanel">×</button>
+            <div class="window-head-tools"><span class="drag-hint">arraste</span><button class="window-close" data-close-panel="initiativePanel">×</button></div>
           </div>
           <div id="combatStatus" class="combat-status">Nenhum combate ativo.</div>
           <div id="initiativeList" class="initiative-list"></div>
+          <div id="npcQuickForm" class="npc-quick-form hidden">
+            <input id="npcName" maxlength="80" placeholder="Nome da criatura">
+            <input id="npcInitiative" type="number" inputmode="numeric" value="0" placeholder="INI">
+            <input id="npcHp" type="number" inputmode="numeric" min="0" placeholder="HP">
+            <label><input id="npcHidden" type="checkbox"> Oculto</label>
+            <button id="saveNpc" class="primary" type="button">Adicionar</button>
+            <button id="cancelNpc" type="button">Cancelar</button>
+          </div>
           <div class="window-footer master-only hidden">
-            <button id="pullInitiative">Puxar iniciativa</button>
-            <button id="addNpc">+ Monstro</button>
-            <button id="addHiddenNpc">+ Oculto</button>
+            <button id="pullInitiative">Puxar personagens</button>
+            <button id="addNpc">+ Criatura</button>
+            <button id="addHiddenNpc">+ Oculta</button>
             <span class="spacer"></span>
-            <button id="prevTurn">←</button>
+            <button id="prevTurn" title="Turno anterior">←</button>
             <button id="startCombat" class="primary">Iniciar</button>
-            <button id="nextTurn">→</button>
+            <button id="nextTurn" title="Próximo turno">→</button>
             <button id="clearCombat">Limpar</button>
             <button id="endCombat" class="danger">Encerrar</button>
           </div>
@@ -135,27 +143,40 @@
           <div class="roll-empty"><b>Nenhuma rolagem ainda.</b><small>Rolagens e habilidades aparecem aqui.</small></div>
         </div>
         <div id="rollForm" class="roll-composer">
-          <div class="roll-form-top">
-            <label><span>Tipo</span><select id="rollKind"><option>Perícia</option><option>Iniciativa</option><option>Ataque</option><option>Defesa</option><option>Resistência</option><option>Dano</option><option selected>Rolagem livre</option></select></label>
-            <label><span>Descrição</span><input id="rollLabel" maxlength="80" placeholder="Percepção, ataque…"></label>
-          </div>
-          <div id="diceMode" class="dice-mode">
-            <div class="dice-expression-row">
-              <label><span>Expressão</span><input id="rollExpression" value="1d20" placeholder="1d20+5"></label>
-              <label><span>Extra</span><input id="rollExtraModifier" type="number" value="0"></label>
-              <button id="submitRoll" class="primary" type="button">Rolar</button>
+          <label class="roll-command-field">
+            <span>COMANDO DE DADOS</span>
+            <div class="roll-command-row">
+              <b>/r</b>
+              <input id="rollExpression" value="1d20" autocomplete="off" spellcheck="false" placeholder="1d20+5">
+              <button id="submitRoll" class="roll-enter" type="button" title="Executar rolagem">↵</button>
             </div>
-            <label class="roll-context-field"><span>Origem do bônus / observação</span><input id="rollNote" maxlength="120" placeholder="+3 Prole · alvo Caído"></label>
-            <div class="quick-dice"><button type="button" data-die="1d20">d20</button><button type="button" data-die="1d12">d12</button><button type="button" data-die="1d10">d10</button><button type="button" data-die="1d8">d8</button><button type="button" data-die="1d6">d6</button><button type="button" data-die="1d4">d4</button><button type="button" data-die="1d100">d100</button></div>
+            <small>Enter para rolar · 2#1d20 faz duas rolagens · 2d20kh1 / 2d20kl1 mantém maior / menor</small>
+          </label>
+          <div class="quick-dice" aria-label="Dados rápidos">
+            <button type="button" data-die="1d20">d20</button>
+            <button type="button" data-die="1d12">d12</button>
+            <button type="button" data-die="1d10">d10</button>
+            <button type="button" data-die="1d8">d8</button>
+            <button type="button" data-die="1d6">d6</button>
+            <button type="button" data-die="1d4">d4</button>
+            <button type="button" data-die="1d100">d100</button>
           </div>
-          <div id="manualMode" class="manual-mode hidden">
-            <label><span>Resultado manual</span><input id="manualTotal" type="number" placeholder="Total"></label>
-            <button id="submitManualRoll" class="primary" type="button">Registrar</button>
-          </div>
-          <div class="roll-options">
-            <label><input id="manualToggle" type="checkbox"><span>Manual</span></label>
-            <label id="secretRollOption" class="master-only hidden"><input id="secretRoll" type="checkbox"><span>Somente mestre</span></label>
-          </div>
+          <details class="roll-details">
+            <summary>Detalhes da rolagem</summary>
+            <div class="roll-detail-grid">
+              <label><span>Tipo</span><select id="rollKind"><option>Perícia</option><option>Iniciativa</option><option>Ataque</option><option>Defesa</option><option>Resistência</option><option>Dano</option><option selected>Rolagem livre</option></select></label>
+              <label><span>Descrição</span><input id="rollLabel" maxlength="80" placeholder="Percepção, ataque…"></label>
+              <label class="roll-context-field"><span>Observação</span><input id="rollNote" maxlength="120" placeholder="Prole, condição, alvo…"></label>
+            </div>
+            <div class="roll-options">
+              <label id="secretRollOption" class="master-only hidden"><input id="secretRoll" type="checkbox"><span>Somente mestre</span></label>
+              <label><input id="manualToggle" type="checkbox"><span>Resultado manual</span></label>
+            </div>
+            <div id="manualMode" class="manual-mode hidden">
+              <label><span>Resultado manual</span><input id="manualTotal" type="number" placeholder="Total"></label>
+              <button id="submitManualRoll" class="primary" type="button">Registrar</button>
+            </div>
+          </details>
         </div>
       </aside>
     </div>
@@ -165,6 +186,6 @@
 <div id="toast" class="toast hidden" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1"></script>
 <script src="scutum-config.js"></script>
-<script src="room.js?v=3.4.2"></script>
+<script src="room.js?v=4.0.0"></script>
 </body>
 </html>
