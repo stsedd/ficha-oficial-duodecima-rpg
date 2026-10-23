@@ -2,7 +2,7 @@
   'use strict';
 
   const SCHEMA_VERSION = 24;
-  const STORAGE_KEY = 'duodecima_universal_stage4_v24';
+  const STORAGE_KEY = window.__DUODECIMA_STORAGE_KEY__ || 'duodecima_universal_stage4_v24';
   const SHEET_BACKUP_DB = 'duodecima_sheet_backups_v1';
   const SHEET_BACKUP_STORE = 'snapshots';
   const SHEET_BACKUP_LIMIT = 8;
