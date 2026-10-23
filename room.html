@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="room.css?v=3.3.1">
+<link rel="stylesheet" href="room.css?v=3.4.0">
 </head>
 <body>
 <header class="room-top">
@@ -162,9 +162,31 @@
   </section>
 </main>
 
+<dialog id="resourceEditor" class="resource-editor">
+  <div class="resource-editor-card">
+    <div class="resource-editor-head">
+      <div><p class="eyebrow">RECURSO</p><h2 id="resourceEditorTitle">Ajustar recurso</h2><p id="resourceEditorMeta"></p></div>
+      <button id="resourceEditorClose" type="button" aria-label="Fechar">×</button>
+    </div>
+    <div class="resource-current"><span>Valor atual</span><b id="resourceEditorCurrent">—</b></div>
+    <div class="resource-quick">
+      <button type="button" data-resource-preset="-10">−10</button>
+      <button type="button" data-resource-preset="-5">−5</button>
+      <button type="button" data-resource-preset="-1">−1</button>
+      <button type="button" data-resource-preset="1">+1</button>
+      <button type="button" data-resource-preset="5">+5</button>
+      <button type="button" data-resource-preset="10">+10</button>
+    </div>
+    <label class="resource-custom-field">
+      <span>Ajuste personalizado</span>
+      <div><input id="resourceEditorDelta" type="number" inputmode="numeric" value="-5"><button id="resourceEditorApply" class="primary" type="button">Aplicar</button></div>
+    </label>
+  </div>
+</dialog>
+
 <div id="toast" class="toast hidden" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1"></script>
 <script src="scutum-config.js"></script>
-<script src="room.js?v=3.3.2"></script>
+<script src="room.js?v=3.4.0"></script>
 </body>
 </html>
