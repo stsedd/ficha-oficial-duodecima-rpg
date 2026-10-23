@@ -223,7 +223,7 @@
   }
 
   async function loadSnapshot(){
-    const snapshot=await getJson(`${SNAPSHOT_URL}?v=1`,'no-cache');
+    const snapshot=await getJson(`${SNAPSHOT_URL}?v=2`,'no-cache');
     if(!snapshot?.manifest||!snapshot?.gods||!snapshot?.skills||!snapshot?.system)throw new Error('Snapshot local incompleto.');
     return snapshot;
   }
