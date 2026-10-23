@@ -111,8 +111,7 @@ function payload(data){
     conditions:Array.isArray(data.conditions)?data.conditions:[],
     exhaustion:Number(data.exhaustion||0),
     sheet_version:Number(data.schemaVersion||24),
-    sheet_data:data,
-    updated_at:new Date().toISOString()
+    sheet_data:data
   };
 }
 function currentLocal(){
