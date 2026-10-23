@@ -38,7 +38,6 @@ let effects=[];
 let rolls=[];
 let messages=[];
 let selectedCharacterId=null;
-let resourceEditorState=null;
 const refreshTimers=new Map();
 let durationTimer=0;
 
@@ -115,10 +114,12 @@ function openSelectedSheet(){
 
 function adjustButtons(characterId,resource,current){
   if(!liveMaster()||current==null)return '';
+  const key=characterId+'-'+resource;
   return '<span class="resource-actions">'+
     '<button data-adjust="'+characterId+'" data-resource="'+resource+'" data-delta="-1" title="Diminuir 1">−</button>'+
+    '<input class="resource-inline-input" data-resource-input="'+key+'" inputmode="numeric" type="number" placeholder="± valor" aria-label="Ajuste manual">'+
+    '<button class="resource-apply" data-inline-apply="'+characterId+'" data-resource="'+resource+'" data-input-key="'+key+'" title="Aplicar ajuste">✓</button>'+
     '<button data-adjust="'+characterId+'" data-resource="'+resource+'" data-delta="1" title="Aumentar 1">+</button>'+
-    '<button data-custom-adjust="'+characterId+'" data-resource="'+resource+'" title="Ajuste personalizado">•••</button>'+
   '</span>';
 }
 function resource(label,current,max,characterId,key){
@@ -217,11 +218,19 @@ function bindParticipantActions(){
     const {error}=await client.from('room_members').delete().eq('room_id',roomId).eq('user_id',b.dataset.removeMember);
     if(error){toast('Não foi possível remover: '+error.message);b.disabled=false}
   });
-  $$('[data-adjust]').forEach(b=>b.onclick=()=>adjustCharacter(b.dataset.adjust,b.dataset.resource,Number(b.dataset.delta)));
-  $('[data-custom-adjust]').forEach(b=>b.onclick=()=>openResourceEditor(
-    b.dataset.customAdjust,
-    b.dataset.resource
-  ));
+  $('[data-adjust]').forEach(b=>b.onclick=()=>adjustCharacter(b.dataset.adjust,b.dataset.resource,Number(b.dataset.delta)));
+  $('[data-inline-apply]').forEach(b=>b.onclick=()=>{
+    const input=$('[data-resource-input="'+b.dataset.inputKey+'"]');
+    const delta=Math.trunc(Number(input?.value));
+    if(!Number.isFinite(delta)||delta===0)return toast('Digite um ajuste como -5 ou +5.');
+    adjustCharacter(b.dataset.inlineApply,b.dataset.resource,delta).then(()=>{if(input)input.value=''});
+  });
+  $('[data-resource-input]').forEach(input=>input.addEventListener('keydown',e=>{
+    if(e.key!=='Enter')return;
+    e.preventDefault();
+    const apply=$('[data-inline-apply][data-input-key="'+input.dataset.resourceInput+'"]');
+    apply?.click();
+  }));
   $$('[data-add-condition]').forEach(b=>b.onclick=async()=>{
     const condition=(prompt('Nome da condição:','')||'').trim();
     if(!condition)return;
@@ -232,39 +241,6 @@ function bindParticipantActions(){
   });
   $$('[data-remove-condition]').forEach(b=>b.onclick=()=>toggleCondition(b.dataset.removeCondition,b.dataset.condition,false));
 }
-function openResourceEditor(characterId,res){
-  if(!liveMaster())return;
-  const p=participants.find(x=>x.character_id===characterId);
-  if(!p)return;
-  const label={hp:'HP',energy:'Energia',sanity:'Sanidade',exhaustion:'Exaustão'}[res]||res;
-  const current={hp:p.current_hp,energy:p.current_energy,sanity:p.current_sanity,exhaustion:p.exhaustion}[res];
-
-  resourceEditorState={characterId,res};
-  $('#resourceEditorTitle').textContent='Ajustar '+label;
-  $('#resourceEditorMeta').textContent=p.character_name||'Personagem';
-  $('#resourceEditorCurrent').textContent=current==null?'—':String(current);
-  $('#resourceEditorDelta').value='-5';
-
-  const dialog=$('#resourceEditor');
-  if(typeof dialog.showModal==='function')dialog.showModal();
-  else dialog.setAttribute('open','');
-  setTimeout(()=>$('#resourceEditorDelta')?.select(),30);
-}
-function closeResourceEditor(){
-  resourceEditorState=null;
-  const dialog=$('#resourceEditor');
-  if(dialog?.open&&typeof dialog.close==='function')dialog.close();
-  else dialog?.removeAttribute('open');
-}
-async function applyResourceEditor(delta){
-  if(!resourceEditorState)return;
-  delta=Math.trunc(Number(delta));
-  if(!Number.isFinite(delta)||delta===0)return toast('Digite um ajuste diferente de zero.');
-  const {characterId,res}=resourceEditorState;
-  await adjustCharacter(characterId,res,delta);
-  closeResourceEditor();
-}
-
 async function adjustCharacter(characterId,res,delta){
   if(!liveMaster())return;
   const p=participants.find(x=>x.character_id===characterId);
