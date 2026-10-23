@@ -25,7 +25,6 @@
     data.currentEnergy=null;
     if(save(data)){
       setPref(false);
-      location.reload();
       return true;
     }
     return false;
