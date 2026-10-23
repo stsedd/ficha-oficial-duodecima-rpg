@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="room.css?v=4.0.0">
+<link rel="stylesheet" href="room.css?v=4.1.0">
 </head>
 <body>
 <header class="room-top">
@@ -150,7 +150,7 @@
               <input id="rollExpression" value="1d20" autocomplete="off" spellcheck="false" placeholder="1d20+5">
               <button id="submitRoll" class="roll-enter" type="button" title="Executar rolagem">↵</button>
             </div>
-            <small>Enter para rolar · 2#1d20 faz duas rolagens · 2d20kh1 / 2d20kl1 mantém maior / menor</small>
+            <small>Enter para rolar · 2#1d20 faz duas rolagens · 2d20kh1 (ou hk1) / 2d20kl1 mantém maior / menor</small>
           </label>
           <div class="quick-dice" aria-label="Dados rápidos">
             <button type="button" data-die="1d20">d20</button>
@@ -186,6 +186,6 @@
 <div id="toast" class="toast hidden" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1"></script>
 <script src="scutum-config.js"></script>
-<script src="room.js?v=4.0.0"></script>
+<script src="room.js?v=4.1.0"></script>
 </body>
 </html>
