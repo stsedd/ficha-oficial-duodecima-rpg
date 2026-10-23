@@ -1,7 +1,7 @@
 (()=>{
   'use strict';
 
-  const STORAGE_KEY='duodecima_universal_stage4_v24';
+  const STORAGE_KEY = window.__DUODECIMA_STORAGE_KEY__ || 'duodecima_universal_stage4_v24';
   const ATTRS=[['for','FOR','Força'],['des','DES','Destreza'],['con','CON','Constituição'],['int','INT','Inteligência'],['fe','FÉ','Fé'],['car','CAR','Carisma']];
   const rebentoRules=()=>window.DUODECIMA_CORE_DATA?.system?.rebentos||window.DUODECIMA_SYSTEM?.rebentos||{
     attributeRewards:{total:2,mustUseDifferentAttributes:true,maxAttribute:6,sacrificableByMagic:false},
