@@ -1,6 +1,6 @@
 (()=>{
   'use strict';
-  const STORAGE_KEY='duodecima_universal_stage4_v24';
+  const STORAGE_KEY = window.__DUODECIMA_STORAGE_KEY__ || 'duodecima_universal_stage4_v24';
   const PREF_KEY='duodecima_successor_creation_pref_v1';
   const rules=()=>window.DUODECIMA_CORE_DATA?.system?.rebentos?.successor||window.DUODECIMA_SYSTEM?.rebentos?.successor||{startingAttributePoints:9,energyBaseBonus:25,energyBaseTotal:125};
   const read=()=>{try{const raw=localStorage.getItem(STORAGE_KEY);return raw?JSON.parse(raw):null}catch(_){return null}};
