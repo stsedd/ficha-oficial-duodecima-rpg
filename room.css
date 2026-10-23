@@ -149,7 +149,9 @@ body.chat-hidden .roll-console{display:none}
 .roll-result-line>strong{font:700 38px/.9 var(--serif);letter-spacing:-.04em;color:#fff}
 .roll-result-detail{display:flex!important;align-items:center;gap:4px;flex-wrap:wrap;min-width:0}
 .roll-expression{font:700 8px var(--sans);border:1px solid #612336;border-radius:999px;padding:3px 6px;color:#ff9fb2;background:#1b0710}
-.dice-breakdown{font-size:8px;color:#d4cfd1}
+.dice-breakdown{font-size:7px;color:#9e979c}
+.roll-kept{font:800 13px/1 var(--sans);color:#fff}
+.roll-modifier{font:800 13px/1 var(--sans);color:#ff6b88}
 .manual-mark,.roll-special,.secret-badge,.roll-series{font-size:6px;border:1px solid #3b3b45;border-radius:999px;padding:2px 5px;color:#aeb1b7}
 .roll-series{color:#ccb777;border-color:#5b4b26}.roll-special{color:#f0ce77;border-color:#6a5528}.roll-message.fumble .roll-result-line>strong{color:#ff5874}.roll-message.critical .roll-result-line>strong{color:#f4d174}
 .roll-note{margin:5px 0 0;font-size:7px;color:#aaa3a6}
