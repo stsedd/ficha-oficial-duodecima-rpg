@@ -4,8 +4,8 @@ const cfg=window.SCUTUM_CONFIG||{};
 const params=new URLSearchParams(location.search);
 const id=params.get('character');
 const returnParam=params.get('return')||'';
-const KEY='duodecima_universal_stage4_v24';
 const CHARACTER_KEY='scutum_character_'+id+'_stage4_v24';
+window.__DUODECIMA_STORAGE_KEY__=CHARACTER_KEY;
 
 if(!id||!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase){
   location.replace('index.html');
@@ -13,9 +13,7 @@ if(!id||!cfg.supabaseUrl||!cfg.supabaseAnonKey||!window.supabase){
 }
 
 const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
-const originalGet=Storage.prototype.getItem;
 const originalSet=Storage.prototype.setItem;
-const originalRemove=Storage.prototype.removeItem;
 let loading=true,timer=0,last='',booted=false,cloudChannel=null,lastSignature='',lastServerUpdatedAt=null;
 let currentUser=null,enhanceTimer=0,roomChatChannel=null,roomChatOpen=false;
 
@@ -117,25 +115,13 @@ async function pushCloud(raw){
     if(note)note.innerHTML='<b>Falha ao sincronizar</b> · sua cópia local continua salva';
   }
 }
-Storage.prototype.getItem=function(k){
-  if(this===localStorage&&k===KEY)return originalGet.call(this,CHARACTER_KEY);
-  return originalGet.call(this,k);
-};
 Storage.prototype.setItem=function(k,v){
-  if(this===localStorage&&k===KEY){
-    originalSet.call(this,CHARACTER_KEY,v);
-    if(!loading&&v!==last){
-      last=v;
-      clearTimeout(timer);
-      timer=setTimeout(()=>pushCloud(v),650);
-    }
-    return;
+  originalSet.call(this,k,v);
+  if(this===localStorage&&k===CHARACTER_KEY&&!loading&&v!==last){
+    last=v;
+    clearTimeout(timer);
+    timer=setTimeout(()=>pushCloud(v),650);
   }
-  return originalSet.call(this,k,v);
-};
-Storage.prototype.removeItem=function(k){
-  if(this===localStorage&&k===KEY)return originalRemove.call(this,CHARACTER_KEY);
-  return originalRemove.call(this,k);
 };
 
 function parseSigned(text){
