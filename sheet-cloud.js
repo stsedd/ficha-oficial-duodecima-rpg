@@ -356,7 +356,7 @@ function injectBootstrap(){
   if(bootstrapLoaded)return;
   bootstrapLoaded=true;
   const script=document.createElement('script');
-  script.src='bootstrap-v511.js?v=v5.21.8-cloud-sync';
+  script.src='bootstrap-v511.js?v=v5.21.9-cloud-sync';
   script.onload=()=>{
     decorateWhenReady();
     startPersistence();
