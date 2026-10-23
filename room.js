@@ -795,25 +795,32 @@ function rollPortrait(r){
 }
 function rollClass(r){
   if(r.is_manual)return 'manual';
-  if(r.expression?.toLowerCase().startsWith('1d20')&&Number(r.natural_roll)===20)return 'critical';
-  if(r.expression?.toLowerCase().startsWith('1d20')&&Number(r.natural_roll)===1)return 'fumble';
+  const expr=String(r.expression||'').toLowerCase();
+  if(expr.includes('d20')&&Number(r.natural_roll)===20)return 'critical';
+  if(expr.includes('d20')&&Number(r.natural_roll)===1)return 'fumble';
   return '';
 }
+function signed(n){
+  n=Number(n)||0;
+  return n>0?'+'+n:String(n);
+}
 function renderRoll(r){
-  const dice=Array.isArray(r.dice)?r.dice:[];
+  const dice=Array.isArray(r.dice)?r.dice.map(Number):[];
   const cls=rollClass(r);
-  const mod=Number(r.modifier||0);
   const breakdown=r.breakdown||{};
-  const baseMod=breakdown.base_modifier!=null?Number(breakdown.base_modifier||0):Number(r.modifier||0);
-  const extraMod=Number(breakdown.extra_modifier||0);
+  const kept=Array.isArray(breakdown.kept_dice)?breakdown.kept_dice.map(Number):dice;
+  const mod=breakdown.base_modifier!=null?Number(breakdown.base_modifier||0):Number(r.modifier||0);
+  const keepMode=breakdown.keep_mode||null;
+  const seriesCount=Number(breakdown.series_count||1);
+  const seriesIndex=Number(breakdown.series_index||1);
 
-  let detail='';
+  let math='';
   if(r.is_manual){
-    detail='<span class="manual-mark">resultado manual</span>';
+    math='<span class="manual-mark">resultado manual</span>';
+  }else if(keepMode){
+    math='<span class="dice-breakdown">['+dice.map(esc).join(', ')+'] → mantém '+kept.map(esc).join(', ')+(mod?' '+signed(mod):'')+'</span>';
   }else{
-    detail='<span class="roll-expression">'+esc(r.expression)+'</span>'+
-      (dice.length?'<span class="dice-breakdown">['+dice.map(esc).join(', ')+']'+(baseMod?(' '+(baseMod>0?'+':'')+baseMod):'')+'</span>':'')+
-      (extraMod?'<span class="roll-extra">'+(extraMod>0?'+':'')+extraMod+' extra</span>':'');
+    math='<span class="dice-breakdown">'+(dice.length?dice.map(esc).join(' + '):'')+(mod?' '+signed(mod):'')+'</span>';
   }
 
   const special=cls==='critical'
@@ -821,12 +828,16 @@ function renderRoll(r){
     :cls==='fumble'
       ?'<span class="roll-special">FALHA CRÍTICA</span>'
       :'';
+  const series=seriesCount>1?'<span class="roll-series">ROLAGEM '+seriesIndex+'/'+seriesCount+'</span>':'';
 
   return '<article class="roll-message '+cls+(r.visibility==='master'?' secret':'')+'">'+
     '<div class="roll-avatar">'+rollPortrait(r)+'</div>'+
     '<div class="roll-message-main">'+
       '<header><div><b>'+esc(r.author_name)+'</b><span>'+esc(r.label)+'</span></div><time>'+new Date(r.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</time></header>'+
-      '<div class="roll-result-line"><strong>'+Number(r.total)+'</strong><div>'+special+detail+'</div></div>'+
+      '<div class="roll-result-line">'+
+        '<strong>'+Number(r.total)+'</strong>'+
+        '<div class="roll-result-detail">'+series+special+'<span class="roll-expression">'+esc(r.expression||'')+'</span>'+math+'</div>'+
+      '</div>'+
       (r.note?'<p class="roll-note">'+esc(r.note)+'</p>':'')+
       (r.visibility==='master'?'<span class="secret-badge">OCULTA · SOMENTE MESTRE</span>':'')+
     '</div>'+
@@ -898,36 +909,34 @@ function rollVisibility(){
 async function submitSystemRoll(){
   if(!roomLive())return toast('Esta sessão está encerrada.');
   const raw=$('#rollExpression').value.trim().toLowerCase().replace(/\s+/g,'');
-  if(!/^[1-9]\d?d[1-9]\d{0,3}(?:[+-]\d{1,5})?$/i.test(raw)){
-    return toast('Use uma expressão como 1d20+5, 2d6 ou 1d100.');
+  if(!/^(?:[1-9]\d?#)?[1-9]\d?d[1-9]\d{0,3}(?:(?:kh|kl)[1-9]\d?)?(?:[+-]\d{1,5})?$/i.test(raw)){
+    return toast('Use 1d20, 1d20+5, 2#1d20, 2d20, 2d20kh1+5 ou 2d20kl1+5.');
   }
-
-  const extra=Math.trunc(Number($('#rollExtraModifier')?.value)||0);
-  const note=($('#rollNote')?.value||'').trim();
 
   const btn=$('#submitRoll');
   btn.disabled=true;
-  btn.textContent='Rolando…';
+  btn.textContent='…';
 
-  const {error}=await client.rpc('roll_room_dice_with_modifiers',{
+  const {error}=await client.rpc('roll_room_expression',{
     p_room_id:roomId,
     p_character_id:currentRollCharacterId(),
     p_label:rollLabel(),
     p_expression:raw,
-    p_extra_modifier:extra,
-    p_note:note,
+    p_note:($('#rollNote')?.value||'').trim(),
     p_visibility:rollVisibility()
   });
 
   btn.disabled=false;
-  btn.textContent='Rolar';
+  btn.textContent='↵';
 
   if(error){
-    console.warn(error);
-    return toast('Não foi possível realizar a rolagem.');
+    console.warn('[SCUTUM] dice expression',error);
+    const msg=String(error.message||'');
+    if(msg.includes('invalid_keep'))return toast('O keep não pode ser maior que a quantidade de dados.');
+    if(msg.includes('roll_out_of_bounds'))return toast('Essa rolagem é grande demais.');
+    return toast('Expressão inválida ou rolagem indisponível.');
   }
   $('#rollLabel').value='';
-  if($('#rollExtraModifier'))$('#rollExtraModifier').value='0';
   if($('#rollNote'))$('#rollNote').value='';
   loadRolls({stick:true});
 }
@@ -975,8 +984,10 @@ async function clearRollChat(){
 }
 function toggleManualMode(){
   const manual=$('#manualToggle').checked;
-  $('#diceMode').classList.toggle('hidden',manual);
   $('#manualMode').classList.toggle('hidden',!manual);
+  $('#rollExpression').disabled=manual;
+  $('#submitRoll').disabled=manual;
+  $('.quick-dice button').forEach(b=>b.disabled=manual);
   if(manual)setTimeout(()=>$('#manualTotal').focus(),0);
   else setTimeout(()=>$('#rollExpression').focus(),0);
 }
