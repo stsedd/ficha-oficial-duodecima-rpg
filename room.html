@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="room.css?v=4.1.0">
+<link rel="stylesheet" href="room.css?v=4.2.0">
 </head>
 <body>
 <header class="room-top">
@@ -183,9 +183,28 @@
   </section>
 </main>
 
+<section id="sheetFloat" class="sheet-float hidden" aria-label="Ficha flutuante">
+  <div id="sheetFloatHandle" class="sheet-float-head">
+    <div class="sheet-float-title">
+      <span>FICHA</span>
+      <strong id="sheetFloatName">Personagem</strong>
+      <small id="sheetFloatMode">carregando…</small>
+    </div>
+    <div class="sheet-float-actions">
+      <button id="sheetFloatMinimize" type="button" title="Minimizar">—</button>
+      <button id="sheetFloatMaximize" type="button" title="Maximizar">□</button>
+      <button id="sheetFloatClose" type="button" title="Fechar">×</button>
+    </div>
+  </div>
+  <div class="sheet-float-body">
+    <div id="sheetFloatLoading" class="sheet-float-loading"><span></span><b>Carregando ficha…</b></div>
+    <iframe id="sheetFrame" title="Ficha do personagem"></iframe>
+  </div>
+</section>
+
 <div id="toast" class="toast hidden" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1"></script>
 <script src="scutum-config.js"></script>
-<script src="room.js?v=4.1.0"></script>
+<script src="room.js?v=4.2.0"></script>
 </body>
 </html>
