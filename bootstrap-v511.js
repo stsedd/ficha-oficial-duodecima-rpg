@@ -5,7 +5,7 @@
   try {
     await new Promise((resolve,reject)=>{
       const io=document.createElement('script');
-      io.src='io-recovery-v51515.js?v=5.16.4-cloud-sync';
+      io.src='io-recovery-v51515.js?v=5.16.5-cloud-sync';
       io.onload=resolve;
       io.onerror=()=>reject(new Error('Falha ao carregar recuperação de importação/exportação'));
       document.body.appendChild(io);
