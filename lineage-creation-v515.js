@@ -1,7 +1,7 @@
 (()=>{
   'use strict';
 
-  const STORAGE_KEY='duodecima_universal_stage4_v24';
+  const STORAGE_KEY = window.__DUODECIMA_STORAGE_KEY__ || 'duodecima_universal_stage4_v24';
   const ATTR_LABEL={for:'Força',des:'Destreza',con:'Constituição',int:'Inteligência',fe:'Fé',car:'Carisma'};
   let originals=new Map();
   let appliedRuntimeSignature='';
