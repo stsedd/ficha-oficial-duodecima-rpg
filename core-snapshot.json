@@ -57282,9 +57282,10 @@
       "lateNightScheduling": "Quem solicita mestragem de madrugada deve se responsabilizar por conseguir participar; se estiver cansado demais, deve avisar e remarcar antes.",
       "respectGM": "Evite cortar o Mestre, spammar pings enquanto ele escreve e mantenha controle da própria ficha, recursos e informações básicas.",
       "guards": {
-        "tunnelMaxLevel": 60,
         "role": "Auxiliar e proteger quem está chegando; não é espaço para farm de fama.",
-        "focus": "A pessoa principal da mesa de chegada é o novo personagem."
+        "focus": "A pessoa principal da mesa de chegada é o novo personagem.",
+        "entryPoint": "Estação Abandonada de Nazzano",
+        "arrivalStationMaxLevel": 60
       }
     },
     "magicAwakening": {
@@ -57303,6 +57304,49 @@
         "rebento"
       ],
       "note": "Cada ponto sacrificado reduz em 1 o atributo físico estrutural e concede +25 de Energia máxima. O atributo pode ficar negativo. Bônus divinos e bônus de Rebento não são sacrificáveis."
+    },
+    "combatClarifications": {
+      "healing": {
+        "cannotHeal": [
+          "mortos-vivos",
+          "constructos",
+          "criaturas do Sonhar"
+        ],
+        "otherTargetsAllowed": true,
+        "note": "Habilidades de cura mágica ou divina não curam mortos-vivos, constructos ou criaturas do Sonhar; as demais invocações, personagens e NPCs podem ser curados."
+      }
+    },
+    "religioClarifications": {
+      "oaths": {
+        "witness": "Orcus",
+        "notBy": "Estige",
+        "breach": "Orcus aparece e mata quem quebrou o juramento, sem negociação ou segunda oportunidade.",
+        "narrativeOnly": true
+      },
+      "devotion": {
+        "narrative": true,
+        "points": false,
+        "mandatoryOfferings": false,
+        "requiresApproval": true,
+        "onePatron": true,
+        "maxPreservedOriginalPassives": 2,
+        "maxReplacedActive": 1,
+        "activeUsesSlot": true,
+        "hpFromPatron": true,
+        "keepBirthAttributeAndSkillBonus": true,
+        "lossRestoresBirthKit": false
+      }
+    },
+    "setting": {
+      "mainCamp": "Reserva de Nazzano, Itália",
+      "formerMainCamp": "Califórnia, EUA",
+      "formerCampStatus": "posto avançado",
+      "arrivalPoint": "Estação Abandonada de Nazzano",
+      "river": "Pequeno Tibre",
+      "fields": "Campos de Marte & Bellona",
+      "cavesAccess": "Bosque dos Faunos e dos Elfos",
+      "bronzeFragilityCrisis": false,
+      "acheronCrystalMechanics": "a definir"
     }
   },
   "equipment": {
@@ -58746,5 +58790,5 @@
       }
     ]
   },
-  "generatedAt": "2026-10-24T09:32:27.926Z"
+  "generatedAt": "2026-10-25T09:49:15.010Z"
 }
