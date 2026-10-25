@@ -42,6 +42,11 @@ let sheetFloatCharacterId=null;
 let sheetFloatRestoreRect=null;
 const refreshTimers=new Map();
 let durationTimer=0;
+let realtimeConnected=false;
+let lastParticipantRefresh=0;
+let participantRefreshInFlight=false;
+let fallbackTimer=0;
+
 
 function pct(current,max){
   if(current==null||max==null||!Number.isFinite(Number(max))||Number(max)<=0)return 0;
@@ -543,18 +548,25 @@ function renderParticipants(){
   bindParticipantActions();
 }
 async function loadParticipants(){
-  const {data,error}=await client.rpc('get_room_table_participants',{p_room_id:roomId});
-  if(error){toast('Não foi possível atualizar a mesa.');return}
+  if(participantRefreshInFlight)return;
+  participantRefreshInFlight=true;
+  try{
+    const {data,error}=await client.rpc('get_room_table_participants',{p_room_id:roomId});
+    if(error){console.warn('[SCUTUM] mesa',error);return}
 
-  const [{data:memberStates},{data:roomEffects}]=await Promise.all([
-    client.from('room_members').select('user_id,ready').eq('room_id',roomId),
-    client.from('room_effects').select('id,character_id,label,remaining_rounds').eq('room_id',roomId)
-  ]);
+    const [{data:memberStates},{data:roomEffects}]=await Promise.all([
+      client.from('room_members').select('user_id,ready').eq('room_id',roomId),
+      client.from('room_effects').select('id,character_id,label,remaining_rounds').eq('room_id',roomId)
+    ]);
 
-  effects=roomEffects||[];
-  const readyMap=new Map((memberStates||[]).map(x=>[x.user_id,!!x.ready]));
-  participants=(data||[]).map(x=>({...x,ready:readyMap.get(x.user_id)||false}));
-  renderParticipants();
+    effects=roomEffects||[];
+    const readyMap=new Map((memberStates||[]).map(x=>[x.user_id,!!x.ready]));
+    participants=(data||[]).map(x=>({...x,ready:readyMap.get(x.user_id)||false}));
+    lastParticipantRefresh=Date.now();
+    renderParticipants();
+  }finally{
+    participantRefreshInFlight=false;
+  }
 }
 
 /* ---------- COMBAT ---------- */
@@ -1289,6 +1301,18 @@ async function refresh(){
   clearInterval(durationTimer);
   durationTimer=setInterval(updateDuration,30000);
 
+  // Realtime remains the primary path. This light refresh protects the master's
+  // HP/EN/SAN panel from missed events and reconnects after tab suspension.
+  clearInterval(fallbackTimer);
+  fallbackTimer=setInterval(()=>{
+    if(document.visibilityState!=='visible')return;
+    const stale=Date.now()-lastParticipantRefresh>20000;
+    if(!realtimeConnected||stale)schedule(loadParticipants,100);
+  },10000);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible')schedule(loadParticipants,120);
+  });
+
   channel=client.channel('room-'+roomId,{config:{presence:{key:me.id}}});
   channel
     .on('presence',{event:'sync'},()=>{
@@ -1312,13 +1336,17 @@ async function refresh(){
   channel.subscribe(async status=>{
     const pill=$('#syncStatus');
     if(status==='SUBSCRIBED'){
+      realtimeConnected=true;
       pill.textContent='Conectado';
       pill.className='sync-pill online';
       await channel.track({user_id:me.id,online_at:new Date().toISOString()});
     }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+      realtimeConnected=false;
+      schedule(loadParticipants,120);
       pill.textContent='Reconectando…';
       pill.className='sync-pill warning';
     }else if(status==='CLOSED'){
+      realtimeConnected=false;
       pill.textContent='Offline';
       pill.className='sync-pill warning';
     }
