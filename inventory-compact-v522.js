@@ -41,6 +41,6 @@ function refresh(){
  }finally{busy=false}
 }
 let queued=false;const observer=new MutationObserver(()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;refresh()})});
-function start(){observer.observe(document.body,{childList:true,subtree:true});refresh()}
+function start(){const style=document.querySelector('link[href*="inventory-compact-v522.css"]');if(style)document.head.appendChild(style);observer.observe(document.body,{childList:true,subtree:true});refresh()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
