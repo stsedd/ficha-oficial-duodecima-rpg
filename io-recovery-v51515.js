@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const STORAGE_KEY='duodecima_universal_stage4_v24';
+  const STORAGE_KEY=window.DUODECIMA_CHARACTER_STORAGE_KEY||'duodecima_universal_stage4_v24';
   const RECOVERY_KEY='duodecima_import_recovery_v1';
   const THEME_DB='duodecima_exclusive_themes_v1';
   const THEME_STORE='themes';
