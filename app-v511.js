@@ -2,7 +2,7 @@
   'use strict';
 
   const SCHEMA_VERSION = 24;
-  const STORAGE_KEY = 'duodecima_universal_stage4_v24';
+  const STORAGE_KEY = window.DUODECIMA_CHARACTER_STORAGE_KEY || 'duodecima_universal_stage4_v24';
   const SHEET_BACKUP_DB = 'duodecima_sheet_backups_v1';
   const SHEET_BACKUP_STORE = 'snapshots';
   const SHEET_BACKUP_LIMIT = 8;
@@ -750,7 +750,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
         state=migrate(window.__DUODECIMA_PRELOAD__);if(state.tempMods)state.tempMods.rolls=0;save();return;
       }
       let raw=safeStorage.getItem(STORAGE_KEY);
-      if(!raw){for(const k of LEGACY_KEYS){raw=safeStorage.getItem(k);if(raw)break}}
+      if(!raw && STORAGE_KEY === 'duodecima_universal_stage4_v24'){for(const k of LEGACY_KEYS){raw=safeStorage.getItem(k);if(raw)break}}
       if(!raw)return;
       state=migrate(JSON.parse(raw));if(state.tempMods)state.tempMods.rolls=0;save();
     }catch(e){console.warn(e)}
