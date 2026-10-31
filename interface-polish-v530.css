@@ -1,0 +1,248 @@
+/* Duodécima · v5.30 · refinamento de interface (somente apresentação) */
+:root{--duo-ui-motion:290ms;--duo-ui-ease:cubic-bezier(.22,.8,.26,1)}
+
+/* Cabeçalho: ícones sem texto, com nomes acessíveis preservados no DOM. */
+.archive-brandbar .unified-top-controls{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:7px!important;
+  flex-wrap:nowrap!important;
+  min-width:0;
+}
+.archive-brandbar .unified-menu{
+  flex:0 0 auto!important;
+  min-width:0!important;
+}
+.archive-brandbar .unified-menu>summary.duo-motion-hit{
+  width:42px!important;
+  min-width:42px!important;
+  height:42px!important;
+  min-height:42px!important;
+  padding:0!important;
+  gap:0!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:50%!important;
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 7%,transparent)!important;
+  transition:border-color var(--duo-ui-motion) ease,background var(--duo-ui-motion) ease,box-shadow var(--duo-ui-motion) ease!important;
+}
+.archive-brandbar .unified-menu>summary.duo-motion-hit .duo-motion-text{display:none!important}
+.archive-brandbar .unified-menu>summary.duo-motion-hit .duo-motion-icon{width:20px!important;height:20px!important}
+.archive-brandbar .unified-menu[open]>summary.duo-motion-hit{
+  border-color:var(--theme-accent,var(--red))!important;
+  background:color-mix(in srgb,var(--theme-accent,var(--red)) 12%,var(--panel) 88%)!important;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--theme-accent,var(--red)) 12%,transparent)!important;
+}
+.archive-brandbar .unified-menu>summary.duo-motion-hit:hover{
+  border-color:color-mix(in srgb,var(--theme-accent,var(--red)) 52%,var(--line) 48%)!important;
+  background:color-mix(in srgb,var(--theme-accent,var(--red)) 8%,var(--panel) 92%)!important;
+}
+.archive-brandbar .multi-character-actions>summary.duo-motion-hit{
+  width:42px!important;min-width:42px!important;
+  height:42px!important;min-height:42px!important;
+  border-radius:50%!important;
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 7%,transparent);
+}
+.archive-brandbar .multi-character-actions[open]>summary{
+  border-color:var(--theme-accent,var(--red))!important;
+  background:color-mix(in srgb,var(--theme-accent,var(--red)) 12%,var(--panel) 88%)!important;
+}
+.archive-brandbar .multi-character-bar>button.duo-motion-hit{
+  min-height:42px!important;
+  border-radius:999px!important;
+}
+.archive-brandbar .multi-character-bar>button.duo-motion-hit .duo-motion-icon{
+  width:17px!important;height:17px!important;
+}
+.archive-brandbar .appearance-top-actions{min-width:0}
+
+/* Listas de menus: alinhamento uniforme, leitura confortável e ações separadas. */
+.unified-menu-content,
+.multi-character-menu{
+  border-radius:13px!important;
+  padding:8px!important;
+  gap:4px!important;
+  border-color:color-mix(in srgb,var(--theme-accent,var(--red)) 14%,var(--line) 86%)!important;
+  box-shadow:0 14px 35px rgba(0,0,0,.18)!important;
+}
+.unified-menu-content :is(button,label).duo-motion-hit,
+.multi-character-menu button.duo-motion-hit{
+  justify-content:flex-start!important;
+  text-align:left!important;
+  gap:10px!important;
+  min-height:42px!important;
+  padding:10px 12px!important;
+  border-radius:9px!important;
+  line-height:1.25!important;
+  font-size:12px!important;
+  white-space:normal!important;
+}
+.unified-menu-content :is(button,label).duo-motion-hit .duo-motion-icon,
+.multi-character-menu button.duo-motion-hit .duo-motion-icon{
+  flex:0 0 17px;
+  width:17px!important;height:17px!important;
+}
+.unified-menu-content :is(button,label).duo-motion-hit:hover,
+.multi-character-menu button.duo-motion-hit:hover{
+  background:color-mix(in srgb,var(--theme-accent,var(--red)) 9%,var(--panel) 91%)!important;
+}
+.unified-menu-content #resetBtn,
+.multi-character-menu [data-multi="delete"]{
+  margin-top:5px!important;
+  padding-top:12px!important;
+  border-top:1px solid color-mix(in srgb,var(--red,#c63652) 25%,var(--line) 75%)!important;
+}
+.unified-menu-content #resetBtn:hover,
+.multi-character-menu [data-multi="delete"]:hover{
+  background:color-mix(in srgb,var(--red,#c63652) 12%,var(--panel) 88%)!important;
+}
+.unified-menu-content #resetBtn .duo-motion-icon,
+.multi-character-menu [data-multi="delete"] .duo-motion-icon{
+  color:var(--red,#ca314a);
+}
+.unified-menu[open]>.unified-menu-content,
+.multi-character-actions[open]>.multi-character-menu{
+  animation:duo-ui-menu-in 180ms var(--duo-ui-ease) both;
+  transform-origin:top right;
+}
+@keyframes duo-ui-menu-in{
+  from{opacity:0;transform:translateY(-5px) scale(.985)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+/* Navegadores que implementam ::details-content também animam o fechamento. */
+@supports selector(details::details-content){
+  .unified-menu::details-content,
+  .multi-character-actions::details-content{
+    opacity:0;
+    transition:opacity 160ms ease,content-visibility 160ms allow-discrete;
+  }
+  .unified-menu[open]::details-content,
+  .multi-character-actions[open]::details-content{opacity:1}
+}
+
+/* Abas: nenhuma mudança no data-tab ou na seleção mecânica. */
+#sheetView .sheet-tab-scroll button.duo-motion-tab{
+  position:relative;
+  min-height:44px!important;
+  gap:7px!important;
+  padding:9px 12px!important;
+  border-radius:8px!important;
+  transition:background var(--duo-ui-motion) ease,color var(--duo-ui-motion) ease,border-color var(--duo-ui-motion) ease,box-shadow var(--duo-ui-motion) ease!important;
+}
+#sheetView .sheet-tab-scroll button.duo-motion-tab .duo-motion-icon{
+  width:18px!important;height:18px!important;
+  opacity:.82;
+}
+#sheetView .sheet-tab-scroll button.duo-motion-tab:hover{
+  background:color-mix(in srgb,var(--theme-accent,var(--red)) 10%,var(--panel) 90%)!important;
+  border-color:color-mix(in srgb,var(--theme-accent,var(--red)) 30%,var(--line) 70%)!important;
+}
+#sheetView .sheet-tab-scroll button.duo-motion-tab.active{
+  color:var(--text)!important;
+  background:color-mix(in srgb,var(--theme-accent,var(--red)) 16%,var(--panel) 84%)!important;
+  border-color:color-mix(in srgb,var(--theme-accent,var(--red)) 54%,var(--line) 46%)!important;
+  box-shadow:inset 0 -2px 0 var(--theme-accent,var(--red)),0 2px 10px rgba(0,0,0,.07)!important;
+}
+#sheetView .sheet-tab-scroll button.duo-motion-tab.active .duo-motion-icon{
+  color:var(--theme-accent,var(--red))!important;
+  opacity:1;
+}
+#sheetView .sheet-tab-scroll button.duo-motion-tab:focus-visible,
+.archive-brandbar :is(.unified-menu>summary,.multi-character-actions>summary,.multi-character-bar>button):focus-visible,
+.unified-menu-content :is(button,label):focus-within{
+  outline:2px solid var(--theme-accent,var(--red))!important;
+  outline-offset:2px!important;
+}
+
+/* Feedback e botões: foco e confirmações fáceis de localizar. */
+.toast:not(.hidden){
+  z-index:3100!important;
+  max-width:min(420px,calc(100vw - 24px))!important;
+  overflow-wrap:anywhere;
+  border-left:3px solid var(--theme-accent,var(--red))!important;
+  animation:duo-ui-toast-in 180ms var(--duo-ui-ease) both;
+}
+@keyframes duo-ui-toast-in{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+[data-pane="inventory"] button.duo-motion-hit,
+.unified-menu-content button.duo-motion-hit{
+  transition:background var(--duo-ui-motion) ease,border-color var(--duo-ui-motion) ease!important;
+}
+body[data-mode="light"] .unified-menu-content,
+body[data-special="snow"] .unified-menu-content{
+  border-color:color-mix(in srgb,var(--theme-accent,var(--red)) 25%,var(--line) 75%)!important;
+}
+body[data-mode="light"] .archive-brandbar .unified-menu>summary.duo-motion-hit .duo-motion-icon,
+body[data-special="snow"] .archive-brandbar .unified-menu>summary.duo-motion-hit .duo-motion-icon{
+  color:var(--text)!important;
+}
+body[data-mode="light"] .archive-brandbar .unified-menu[open]>summary.duo-motion-hit .duo-motion-icon{
+  color:var(--theme-accent-deep,var(--text))!important;
+}
+
+/* Mobile: ações ficam numa linha, com áreas de toque sem rótulos largos. */
+@media(max-width:760px){
+  #sheetView .sheet-tab-scroll button.duo-motion-tab{
+    min-height:44px!important;
+    padding:9px 11px!important;
+  }
+  #sheetView .sheet-tab-scroll button.duo-motion-tab .duo-motion-icon{
+    width:17px!important;height:17px!important;
+  }
+  .toast:not(.hidden){
+    left:12px!important;right:12px!important;bottom:12px!important;
+    max-width:none!important;
+    font-size:13px!important;
+    line-height:1.4!important;
+  }
+}
+@media(max-width:620px){
+  .archive-brandbar .unified-top-controls{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    justify-content:flex-end!important;
+    gap:8px!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+  .archive-brandbar .unified-menu>summary.duo-motion-hit{
+    width:44px!important;
+    min-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+    padding:0!important;
+    border-radius:50%!important;
+  }
+  .archive-brandbar .unified-menu>summary.duo-motion-hit .duo-motion-icon{
+    width:20px!important;height:20px!important;
+  }
+  .archive-brandbar .multi-character-actions>summary.duo-motion-hit{
+    width:44px!important;min-width:44px!important;
+    height:44px!important;min-height:44px!important;
+  }
+  .archive-brandbar .multi-character-bar>button.duo-motion-hit{min-height:44px!important}
+  .unified-menu-content :is(button,label).duo-motion-hit,
+  .multi-character-menu button.duo-motion-hit{min-height:44px!important}
+  .unified-menu-content{max-width:calc(100vw - 24px)!important}
+}
+@media(max-width:360px){
+  .archive-brandbar .unified-top-controls{gap:6px!important}
+  .archive-brandbar .unified-menu>summary.duo-motion-hit{
+    width:44px!important;min-width:44px!important;
+  }
+}
+/* Animações respeitam a escolha do sistema e não deslocam o layout. */
+@media(prefers-reduced-motion:reduce){
+  :root{--duo-ui-motion:0ms}
+  .unified-menu[open]>.unified-menu-content,
+  .multi-character-actions[open]>.multi-character-menu,
+  .toast:not(.hidden){animation:none!important}
+  .unified-menu::details-content,.multi-character-actions::details-content{transition:none!important}
+  #sheetView .sheet-tab-scroll button.duo-motion-tab,
+  .archive-brandbar .unified-menu>summary.duo-motion-hit{
+    transition:none!important;
+  }
+}
