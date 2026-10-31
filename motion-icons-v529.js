@@ -109,6 +109,14 @@
       ['#addInventoryFromLibrary','plus'],
       ['#addInventoryByKind','plus']
     ].forEach(([selector,kind])=>decorateButton(root.querySelector(selector),kind));
+    // Equipamentos: reaproveita o observador já existente após cada render.
+    // Não altera nomes, IDs nem listeners dos campos.
+    root.querySelectorAll(
+      '#uploadArmorImage,#uploadShieldImage,[data-upload-weapon-image],[data-upload-item-image]'
+    ).forEach(el=>decorateButton(el,'pencil'));
+    root.querySelectorAll(
+      '#clearArmorImage,#clearShieldImage,[data-clear-weapon-image],[data-clear-item-image]'
+    ).forEach(el=>decorateButton(el,'trash'));
   }
   let scheduled=false;
   function queue(){
