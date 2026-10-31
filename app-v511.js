@@ -105,6 +105,7 @@
   const system = window.DUODECIMA_SYSTEM || {conditions:[],materials:[],armorTypes:[],weaponTypes:[]};
   const CORE_ATTR_START=Math.max(0,Number(system.attributes?.startingPoints ?? 8));
   const CORE_ATTR_MAX=Math.max(1,Number(system.attributes?.normalMax ?? 5));
+  const creationPointLimit=()=>state?.roma?.successorOfRebento&&!isMortal()?Number(system.rebentos?.successor?.startingAttributePoints||9):CORE_ATTR_START;
   const CORE_LEVEL_MIN=Math.max(1,Number(system.levels?.min ?? 1));
   const CORE_LEVEL_MAX=Math.max(CORE_LEVEL_MIN,Number(system.levels?.max ?? 100));
   const talentsDb = window.DUODECIMA_TALENTS || [];
@@ -373,7 +374,7 @@
       const sacrificeEnergy=magicSacrificeTotal()*(Number(magicRules.sacrificeEnergyEach)||25);
       return decadeEnergy+sacrificeEnergy;
     }
-    const e=system.energy||{},base=Number(e.base??100),every=Math.max(1,Number(e.everyLevels??5)),inc=Number(e.increment??25);
+    const e=system.energy||{},base=Number(e.base??100)+(state.roma?.successorOfRebento?Number(system.rebentos?.successor?.energyBaseBonus??25):0),every=Math.max(1,Number(e.everyLevels??5)),inc=Number(e.increment??25);
     return base+Math.floor(state.level/every)*inc+(state.magic?.enabled?magicSacrificeTotal()*(Number(magicRules.sacrificeEnergyEach)||25):0);
   }
   function hpMax(){return state.exhaustion>=5?Math.max(1,Math.floor(rawHpMax()/2)):rawHpMax()}
@@ -829,7 +830,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     return ordered.filter(group=>groups[group]?.length).map(group=>`<optgroup label="${GROUP_LABEL[group]||group}">${groups[group].map(g=>`<option value="${g.id}" ${selectedId===g.id?'selected':''}>${g.name}</option>`).join('')}</optgroup>`).join('');
   }
   function attrCard(k,abbr,label,creation=false){
-    const divine=isMortal()?0:Math.max(0,Number(god()?.bonuses?.[k])||0),lvl=Math.max(0,Number(state.levelAttributes[k])||0),base=Math.max(0,Number(state.baseAttributes[k])||0),tal=Math.max(0,talentAttributeBonus(k)),raw=base+lvl+tal+divine,capped=Math.min(CORE_ATTR_MAX,raw),extra=attributeExtraBonus(k),sacrifice=magicSacrifice(k),total=capped+extra-sacrifice,pen=sanityAttrPenalty(k),eff=total+pen,overflow=Math.max(0,raw-CORE_ATTR_MAX),incDisabled=raw>=CORE_ATTR_MAX||(!state.isCreated&&sum(state.baseAttributes)>=CORE_ATTR_START);
+    const divine=isMortal()?0:Math.max(0,Number(god()?.bonuses?.[k])||0),lvl=Math.max(0,Number(state.levelAttributes[k])||0),base=Math.max(0,Number(state.baseAttributes[k])||0),tal=Math.max(0,talentAttributeBonus(k)),raw=base+lvl+tal+divine,capped=Math.min(CORE_ATTR_MAX,raw),extra=attributeExtraBonus(k),sacrifice=magicSacrifice(k),total=capped+extra-sacrifice,pen=sanityAttrPenalty(k),eff=total+pen,overflow=Math.max(0,raw-CORE_ATTR_MAX),incDisabled=raw>=CORE_ATTR_MAX||(!state.isCreated&&sum(state.baseAttributes)>=creationPointLimit());
     return `<div class="attr"><div class="attr-name">${abbr} · ${label}</div><div class="attr-total">${total}</div><div class="attr-break">base ${base} · nível +${lvl}${tal?` · talento +${tal}`:''} ${!isMortal()?` · divino +${divine}`:''}${extra?` · extra +${extra}`:''}${sacrifice?` · magia −${sacrifice}`:''}${overflow?` · excedente padrão ${overflow} ignorado pelo limite ${CORE_ATTR_MAX}`:''}${pen?` · penalidade de sanidade ${pen} (efetivo ${eff})`:''}</div>${creation?`<div class="stepper"><button data-base-dec="${k}">−</button><span class="base">${base}</span><button data-base-inc="${k}" ${incDisabled?'disabled':''}>+</button></div>`:''}</div>`;
   }
 
@@ -854,21 +855,21 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     </div>`;
   }
   function canFinishCreation(){
-    if(sum(state.baseAttributes)!==CORE_ATTR_START||state.initialSkills.length!==initialSkillLimit())return false;
+    if(sum(state.baseAttributes)!==creationPointLimit()||state.initialSkills.length!==initialSkillLimit())return false;
     if(isMortal())return !!state.originSkillChoice;
     const g=god(),type=state.lineage?.type||'normal',sub=secondaryGod();
     const lineageOk=type==='normal'||(!isTriumvir(state.godId)&&!!sub&&sub.id!==state.godId);
     return lineageOk&&(!g.skillChoice?.length||!!state.divineSkillChoice);
   }
   function renderCreation(){
-    const g=god(),spent=sum(state.baseAttributes),left=CORE_ATTR_START-spent,isMort=isMortal();
+    const g=god(),spent=sum(state.baseAttributes),left=creationPointLimit()-spent,isMort=isMortal();
     const granted=isMort?(state.originSkillChoice?[state.originSkillChoice]:[]):g.grantedSkills||[];
     const customGranted=granted.filter(s=>!skills.some(x=>x.name===s));
     const sourceClass=!isMort&&g.source.startsWith('Atualizado')?'good':!isMort&&g.source.startsWith('Provisório')?'warn':'';
     const freeSkillLabel=isMort?'origem':'divina';
     const finishHelp=isMort
-      ?`Para concluir: distribua exatamente ${CORE_ATTR_START} pontos, escolha 1 perícia de origem e ${initialSkillLimit()} perícias por INT.`
-      :`Para concluir: distribua exatamente ${CORE_ATTR_START} pontos, escolha ${initialSkillLimit()} perícias por INT e preencha a escolha divina quando o kit exigir.`;
+      ?`Para concluir: distribua exatamente ${creationPointLimit()} pontos, escolha 1 perícia de origem e ${initialSkillLimit()} perícias por INT.`
+      :`Para concluir: distribua exatamente ${creationPointLimit()} pontos, escolha ${initialSkillLimit()} perícias por INT e preencha a escolha divina quando o kit exigir.`;
     creationView.innerHTML=`
       <article class="card stack">
         <div class="section-title"><div><p class="eyebrow">1 · IDENTIDADE & ORIGEM</p><h2>Criação</h2></div><span class="pill ${sourceClass}">${isMort?'Mortal da Névoa':g.source}</span></div>
@@ -882,13 +883,14 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
             </div>`
           :`<label><span class="label">Divindade principal / primeira origem</span><select id="godSelect">${groupedGodOptions()}</select></label>${renderCreationLineage()}
             <div class="subcard compact"><div class="row between"><strong>${g.name}${state.lineage?.type==='direct'?' · kit estrutural':''}</strong><span class="pill">${GROUP_LABEL[g.group]||g.group}</span></div><p class="muted">Conjuração: <b>${attrName(g.casting)}</b> · HP: <b>${g.hpBase} + CON</b> · por 10 níveis: <b>+${g.hpPerDecade} + CON</b></p><p><span class="label">Bônus divinos</span>${bonusText(g)}</p>${granted.length?`<p><span class="label">Perícia(s) divina(s)</span>${granted.join(', ')}</p>`:''}${g.skillChoice?.length?`<label><span class="label">Escolha divina (não gasta escolhas por Inteligência)</span><select id="divineSkillChoice"><option value="">Selecione…</option>${g.skillChoice.map(s=>`<option ${state.divineSkillChoice===s?'selected':''}>${s}</option>`).join('')}</select></label>`:''}${customGranted.length?`<div class="notice">Atenção: ${customGranted.join(', ')} não existe na lista-base atual de perícias. Mantive como veio da fonte.</div>`:''}${(g.notes||[]).map(n=>`<div class="notice">${n}</div>`).join('')}</div>`}
-        <div><div class="row between"><span class="label">${CORE_ATTR_START} pontos de atributos</span><b>${left} restante(s)</b></div><div class="progress"><i style="width:${clamp(spent/Math.max(1,CORE_ATTR_START)*100,0,100)}%"></i></div></div>
+        ${!isMort?`<div class="subcard rebento-successor-creation"><label class="rebento-toggle-line"><span><b>Sucessor de Rebento</b><small>9 pontos iniciais e +25 de Energia máxima permanente.</small></span><input id="rebentoSuccessorToggle" type="checkbox" ${state.roma?.successorOfRebento?'checked':''}></label></div>`:''}<div><div class="row between"><span class="label">${creationPointLimit()} pontos de atributos</span><b>${left} restante(s)</b></div><div class="progress"><i style="width:${clamp(spent/Math.max(1,creationPointLimit())*100,0,100)}%"></i></div></div>
         <div class="attrs">${ATTRS.map(a=>attrCard(...a,true)).join('')}</div><p class="dev-note">O limite normal é ${CORE_ATTR_MAX} considerando pontos da criação, progressão e talentos comuns${isMort?'.':' e bônus divinos.'} Só efeitos que digam explicitamente ultrapassar o limite podem levar o atributo acima de ${CORE_ATTR_MAX}.</p>
       </article>
       <aside class="card stack"><div><p class="eyebrow">2 · PERÍCIAS INICIAIS</p><h2>Escolhas por Inteligência</h2><p class="muted">A ficha usa <b>2 + INT inicial</b>. A perícia ${isMort?'de origem':'divina'} não consome essas escolhas.</p></div><div class="row between"><span class="pill">Limite: ${initialSkillLimit()}</span><span class="pill">Escolhidas: ${state.initialSkills.length}</span></div><div class="skills">${skills.map(s=>{const free=divineGranted().includes(s.name),checked=state.initialSkills.includes(s.name),disabled=free||(!checked&&state.initialSkills.length>=initialSkillLimit());return `<label class="skill-check ${disabled?'disabled':''}"><input type="checkbox" data-skill="${esc(s.name)}" ${checked?'checked':''} ${disabled?'disabled':''}><span>${s.name}<small class="muted"> · ${attrAbbr(s.attr)}${free?` · ${freeSkillLabel}`:''}</small></span></label>`}).join('')}</div><button id="finishBtn" class="primary" ${canFinishCreation()?'':'disabled'}>Criar ficha de teste</button>${!canFinishCreation()?`<p class="notice">${finishHelp}</p>`:''}</aside>`;
     bindCreation();
   }
   function bindCreation(){
+    const successorToggle=byId('rebentoSuccessorToggle');if(successorToggle)successorToggle.onchange=e=>{const selected=e.target.checked;if(!selected&&sum(state.baseAttributes)>CORE_ATTR_START){e.target.checked=true;notify('Distribua no máximo 8 pontos de atributos para desativar Sucessor. Use os botões −; nenhum reset é necessário.');return;}state.roma=state.roma||{};state.roma.successorOfRebento=selected;state.currentEnergy=null;syncCurrentCaps();save();renderCreation()};
     byId('nameInput').oninput=e=>{state.name=e.target.value;save()};byId('playerInput').oninput=e=>{state.player=e.target.value;save()};
     const origin=byId('originType');if(origin)origin.onchange=e=>{
       state.originType=e.target.value==='mortal'?'mortal':'divine';
@@ -903,7 +905,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     const d=byId('divineSkillChoice');if(d)d.onchange=e=>{state.divineSkillChoice=e.target.value;state.initialSkills=state.initialSkills.filter(s=>s!==e.target.value);save();renderCreation()};
     document.querySelectorAll('[data-base-inc]').forEach(b=>b.onclick=()=>changeBase(b.dataset.baseInc,1));document.querySelectorAll('[data-base-dec]').forEach(b=>b.onclick=()=>changeBase(b.dataset.baseDec,-1));document.querySelectorAll('[data-skill]').forEach(c=>c.onchange=()=>toggleInitialSkill(c.dataset.skill,c.checked));byId('finishBtn').onclick=finishCreation;
   }
-  function changeBase(k,delta){const cur=state.baseAttributes[k]||0;if(delta>0&&ordinaryAttrRaw(k)>=CORE_ATTR_MAX)return;if(delta>0&&!state.isCreated&&sum(state.baseAttributes)>=CORE_ATTR_START)return;if(delta<0&&cur<=0)return;state.baseAttributes[k]=cur+delta;const limit=initialSkillLimit();if(state.initialSkills.length>limit)state.initialSkills=state.initialSkills.slice(0,limit);syncCurrentCaps();save();state.isCreated?renderSheet():renderCreation()}
+  function changeBase(k,delta){const cur=state.baseAttributes[k]||0;if(delta>0&&ordinaryAttrRaw(k)>=CORE_ATTR_MAX)return;if(delta>0&&!state.isCreated&&sum(state.baseAttributes)>=creationPointLimit())return;if(delta<0&&cur<=0)return;state.baseAttributes[k]=cur+delta;const limit=initialSkillLimit();if(state.initialSkills.length>limit)state.initialSkills=state.initialSkills.slice(0,limit);syncCurrentCaps();save();state.isCreated?renderSheet():renderCreation()}
   function toggleInitialSkill(name,on){if(!canUseInitialSkill(name))return;if(on&&!state.initialSkills.includes(name)&&state.initialSkills.length<initialSkillLimit())state.initialSkills.push(name);if(!on)state.initialSkills=state.initialSkills.filter(s=>s!==name);save();renderCreation()}
   function finishCreation(){if(!canFinishCreation())return;state.isCreated=true;state.createdAt=state.createdAt||new Date().toISOString();syncCurrentCaps();save();render();notify('Ficha criada.')}
 
