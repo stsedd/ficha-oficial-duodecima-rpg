@@ -19,8 +19,8 @@ function init(){
  // Retain storage status; hide only redundant toolbar placement.
  document.querySelectorAll('.unified-menu').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.unified-menu').forEach(o=>{if(o!==d)o.open=false})}));
  document.addEventListener('click',e=>{if(!e.target.closest?.('.unified-menu'))document.querySelectorAll('.unified-menu[open]').forEach(o=>o.open=false)});
- const marker=toolbar.querySelector('.version-chip');if(marker)marker.textContent='v5.27 · inventário e acabamento';
- const footer=document.querySelector('footer p');if(footer)footer.textContent=footer.textContent.replace(/v5\.21\.1-ability-deck-polish/,'v5.27');
+ const marker=toolbar.querySelector('.version-chip');if(marker)marker.textContent='v5.28 · backups seguros';
+ const footer=document.querySelector('footer p');if(footer)footer.textContent=footer.textContent.replace(/v5\.21\.1-ability-deck-polish/,'v5.28');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
