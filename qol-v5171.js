@@ -15,7 +15,17 @@
     @media(max-width:680px){.qol-rest-strip{align-items:flex-start;flex-direction:column}.qol-sanity-card{grid-template-columns:1fr}.qol-reset-actions{flex-direction:column}.qol-reset-actions button{width:100%}.qol-reset-actions .qol-reset-final{margin-left:0}}
   `;document.head.appendChild(s)}
 
-  function hardResetToCreation(){
+  async function hardResetToCreation(){
+    const backups=window.DUODECIMA_BACKUP_API;
+    if(!backups||backups.activeStorageKey!==STORAGE_KEY){
+      alert('Reset cancelado: o sistema de backup ainda não está pronto. Recarregue a página.');
+      return;
+    }
+    const ok=await backups.create('Antes de resetar a ficha');
+    if(!ok){
+      alert('Reset cancelado: não foi possível criar um backup. Exporte o JSON antes de continuar.');
+      return;
+    }
     const fresh={schemaVersion:24,isCreated:false,createdAt:null,updatedAt:new Date().toISOString()};
     try{
       localStorage.setItem(STORAGE_KEY,JSON.stringify(fresh));
@@ -28,7 +38,7 @@
     }
   }
 
-  function resetDialog(){let d=document.querySelector('#qolResetDialog');if(d)return d;d=document.createElement('dialog');d.id='qolResetDialog';d.className='qol-reset-dialog';d.innerHTML=`<div class="qol-reset-card"><p class="eyebrow">NOVA FICHA</p><h2>Resetar ficha</h2><div class="qol-reset-warning"><b>Salve seu personagem antes de continuar.</b><br>Antes de resetar a ficha, recomendamos exportar o JSON atual. Assim você poderá importar este personagem novamente no futuro sem perder os dados.</div><p class="qol-reset-question">Tem certeza de que deseja resetar a ficha?</p><p class="muted compact">Esta ação abre uma ficha nova para criação. Seus backups já existentes continuam disponíveis.</p><div class="qol-reset-actions"><button type="button" class="ghost" data-qol-export>Exportar JSON agora</button><button type="button" class="ghost" data-qol-cancel>Cancelar</button><button type="button" class="danger qol-reset-final" data-qol-confirm>Sim, resetar</button></div></div>`;document.body.appendChild(d);d.querySelector('[data-qol-cancel]').onclick=()=>d.close();d.querySelector('[data-qol-export]').onclick=()=>document.querySelector('#exportBtn')?.click();d.querySelector('[data-qol-confirm]').onclick=()=>{d.close();hardResetToCreation()};d.addEventListener('click',e=>{if(e.target===d)d.close()});return d}
+  function resetDialog(){let d=document.querySelector('#qolResetDialog');if(d)return d;d=document.createElement('dialog');d.id='qolResetDialog';d.className='qol-reset-dialog';d.innerHTML=`<div class="qol-reset-card"><p class="eyebrow">NOVA FICHA</p><h2>Resetar ficha</h2><div class="qol-reset-warning"><b>Salve seu personagem antes de continuar.</b><br>O sistema criará um backup da personagem atual antes de resetar. Para guardar uma cópia fora do navegador, você também pode exportar o JSON.</div><p class="qol-reset-question">Tem certeza de que deseja resetar a ficha?</p><p class="muted compact">Esta ação abre uma ficha nova para criação. Seus backups já existentes continuam disponíveis.</p><div class="qol-reset-actions"><button type="button" class="ghost" data-qol-export>Exportar JSON agora</button><button type="button" class="ghost" data-qol-cancel>Cancelar</button><button type="button" class="danger qol-reset-final" data-qol-confirm>Sim, resetar</button></div></div>`;document.body.appendChild(d);d.querySelector('[data-qol-cancel]').onclick=()=>d.close();d.querySelector('[data-qol-export]').onclick=()=>document.querySelector('#exportBtn')?.click();d.querySelector('[data-qol-confirm]').onclick=()=>{d.close();hardResetToCreation()};d.addEventListener('click',e=>{if(e.target===d)d.close()});return d}
   function resetIntercept(){if(document.documentElement.dataset.qolReset==='1')return;document.documentElement.dataset.qolReset='1';document.addEventListener('click',e=>{if(!e.target?.closest?.('#resetBtn'))return;e.preventDefault();e.stopImmediatePropagation();const d=resetDialog();d.showModal?d.showModal():d.setAttribute('open','')},true)}
 
   function moveRests(){
