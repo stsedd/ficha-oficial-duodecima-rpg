@@ -260,39 +260,56 @@
       });
     }finally{db.close()}
   }
+  // Backups v5.28: novos registros identificam a ficha; arquivos antigos nunca são apagados.
+  const SHEET_BACKUP_PERSONAL_FALLBACK_KEY=SHEET_BACKUP_FALLBACK_KEY+':'+encodeURIComponent(STORAGE_KEY);
   function legacyRecoveryCandidates(){
     const out=[];
     for(const key of LEGACY_KEYS){
       try{
         const raw=safeStorage.getItem(key);if(!raw)continue;
         const data=JSON.parse(raw);if(!hasMeaningfulSheetData(data))continue;
-        out.push({id:`legacy:${key}`,savedAt:data.updatedAt||data.createdAt||'',reason:'Cópia local de versão anterior',name:data.name||'Ficha antiga',signature:sheetBackupSignature(data),state:data,legacy:true});
-      }catch(_){ }
+        out.push({id:'legacy:'+key,savedAt:data.updatedAt||data.createdAt||'',reason:'Cópia local de versão anterior',name:data.name||'Ficha antiga',signature:sheetBackupSignature(data),state:data,legacy:true,archivedLegacy:true});
+      }catch(_){}
     }
     return out;
   }
   async function listSheetBackups(){
     let records=[];
-    try{records=await sheetBackupDbAction('list')}catch(_){ }
-    try{const raw=safeStorage.getItem(SHEET_BACKUP_FALLBACK_KEY);if(raw){const item=JSON.parse(raw);if(item?.state)records.push({...item,fallback:true})}}catch(_){ }
-    records.push(...legacyRecoveryCandidates());
-    records.sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
+    try{records=await sheetBackupDbAction('list')}catch(_){}
+    const own=records.filter(x=>x?.ownerKey===STORAGE_KEY&&x?.state).map(x=>({...x,archivedLegacy:false}));
+    const archived=records.filter(x=>!x?.ownerKey&&x?.state).map(x=>({...x,archivedLegacy:true}));
+    try{
+      const raw=safeStorage.getItem(SHEET_BACKUP_PERSONAL_FALLBACK_KEY);
+      if(raw){const item=JSON.parse(raw);if(item?.state)own.push({...item,fallback:true,archivedLegacy:false})}
+    }catch(_){}
+    try{
+      const raw=safeStorage.getItem(SHEET_BACKUP_FALLBACK_KEY);
+      if(raw){const item=JSON.parse(raw);if(item?.state)archived.push({...item,fallback:true,archivedLegacy:true})}
+    }catch(_){}
+    archived.push(...legacyRecoveryCandidates());
+    const byDate=(a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0);
+    own.sort(byDate);archived.sort(byDate);
     const seen=new Set();
-    return records.filter(item=>{const key=item.id||item.signature;if(!key||seen.has(key))return false;seen.add(key);return true});
+    return [...own,...archived].filter(item=>{
+      const key=item.id||item.signature;if(!key||seen.has(key))return false;seen.add(key);return true;
+    });
   }
   async function storeSheetBackup(data,reason='Backup automático',force=false){
     if(!hasMeaningfulSheetData(data))return false;
     const snapshot=deepCloneJson(data),signature=sheetBackupSignature(snapshot);
-    const record={id:`backup-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,savedAt:new Date().toISOString(),reason,name:snapshot.name||'Ficha sem nome',signature,state:snapshot};
+    const record={id:'backup-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),ownerKey:STORAGE_KEY,savedAt:new Date().toISOString(),reason,name:snapshot.name||'Ficha sem nome',signature,state:snapshot};
     try{
-      const current=(await sheetBackupDbAction('list')).sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
-      if(!force&&current[0]?.signature===signature)return false;
+      const all=await sheetBackupDbAction('list');
+      const current=all.filter(x=>x?.ownerKey===STORAGE_KEY).sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
+      if(!force&&current[0]?.signature===signature)return true;
       await sheetBackupDbAction('put',record);
-      const all=[record,...current.filter(x=>x.id!==record.id)].sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
-      for(const extra of all.slice(SHEET_BACKUP_LIMIT))await sheetBackupDbAction('delete',extra.id);
+      const owned=[record,...current.filter(x=>x.id!==record.id)].sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
+      // Limite de oito POR personagem; snapshots legados e de outras fichas não são tocados.
+      for(const extra of owned.slice(SHEET_BACKUP_LIMIT))await sheetBackupDbAction('delete',extra.id);
       return true;
     }catch(err){
-      try{safeStorage.setItem(SHEET_BACKUP_FALLBACK_KEY,JSON.stringify(record));return true}catch(_){console.warn('[Ficha] Não foi possível criar backup local.',err);return false}
+      try{safeStorage.setItem(SHEET_BACKUP_PERSONAL_FALLBACK_KEY,JSON.stringify(record));return true}
+      catch(_){console.warn('[Ficha] Não foi possível criar backup desta personagem.',err);return false}
     }
   }
   function backupDateLabel(value){
@@ -302,19 +319,31 @@
   }
   async function updateBackupButtonCount(){
     const btn=document.getElementById('backupsBtn');if(!btn)return;
-    const list=await listSheetBackups();btn.textContent=list.length?`Backups · ${list.length}`:'Backups';
+    const list=await listSheetBackups(),owned=list.filter(x=>!x.archivedLegacy);
+    btn.textContent=owned.length?'Backups · '+owned.length:'Backups';
   }
   async function renderBackupDialog(){
     const root=document.getElementById('backupList');if(!root)return;
-    const list=await listSheetBackups();
-    root.innerHTML=list.length?list.map(item=>`<article class="backup-entry"><div class="backup-entry-copy"><div class="row between"><strong>${esc(item.name||'Ficha sem nome')}</strong><span class="pill">${esc(backupDateLabel(item.savedAt))}</span></div><p class="muted compact">${esc(item.reason||'Backup local')}${item.legacy?' · recuperação de versão anterior':''}</p></div><button type="button" class="ghost small-btn" data-restore-backup="${esc(item.id)}">Restaurar</button></article>`).join(''):`<div class="backup-empty"><b>Nenhum backup encontrado.</b><p class="muted compact">A partir desta versão, a ficha cria checkpoints automáticos antes de operações destrutivas.</p></div>`;
+    const list=await listSheetBackups(),own=list.filter(x=>!x.archivedLegacy),old=list.filter(x=>x.archivedLegacy);
+    const row=item=>'<article class="backup-entry"><div class="backup-entry-copy"><div class="row between"><strong>'+esc(item.name||'Ficha sem nome')+'</strong><span class="pill">'+esc(backupDateLabel(item.savedAt))+'</span></div><p class="muted compact">'+esc(item.reason||'Backup local')+'</p></div><button type="button" class="ghost small-btn" data-restore-backup="'+esc(item.id)+'">Restaurar</button></article>';
+    const current=own.length?own.map(row).join(''):'<div class="backup-empty"><b>Esta personagem ainda não possui backups.</b><p class="muted compact">Use “Criar backup agora” para guardar uma cópia no navegador.</p></div>';
+    const archive=old.length?'<details class="backup-legacy-archive"><summary>Backups antigos sem personagem identificado · '+old.length+'</summary><p class="muted compact">Estes backups foram criados antes da separação das fichas. Eles foram preservados, mas podem pertencer a qualquer personagem. Confira o nome antes de restaurar.</p><div class="backup-list">'+old.map(row).join('')+'</div></details>':'';
+    root.innerHTML='<div class="backup-current"><p class="eyebrow">PERSONAGEM ATUAL</p>'+current+'</div>'+archive;
   }
   async function restoreSheetBackup(id){
     const list=await listSheetBackups(),item=list.find(x=>x.id===id);if(!item){notify('Esse backup não está mais disponível.');return}
-    if(!confirm(`Restaurar “${item.name||'Ficha sem nome'}” de ${backupDateLabel(item.savedAt)}? A ficha atual também será salva em Backups antes da restauração.`))return;
-    await storeSheetBackup(state,'Antes de restaurar outro backup',true);
-    state=migrate(deepCloneJson(item.state));syncCurrentCaps();save();render();
-    document.getElementById('backupDialog')?.close();await updateBackupButtonCount();notify('Backup restaurado.');
+    const archived=item.archivedLegacy;
+    const warning=archived?'Este é um backup antigo sem personagem identificado. CONFIRA o nome antes de restaurar. ':'';
+    if(!confirm(warning+'Restaurar “'+(item.name||'Ficha sem nome')+'” de '+backupDateLabel(item.savedAt)+' na personagem atual? Os dados atuais serão preservados primeiro em Backups.'))return;
+    if(hasMeaningfulSheetData(state)){
+      const backed=await storeSheetBackup(state,'Antes de restaurar outro backup',true);
+      if(!backed){notify('A restauração foi cancelada: não foi possível salvar uma cópia da ficha atual. Exporte o JSON antes de continuar.');return}
+    }
+    const previous=state;
+    state=migrate(deepCloneJson(item.state));syncCurrentCaps();
+    if(!save()){state=previous;syncCurrentCaps();notify('Falha ao salvar a restauração. Seus dados anteriores foram mantidos.');return}
+    render();
+    document.getElementById('backupDialog')?.close();await updateBackupButtonCount();notify('Backup restaurado na personagem atual.');
   }
 
   const MORTAL_PROFILE={
@@ -2176,10 +2205,15 @@ function longRest(){
   byId('backupNowBtn').onclick=async()=>{const ok=await storeSheetBackup(state,'Backup manual',true);await renderBackupDialog();await updateBackupButtonCount();notify(ok?'Backup criado.':'Não havia conteúdo para salvar em backup.')};
   byId('backupList').onclick=e=>{const btn=e.target.closest?.('[data-restore-backup]');if(btn)restoreSheetBackup(btn.dataset.restoreBackup)};
   byId('exportBtn').onclick=()=>{save();const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`duodecima-${(state.name||'personagem').toLowerCase().replace(/[^a-z0-9]+/g,'-')}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
-  byId('importInput').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=async()=>{try{const data=JSON.parse(reader.result);const ver=Number(data.schemaVersion);if(!Number.isFinite(ver)||ver<1||ver>SCHEMA_VERSION)throw new Error('schema');await storeSheetBackup(state,'Antes de importar JSON',true);state=migrate(data);syncCurrentCaps();save();render();await updateBackupButtonCount();notify('Ficha importada. A anterior ficou em Backups.')}catch(err){notify('Não foi possível importar este JSON.')}};reader.readAsText(f)};
-  byId('resetBtn').onclick=async()=>{if(!confirm('Criar uma ficha nova? A ficha atual será salva automaticamente em Backups antes de ser limpa.'))return;const backed=await storeSheetBackup(state,'Antes de resetar / criar outra ficha',true);state=defaultState();save();render();await updateBackupButtonCount();notify(backed?'Ficha anterior salva em Backups.':'Ficha resetada.')};
+  byId('importInput').onchange=e=>{if(window.DUODECIMA_SAFE_IMPORT_READY)return;notify('Importação protegida indisponível. Recarregue a página antes de importar.');return;const f=e.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=async()=>{try{const data=JSON.parse(reader.result);const ver=Number(data.schemaVersion);if(!Number.isFinite(ver)||ver<1||ver>SCHEMA_VERSION)throw new Error('schema');await storeSheetBackup(state,'Antes de importar JSON',true);state=migrate(data);syncCurrentCaps();save();render();await updateBackupButtonCount();notify('Ficha importada. A anterior ficou em Backups.')}catch(err){notify('Não foi possível importar este JSON.')}};reader.readAsText(f)};
+  byId('resetBtn').onclick=async()=>{if(!confirm('Criar uma ficha nova? A ficha atual será salva automaticamente em Backups antes de ser limpa.'))return;const backed=hasMeaningfulSheetData(state)?await storeSheetBackup(state,'Antes de resetar / criar outra ficha',true):true;if(!backed){notify('Reset cancelado: não foi possível criar backup. Exporte o JSON antes de continuar.');return}state=defaultState();save();render();await updateBackupButtonCount();notify(backed?'Ficha anterior salva em Backups.':'Ficha resetada.')};
 
   await load();
+  window.DUODECIMA_BACKUP_API={
+    activeStorageKey:STORAGE_KEY,
+    hasMeaningful:()=>hasMeaningfulSheetData(state),
+    create:reason=>hasMeaningfulSheetData(state)?storeSheetBackup(state,String(reason||'Backup manual'),true):Promise.resolve(true)
+  };
   await storeSheetBackup(state,'Backup de segurança ao abrir');
   await updateBackupButtonCount();
   setInterval(()=>{storeSheetBackup(state,'Backup automático').then(updateBackupButtonCount)},5*60*1000);
