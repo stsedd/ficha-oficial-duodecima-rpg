@@ -1117,7 +1117,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function libraryOptions(){
     const byGroup={};
     ITEM_LIBRARY.forEach(item=>{(byGroup[item.group]||(byGroup[item.group]=[])).push(item)});
-    return Object.entries(byGroup).map(([group,items])=>`<optgroup label="${esc(group)}">${items.map(item=>`<option value="${item.id}">${esc(item.name)}${item.kind==='weapon'?' · arma':item.kind==='armor'?' · armadura':item.kind==='shield'?' · escudo':''}</option>`).join('')}</optgroup>`).join('');
+    return Object.entries(byGroup).map(([group,items])=>`<optgroup label="${esc(group)}">${items.map(item=>`<option value="${item.id}">${esc(item.name)}${item.kind==='weapon'?' · arma':item.kind==='armor'?' · armadura':item.kind==='shield'?' · escudo':''}${item.material?` · ${esc((system.materials||[]).find(m=>m.id===item.material)?.name||item.material)}`:''}</option>`).join('')}</optgroup>`).join('');
   }
   function createInventoryItemFromLibrary(template){
     const item={id:uid('item'),name:template.name||'Item',qty:Math.max(0,Number(template.qty)||1),category:normalizeInventoryCategory(template.category||'outro'),material:String(template.material||''),rune:'',effect:String(template.effect||''),notes:String(template.notes||''),imageUrl:'',showInDeck:!!template.showInDeck,isHeritage:false,attackAttr:String(template.attackAttr||'for'),attackBonus:Number(template.attackBonus)||0,damage:String(template.damage||''),range:String(template.range||'')};
