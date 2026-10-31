@@ -1,7 +1,7 @@
 (()=>{
   'use strict';
-  const STORAGE_KEY='duodecima_universal_stage4_v24';
-  const PREF_KEY='duodecima_successor_creation_pref_v1';
+  const STORAGE_KEY=window.DUODECIMA_CHARACTER_STORAGE_KEY||'duodecima_universal_stage4_v24';
+  const PREF_KEY='duodecima_successor_creation_pref_v1_'+STORAGE_KEY;
   const rules=()=>window.DUODECIMA_CORE_DATA?.system?.rebentos?.successor||window.DUODECIMA_SYSTEM?.rebentos?.successor||{startingAttributePoints:9,energyBaseBonus:25,energyBaseTotal:125};
   const read=()=>{try{const raw=localStorage.getItem(STORAGE_KEY);return raw?JSON.parse(raw):null}catch(_){return null}};
   const pref=()=>{try{return localStorage.getItem(PREF_KEY)==='1'}catch(_){return false}};
