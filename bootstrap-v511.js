@@ -104,19 +104,12 @@
     try { await window.DUODECIMA_LINEAGE_CREATION_READY; } catch (_) {}
   } catch (err) {console.warn('[Ficha] Automação de Legados indisponível; carregando ficha base.',err)}
 
-  try{
-    await new Promise((resolve,reject)=>{
-      const patch=document.createElement('script');
-      patch.src=`rebento-fresh-creation-v5161.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
-      patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar inicialização de sucessor'));
-      document.body.appendChild(patch);
-    });
-  }catch(err){console.warn('[Ficha] Inicialização de sucessor indisponível.',err)}
+  // Sucessor implementado no app principal; a camada de criacao antiga foi desativada.
 
   try{
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`rebento-mechanics-v516.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`rebento-mechanics-v516.js?v=5.24.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar mecânicas de Rebento'));
       document.body.appendChild(patch);
     });
@@ -132,7 +125,7 @@
   }catch(err){console.warn('[Ficha] Camada visual de Rebento indisponível.',err)}
 
   const script=document.createElement('script');
-  script.src=`app-v511.js?v=5.23-multichar-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src=`app-v511.js?v=5.24.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer=false;
   script.onload=async()=>{
     try{
