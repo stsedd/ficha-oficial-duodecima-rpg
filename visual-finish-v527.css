@@ -1,0 +1,51 @@
+/* Duodécima v5.27 · acabamento transversal sem mudar as regras */
+:root { text-size-adjust:100%; -webkit-text-size-adjust:100%; }
+.archive-brandbar .archive-brand-copy{min-width:0}
+.archive-brandbar .archive-brand-copy strong{line-height:1.12}
+.archive-brandbar .legio-logo{flex-shrink:0}
+.archive-brandbar .multi-character-bar select{overflow:hidden;text-overflow:ellipsis}
+.unified-menu>summary:hover,
+.multi-character-actions>summary:hover{
+  border-color:color-mix(in srgb,var(--theme-accent,#d53645) 45%,var(--line) 55%);
+}
+.unified-menu-content,
+.multi-character-menu{color:var(--text);background:var(--panel);overscroll-behavior:contain}
+.unified-menu-content button,.unified-menu-content label,
+.multi-character-menu button{line-height:1.25}
+:is(.unified-menu>summary,.multi-character-actions>summary,.equipment-collapse,.weapon-notes-details>summary,.inventory-help-details>summary):focus-visible{
+  outline:2px solid var(--theme-accent,#d53645)!important;
+  outline-offset:2px!important;
+}
+:where(.archive-brandbar,.archive-toolbar,.card,.subcard,.weapon-card,.inventory-item-large){
+  min-width:0;
+}
+#sheetView .section-title{min-width:0}
+#sheetView .section-title > div{min-width:0}
+#sheetView .section-title h2{overflow-wrap:anywhere}
+#sheetView .tab-pane .pill{max-width:100%;white-space:normal}
+.theme-dialog,.help-dialog,.banner-crop-dialog,.backup-dialog{
+  overscroll-behavior:contain;
+}
+@media(max-width:760px){
+  .shell{overflow-x:clip}
+  #sheetView .tab-pane{min-width:0}
+  #sheetView :is(.card,.subcard,.weapon-card,.inventory-item-large){max-width:100%}
+  #sheetView .section-title h2{font-size:clamp(17px,4.6vw,23px)}
+  #sheetView label>.label{font-size:11px;line-height:1.3}
+  #sheetView input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  #sheetView select,#sheetView textarea{
+    min-width:0;max-width:100%;
+    font-size:max(14px,1rem);
+  }
+  .multi-character-actions summary,.unified-menu summary{touch-action:manipulation}
+  .sheet-tab-scroll{overscroll-behavior-x:contain}
+}
+@media(max-width:390px){
+  .archive-brandbar .multi-character-bar{padding:4px!important}
+  .archive-brandbar .multi-character-bar select{font-size:12px!important}
+  .archive-brandbar .multi-character-bar>button{font-size:11px!important}
+  .unified-top-controls{gap:5px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .sheet-tab-scroll{scroll-behavior:auto!important}
+}
