@@ -1,0 +1,238 @@
+/* Duodécima v5.27 · inventário e acabamento visual */
+[data-pane="inventory"] .inventory-toolbar-card{
+  grid-template-columns:minmax(150px,.48fr) minmax(0,1.6fr)!important;
+  align-items:center!important;
+  gap:8px 12px!important;
+  padding:12px 14px!important;
+}
+[data-pane="inventory"] .inventory-toolbar-card>div:first-child h2{
+  font-size:clamp(18px,1.5vw,22px)!important;
+  line-height:1.12!important;
+}
+[data-pane="inventory"] .inventory-toolbar-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+  align-items:stretch;
+}
+[data-pane="inventory"] .inventory-import-card,
+[data-pane="inventory"] .inventory-manual-card{
+  min-height:0!important;
+  padding:10px!important;
+  border-radius:12px!important;
+}
+[data-pane="inventory"] .inventory-import-card .eyebrow,
+[data-pane="inventory"] .inventory-manual-card .eyebrow{
+  margin-bottom:5px!important;
+  font-size:9px!important;
+}
+[data-pane="inventory"] .inventory-library-picker>summary{
+  min-height:40px!important;
+  padding:8px 10px!important;
+}
+[data-pane="inventory"] .inventory-manual-row{
+  display:flex!important;
+  gap:6px!important;
+  min-width:0!important;
+}
+[data-pane="inventory"] .inventory-manual-row select{flex:1;min-width:0}
+[data-pane="inventory"] .inventory-manual-row button{flex:0 0 auto;white-space:nowrap}
+[data-pane="inventory"] .inventory-manual-card>p.muted{display:none!important}
+[data-pane="inventory"] .inventory-filter-row{
+  grid-column:2!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(135px,.48fr)!important;
+  gap:8px!important;
+  margin:0!important;
+}
+[data-pane="inventory"] .inventory-filter-row input,
+[data-pane="inventory"] .inventory-filter-row select{width:100%;min-width:0}
+[data-pane="inventory"] .inventory-help-inline{
+  grid-column:2!important;
+  display:block!important;
+  min-width:0;
+  padding:0!important;
+  margin:0!important;
+}
+[data-pane="inventory"] .inventory-help-inline details{
+  width:100%;
+  border:1px solid color-mix(in srgb,var(--theme-accent,#d53645) 18%,var(--line) 82%);
+  border-radius:9px;
+  background:color-mix(in srgb,var(--theme-accent,#d53645) 4%,var(--panel) 96%);
+}
+[data-pane="inventory"] .inventory-help-inline summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:34px;
+  padding:6px 11px;
+  font-size:11px;
+  cursor:pointer;
+  list-style:none;
+}
+[data-pane="inventory"] .inventory-help-inline summary::-webkit-details-marker{display:none}
+[data-pane="inventory"] .inventory-help-inline summary:after{content:"⌄";font-size:15px;font-weight:700}
+[data-pane="inventory"] .inventory-help-inline details[open] summary:after{transform:rotate(180deg)}
+[data-pane="inventory"] .inventory-help-content{padding:3px 12px 10px}
+[data-pane="inventory"] .inventory-help-content .muted{font-size:12px;line-height:1.45}
+[data-pane="inventory"] .inventory-help-content label{display:block;width:100%;min-width:0}
+[data-pane="inventory"] .inventory-help-content textarea{
+  display:block;width:100%;resize:vertical;
+  min-height:74px!important;height:auto!important;
+}
+[data-pane="inventory"] .inventory-ledger{display:none!important}
+[data-pane="inventory"] .mechanics-section{margin-top:12px!important}
+[data-pane="inventory"] .section-title{margin-bottom:7px!important;gap:8px}
+[data-pane="inventory"] .section-title h2{font-size:clamp(18px,1.7vw,23px)!important}
+[data-pane="inventory"] [data-inventory-kind="protection"]{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:start;gap:10px!important;
+}
+[data-pane="inventory"] .equipment-editor-card{
+  min-width:0!important;min-height:0!important;
+  padding:12px!important;align-self:start!important;
+}
+[data-pane="inventory"] .equipment-editor-card>.row.between:first-child{
+  min-height:36px;
+  flex-wrap:wrap;
+  gap:8px!important;
+}
+[data-pane="inventory"] .equipment-editor-card>.row:first-child .eyebrow{margin:0!important}
+[data-pane="inventory"] .equipment-compact-summary{
+  display:none;
+  margin-left:auto;
+  padding:4px 7px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  color:var(--muted);
+  font-size:11px;
+}
+[data-pane="inventory"] .equipment-editor-card.is-collapsed{
+  padding:8px 11px!important;
+  border-style:dashed!important;
+}
+[data-pane="inventory"] .equipment-editor-card.is-collapsed>.row:first-child{
+  display:flex!important;align-items:center!important;
+  justify-content:flex-start!important;min-height:38px!important;
+}
+[data-pane="inventory"] .equipment-editor-card.is-collapsed>.row:first-child label{display:none!important}
+[data-pane="inventory"] .equipment-editor-card.is-collapsed .equipment-compact-summary{display:inline-flex}
+[data-pane="inventory"] .equipment-editor-card .equipment-collapse{
+  font-size:11px!important;
+  padding:7px 9px!important;
+  margin-left:auto!important;
+  min-height:34px;
+  white-space:nowrap;
+}
+[data-pane="inventory"] .equipment-editor-card .equipment-editor-head{
+  display:grid!important;
+  grid-template-columns:76px minmax(0,1fr)!important;
+  align-items:start;
+  gap:10px!important;
+}
+[data-pane="inventory"] .equipment-editor-card .inventory-image-preview{
+  width:76px!important;height:76px!important;
+  max-width:76px!important;max-height:76px!important;
+}
+[data-pane="inventory"] .equipment-editor-card .equipment-editor-fields{min-width:0!important}
+[data-pane="inventory"] .equipment-editor-card .subcard{padding:8px 10px!important;margin:6px 0!important}
+[data-pane="inventory"] .equipment-editor-card .grid.two{gap:8px!important}
+[data-pane="inventory"] .equipment-editor-card label{min-width:0}
+[data-pane="inventory"] .equipment-editor-card .inventory-image-actions{
+  gap:4px!important;flex-wrap:wrap!important;
+}
+[data-pane="inventory"] .weapon-list{
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,365px),1fr))!important;
+  align-items:start!important;gap:11px!important;
+}
+[data-pane="inventory"] .weapon-card{
+  min-width:0!important;
+  min-height:0!important;
+  padding:11px!important;align-self:start!important;
+}
+[data-pane="inventory"] .weapon-card .weapon-editor-head{
+  display:grid!important;
+  grid-template-columns:78px minmax(0,1fr)!important;
+  align-items:start!important;gap:10px!important;
+  margin-bottom:8px!important;
+}
+[data-pane="inventory"] .weapon-card .inventory-image-preview{
+  width:78px!important;height:78px!important;
+  max-height:78px!important;max-width:78px!important;
+}
+[data-pane="inventory"] .weapon-card .weapon-editor-fields{min-width:0!important}
+[data-pane="inventory"] .weapon-card .weapon-editor-fields>.row.between>div:first-child{min-width:0!important;flex:1 1 100%}
+[data-pane="inventory"] .weapon-card .weapon-name{width:100%!important;min-width:0!important}
+[data-pane="inventory"] .weapon-card .weapon-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;
+}
+[data-pane="inventory"] .weapon-card .weapon-grid label{min-width:0!important}
+[data-pane="inventory"] .weapon-card .weapon-grid input,
+[data-pane="inventory"] .weapon-card .weapon-grid select{width:100%!important;min-width:0!important}
+[data-pane="inventory"] .weapon-card .weapon-results{gap:5px!important;margin:7px 0!important}
+[data-pane="inventory"] .weapon-card .weapon-results .pill{font-size:10px!important;line-height:1.25!important}
+[data-pane="inventory"] .weapon-notes-details{
+  border:1px solid var(--line);
+  border-radius:9px;
+  margin:7px 0;
+  overflow:hidden;
+}
+[data-pane="inventory"] .weapon-notes-details summary{
+  display:flex;align-items:center;gap:7px;
+  padding:8px 10px;min-height:36px;
+  font-size:11px;font-weight:700;cursor:pointer;
+  list-style:none;
+}
+[data-pane="inventory"] .weapon-notes-details summary::-webkit-details-marker{display:none}
+[data-pane="inventory"] .weapon-notes-details summary:before{content:"▸";color:var(--theme-accent,var(--accent))}
+[data-pane="inventory"] .weapon-notes-details[open] summary:before{content:"▾"}
+[data-pane="inventory"] .weapon-notes-preview{
+  display:block;flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:10px;font-weight:400;color:var(--muted);
+}
+[data-pane="inventory"] .weapon-notes-details[open] .weapon-notes-preview{display:none}
+[data-pane="inventory"] .weapon-notes-details label{display:block;padding:2px 9px 10px}
+[data-pane="inventory"] .weapon-notes-details textarea{
+  display:block;width:100%!important;
+  resize:vertical!important;
+  min-height:76px!important;height:76px!important;
+}
+[data-pane="inventory"] .weapon-card .row.between{gap:6px!important;align-items:center}
+[data-pane="inventory"] .inventory-grid-large{gap:10px!important}
+[data-pane="inventory"] .inventory-item-large{min-width:0!important;padding:12px!important}
+[data-pane="inventory"] .inventory-item-large textarea{min-height:92px!important;height:92px!important;resize:vertical!important}
+@media(min-width:801px) {
+  [data-pane="inventory"] .inventory-item-large{
+    content-visibility:auto;
+    contain-intrinsic-size:auto 350px;
+  }
+}
+@media(max-width:980px){
+  [data-pane="inventory"] .inventory-toolbar-card{grid-template-columns:1fr!important}
+  [data-pane="inventory"] .inventory-filter-row,
+  [data-pane="inventory"] .inventory-help-inline{grid-column:1!important}
+}
+@media(max-width:760px){
+  [data-pane="inventory"] [data-inventory-kind="protection"]{grid-template-columns:1fr!important}
+  [data-pane="inventory"] .weapon-list{grid-template-columns:1fr!important}
+  [data-pane="inventory"] .weapon-card .weapon-editor-head{grid-template-columns:74px minmax(0,1fr)!important}
+  [data-pane="inventory"] .weapon-card .inventory-image-preview{width:74px!important;height:74px!important}
+  [data-pane="inventory"] .weapon-card .weapon-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  [data-pane="inventory"] .inventory-grid-large{grid-template-columns:1fr!important}
+  [data-pane="inventory"] .inventory-item-large .inventory-image-preview{width:90px!important;height:90px!important}
+  [data-pane="inventory"] .inventory-item-head-large{grid-template-columns:90px minmax(0,1fr)!important}
+  [data-pane="inventory"] .weapon-notes-details summary{min-height:44px}
+}
+@media(max-width:560px){
+  [data-pane="inventory"] .inventory-toolbar-card{padding:10px!important}
+  [data-pane="inventory"] .inventory-toolbar-grid{grid-template-columns:1fr!important}
+  [data-pane="inventory"] .inventory-filter-row{grid-template-columns:1fr!important}
+  [data-pane="inventory"] .equipment-editor-card .equipment-collapse{min-height:44px!important}
+  [data-pane="inventory"] .inventory-manual-row button{min-height:44px!important}
+  [data-pane="inventory"] .inventory-library-picker>summary{min-height:44px!important}
+  [data-pane="inventory"] .inventory-item-head-large{gap:8px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  [data-pane="inventory"] *,
+  .unified-menu-content{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
