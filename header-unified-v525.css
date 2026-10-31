@@ -1,0 +1,22 @@
+/* v5.25: cabeçalho integrado sem alterar controles, dados ou listeners */
+.archive-brandbar{gap:10px!important;padding:10px 16px!important;margin-bottom:8px!important}
+.archive-brand-copy .archive-brand-kicker{display:none!important}
+.archive-brand-copy strong{font-size:clamp(17px,2vw,24px)!important}
+.archive-brandbar .appearance-top-actions{display:flex!important;align-items:center!important;gap:8px!important}
+.unified-top-controls{display:flex;gap:7px;align-items:center}
+.unified-menu{position:relative;min-width:0}
+.unified-menu>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:9px 13px;border:1px solid var(--line);border-radius:30px;background:var(--panel);font-size:12px;font-weight:700;min-height:36px;white-space:nowrap}
+.unified-menu>summary::-webkit-details-marker{display:none}
+.unified-menu[open]>summary{border-color:var(--theme-accent,var(--red))}
+.unified-menu-content{position:absolute;top:calc(100% + 8px);right:0;z-index:900;min-width:205px;max-width:min(92vw,330px);padding:9px;background:var(--panel);border:1px solid var(--line);border-radius:13px;box-shadow:0 16px 30px rgba(0,0,0,.18);display:flex;flex-direction:column;align-items:stretch;gap:6px}
+.unified-menu-content>button,.unified-menu-content>label{width:100%!important;display:flex!important;align-items:center;justify-content:center;text-align:center;min-height:34px!important;margin:0!important;font-size:12px!important}
+.unified-menu-content .theme-toggle{max-width:none!important;justify-content:flex-start!important}
+.archive-toolbar.unified-toolbar{padding:0!important;min-height:0!important;margin:0 0 5px!important;border:0!important;background:transparent!important;box-shadow:none!important}
+.archive-toolbar.unified-toolbar .archive-actions{display:none!important}
+.archive-toolbar.unified-toolbar .archive-toolbar-copy{display:flex!important;gap:7px!important;justify-content:flex-end!important;align-items:center!important;opacity:.75;max-height:24px;overflow:hidden;padding:0 4px!important;font-size:9px!important}
+.archive-toolbar.unified-toolbar .archive-save-note{font-size:9px!important}
+.archive-toolbar.unified-toolbar .version-chip{font-size:8px!important}
+.profile-cover{margin-bottom:5px!important}
+#sheetView,#creationView{margin-top:5px!important}
+@media(max-width:1120px){.archive-brandbar .appearance-top-actions{margin-left:auto!important}}
+@media(max-width:600px){.archive-brandbar{padding:9px!important}.unified-top-controls{gap:4px;flex-wrap:wrap}.unified-menu>summary{font-size:11px;padding:7px 9px;min-height:32px}.archive-toolbar.unified-toolbar .archive-save-note{display:none!important}}
