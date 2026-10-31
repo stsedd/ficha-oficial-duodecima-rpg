@@ -25,9 +25,12 @@
     const mode = String(body.dataset.mode || body.getAttribute('data-theme-mode') || 'dark').toLowerCase();
     const palette = String(body.dataset.palette || '').toLowerCase();
     const special = String(body.dataset.special || '').toLowerCase();
-    const originalRed = palette === 'red' && (special === 'none' || special === '');
+    const exclusive = String(body.dataset.exclusiveTheme || 'none').toLowerCase();
+    const originalRed = palette === 'red' && special === 'none' && exclusive === 'none';
+    // Neve uses a light surface and Fogo uses a dark one, regardless of saved mode.
+    const lightSurface = special === 'snow' || (special !== 'fire' && mode === 'light');
     const src = originalRed ? 'legio-vermelho.png?v=5.25.1'
-      : mode === 'light' ? 'legio-preto.png?v=5.25.1'
+      : lightSurface ? 'legio-preto.png?v=5.25.1'
       : 'legio-branco.png?v=5.25.1';
     if (logo.getAttribute('src') !== src) logo.setAttribute('src', src);
   }
@@ -37,7 +40,7 @@
     const observer = new MutationObserver(updateLogo);
     observer.observe(document.body, {
       attributes: true,
-      attributeFilter: ['data-mode', 'data-theme-mode', 'data-palette', 'data-special']
+      attributeFilter: ['data-mode', 'data-theme-mode', 'data-palette', 'data-special', 'data-exclusive-theme']
     });
     const brand = document.querySelector('.archive-brand-copy');
     if (brand) observer.observe(brand, { childList: true });
