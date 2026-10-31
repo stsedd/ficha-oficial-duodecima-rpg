@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const STORAGE_KEY=window.DUODECIMA_CHARACTER_STORAGE_KEY||'duodecima_universal_stage4_v24';
-  const RECOVERY_KEY='duodecima_import_recovery_v1';
+  const RECOVERY_KEY='duodecima_import_recovery_v1_'+encodeURIComponent(STORAGE_KEY);
   const THEME_DB='duodecima_exclusive_themes_v1';
   const THEME_STORE='themes';
   const THEME_INDEX='duodecima_exclusive_theme_index_v1';
@@ -56,10 +56,67 @@
   })}
   function fallbackStoreTheme(theme){localStorage.setItem(`duodecima_exclusive_theme_v1_${theme.id}`,JSON.stringify(theme));let ids=[];try{ids=JSON.parse(localStorage.getItem(THEME_INDEX)||'[]')}catch(_){}if(!Array.isArray(ids))ids=[];localStorage.setItem(THEME_INDEX,JSON.stringify([...new Set([...ids,theme.id])]))}
   async function importTheme(file){const raw=await parseJsonFile(file),theme=validateTheme(raw);try{await Promise.race([storeTheme(theme),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),2500))])}catch(_){fallbackStoreTheme(theme)}const sheet=currentSheet();if(sheet){sheet.appearance=sheet.appearance||{};sheet.appearance.exclusiveThemeId=theme.id;sheet.appearance.special='none';localStorage.setItem(STORAGE_KEY,JSON.stringify(sheet))}toast(`Tema exclusivo ${theme.name} instalado. Recarregando…`);setTimeout(()=>location.reload(),250)}
+
+  let importing=false;
+  function ensureImportDialog(){
+    let dialog=document.getElementById('duodecimaSafeImportDialog');
+    if(dialog)return dialog;
+    dialog=document.createElement('dialog');
+    dialog.id='duodecimaSafeImportDialog';
+    dialog.className='theme-dialog safe-import-dialog';
+    dialog.innerHTML='<div class="theme-dialog-card safe-import-card"><p class="eyebrow">IMPORTAR FICHA</p><h2>Como deseja importar?</h2><p class="muted compact" id="safeImportFilename"></p><p class="muted compact">Você pode adicionar o personagem sem alterar os existentes ou substituir apenas a ficha selecionada, criando antes um backup de segurança.</p><div class="safe-import-actions"><button type="button" class="primary" data-safe-import="new">+ Criar novo personagem</button><button type="button" class="ghost" data-safe-import="replace">Substituir personagem atual</button><button type="button" class="ghost" data-safe-import="cancel">Cancelar</button></div></div>';
+    document.body.appendChild(dialog);
+    return dialog;
+  }
+  function chooseImportMode(file,data){
+    const dialog=ensureImportDialog();
+    dialog.querySelector('#safeImportFilename').textContent='Arquivo: '+(file.name||'ficha.json')+' · Personagem: '+String(data.name||'Sem nome');
+    return new Promise(resolve=>{
+      let finished=false;
+      function settle(value){
+        if(finished)return;finished=true;
+        dialog.removeEventListener('click',onClick);
+        dialog.removeEventListener('cancel',onCancel);
+        if(dialog.open)dialog.close();
+        resolve(value);
+      }
+      function onClick(event){
+        const action=event.target.closest?.('[data-safe-import]')?.dataset.safeImport;
+        if(!action)return;
+        settle(action==='new'||action==='replace'?action:null);
+      }
+      function onCancel(event){event.preventDefault();settle(null)}
+      dialog.addEventListener('click',onClick);
+      dialog.addEventListener('cancel',onCancel);
+      if(typeof dialog.showModal==='function')dialog.showModal();
+      else settle(null);
+    });
+  }
+  async function handleImport(file){
+    const data=validateSheet(await parseJsonFile(file));
+    const choice=await chooseImportMode(file,data);
+    if(!choice)return;
+    if(choice==='new'){
+      const manager=window.DUODECIMA_CHARACTER_MANAGER;
+      if(!manager?.importAsNew)throw new Error('O seletor de personagens está indisponível. Recarregue a página.');
+      if(!manager.importAsNew(data))throw new Error('Não foi possível guardar a nova personagem. Verifique o espaço do navegador.');
+      return;
+    }
+    const backups=window.DUODECIMA_BACKUP_API;
+    if(!backups||backups.activeStorageKey!==STORAGE_KEY)throw new Error('Sistema de backup não está pronto. Recarregue a página antes de substituir.');
+    const ok=await backups.create('Antes de substituir por JSON');
+    if(!ok)throw new Error('Substituição cancelada: não foi possível criar um backup. Exporte a ficha atual primeiro.');
+    // Recuperação extra por personagem; o backup normal fica no IndexedDB.
+    backupBeforeImport();
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+    toast('Importação concluída nesta personagem. Recarregando…');
+    setTimeout(()=>location.reload(),180);
+  }
+
   function install(){
     const exp=q('exportBtn'),imp=q('importInput'),theme=q('exclusiveThemeInput');
     if(exp&&!exp.dataset.ioRecovery){exp.dataset.ioRecovery='1';exp.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();const data=currentSheet();if(!data){toast('Não encontrei uma ficha local para exportar.');return}downloadJson(data,`duodecima-${safeName(data.name)}.json`);toast('Ficha exportada.')},true)}
-    if(imp&&!imp.dataset.ioRecovery){imp.dataset.ioRecovery='1';imp.addEventListener('change',async e=>{e.stopImmediatePropagation();const file=e.target.files?.[0];e.target.value='';if(!file)return;try{const data=validateSheet(await parseJsonFile(file));backupBeforeImport();localStorage.setItem(STORAGE_KEY,JSON.stringify(data));toast('Ficha importada. Recarregando…');setTimeout(()=>location.reload(),250)}catch(err){console.warn('[Duodecima IO] import',err);toast(err?.message||'Não foi possível importar este JSON.')}},true)}
+    if(imp&&!imp.dataset.ioRecovery){imp.dataset.ioRecovery='1';window.DUODECIMA_SAFE_IMPORT_READY=true;imp.addEventListener('change',async e=>{e.preventDefault();e.stopImmediatePropagation();const file=e.target.files?.[0];e.target.value='';if(!file||importing)return;importing=true;try{await handleImport(file)}catch(err){console.warn('[Duodecima IO] import',err);toast(err?.message||'Não foi possível importar este JSON.')}finally{importing=false}},true)}
     if(theme&&!theme.dataset.ioRecovery){theme.dataset.ioRecovery='1';theme.addEventListener('change',async e=>{e.stopImmediatePropagation();const file=e.target.files?.[0];e.target.value='';if(!file)return;try{await importTheme(file)}catch(err){console.warn('[Duodecima IO] theme',err);toast(err?.message||'Não foi possível instalar este tema exclusivo.')}},true)}
   }
   install();
