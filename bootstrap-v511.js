@@ -125,7 +125,7 @@
   }catch(err){console.warn('[Ficha] Camada visual de Rebento indisponível.',err)}
 
   const script=document.createElement('script');
-  script.src=`app-v511.js?v=5.24.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src=`app-v511.js?v=5.27.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer=false;
   script.onload=async()=>{
     try{
