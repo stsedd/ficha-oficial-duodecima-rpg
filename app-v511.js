@@ -271,6 +271,10 @@
         out.push({id:'legacy:'+key,savedAt:data.updatedAt||data.createdAt||'',reason:'Cópia local de versão anterior',name:data.name||'Ficha antiga',signature:sheetBackupSignature(data),state:data,legacy:true,archivedLegacy:true});
       }catch(_){}
     }
+    try{
+      const oldRecovery=safeStorage.getItem('duodecima_import_recovery_v1');
+      if(oldRecovery){const record=JSON.parse(oldRecovery);if(hasMeaningfulSheetData(record?.state))out.push({id:'legacy:import-recovery',savedAt:record.savedAt||'',reason:'Cópia de segurança de importação antiga',name:record.state.name||'Ficha antiga',signature:sheetBackupSignature(record.state),state:record.state,legacy:true,archivedLegacy:true})}
+    }catch(_){}
     return out;
   }
   async function listSheetBackups(){
