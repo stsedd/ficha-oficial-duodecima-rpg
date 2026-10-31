@@ -14,6 +14,26 @@ function ensure(){let r=registry();if(!r.characters.some(c=>c.id===r.active))r.a
 function current(){return registry().active}
 function change(id){const r=registry();if(!r.characters.some(c=>c.id===id))return;r.active=id;write(META,r);window.location.reload()}
 function add(copy){const r=registry();const id=makeId();if(copy){const data=store.getItem(key(r.active));if(data){try{store.setItem(key(id),data)}catch(e){alert('Não há espaço suficiente para duplicar esta ficha. Exporte o JSON antes de continuar.');return}}}r.characters.push({id,name:copy?label(r.active)+' (cópia)':'Novo personagem'});r.active=id;try{write(META,r)}catch(e){alert('Não foi possível criar a ficha neste navegador.');return}window.location.reload()}
+function importAsNew(data){
+ const r=registry(),id=makeId(),storageKey=key(id),name=String(data?.name||'').trim()||'Personagem importado';
+ let stored=false;
+ try{
+   // Grava a ficha ANTES de ativá-la. Se o registro falhar, não troca a personagem atual.
+   store.setItem(storageKey,JSON.stringify(data));stored=true;
+   const next={...r,characters:[...r.characters,{id,name}],active:id};
+   write(META,next);
+   window.location.reload();
+   return true;
+ }catch(err){
+   if(stored)try{store.removeItem(storageKey)}catch(_){}
+   console.error('[Duodecima] Não foi possível importar como novo personagem.',err);
+   return false;
+ }
+}
+window.DUODECIMA_CHARACTER_MANAGER={
+ activeStorageKey:()=>key(current()),
+ importAsNew
+};
 function del(){const r=registry();if(r.characters.length===1){alert('É necessário manter pelo menos um personagem.');return}const id=r.active;if(!confirm('Excluir '+label(id)+' da lista local? Exporte o JSON antes: a exclusão não pode ser desfeita.'))return;if(id==='legacy'){alert('Para proteger a ficha original, ela não pode ser excluída. Você pode mudar para outra ficha.');return}r.characters=r.characters.filter(c=>c.id!==id);r.active=r.characters[0].id;write(META,r);store.removeItem(key(id));window.location.reload()}
 function download(){const data=store.getItem(key(current()));if(!data){alert('Esta ficha ainda não contém dados salvos.');return}const blob=new Blob([data],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='duodecima-'+label(current()).replace(/[^a-z0-9-]+/gi,'-')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function init(){
