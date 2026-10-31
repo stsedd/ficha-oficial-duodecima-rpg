@@ -97,7 +97,7 @@
   try {
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`lineage-creation-v515.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`lineage-creation-v515.js?v=5.26.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar automação de Legados'));
       document.body.appendChild(patch);
     });
@@ -118,7 +118,7 @@
   try{
     await new Promise((resolve,reject)=>{
       const visual=document.createElement('script');
-      visual.src='rebento-visual-v5163.js?v=5.16.3';
+      visual.src='rebento-visual-v5163.js?v=5.26.0';
       visual.onload=resolve;visual.onerror=()=>reject(new Error('Falha ao carregar visual de Rebento'));
       document.body.appendChild(visual);
     });
@@ -131,7 +131,7 @@
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src=`rules-sync-v516.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.src=`rules-sync-v516.js?v=5.26.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
         patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar sincronização das regras de combate'));
         document.body.appendChild(patch);
       });
