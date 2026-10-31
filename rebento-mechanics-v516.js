@@ -1,7 +1,7 @@
 (()=>{
   'use strict';
 
-  const STORAGE_KEY='duodecima_universal_stage4_v24';
+  const STORAGE_KEY=window.DUODECIMA_CHARACTER_STORAGE_KEY||'duodecima_universal_stage4_v24';
   const ATTRS=[['for','FOR','Força'],['des','DES','Destreza'],['con','CON','Constituição'],['int','INT','Inteligência'],['fe','FÉ','Fé'],['car','CAR','Carisma']];
   const rebentoRules=()=>window.DUODECIMA_CORE_DATA?.system?.rebentos||window.DUODECIMA_SYSTEM?.rebentos||{
     attributeRewards:{total:2,mustUseDifferentAttributes:true,maxAttribute:6,sacrificableByMagic:false},
@@ -42,7 +42,7 @@
       window.DUODECIMA_SYSTEM.energy.successorBonus=bonus;
     }
   }
-  applySuccessorEnergyBeforeApp();
+  // Bônus calculado exclusivamente pelo app principal a partir do personagem ativo.
 
   function creationReady(data){
     const limit=Number(rebentoRules().successor?.startingAttributePoints||9);
@@ -178,7 +178,7 @@
     rail.querySelector('.rail-identity')?.appendChild(badge);
   }
 
-  function patchAll(){patchCreation();patchRebentoProfile();patchSuccessorBadge()}
+  function patchAll(){patchRebentoProfile();patchSuccessorBadge()}
   function initObserver(){
     let queued=false;const queue=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;patchAll()})};
     new MutationObserver(queue).observe(document.body,{childList:true,subtree:true});queue();
