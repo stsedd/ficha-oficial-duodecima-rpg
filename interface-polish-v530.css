@@ -183,6 +183,28 @@ body[data-mode="light"] .archive-brandbar .unified-menu[open]>summary.duo-motion
   color:var(--theme-accent-deep,var(--text))!important;
 }
 
+/* Ações do inventário e recolhimento de equipamentos, mantendo os textos. */
+[data-pane="inventory"] .inventory-image-actions button.duo-motion-hit{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+}
+[data-pane="inventory"] .inventory-image-actions button.duo-motion-hit .duo-motion-icon{
+  width:15px!important;height:15px!important;flex:0 0 15px;
+}
+[data-pane="inventory"] .equipment-collapse{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:6px!important;
+}
+[data-pane="inventory"] .equipment-collapse::before{
+  content:"▾";display:inline-block;font-size:15px;line-height:1;
+  transform:rotate(0deg);transition:transform var(--duo-ui-motion) var(--duo-ui-ease);
+}
+[data-pane="inventory"] .equipment-editor-card.is-collapsed .equipment-collapse::before{
+  transform:rotate(-90deg);
+}
 /* Mobile: ações ficam numa linha, com áreas de toque sem rótulos largos. */
 @media(max-width:760px){
   #sheetView .sheet-tab-scroll button.duo-motion-tab{
@@ -245,4 +267,5 @@ body[data-mode="light"] .archive-brandbar .unified-menu[open]>summary.duo-motion
   .archive-brandbar .unified-menu>summary.duo-motion-hit{
     transition:none!important;
   }
+  [data-pane="inventory"] .equipment-collapse::before{transition:none!important}
 }
