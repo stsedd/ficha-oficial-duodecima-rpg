@@ -693,6 +693,26 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   let sheetWriteSequence=0;
   let lastRenderedWriteSequence=-1;
   function save(){state.schemaVersion=SCHEMA_VERSION;state.updatedAt=new Date().toISOString();try{safeStorage.setItem(STORAGE_KEY,JSON.stringify(state));sheetWriteSequence++;return true}catch(err){console.error('[Ficha] Falha ao salvar a ficha localmente.',err);notify('A ficha atingiu o limite de armazenamento deste navegador. Remova imagens antigas ou exporte o JSON antes de continuar.');return false}}
+  window.DUODECIMA_REORDER_DECK=(type,keys)=>{
+    if(!Array.isArray(keys)||!keys.length||new Set(keys).size!==keys.length||keys.some(k=>typeof k!=='string'))return false;
+    if(type==='abilities'){
+      const previous=Array.isArray(state.abilityDeck)?[...state.abilityDeck]:[];
+      if(previous.length!==keys.length||keys.some(k=>!previous.includes(k)))return false;
+      state.abilityDeck=[...keys];
+      if(!save()){state.abilityDeck=previous;return false}
+      return true;
+    }
+    if(type==='equipment'){
+      const visible=[...document.querySelectorAll('#sheetView .equipment-deck .equipment-card[data-equipment-key]')].map(el=>el.dataset.equipmentKey);
+      if(visible.length!==keys.length||keys.some(k=>!visible.includes(k)))return false;
+      const previous=Array.isArray(state.equipmentDeckOrder)?[...state.equipmentDeckOrder]:[];
+      // Keep previously ordered but temporarily unequipped items for later.
+      state.equipmentDeckOrder=[...keys,...previous.filter(k=>!keys.includes(k))].slice(0,300);
+      if(!save()){state.equipmentDeckOrder=previous;return false}
+      return true;
+    }
+    return false;
+  };
   function uid(prefix='id'){return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`}
   function migrate(data){
     const out=Object.assign(defaultState(),data||{});
@@ -702,6 +722,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     out.originSkillChoice=typeof data?.originSkillChoice==='string'?data.originSkillChoice:'';
     out.abilityVisuals=data?.abilityVisuals&&typeof data.abilityVisuals==='object'?Object.fromEntries(Object.entries(data.abilityVisuals).filter(([k])=>typeof k==='string').map(([k,v])=>[k,{imageUrl:typeof v?.imageUrl==='string'?v.imageUrl:'',summary:typeof v?.summary==='string'?v.summary.slice(0,180):''}])):{};
     out.abilityDeck=Array.isArray(data?.abilityDeck)?[...new Set(data.abilityDeck.filter(x=>typeof x==='string'))].slice(0,3):[];
+    out.equipmentDeckOrder=Array.isArray(data?.equipmentDeckOrder)?[...new Set(data.equipmentDeckOrder.filter(k=>typeof k==='string'&&k.length<180))].slice(0,300):[];
     out.fortunaBlessing=out.fortunaBlessing===true;
     const fortunaMonth=currentMonthKey();
     if(out.fortunaBlessing&&out.fortunaBlessingMonth&&out.fortunaBlessingMonth!==fortunaMonth)out.fortunaBlessing=false;
@@ -1253,7 +1274,12 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
       cards.push(card(`item ${it.category}`,`item:${it.id}`,badge,meta,equipmentCardVisual(it.imageUrl,'✧'),it.name||'Item',subtitle,description,stats,extra));
     });
     if(!cards.length)return `<div class="equipment-deck-empty"><span>✦</span><b>Seu baralho está vazio</b><p>Equipe armas, armadura ou escudo, ou fixe itens do inventário para vê-los aqui.</p><button type="button" data-go-tab="inventory" class="primary">Abrir inventário</button></div>`;
-    return `<div class="equipment-deck upgraded-equipment-deck">${cards.join('')}</div>`;
+    const priority=new Map((state.equipmentDeckOrder||[]).map((key,index)=>[key,index]));
+    const ordered=cards.map((html,index)=>{
+      const key=html.match(/data-equipment-key="([^"]+)"/)?.[1]||'';
+      return {html,index,key};
+    }).sort((a,b)=>(priority.get(a.key)??Infinity)-(priority.get(b.key)??Infinity)||a.index-b.index);
+    return `<div class="equipment-deck upgraded-equipment-deck">${ordered.map(x=>x.html).join('')}</div>`;
   }
   function renderCombatEquipmentSummary(){
     const a=state.armor,t=armorType(a.type),s=state.shield,eqWeapons=(state.weapons||[]).filter(w=>w.equipped!==false);
