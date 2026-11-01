@@ -690,7 +690,9 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     return {name:'Energia estável',cls:'good-text',text:'Sem penalidade por Energia.'};
   }
   function notify(msg){toast.textContent=msg;toast.classList.remove('hidden');clearTimeout(notify.t);notify.t=setTimeout(()=>toast.classList.add('hidden'),2800)}
-  function save(){state.schemaVersion=SCHEMA_VERSION;state.updatedAt=new Date().toISOString();try{safeStorage.setItem(STORAGE_KEY,JSON.stringify(state));return true}catch(err){console.error('[Ficha] Falha ao salvar a ficha localmente.',err);notify('A ficha atingiu o limite de armazenamento deste navegador. Remova imagens antigas ou exporte o JSON antes de continuar.');return false}}
+  let sheetWriteSequence=0;
+  let lastRenderedWriteSequence=-1;
+  function save(){state.schemaVersion=SCHEMA_VERSION;state.updatedAt=new Date().toISOString();try{safeStorage.setItem(STORAGE_KEY,JSON.stringify(state));sheetWriteSequence++;return true}catch(err){console.error('[Ficha] Falha ao salvar a ficha localmente.',err);notify('A ficha atingiu o limite de armazenamento deste navegador. Remova imagens antigas ou exporte o JSON antes de continuar.');return false}}
   function uid(prefix='id'){return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`}
   function migrate(data){
     const out=Object.assign(defaultState(),data||{});
@@ -1473,7 +1475,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function renderSheet(){
     syncCurrentCaps();const g=god(),set=effectiveAbilitySet(),fDef=fixedDefense();
     sheetView.innerHTML=`<div class="sheet-frame">${renderCharacterRail(g)}<div class="sheet-main">${renderTabs()}${renderStatusTab(g)}${renderCombatTab(fDef,set)}${renderInventoryTab()}${renderFamiliarsTab()}${renderRomaTab()}${renderMagicTab()}${renderHistoryTab()}${renderNotesTab()}</div></div>`;
-    bindSheet();save();
+    bindSheet();if(save())lastRenderedWriteSequence=sheetWriteSequence;
   }
   function renderArmorCard(){
     const a=state.armor,m=material(a.material),t=armorType(a.type),res=m.unbreakable?'∞':clamp(Number(a.resistanceCurrent)||0,0,m.resistance||0);
@@ -1848,6 +1850,60 @@ function applyManualResource(kind,input){
     requestAnimationFrame(()=>requestAnimationFrame(layoutAbilityMasonry));
   }
 
+  const SHEET_TABS=new Set(['status','combat','inventory','familiars','roma','magic','history','notes']);
+  function bindActivePane(tab){
+    const pane=sheetView.querySelector('.sheet-main > .tab-pane[data-pane="'+tab+'"]');
+    if(!pane)return;
+    if(pane.dataset.duoActiveBound==='1'){
+      if(tab==='combat')requestAnimationFrame(layoutAbilityMasonry);
+      return;
+    }
+    pane.dataset.duoActiveBound='1';
+    if(tab==='status'){bindSkillTraining();bindSkillMatrix();bindTalents();bindLegacy();}
+    else if(tab==='inventory')bindInventory();
+    else if(tab==='familiars')bindFamiliars();
+    else if(tab==='roma')bindRoma();
+    else if(tab==='magic')bindMagic();
+    else if(tab==='combat')bindAbilityMasonry();
+  }
+
+  function switchSheetTab(target){
+    if(!SHEET_TABS.has(target)||state.activeTab===target)return;
+    const prev=state.activeTab;
+    const dirty=sheetWriteSequence!==lastRenderedWriteSequence;
+    const panes=[...sheetView.querySelectorAll('.sheet-main > .tab-pane[data-pane]')];
+    const next=panes.find(p=>p.dataset.pane===target);
+    const nav=sheetView.querySelector('.sheet-tab-scroll');
+    if(!next||!nav){
+      state.activeTab=target;
+      if(!save()){state.activeTab=prev;return}
+      renderSheet();
+      return;
+    }
+    state.activeTab=target;
+    if(!save()){state.activeTab=prev;return}
+    // Any data edit since the most recent render forces the original, complete path.
+    // Pure navigation only changes the active view and binds it once.
+    if(dirty){renderSheet();return}
+    panes.forEach(p=>{
+      const active=p.dataset.pane===target;
+      p.classList.toggle('hidden',!active);
+      p.setAttribute('aria-hidden',active?'false':'true');
+    });
+    nav.querySelectorAll('[data-tab]').forEach(button=>{
+      const active=button.dataset.tab===target;
+      button.classList.toggle('active',active);
+      button.setAttribute('aria-current',active?'page':'false');
+    });
+    bindActivePane(target);
+    lastRenderedWriteSequence=sheetWriteSequence;
+    requestAnimationFrame(()=>{
+      const active=nav.querySelector('[data-tab].active');
+      if(!active||!nav.isConnected)return;
+      nav.scrollLeft=Math.max(0,active.offsetLeft-(nav.clientWidth-active.offsetWidth)/2);
+    });
+  }
+
   function bindSheet(){
     syncShellChrome();
     const tabNav=document.querySelector('.sheet-tabs'),tabScroller=tabNav?.querySelector('.sheet-tab-scroll');
@@ -1888,8 +1944,8 @@ function applyManualResource(kind,input){
         try{sessionStorage.setItem('duodecima_mobile_profile_expanded',next?'1':'0')}catch(_){};
       };
     }
-    document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(state.activeTab===b.dataset.tab)return;state.activeTab=b.dataset.tab;save();renderSheet()});
-    document.querySelectorAll('[data-go-tab]').forEach(b=>b.onclick=()=>{state.activeTab=b.dataset.goTab;save();renderSheet()});
+    document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchSheetTab(b.dataset.tab));
+    document.querySelectorAll('[data-go-tab]').forEach(b=>b.onclick=()=>switchSheetTab(b.dataset.goTab));
     document.querySelectorAll('[data-ability-image-upload]').forEach(b=>b.onclick=()=>{
       const key=b.dataset.abilityImageUpload;if(!key)return;
       chooseStoredImage(url=>{const visual=abilityVisualState(key),previous=visual.imageUrl;visual.imageUrl=url;if(!save()){visual.imageUrl=previous;return}renderSheet();notify('Banner da habilidade atualizado.')},1200,120000);
@@ -2056,13 +2112,8 @@ document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{
     document.querySelectorAll('[data-history]').forEach(el=>el.oninput=()=>{state.history[el.dataset.history]=el.value;save()});
     const notes=byId('notesField');if(notes)notes.oninput=e=>{state.notes=e.target.value;save()};
     bindDeath();
-    if(state.activeTab==='status'){bindSkillTraining();bindSkillMatrix();bindTalents();bindLegacy();}
     document.querySelectorAll('[data-consume-item]').forEach(b=>b.onclick=()=>consumeInventoryItem(b.dataset.consumeItem));
-    if(state.activeTab==='inventory'){bindInventory();}
-    if(state.activeTab==='familiars'){bindFamiliars();}
-    if(state.activeTab==='roma'){bindRoma();}
-    if(state.activeTab==='magic'){bindMagic();}
-    if(state.activeTab==='combat')bindAbilityMasonry();
+    bindActivePane(state.activeTab);
   }
 
   function bindArmor(){
