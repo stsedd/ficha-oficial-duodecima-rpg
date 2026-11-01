@@ -131,7 +131,7 @@
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src=`rules-sync-v516.js?v=5.26.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.src=`rules-sync-v516.js?v=5.33.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
         patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar sincronização das regras de combate'));
         document.body.appendChild(patch);
       });
@@ -139,7 +139,7 @@
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src=`stabilization-v516.js?v=5.16.3-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+        patch.src=`stabilization-v516.js?v=5.33.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
         patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar camada de estabilização'));
         document.body.appendChild(patch);
       });
@@ -148,7 +148,7 @@
     try{
       await new Promise((resolve,reject)=>{
         const patch=document.createElement('script');
-        patch.src='qol-v5171.js?v=5.28.0-safe-reset';
+        patch.src='qol-v5171.js?v=5.33.0-stable';
         patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar ajustes de reset, descansos e Sanidade'));
         document.body.appendChild(patch);
       });
