@@ -697,8 +697,9 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     if(!Array.isArray(keys)||!keys.length||new Set(keys).size!==keys.length||keys.some(k=>typeof k!=='string'))return false;
     if(type==='abilities'){
       const previous=Array.isArray(state.abilityDeck)?[...state.abilityDeck]:[];
-      if(previous.length!==keys.length||keys.some(k=>!previous.includes(k)))return false;
-      state.abilityDeck=[...keys];
+      const visible=[...document.querySelectorAll('#sheetView .ability-quick-track .ability-quick-card[data-open-ability]')].map(el=>el.dataset.openAbility);
+      if(visible.length!==keys.length||keys.some(k=>!visible.includes(k)||!previous.includes(k)))return false;
+      state.abilityDeck=[...keys,...previous.filter(k=>!keys.includes(k))].slice(0,3);
       if(!save()){state.abilityDeck=previous;return false}
       return true;
     }
