@@ -1,7 +1,12 @@
 (()=>{
   'use strict';
 
-  const DISPLAY_VERSION=(()=>{const chip=document.querySelector('.version-chip'),current=chip?.textContent?.trim()||'';return /^v\d+\.\d+(?:\.\d+)?(?:[-\w.]*)?$/i.test(current)?current:'v5.15.7-image-storage'})();
+  const DISPLAY_VERSION=(()=>{
+    // The version in the document title is authoritative; the badge may contain extra explanatory words.
+    const title=(document.title.match(/\bv\d+\.\d+(?:\.\d+)?\b/i)||[])[0];
+    const chip=(document.querySelector('.version-chip')?.textContent||'').match(/\bv\d+\.\d+(?:\.\d+)?\b/i)?.[0];
+    return title||chip||'v5.33';
+  })();
   const materialRules=()=>new Map((window.DUODECIMA_SYSTEM?.materials||[]).map(x=>[x.id,x.targeting?.ruleText||'']));
 
   function installStyles(){
@@ -34,9 +39,20 @@
   }
 
   function syncDisplayedVersion(){
-    if(/v\d+\.\d+(?:\.\d+)?(?:[-\w.]*)?/i.test(document.title))document.title=document.title.replace(/v\d+\.\d+(?:\.\d+)?(?:[-\w.]*)?/i,DISPLAY_VERSION);
-    const chip=document.querySelector('.version-chip');if(chip)chip.textContent=DISPLAY_VERSION;
-    document.querySelectorAll('footer p').forEach(p=>{if(/v\d+\.\d+/i.test(p.textContent||''))p.textContent=(p.textContent||'').replace(/v\d+\.\d+(?:\.\d+)?(?:[-\w.]*)?/i,DISPLAY_VERSION)});
+    const version=/v\d+\.\d+(?:\.\d+)?/i;
+    const title=document.title;
+    if(version.test(title)){
+      const next=title.replace(version,DISPLAY_VERSION);
+      if(next!==title)document.title=next;
+    }
+    const chip=document.querySelector('.version-chip');
+    if(chip&&!chip.textContent.includes(DISPLAY_VERSION))chip.textContent=DISPLAY_VERSION+' · estabilidade';
+    document.querySelectorAll('footer p').forEach(p=>{
+      const old=p.textContent||'';
+      if(!version.test(old))return;
+      const next=old.replace(version,DISPLAY_VERSION);
+      if(next!==old)p.textContent=next;
+    });
   }
 
   function closestEquipmentCard(el){return el?.closest?.('.weapon-card,.equipment-editor-card,[data-theme-component="equipment-card"],article.card,article')||null}
@@ -53,7 +69,7 @@
       const restricted=text&&!/^Sem restrição especial/i.test(text);
       if(!restricted){old?.remove();continue;}
       const box=old||document.createElement('div');box.className='core-material-rule';
-      box.innerHTML=`<b>Regra do material · Core</b>${escapeHtml(text)}`;
+      const html=`<b>Regra do material · Core</b>${escapeHtml(text)}`;if(box.innerHTML!==html)box.innerHTML=html;
       if(!old)card.appendChild(box);
     }
   }
