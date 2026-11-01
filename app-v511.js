@@ -1871,7 +1871,7 @@ function applyManualResource(kind,input){
       tabScroller.addEventListener('scroll',updateTabEdges,{passive:true});
       document.querySelectorAll('[data-tab-scroll]').forEach(btn=>btn.onclick=()=>{
         const dir=Number(btn.dataset.tabScroll)||0;
-        tabScroller.scrollBy({left:dir*Math.max(160,tabScroller.clientWidth*.78),behavior:'smooth'});
+        tabScroller.scrollBy({left:dir*Math.max(160,tabScroller.clientWidth*.78),behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?'auto':'smooth'});
       });
       requestAnimationFrame(()=>{centerActiveTab();requestAnimationFrame(updateTabEdges)});
     }
@@ -1888,7 +1888,7 @@ function applyManualResource(kind,input){
         try{sessionStorage.setItem('duodecima_mobile_profile_expanded',next?'1':'0')}catch(_){};
       };
     }
-    document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.activeTab=b.dataset.tab;save();renderSheet()});
+    document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if(state.activeTab===b.dataset.tab)return;state.activeTab=b.dataset.tab;save();renderSheet()});
     document.querySelectorAll('[data-go-tab]').forEach(b=>b.onclick=()=>{state.activeTab=b.dataset.goTab;save();renderSheet()});
     document.querySelectorAll('[data-ability-image-upload]').forEach(b=>b.onclick=()=>{
       const key=b.dataset.abilityImageUpload;if(!key)return;
@@ -1906,7 +1906,7 @@ function applyManualResource(kind,input){
     document.querySelectorAll('[data-ability-deck-summary]').forEach(input=>input.onchange=()=>{const key=input.dataset.abilityDeckSummary;if(!key)return;abilityVisualState(key).summary=String(input.value||'').slice(0,180);save();renderSheet()});
     const openAbilityFromDeck=key=>{
       const card=[...document.querySelectorAll('[data-ability-key]')].find(el=>el.dataset.abilityKey===key);if(!card)return;
-      card.scrollIntoView({behavior:'smooth',block:'center'});card.classList.add('ability-jump-highlight');setTimeout(()=>card.classList.remove('ability-jump-highlight'),1600);
+      card.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?'auto':'smooth',block:'center'});card.classList.add('ability-jump-highlight');setTimeout(()=>card.classList.remove('ability-jump-highlight'),1600);
     };
     document.querySelectorAll('[data-open-ability-button]').forEach(b=>b.onclick=e=>{e.stopPropagation();openAbilityFromDeck(b.dataset.openAbilityButton)});
     document.querySelectorAll('[data-open-ability]').forEach(card=>{
@@ -1914,7 +1914,7 @@ function applyManualResource(kind,input){
       card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openAbilityFromDeck(card.dataset.openAbility)}};
     });
 
-    document.querySelectorAll('[data-edit-equipment]').forEach(b=>b.onclick=()=>{const target=b.dataset.editEquipment;state.activeTab='inventory';save();renderSheet();setTimeout(()=>{let el=null;if(target==='armor')el=byId('armorEditor');else if(target==='shield')el=byId('shieldEditor');else if(target.startsWith('weapon:'))el=document.querySelector(`[data-weapon-card="${target.slice(7)}"]`);else if(target.startsWith('item:'))el=document.querySelector(`[data-item-card="${target.slice(5)}"]`);if(el){el.classList.add('edit-flash');el.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>el.classList.remove('edit-flash'),1400)}},0)});
+    document.querySelectorAll('[data-edit-equipment]').forEach(b=>b.onclick=()=>{const target=b.dataset.editEquipment;state.activeTab='inventory';save();renderSheet();setTimeout(()=>{let el=null;if(target==='armor')el=byId('armorEditor');else if(target==='shield')el=byId('shieldEditor');else if(target.startsWith('weapon:'))el=document.querySelector(`[data-weapon-card="${target.slice(7)}"]`);else if(target.startsWith('item:'))el=document.querySelector(`[data-item-card="${target.slice(5)}"]`);if(el){el.classList.add('edit-flash');el.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?'auto':'smooth',block:'center'});setTimeout(()=>el.classList.remove('edit-flash'),1400)}},0)});
     // Seleção puramente visual do baralho. Não altera nenhuma mecânica nem é salva no JSON;
     // existe para temas poderem destacar uma carta clicada/focada de forma consistente.
     document.querySelectorAll('[data-theme-selectable="true"]').forEach(card=>{
