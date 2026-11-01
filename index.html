@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Character Archive — Legio XII Fulminata · v5.30</title>
+  <title>Character Archive — Legio XII Fulminata · v5.32</title>
   <link rel="stylesheet" href="styles-v511.css?v=v5.21.1-ability-deck-polish">
   <link rel="stylesheet" href="theme-consistency-v518.css?v=5.18.1">
   <link rel="stylesheet" href="critical-usability-v519.css?v=5.19.0">
@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="backup-safety-v528.css?v=5.28.0">
   <link rel="stylesheet" href="motion-icons-v529.css?v=5.29.0">
   <link rel="stylesheet" href="interface-polish-v530.css?v=5.30.0">
+  <link rel="stylesheet" href="safety-mobile-v532.css?v=5.32.0">
 </head>
 <body data-theme="standard" data-mode="dark" data-palette="red" data-special="none">
   <div class="theme-ambient-layer theme-ambient-back" data-theme-layer="back" aria-hidden="true"></div>
@@ -61,7 +62,7 @@
     <section id="creationView" class="grid two"></section>
     <section id="sheetView" class="hidden"></section>
 
-    <footer><p>Ficha Universal da Legio XII Fulminata · v5.30</p></footer>
+    <footer><p>Ficha Universal da Legio XII Fulminata · v5.32</p></footer>
   </main>
 
   <dialog id="bannerCropDialog" class="banner-crop-dialog">
@@ -133,7 +134,7 @@
   <dialog id="backupDialog" class="theme-dialog">
     <form method="dialog" class="theme-dialog-card backup-dialog-card">
       <div class="row between theme-dialog-head"><div><p class="eyebrow">SEGURANÇA</p><h2>Backups da ficha</h2><p class="muted compact">A ficha salva checkpoints automáticos antes de resetar, criar outra ficha ou importar um JSON, além de manter backups periódicos neste navegador.</p></div><button value="cancel" class="theme-dialog-close" aria-label="Fechar">×</button></div>
-      <div class="backup-dialog-actions"><button type="button" id="backupNowBtn" class="primary small-btn">Criar backup agora</button><span class="muted">Até 8 backups por personagem; os antigos ficam arquivados.</span></div>
+      <div class="backup-dialog-actions"><button type="button" id="backupNowBtn" class="primary small-btn">Criar backup agora</button><span class="muted">Até 8 backups automáticos por personagem. Backups protegidos não expiram.</span></div>
       <div id="backupList" class="backup-list" aria-live="polite"></div>
       <p class="muted compact backup-local-note">Os backups ficam neste navegador. Para uma cópia fora do dispositivo, continue usando Exportar JSON.</p>
     </form>
@@ -166,14 +167,15 @@
   <script src="roma-v55.js?v=5.5.0"></script>
   <script src="familiars-v55.js?v=5.5.0"></script>
   <script src="core-bridge-v511.js?v=v5.21.1-ability-deck-polish-core"></script>
-  <script src="multi-character-v523.js?v=5.28.0"></script>
+  <script src="multi-character-v523.js?v=5.32.0"></script>
   <script src="qol-v5171.js?v=5.28.0"></script>
-  <script src="bootstrap-v511.js?v=v5.28.0"></script>
+  <script src="bootstrap-v511.js?v=v5.32.0"></script>
   <script src="inventory-compact-v522.js?v=5.27.0"></script>
-  <script src="header-unified-v525.js?v=5.30.0"></script>
+  <script src="header-unified-v525.js?v=5.32.0"></script>
   <script src="legio-logo.js?v=5.26.0"></script>
   <script src="mobile-stability-v526.js?v=5.26.0"></script>
-  <script src="motion-icons-v529.js?v=5.30.0"></script>
+  <script src="motion-icons-v529.js?v=5.32.0"></script>
   <script src="interface-polish-v530.js?v=5.30.0"></script>
+  <script src="safety-mobile-v532.js?v=5.32.0"></script>
 </body>
 </html>
