@@ -1858,13 +1858,13 @@ function applyManualResource(kind,input){
       if(tab==='combat')requestAnimationFrame(layoutAbilityMasonry);
       return;
     }
-    pane.dataset.duoActiveBound='1';
     if(tab==='status'){bindSkillTraining();bindSkillMatrix();bindTalents();bindLegacy();}
     else if(tab==='inventory')bindInventory();
     else if(tab==='familiars')bindFamiliars();
     else if(tab==='roma')bindRoma();
     else if(tab==='magic')bindMagic();
     else if(tab==='combat')bindAbilityMasonry();
+    pane.dataset.duoActiveBound='1';
   }
 
   function switchSheetTab(target){
