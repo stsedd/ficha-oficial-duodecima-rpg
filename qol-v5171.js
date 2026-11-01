@@ -51,7 +51,7 @@
     let strip=status.querySelector('.qol-rest-strip');
     if(!strip){strip=document.createElement('article');strip.className='qol-rest-strip';strip.innerHTML='<div class="qol-rest-copy"><b>Descansos</b><small></small></div><div class="qol-rest-actions"></div>';const anchor=status.querySelector('.overview-grid')||status.firstElementChild;anchor?status.insertBefore(strip,anchor):status.prepend(strip)}
     const copy=strip.querySelector('.qol-rest-copy small');if(copy&&copy.textContent!==restText)copy.textContent=restText;
-    strip.querySelector('.qol-rest-actions').append(a,b);
+    const actions=strip.querySelector('.qol-rest-actions');if(a.parentElement!==actions)actions.appendChild(a);if(b.parentElement!==actions)actions.appendChild(b);
     const card=combat.querySelector('.combat-rest-card');if(card){const eyebrow=card.querySelector('.eyebrow');if(eyebrow&&eyebrow.textContent!=='MODS DE COMBATE')eyebrow.textContent='MODS DE COMBATE';card.querySelector('.subcard.compact')?.remove()}
   }
 
@@ -60,6 +60,6 @@
 
   function refresh(){styles();resetDialog();moveRests();refreshSanity()}
   function queue(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;refresh()})}
-  function init(){styles();resetIntercept();refresh();const root=document.querySelector('#sheetView')||document.body;new MutationObserver(queue).observe(root,{childList:true,subtree:true});window.addEventListener('storage',queue)}
+  function init(){if(window.__DUODECIMA_QOL_INITIALIZED__)return;window.__DUODECIMA_QOL_INITIALIZED__=true;styles();resetIntercept();refresh();const root=document.querySelector('#sheetView')||document.body;new MutationObserver(queue).observe(root,{childList:true,subtree:true});window.addEventListener('storage',queue)}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init,{once:true}):init();
 })();
