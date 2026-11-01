@@ -298,23 +298,47 @@
       const key=item.id||item.signature;if(!key||seen.has(key))return false;seen.add(key);return true;
     });
   }
+  function backupIsProtected(record){
+    if(typeof record?.protected==='boolean')return record.protected;
+    // Preserva backups manuais e pré-operação criados antes desta versão.
+    return !['Backup automático','Backup de segurança ao abrir'].includes(String(record?.reason||''));
+  }
   async function storeSheetBackup(data,reason='Backup automático',force=false){
     if(!hasMeaningfulSheetData(data))return false;
     const snapshot=deepCloneJson(data),signature=sheetBackupSignature(snapshot);
-    const record={id:'backup-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),ownerKey:STORAGE_KEY,savedAt:new Date().toISOString(),reason,name:snapshot.name||'Ficha sem nome',signature,state:snapshot};
+    const record={id:'backup-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),ownerKey:STORAGE_KEY,savedAt:new Date().toISOString(),reason,name:snapshot.name||'Ficha sem nome',signature,protected:Boolean(force),state:snapshot};
     try{
       const all=await sheetBackupDbAction('list');
       const current=all.filter(x=>x?.ownerKey===STORAGE_KEY).sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
-      if(!force&&current[0]?.signature===signature)return true;
+      const recentAuto=current.find(x=>!backupIsProtected(x));
+      if(!force&&recentAuto?.signature===signature)return true;
       await sheetBackupDbAction('put',record);
       const owned=[record,...current.filter(x=>x.id!==record.id)].sort((a,b)=>new Date(b.savedAt||0)-new Date(a.savedAt||0));
-      // Limite de oito POR personagem; snapshots legados e de outras fichas não são tocados.
-      for(const extra of owned.slice(SHEET_BACKUP_LIMIT))await sheetBackupDbAction('delete',extra.id);
+      // No máximo 8 automáticos por personagem. Os protegidos jamais entram na limpeza.
+      const automatics=owned.filter(x=>!backupIsProtected(x));
+      for(const extra of automatics.slice(SHEET_BACKUP_LIMIT))await sheetBackupDbAction('delete',extra.id);
       return true;
     }catch(err){
       try{safeStorage.setItem(SHEET_BACKUP_PERSONAL_FALLBACK_KEY,JSON.stringify(record));return true}
-      catch(_){console.warn('[Ficha] Não foi possível criar backup desta personagem.',err);return false}
+      catch(_){console.warn('[Ficha] Não foi possível criar backup local.',err);return false}
     }
+  }
+  async function setBackupProtected(id,protectedValue){
+    const list=await listSheetBackups(),entry=list.find(x=>x.id===id&&!x.archivedLegacy);
+    if(!entry){notify('Não foi possível encontrar este backup.');return}
+    const value=Boolean(protectedValue);
+    if(entry.fallback){
+      try{
+        const raw=safeStorage.getItem(SHEET_BACKUP_PERSONAL_FALLBACK_KEY),item=raw&&JSON.parse(raw);
+        if(item?.id!==id)throw new Error('O backup mudou de lugar.');
+        safeStorage.setItem(SHEET_BACKUP_PERSONAL_FALLBACK_KEY,JSON.stringify({...item,protected:value}));
+      }catch(e){console.warn(e);notify('Não foi possível modificar a proteção deste backup.');return}
+    }else{
+      try{await sheetBackupDbAction('put',{...entry,protected:value,archivedLegacy:undefined})}
+      catch(e){console.warn(e);notify('Não foi possível modificar a proteção deste backup.');return}
+    }
+    await renderBackupDialog();await updateBackupButtonCount();
+    notify(value?'Backup protegido contra limpeza automática.':'Proteção retirada deste backup.');
   }
   function backupDateLabel(value){
     if(!value)return 'data antiga';
@@ -329,9 +353,15 @@
   async function renderBackupDialog(){
     const root=document.getElementById('backupList');if(!root)return;
     const list=await listSheetBackups(),own=list.filter(x=>!x.archivedLegacy),old=list.filter(x=>x.archivedLegacy);
-    const row=item=>'<article class="backup-entry"><div class="backup-entry-copy"><div class="row between"><strong>'+esc(item.name||'Ficha sem nome')+'</strong><span class="pill">'+esc(backupDateLabel(item.savedAt))+'</span></div><p class="muted compact">'+esc(item.reason||'Backup local')+'</p></div><button type="button" class="ghost small-btn" data-restore-backup="'+esc(item.id)+'">Restaurar</button></article>';
-    const current=own.length?own.map(row).join(''):'<div class="backup-empty"><b>Esta personagem ainda não possui backups.</b><p class="muted compact">Use “Criar backup agora” para guardar uma cópia no navegador.</p></div>';
-    const archive=old.length?'<details class="backup-legacy-archive"><summary>Backups antigos sem personagem identificado · '+old.length+'</summary><p class="muted compact">Estes backups foram criados antes da separação das fichas. Eles foram preservados, mas podem pertencer a qualquer personagem. Confira o nome antes de restaurar.</p><div class="backup-list">'+old.map(row).join('')+'</div></details>':'';
+    const isProtected=item=>backupIsProtected(item);
+    const row=(item,legacy=false)=>{
+      const protectedBackup=!legacy&&isProtected(item);
+      const protectButton=legacy?'':'<button type="button" class="ghost small-btn backup-protect-toggle" data-protect-backup="'+esc(item.id)+'" aria-pressed="'+String(protectedBackup)+'">'+(protectedBackup?'Desproteger':'Proteger')+'</button>';
+      const info=legacy?'':'<span class="backup-protection-label">'+(protectedBackup?'◆ Protegido':'Automático')+'</span>';
+      return '<article class="backup-entry"><div class="backup-entry-copy"><div class="row between"><strong>'+esc(item.name||'Ficha sem nome')+'</strong><span class="pill">'+esc(backupDateLabel(item.savedAt))+'</span></div><p class="muted compact">'+esc(item.reason||'Backup local')+' '+info+'</p></div><div class="backup-entry-actions">'+protectButton+'<button type="button" class="ghost small-btn" data-restore-backup="'+esc(item.id)+'">Restaurar</button></div></article>';
+    };
+    const current=own.length?own.map(item=>row(item)).join(''):'<div class="backup-empty"><b>Esta personagem ainda não possui backups.</b><p class="muted compact">Use “Criar backup agora” para guardar uma cópia no navegador.</p></div>';
+    const archive=old.length?'<details class="backup-legacy-archive"><summary>Backups antigos sem personagem identificado · '+old.length+'</summary><p class="muted compact">Estes backups foram criados antes da separação das fichas. Eles foram preservados, mas podem pertencer a qualquer personagem. Confira o nome antes de restaurar.</p><div class="backup-list">'+old.map(item=>row(item,true)).join('')+'</div></details>':'';
     root.innerHTML='<div class="backup-current"><p class="eyebrow">PERSONAGEM ATUAL</p>'+current+'</div>'+archive;
   }
   async function restoreSheetBackup(id){
@@ -2207,7 +2237,7 @@ function longRest(){
 
   byId('backupsBtn').onclick=async()=>{await renderBackupDialog();byId('backupDialog').showModal()};
   byId('backupNowBtn').onclick=async()=>{const ok=await storeSheetBackup(state,'Backup manual',true);await renderBackupDialog();await updateBackupButtonCount();notify(ok?'Backup criado.':'Não havia conteúdo para salvar em backup.')};
-  byId('backupList').onclick=e=>{const btn=e.target.closest?.('[data-restore-backup]');if(btn)restoreSheetBackup(btn.dataset.restoreBackup)};
+  byId('backupList').onclick=e=>{const button=e.target.closest?.('button');if(!button)return;if(button.dataset.protectBackup)setBackupProtected(button.dataset.protectBackup,button.getAttribute('aria-pressed')!=='true');else if(button.dataset.restoreBackup)restoreSheetBackup(button.dataset.restoreBackup)};
   byId('exportBtn').onclick=()=>{save();const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`duodecima-${(state.name||'personagem').toLowerCase().replace(/[^a-z0-9]+/g,'-')}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
   // A importação é tratada pela janela segura de io-recovery-v51515.js.
   byId('importInput').onchange=()=>{if(!window.DUODECIMA_SAFE_IMPORT_READY)notify('Importação protegida indisponível. Recarregue a página antes de importar.');};
