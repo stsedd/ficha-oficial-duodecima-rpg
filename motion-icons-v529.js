@@ -85,6 +85,7 @@
       ['#clearBannerBtn','trash'],
       ['.multi-character-menu [data-multi="copy"]','copy'],
       ['.multi-character-menu [data-multi="export"]','file-up'],
+      ['.multi-character-menu [data-multi="trash"]','history'],
       ['.multi-character-menu [data-multi="delete"]','trash'],
       ['#backupNowBtn','history']
     ].forEach(([selector,kind])=>{
