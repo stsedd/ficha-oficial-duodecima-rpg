@@ -19,8 +19,8 @@ function init(){
  // Retain storage status; hide only redundant toolbar placement.
  document.querySelectorAll('.unified-menu').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('.unified-menu').forEach(o=>{if(o!==d)o.open=false})}));
  document.addEventListener('click',e=>{if(!e.target.closest?.('.unified-menu'))document.querySelectorAll('.unified-menu[open]').forEach(o=>o.open=false)});
- const marker=toolbar.querySelector('.version-chip');if(marker)marker.textContent='v5.32 · segurança e mobile';
- const footer=document.querySelector('footer p');if(footer)footer.textContent=footer.textContent.replace(/v5\.21\.1-ability-deck-polish/,'v5.32');
+ const marker=toolbar.querySelector('.version-chip');if(marker)marker.textContent='v5.33 · desempenho e estabilidade';
+ const footer=document.querySelector('footer p');if(footer)footer.textContent=footer.textContent.replace(/v5\.21\.1-ability-deck-polish/,'v5.33');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
