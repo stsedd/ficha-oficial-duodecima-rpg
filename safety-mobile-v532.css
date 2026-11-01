@@ -1,0 +1,138 @@
+/* Duodécima v5.32 — proteção das fichas e refinamento mobile */
+.backup-entry-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap;min-width:0}
+.backup-entry-actions button{min-height:35px!important;white-space:nowrap}
+.backup-protect-toggle[aria-pressed="true"]{border-color:var(--theme-accent,var(--red))!important;color:var(--theme-accent,var(--red))!important}
+.backup-protection-label{font-size:10px;font-weight:700;color:var(--theme-accent,var(--red));margin-left:4px}
+.duo-trash-dialog{width:min(560px,calc(100vw - 24px));max-width:min(560px,calc(100vw - 24px))}
+.duo-trash-card{padding:18px!important;max-width:100%!important}
+.duo-trash-card h2{margin:3px 0 7px;font-size:clamp(21px,3vw,26px)}
+.duo-trash-card .theme-dialog-close{flex:0 0 auto}
+.duo-trash-list{display:grid;gap:9px;margin-top:15px}
+.duo-trash-entry{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:12px;border-radius:11px;border:1px solid var(--line);background:var(--panel)}
+.duo-trash-entry>div{display:grid;gap:4px;min-width:0;flex:1 1 120px}
+.duo-trash-entry strong{font-size:13px;overflow-wrap:anywhere}
+.duo-trash-entry small{font-size:11px;color:var(--muted)}
+.duo-trash-entry button{min-height:40px;white-space:nowrap}
+.multi-character-menu [data-multi="trash"]{font-weight:700}
+.multi-character-menu [data-multi="delete"]{margin-top:6px!important;border-top:1px solid var(--line)!important}
+@media(max-width:760px){
+  .backup-entry-actions{width:100%;justify-content:flex-start}
+  .backup-entry-actions button{flex:1 1 auto;min-height:44px!important}
+}
+@media(max-width:620px){
+  /* Logotipo, menus compactos e seletor de personagens com espaço próprio. */
+  .archive-brandbar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-rows:auto auto;
+    gap:8px!important;
+    align-items:center!important;
+    overflow:visible!important;
+  }
+  .archive-brandbar .archive-brand-copy{
+    grid-column:1!important;grid-row:1!important;
+    order:0!important;width:auto!important;min-width:0!important;
+    gap:7px!important;
+    overflow:hidden;
+  }
+  .archive-brandbar .archive-brand-copy strong{
+    min-width:0!important;
+    font-size:clamp(16px,3.5vw,20px)!important;
+    line-height:1.05!important;
+    white-space:nowrap!important;
+    overflow:hidden;text-overflow:ellipsis;
+  }
+  .archive-brandbar .appearance-top-actions{
+    grid-column:2!important;grid-row:1!important;
+    order:1!important;
+    justify-self:end!important;
+    width:auto!important;max-width:none!important;
+    flex:0 0 auto!important;
+    margin:0!important;
+  }
+  .archive-brandbar .unified-top-controls{
+    justify-content:flex-end!important;
+    width:auto!important;max-width:none!important;
+    gap:6px!important;
+    flex-wrap:nowrap!important;
+  }
+  .archive-brandbar .multi-character-bar{
+    grid-column:1/-1!important;grid-row:2!important;
+    order:2!important;width:100%!important;max-width:100%!important;
+    min-width:0!important;
+    margin:0!important;padding:6px!important;
+  }
+  .archive-brandbar .multi-character-bar select{
+    width:0!important;min-width:0!important;flex:1 1 0!important;
+    font-size:16px!important;
+  }
+  .archive-brandbar .multi-character-bar>button,
+  .archive-brandbar .multi-character-actions>summary{
+    min-height:44px!important;
+  }
+  .archive-brandbar .unified-menu>summary.duo-motion-hit{
+    width:44px!important;height:44px!important;
+    min-width:44px!important;min-height:44px!important;
+  }
+  .archive-brandbar .unified-menu-content{
+    max-width:calc(100vw - 20px)!important;
+    overscroll-behavior:contain;
+  }
+  .multi-character-menu{
+    right:0!important;left:auto!important;
+    max-width:calc(100vw - 24px)!important;
+    max-height:min(440px,calc(var(--duo-vv-height,100dvh) - 70px))!important;
+    overflow-y:auto!important;
+  }
+  /* VisualViewport detecta a área efetivamente visível com teclado aberto. */
+  :is(dialog.theme-dialog,dialog.help-dialog,dialog.banner-crop-dialog,dialog.qol-reset-dialog,dialog.duo-trash-dialog)[open]{
+    position:fixed!important;
+    top:calc(var(--duo-vv-top,0px) + 10px)!important;
+    bottom:auto!important;left:10px!important;right:10px!important;
+    margin:0 auto!important;
+    width:calc(100vw - 20px)!important;
+    max-width:calc(100vw - 20px)!important;
+    max-height:calc(var(--duo-vv-height,100dvh) - 20px)!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain;
+  }
+  :is(.theme-dialog-card,.banner-crop-card,.help-dialog-card,.qol-reset-card,.duo-trash-card){
+    max-width:100%!important;width:100%!important;min-width:0!important;
+  }
+  .safe-import-card{max-width:100%!important}
+  .duo-trash-entry{align-items:stretch!important}
+  .duo-trash-entry button{min-height:44px!important}
+  /* Evita zoom automático do Safari ao focalizar formulários. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  select,textarea{
+    font-size:16px!important;
+    max-width:100%;
+  }
+  .backup-entry strong,.duo-trash-entry strong{overflow-wrap:anywhere}
+  #sheetView .sheet-tab-scroll{scroll-padding-inline:15px;overscroll-behavior-x:contain}
+  #sheetView .sheet-tab-scroll button{min-height:44px!important}
+  .toast:not(.hidden){bottom:calc(12px + env(safe-area-inset-bottom,0px))!important}
+}
+@media(max-width:460px){
+  .archive-brandbar .archive-brand-copy strong{display:none!important}
+  .archive-brandbar .archive-brand-copy .legio-logo{
+    width:40px!important;height:40px!important;
+  }
+  .archive-brandbar .unified-top-controls{gap:5px!important}
+  .archive-brandbar .multi-character-bar>button.duo-motion-hit{
+    padding:7px 9px!important;
+    font-size:12px!important;
+  }
+}
+@media(max-width:350px){
+  .archive-brandbar .multi-character-bar{gap:4px!important;padding:4px!important}
+  .archive-brandbar .unified-menu>summary.duo-motion-hit{
+    width:44px!important;min-width:44px!important
+  }
+  .archive-brandbar .multi-character-bar>button.duo-motion-hit{
+    padding:6px 7px!important;font-size:11px!important
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .duo-trash-entry *, .backup-protect-toggle{transition:none!important;animation:none!important}
+}
