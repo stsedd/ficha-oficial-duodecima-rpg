@@ -1,0 +1,123 @@
+/* Duodécima v5.35 · reordenação de cartas, sem alterar os efeitos das fichas */
+.deck-reorder-hint{
+  display:block;
+  margin:5px 0 11px!important;
+  padding:0 2px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.4;
+}
+.deck-reorder-announcer{
+  position:absolute!important;width:1px!important;height:1px!important;
+  padding:0!important;margin:-1px!important;overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+}
+#sheetView .deck-reorderable>.equipment-card,
+#sheetView .deck-reorderable>.ability-quick-card{position:relative!important}
+#sheetView .deck-reorder-handle{
+  position:absolute!important;
+  top:9px!important;right:9px!important;
+  z-index:18!important;
+  width:34px!important;height:34px!important;
+  min-width:34px!important;min-height:34px!important;
+  display:grid!important;place-items:center!important;
+  padding:0!important;
+  border:1px solid color-mix(in srgb,var(--theme-accent,var(--red)) 35%,var(--line) 65%)!important;
+  background:color-mix(in srgb,var(--panel) 91%,transparent)!important;
+  color:var(--text)!important;
+  border-radius:9px!important;
+  box-shadow:0 3px 11px #0002!important;
+  font:700 25px/1 system-ui,sans-serif!important;
+  cursor:grab!important;
+  user-select:none!important;
+  touch-action:manipulation;
+}
+#sheetView .deck-reorder-handle:hover,
+#sheetView .deck-reorder-handle:focus-visible{
+  border-color:var(--theme-accent,var(--red))!important;
+  background:color-mix(in srgb,var(--theme-accent,var(--red)) 12%,var(--panel) 88%)!important;
+  outline:2px solid var(--theme-accent,var(--red))!important;
+  outline-offset:2px!important;
+}
+#sheetView .ability-quick-card>.deck-reorder-handle{top:8px!important;right:8px!important}
+#sheetView .equipment-card>.deck-reorder-handle{top:8px!important;right:8px!important}
+/* Preserve the original badge/heading and reserve room for the new grip. */
+#sheetView .equipment-card .equipment-card-topline{padding-right:38px!important}
+#sheetView .ability-quick-card .ability-quick-badges{padding-right:37px!important}
+#sheetView .deck-reorder-active{
+  scroll-snap-type:none!important;
+  cursor:grabbing!important;
+  user-select:none!important;
+  -webkit-user-select:none!important;
+}
+#sheetView .deck-reorder-active .deck-reorder-source{
+  opacity:.28!important;
+  outline:2px dashed var(--theme-accent,var(--red))!important;
+  outline-offset:-3px!important;
+  transform:none!important;filter:none!important;
+  transition:none!important;
+}
+.deck-reorder-ghost{
+  position:fixed!important;
+  z-index:99999!important;
+  display:block!important;
+  margin:0!important;
+  pointer-events:none!important;
+  touch-action:none!important;
+  opacity:.92!important;
+  transform:rotate(-2deg) scale(.99)!important;
+  transform-origin:top left!important;
+  filter:drop-shadow(0 22px 28px #0007)!important;
+  overflow:hidden!important;
+  max-height:72vh!important;
+  transition:none!important;
+  box-sizing:border-box!important;
+}
+.deck-reorder-ghost :is(button,input,select,textarea){pointer-events:none!important}
+body[data-mode="light"] #sheetView .deck-reorder-handle,
+body[data-special="snow"] #sheetView .deck-reorder-handle{
+  color:var(--text)!important;
+}
+@media(hover:hover) and (pointer:fine){
+ #sheetView .deck-reorderable>.equipment-card,
+ #sheetView .deck-reorderable>.ability-quick-card{cursor:grab}
+ #sheetView .deck-reorder-active>.equipment-card,
+ #sheetView .deck-reorder-active>.ability-quick-card{cursor:grabbing}
+}
+@media(max-width:760px){
+  #sheetView .deck-reorder-handle{
+    width:44px!important;height:44px!important;
+    min-width:44px!important;min-height:44px!important;
+    font-size:25px!important;
+  }
+  #sheetView [data-pane="combat"] .equipment-deck.upgraded-equipment-deck{
+    display:grid!important;
+    grid-template-columns:none!important;
+    grid-auto-flow:column!important;
+    grid-auto-columns:min(290px,82vw)!important;
+    align-items:stretch!important;
+    column-gap:11px!important;
+    padding:12px 16px 12px 4px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    scroll-snap-type:x proximity!important;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  #sheetView [data-pane="combat"] .equipment-deck.upgraded-equipment-deck.deck-reorder-active{
+    scroll-snap-type:none!important;
+  }
+  #sheetView [data-pane="combat"] .equipment-deck.upgraded-equipment-deck>.equipment-card{
+    width:auto!important;
+    min-width:0!important;
+    scroll-snap-align:start;
+  }
+  #sheetView .deck-reorder-hint{font-size:11px!important}
+  #sheetView .ability-quick-card .ability-quick-badges{padding-right:46px!important}
+  #sheetView .equipment-card .equipment-card-topline{padding-right:48px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #sheetView .deck-reorder-active .deck-reorder-source,
+ .deck-reorder-ghost{transition:none!important;animation:none!important}
+ .deck-reorder-ghost{transform:none!important}
+}
