@@ -62,7 +62,7 @@
  async function refresh(){
   const value=raw(),isSaved=persistent(),status=last?.status;
   set('duoDiagStatus',status==='error'?'Falha de gravação':!isSaved||status==='temporary'?'Temporário (sem persistência garantida)':value?'Salvamento local ativo':'Ainda sem JSON local');
-  set('duoDiagUpdated',date(last?.at||lastSaved()));
+  set('duoDiagUpdated',date(status==='error'?lastSaved():last?.at||lastSaved()));
   set('duoDiagStorage',value?size(new Blob([value]).size):'Não disponível');
   set('duoDiagCore',String(window.DUODECIMA_CORE_STATE?.version||'Não identificado'));
   set('duoDiagBackups','Conferindo...');
@@ -80,6 +80,10 @@
   const menu=document.querySelector('.multi-character-menu');
   if(menu&&!menu.querySelector('[data-multi="diagnostics"]')){
    const btn=document.createElement('button');btn.type='button';btn.dataset.multi='diagnostics';btn.textContent='Diagnóstico';
+   btn.classList.add('duo-motion-hit');btn.dataset.motion='help';
+   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.classList.add('duo-motion-icon');
+   svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','1.8');svg.setAttribute('stroke-linecap','round');svg.setAttribute('aria-hidden','true');
+   svg.innerHTML='<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.5"/>';btn.prepend(svg);
    const anchor=menu.querySelector('[data-multi="trash"]');
    if(anchor)anchor.before(btn);else menu.appendChild(btn);
    btn.addEventListener('click',()=>{
