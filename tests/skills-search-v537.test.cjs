@@ -43,5 +43,17 @@ test('collapsible sections default open, and only store UI state in session',()=
 });
 test('versioned assets are loaded',()=>{
  assert.ok(html.includes('skills-search-collapse-v537.js?v=5.37.0'));
- assert.ok(html.includes('skills-search-collapse-v537.css?v=5.37.0'));
+ assert.ok(html.includes('skills-search-collapse-v537.css?v=5.37.1'));
+});
+
+test('v5.37.1 keeps P/E on the same horizontal line and name beside badge',()=>{
+ const fix=css.slice(css.indexOf('/* v5.37.1 — correção de regressão'));
+ assert.ok(fix.length>100,'layout regression patch is present');
+ assert.match(fix,/\.skill-row-main\s*>\s*\.skill-ledger-flags\s*\{/);
+ assert.match(fix,/flex-direction:row!important/);
+ assert.match(fix,/\.skill-ledger-row \.skill-ledger-name\s*\{/);
+ assert.match(fix,/\.skill-ledger-flags\s*>\s*\.skill-tiny-check\s*\{/);
+ assert.match(fix,/min-height:40px!important/);
+ assert.match(fix,/\.skill-ledger-flags\s*>\s*\.skill-tiny-check:focus-within/);
+ assert.match(fix,/@media\(max-width:550px\)/);
 });
