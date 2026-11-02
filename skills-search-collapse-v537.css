@@ -189,3 +189,18 @@
 @media(prefers-reduced-motion:reduce){
  .duo-collapse-chevron,.duo-search-highlight,#sheetView .skill-ledger-row{transition:none!important;animation:none!important}
 }
+
+/* A barra mobile já usa grid com três colunas. A lupa é a quarta coluna fixa. */
+@media(max-width:760px){
+ #sheetView .sheet-tabs{
+  display:grid!important;
+  grid-template-columns:40px minmax(0,1fr) 40px 44px!important;
+  align-items:center!important;
+  gap:4px!important;
+  overflow:visible!important;
+ }
+ #sheetView .sheet-tabs>.sheet-tab-scroll{min-width:0!important}
+}
+@media(max-width:380px){
+ #sheetView .sheet-tabs{grid-template-columns:38px minmax(0,1fr) 38px 44px!important}
+}
