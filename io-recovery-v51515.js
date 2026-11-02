@@ -14,6 +14,8 @@
     window.__duodecimaIoToastTimer=setTimeout(()=>el.classList.add('hidden'),3200);
   };
   const parseJsonFile=file=>new Promise((resolve,reject)=>{
+    const limit=window.DUODECIMA_IMPORT_MAX_BYTES_V536||32*1024*1024;
+    if(Number(file?.size)>limit){reject(new Error('Arquivo maior que 32 MB. Exporte uma versão com imagens menores.'));return}
     const reader=new FileReader();
     reader.onerror=()=>reject(reader.error||new Error('Falha ao ler arquivo'));
     reader.onload=()=>{try{resolve(JSON.parse(String(reader.result||'')))}catch(err){reject(new Error('O arquivo não contém um JSON válido.'))}};
@@ -28,11 +30,9 @@
   function safeName(value){return String(value||'personagem').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'personagem'}
   function currentSheet(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')}catch(_){return null}}
   function backupBeforeImport(){const current=currentSheet();if(!current)return;try{localStorage.setItem(RECOVERY_KEY,JSON.stringify({savedAt:new Date().toISOString(),state:current}))}catch(_){}}
-  function validateSheet(data){
-    if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('Este JSON não parece ser uma ficha da Duodécima.');
-    const version=Number(data.schemaVersion);
-    if(!Number.isFinite(version)||version<1||version>24)throw new Error(`Versão de ficha incompatível (${data.schemaVersion??'sem versão'}).`);
-    return data;
+  function validateSheet(data,file){
+    if(typeof window.DUODECIMA_VALIDATE_SHEET_V536!=='function')throw new Error('Verificação de segurança indisponível. Recarregue a página antes de importar.');
+    return window.DUODECIMA_VALIDATE_SHEET_V536(data,{byteSize:file?.size||0});
   }
   function normalizeThemeId(v=''){return String(v||'').trim().toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,64)}
   function assetOk(v){return typeof v==='string'&&/^data:(?:image\/(?:png|jpeg|jpg|webp|gif|svg\+xml)|font\/(?:woff2?|ttf|otf)|application\/(?:font-woff|font-woff2|x-font-ttf|x-font-opentype));base64,[A-Za-z0-9+/=\s]+$/i.test(v)}
@@ -64,13 +64,13 @@
     dialog=document.createElement('dialog');
     dialog.id='duodecimaSafeImportDialog';
     dialog.className='theme-dialog safe-import-dialog';
-    dialog.innerHTML='<div class="theme-dialog-card safe-import-card"><p class="eyebrow">IMPORTAR FICHA</p><h2>Como deseja importar?</h2><p class="muted compact" id="safeImportFilename"></p><p class="muted compact">Você pode adicionar o personagem sem alterar os existentes ou substituir apenas a ficha selecionada, criando antes um backup de segurança.</p><div class="safe-import-actions"><button type="button" class="primary" data-safe-import="new">+ Criar novo personagem</button><button type="button" class="ghost" data-safe-import="replace">Substituir personagem atual</button><button type="button" class="ghost" data-safe-import="cancel">Cancelar</button></div></div>';
+    dialog.innerHTML='<div class="theme-dialog-card safe-import-card"><p class="eyebrow">IMPORTAR FICHA</p><h2>Como deseja importar?</h2><p class="muted compact" id="safeImportFilename"></p><p class="muted compact">O arquivo foi verificado. Você pode criar uma ficha separada ou substituir apenas a selecionada; neste último caso, um backup será obrigatório.</p><div class="safe-import-actions"><button type="button" class="primary" data-safe-import="new">+ Criar novo personagem</button><button type="button" class="ghost" data-safe-import="replace">Substituir personagem atual</button><button type="button" class="ghost" data-safe-import="cancel">Cancelar</button></div></div>';
     document.body.appendChild(dialog);
     return dialog;
   }
   function chooseImportMode(file,data){
     const dialog=ensureImportDialog();
-    dialog.querySelector('#safeImportFilename').textContent='Arquivo: '+(file.name||'ficha.json')+' · Personagem: '+String(data.name||'Sem nome');
+    dialog.querySelector('#safeImportFilename').textContent='Arquivo: '+(file.name||'ficha.json')+' · Personagem: '+String(data.name||'Sem nome')+' · Versão: '+String(data.schemaVersion)+' · Itens: '+String(data.inventory?.items?.length||0);
     return new Promise(resolve=>{
       let finished=false;
       function settle(value){
@@ -93,7 +93,7 @@
     });
   }
   async function handleImport(file){
-    const data=validateSheet(await parseJsonFile(file));
+    const data=validateSheet(await parseJsonFile(file),file);
     const choice=await chooseImportMode(file,data);
     if(!choice)return;
     if(choice==='new'){
