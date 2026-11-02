@@ -14,8 +14,8 @@ jobs:
           node-version: '22'
       - name: Conferir scripts da ficha
         run: |
-          for file in app-v511.js io-recovery-v51515.js bootstrap-v511.js multi-character-v523.js diagnostics-v536.js integrity-validation-v536.js; do
+          for file in app-v511.js io-recovery-v51515.js bootstrap-v511.js multi-character-v523.js diagnostics-v536.js integrity-validation-v536.js skills-search-collapse-v537.js; do
             node --check "$file"
           done
       - name: Executar testes de integridade
-        run: node --test tests/integrity-v536.test.cjs
+        run: node --test tests/*.test.cjs
