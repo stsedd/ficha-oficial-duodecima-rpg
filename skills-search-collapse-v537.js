@@ -170,9 +170,16 @@
    const el=target(entry.selector,entry.attribute,entry.value);
    if(!el)return;
    expandParents(el);
+   const hadTabindex=el.hasAttribute('tabindex');
+   if(!hadTabindex)el.setAttribute('tabindex','-1');
    el.classList.add('duo-search-highlight');
+   el.focus?.({preventScroll:true});
    el.scrollIntoView({block:'center',behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches?'auto':'smooth'});
-   window.setTimeout(()=>{if(el.isConnected)el.classList.remove('duo-search-highlight')},1700);
+   window.setTimeout(()=>{
+    if(!el.isConnected)return;
+    el.classList.remove('duo-search-highlight');
+    if(!hadTabindex)el.removeAttribute('tabindex');
+   },1700);
   }));
  }
  function openSearch(){
