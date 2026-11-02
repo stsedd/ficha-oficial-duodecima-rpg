@@ -38,9 +38,8 @@
     title.textContent=cfg.label;chevron.className='duo-collapse-chevron';chevron.textContent='▾';chevron.setAttribute('aria-hidden','true');
     button.append(title,chevron);
     button.setAttribute('aria-label','Mostrar ou recolher '+cfg.label);
-    const contentId='duo-v537-fold-'+cfg.id;
-    const firstContent=content[0];if(!firstContent.id)firstContent.id=contentId;
-    button.setAttribute('aria-controls',firstContent.id);
+    const controlled=content.map((child,index)=>{if(!child.id)child.id='duo-v537-fold-'+cfg.id+'-'+index;return child.id});
+    button.setAttribute('aria-controls',controlled.join(' '));
     container.prepend(button);
     button.addEventListener('click',()=>setFold(container,!container.classList.contains('duo-is-collapsed'),true));
     setFold(container,originalState(cfg.id),false);
@@ -82,7 +81,7 @@
   });
   for(const [id,name] of [['armorEditor','Armadura'],['shieldEditor','Escudo']]){
    const el=document.getElementById(id);
-   if(el&&host.contains(el))add('Equipamento','inventory',el.querySelector('input[data-armor-field="name"],input[data-shield-field="name"]')?.value||name,'#'+id,'',id,'inventário');
+   if(el&&host.contains(el))add('Equipamento','inventory',document.getElementById(id==='armorEditor'?'armorName':'shieldName')?.value||name,'#'+id,'',id,'inventário');
   }
   host.querySelectorAll('.familiar-card[data-familiar-id]').forEach(el=>{
    const name=el.querySelector('input[data-familiar-field$=":name"]')?.value;
