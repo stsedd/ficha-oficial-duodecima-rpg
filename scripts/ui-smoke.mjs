@@ -108,6 +108,37 @@ for(const test of cases){
   await page.goto(base,{waitUntil:'networkidle',timeout:60000});
   await page.waitForSelector('#sheetView:not(.hidden)',{state:'visible',timeout:30000});
   await page.waitForFunction(()=>document.body.dataset.rebento==='true',{timeout:10000});
+
+  // v5.37.1 — QA geométrico das perícias no desktop e no mobile.
+  const skillsLayout=await page.evaluate(()=>{
+    const row=document.querySelector('#sheetView .skill-ledger-row');
+    if(!row)return {missing:true};
+    const rect=el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
+    const flags=[...row.querySelectorAll('.skill-tiny-check')],bonus=row.querySelector('.skill-roll-value');
+    const name=row.querySelector('.skill-ledger-name'),badge=row.querySelector('.skill-attr-badge');
+    const title=name?.querySelector('b'),details=row.querySelector('.skill-settings summary');
+    const boxes=[...row.querySelectorAll('.skill-tiny-check,.skill-roll-value,.skill-ledger-name,.skill-settings summary')];
+    return {
+      missing:false,
+      nameDirection:getComputedStyle(name).flexDirection,
+      flags:flags.map(rect),bonus:rect(bonus),name:rect(name),title:rect(title),badge:rect(badge),details:rect(details),
+      row:rect(row),overflows:boxes.some(el=>{const a=el.getBoundingClientRect(),b=row.getBoundingClientRect();return a.x<b.x-2||a.right>b.right+2}),
+      sourceInput:!!row.querySelector('[data-skill-manual]'),expertInput:!!row.querySelector('[data-skill-expertise]')
+    };
+  });
+  if(skillsLayout.missing)failures.push(`${test.name}-skills: perícias não foram renderizadas`);
+  else{
+    const L=skillsLayout;
+    if(L.nameDirection!=='row')failures.push(`${test.name}-skills: nome ainda empilhado (flex-direction=${L.nameDirection})`);
+    if(L.flags.length!==2||Math.abs(L.flags[0].y-L.flags[1].y)>2)failures.push(`${test.name}-skills: controles P/E não estão na mesma linha`);
+    if(L.flags.some(x=>x.width<30||x.height<(test.name==='mobile'?39:32)))failures.push(`${test.name}-skills: áreas de clique P/E pequenas: ${JSON.stringify(L.flags)}`);
+    if(!(L.bonus.x>L.flags[1].x&&L.name.x>L.bonus.x&&L.details.x>L.name.x))failures.push(`${test.name}-skills: ordem P/E → bônus → nome → detalhes incorreta`);
+    if(test.name==='desktop'&&Math.abs(L.title.y-L.badge.y)>9)failures.push(`${test.name}-skills: atributo não acompanha o nome na linha`);
+    if(!L.sourceInput||!L.expertInput)failures.push(`${test.name}-skills: entradas de perícia não encontradas`);
+    if(L.overflows)failures.push(`${test.name}-skills: controles vazaram da linha`);
+  }
+  await page.screenshot({path:`ui-artifacts/${test.name}-skills-v5371.png`,fullPage:false});
+
   const result=await page.evaluate(()=>{
     const cards=[...document.querySelectorAll('#sheetView .attr')];
     const byName=abbr=>cards.find(card=>(card.querySelector('.attr-name')?.textContent||'').startsWith(`${abbr} ·`));
