@@ -22,9 +22,9 @@
   if(!Number.isInteger(version)||version<1||version>SCHEMA_MAX)
     throw new Error('Versão de ficha incompatível ('+String(data.schemaVersion??'sem versão')+').');
   // Evita que um JSON com apenas a versão substitua ou crie uma ficha vazia.
-  const known=['baseAttributes','inventory','history','weapons','familiars','godId','magic','roma','isCreated','name','player','notes'];
+  const known=['baseAttributes','inventory','history','weapons','familiars','godId','magic','roma','appearance','armor','shield','skillMeta'];
   if(!known.some(k=>Object.prototype.hasOwnProperty.call(data,k)))
-    throw new Error('Arquivo incompleto: não foram encontrados os campos de uma ficha.');
+    throw new Error('Arquivo incompleto: não foram encontrados os campos estruturais de uma ficha.');
   for(const [key,type] of Object.entries(fields)){
    if(Object.prototype.hasOwnProperty.call(data,key)&&shape(data[key])!==type)
     throw new Error('Campo incompatível no JSON: '+key+'.');
