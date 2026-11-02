@@ -17,8 +17,9 @@ test('a legacy sheet with a recognizable shape is accepted',()=>{
  const input={schemaVersion:1,baseAttributes:{},name:'Legado'};
  assert.equal(validate(input),input);
 });
-test('a version-only JSON is rejected',()=>{
+test('version-only and name-only JSON are rejected',()=>{
  assert.throws(()=>validate({schemaVersion:24}),/incompleto/);
+ assert.throws(()=>validate({schemaVersion:24,name:'Rascunho'}),/incompleto/);
 });
 test('invalid JSON shapes are rejected before migration',()=>{
  assert.throws(()=>validate({...basic(),weapons:{}}),/weapons/);
