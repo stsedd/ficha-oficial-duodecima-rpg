@@ -5,7 +5,7 @@
   try {
     await new Promise((resolve,reject)=>{
       const io=document.createElement('script');
-      io.src='io-recovery-v51515.js?v=5.28.0-safe-import';
+      io.src='io-recovery-v51515.js?v=5.36.0-validated';
       io.onload=resolve;
       io.onerror=()=>reject(new Error('Falha ao carregar recuperação de importação/exportação'));
       document.body.appendChild(io);
@@ -125,7 +125,7 @@
   }catch(err){console.warn('[Ficha] Camada visual de Rebento indisponível.',err)}
 
   const script=document.createElement('script');
-  script.src=`app-v511.js?v=5.35.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+  script.src=`app-v511.js?v=5.36.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
   script.defer=false;
   script.onload=async()=>{
     try{
