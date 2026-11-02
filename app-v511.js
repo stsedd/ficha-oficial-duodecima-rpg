@@ -125,8 +125,10 @@
       const probe='__duodecima_probe__';
       window.localStorage.setItem(probe,'1');
       window.localStorage.removeItem(probe);
+      window.DUODECIMA_STORAGE_PERSISTENT=true;
       return window.localStorage;
     } catch (err) {
+      window.DUODECIMA_STORAGE_PERSISTENT=false;
       const memory = {};
       return {
         getItem: key => Object.prototype.hasOwnProperty.call(memory,key) ? memory[key] : null,
@@ -323,6 +325,25 @@
       catch(_){console.warn('[Ficha] Não foi possível criar backup local.',err);return false}
     }
   }
+  async function backupStats(){
+    const all=await listSheetBackups(),own=all.filter(x=>!x.archivedLegacy);
+    return {total:own.length,automatic:own.filter(x=>!backupIsProtected(x)).length,protected:own.filter(backupIsProtected).length,legacy:all.length-own.length};
+  }
+  async function deleteSheetBackup(id){
+    const all=await listSheetBackups(),entry=all.find(x=>x.id===id&&!x.archivedLegacy);
+    if(!entry){notify('Backup não encontrado.');return false}
+    if(backupIsProtected(entry)){notify('Desproteja este backup antes de apagá-lo.');return false}
+    if(!confirm('Apagar permanentemente o backup de '+backupDateLabel(entry.savedAt)+'? Esta ação não pode ser desfeita. Confira se você possui um JSON exportado.'))return false;
+    try{
+      if(entry.fallback){
+        const raw=safeStorage.getItem(SHEET_BACKUP_PERSONAL_FALLBACK_KEY),current=raw&&JSON.parse(raw);
+        if(current?.id!==id)throw new Error('Backup diferente');
+        safeStorage.removeItem(SHEET_BACKUP_PERSONAL_FALLBACK_KEY);
+      }else await sheetBackupDbAction('delete',id);
+      await renderBackupDialog();await updateBackupButtonCount();
+      notify('Backup apagado.');return true;
+    }catch(e){console.warn('[Ficha] Falha ao apagar backup',e);notify('Não foi possível apagar este backup.');return false}
+  }
   async function setBackupProtected(id,protectedValue){
     const list=await listSheetBackups(),entry=list.find(x=>x.id===id&&!x.archivedLegacy);
     if(!entry){notify('Não foi possível encontrar este backup.');return}
@@ -357,12 +378,17 @@
     const row=(item,legacy=false)=>{
       const protectedBackup=!legacy&&isProtected(item);
       const protectButton=legacy?'':'<button type="button" class="ghost small-btn backup-protect-toggle" data-protect-backup="'+esc(item.id)+'" aria-pressed="'+String(protectedBackup)+'">'+(protectedBackup?'Desproteger':'Proteger')+'</button>';
+      const deleteButton=legacy||protectedBackup?'':'<button type="button" class="ghost small-btn backup-delete" data-delete-backup="'+esc(item.id)+'">Apagar</button>';
       const info=legacy?'':'<span class="backup-protection-label">'+(protectedBackup?'◆ Protegido':'Automático')+'</span>';
-      return '<article class="backup-entry"><div class="backup-entry-copy"><div class="row between"><strong>'+esc(item.name||'Ficha sem nome')+'</strong><span class="pill">'+esc(backupDateLabel(item.savedAt))+'</span></div><p class="muted compact">'+esc(item.reason||'Backup local')+' '+info+'</p></div><div class="backup-entry-actions">'+protectButton+'<button type="button" class="ghost small-btn" data-restore-backup="'+esc(item.id)+'">Restaurar</button></div></article>';
+      return '<article class="backup-entry"><div class="backup-entry-copy"><div class="row between"><strong>'+esc(item.name||'Ficha sem nome')+'</strong><span class="pill">'+esc(backupDateLabel(item.savedAt))+'</span></div><p class="muted compact">'+esc(item.reason||'Backup local')+' '+info+'</p></div><div class="backup-entry-actions">'+protectButton+deleteButton+'<button type="button" class="ghost small-btn" data-restore-backup="'+esc(item.id)+'">Restaurar</button></div></article>';
     };
     const current=own.length?own.map(item=>row(item)).join(''):'<div class="backup-empty"><b>Esta personagem ainda não possui backups.</b><p class="muted compact">Use “Criar backup agora” para guardar uma cópia no navegador.</p></div>';
     const archive=old.length?'<details class="backup-legacy-archive"><summary>Backups antigos sem personagem identificado · '+old.length+'</summary><p class="muted compact">Estes backups foram criados antes da separação das fichas. Eles foram preservados, mas podem pertencer a qualquer personagem. Confira o nome antes de restaurar.</p><div class="backup-list">'+old.map(item=>row(item,true)).join('')+'</div></details>':'';
-    root.innerHTML='<div class="backup-current"><p class="eyebrow">PERSONAGEM ATUAL</p>'+current+'</div>'+archive;
+    const protectedCount=own.filter(isProtected).length;
+    const info='<p class="muted compact backup-retention-notice">'+(protectedCount>=12
+      ?'Atenção: existem '+protectedCount+' backups protegidos. Eles não são excluídos automaticamente e podem ocupar bastante espaço. Exporte um JSON e revise os antigos.'
+      :'Backups automáticos: até 8. Backups protegidos: '+protectedCount+' (sem exclusão automática). Para apagar um backup, primeiro desproteja-o.')+'</p>';
+    root.innerHTML='<div class="backup-current"><p class="eyebrow">PERSONAGEM ATUAL</p>'+info+current+'</div>'+archive;
   }
   async function restoreSheetBackup(id){
     const list=await listSheetBackups(),item=list.find(x=>x.id===id);if(!item){notify('Esse backup não está mais disponível.');return}
@@ -692,7 +718,10 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function notify(msg){toast.textContent=msg;toast.classList.remove('hidden');clearTimeout(notify.t);notify.t=setTimeout(()=>toast.classList.add('hidden'),2800)}
   let sheetWriteSequence=0;
   let lastRenderedWriteSequence=-1;
-  function save(){state.schemaVersion=SCHEMA_VERSION;state.updatedAt=new Date().toISOString();try{safeStorage.setItem(STORAGE_KEY,JSON.stringify(state));sheetWriteSequence++;return true}catch(err){console.error('[Ficha] Falha ao salvar a ficha localmente.',err);notify('A ficha atingiu o limite de armazenamento deste navegador. Remova imagens antigas ou exporte o JSON antes de continuar.');return false}}
+  function broadcastSaveStatus(status,error){
+    try{window.dispatchEvent(new CustomEvent('duodecima:save-status',{detail:{status,storageKey:STORAGE_KEY,at:state.updatedAt,persistent:window.DUODECIMA_STORAGE_PERSISTENT!==false,error:error?String(error.message||error):''}}))}catch(_){}
+  }
+  function save(){state.schemaVersion=SCHEMA_VERSION;state.updatedAt=new Date().toISOString();try{safeStorage.setItem(STORAGE_KEY,JSON.stringify(state));sheetWriteSequence++;broadcastSaveStatus(window.DUODECIMA_STORAGE_PERSISTENT===false?'temporary':'saved');return true}catch(err){broadcastSaveStatus('error',err);console.error('[Ficha] Falha ao salvar a ficha localmente.',err);notify('A ficha atingiu o limite de armazenamento deste navegador. Remova imagens antigas ou exporte o JSON antes de continuar.');return false}}
   window.DUODECIMA_REORDER_DECK=(type,keys)=>{
     if(!Array.isArray(keys)||!keys.length||new Set(keys).size!==keys.length||keys.some(k=>typeof k!=='string'))return false;
     if(type==='abilities'){
@@ -2315,7 +2344,7 @@ function longRest(){
 
   byId('backupsBtn').onclick=async()=>{await renderBackupDialog();byId('backupDialog').showModal()};
   byId('backupNowBtn').onclick=async()=>{const ok=await storeSheetBackup(state,'Backup manual',true);await renderBackupDialog();await updateBackupButtonCount();notify(ok?'Backup criado.':'Não havia conteúdo para salvar em backup.')};
-  byId('backupList').onclick=e=>{const button=e.target.closest?.('button');if(!button)return;if(button.dataset.protectBackup)setBackupProtected(button.dataset.protectBackup,button.getAttribute('aria-pressed')!=='true');else if(button.dataset.restoreBackup)restoreSheetBackup(button.dataset.restoreBackup)};
+  byId('backupList').onclick=e=>{const button=e.target.closest?.('button');if(!button)return;if(button.dataset.protectBackup)setBackupProtected(button.dataset.protectBackup,button.getAttribute('aria-pressed')!=='true');else if(button.dataset.deleteBackup)deleteSheetBackup(button.dataset.deleteBackup);else if(button.dataset.restoreBackup)restoreSheetBackup(button.dataset.restoreBackup)};
   byId('exportBtn').onclick=()=>{save();const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`duodecima-${(state.name||'personagem').toLowerCase().replace(/[^a-z0-9]+/g,'-')}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
   // A importação é tratada pela janela segura de io-recovery-v51515.js.
   byId('importInput').onchange=()=>{if(!window.DUODECIMA_SAFE_IMPORT_READY)notify('Importação protegida indisponível. Recarregue a página antes de importar.');};
@@ -2325,7 +2354,8 @@ function longRest(){
   window.DUODECIMA_BACKUP_API={
     activeStorageKey:STORAGE_KEY,
     hasMeaningful:()=>hasMeaningfulSheetData(state),
-    create:reason=>hasMeaningfulSheetData(state)?storeSheetBackup(state,String(reason||'Backup manual'),true):Promise.resolve(true)
+    create:reason=>hasMeaningfulSheetData(state)?storeSheetBackup(state,String(reason||'Backup manual'),true):Promise.resolve(true),
+    stats:backupStats
   };
   await storeSheetBackup(state,'Backup de segurança ao abrir');
   await updateBackupButtonCount();
