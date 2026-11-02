@@ -1,0 +1,25 @@
+/* Duodécima v5.36 — diagnóstico discreto, temas e mobile */
+.duo-save-health{display:block;margin:7px auto 0;font-size:10.5px;line-height:1.4;text-align:center;color:var(--muted);letter-spacing:.02em}
+.duo-save-health[data-status="error"],.duo-save-health[data-status="temporary"]{color:var(--red,#ca314a);font-weight:700}
+.multi-character-menu [data-multi="diagnostics"]{font-weight:650}
+.duo-diagnostics-dialog{width:min(560px,calc(100vw - 20px));max-width:min(560px,calc(100vw - 20px))}
+.duo-diagnostics-card{padding:19px!important;max-width:100%!important}
+.duo-diagnostics-card h2{font-size:clamp(22px,4vw,27px);margin:3px 0 8px}
+.duo-diagnostics-grid{display:grid;gap:0;margin:18px 0 12px;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.duo-diagnostics-grid>div{display:grid;grid-template-columns:minmax(110px,1fr) minmax(0,1.6fr);gap:10px;align-items:center;padding:12px;border-bottom:1px solid var(--line)}
+.duo-diagnostics-grid>div:last-child{border-bottom:0}
+.duo-diagnostics-grid dt{color:var(--muted);font-size:12px}
+.duo-diagnostics-grid dd{margin:0;color:var(--text);font-size:12px;font-weight:700;text-align:right;overflow-wrap:anywhere}
+.duo-diagnostics-note{line-height:1.5!important}
+.duo-diagnostics-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:9px;margin-top:18px}
+.duo-diagnostics-actions button{min-height:42px}
+.backup-delete{color:var(--red,#ca314a)!important}
+.backup-retention-notice{line-height:1.5!important;margin:7px 0 15px!important}
+@media(max-width:620px){
+ .duo-diagnostics-card{padding:13px!important}
+ .duo-diagnostics-grid>div{grid-template-columns:1fr;gap:4px;padding:10px}
+ .duo-diagnostics-grid dd{text-align:left}
+ .duo-diagnostics-actions button{min-height:44px;flex:1 1 130px}
+ .duo-save-health{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){.duo-diagnostics-dialog *{animation:none!important;transition:none!important}}
