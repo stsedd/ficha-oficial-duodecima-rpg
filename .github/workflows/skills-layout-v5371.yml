@@ -1,0 +1,34 @@
+name: Perícias v5.37.1 · Desktop e Mobile
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'styles-v511.css'
+      - 'skills-search-collapse-v537.css'
+      - 'skills-search-collapse-v537.js'
+      - 'app-v511.js'
+      - 'scripts/skills-layout-v5371-smoke.mjs'
+      - '.github/workflows/skills-layout-v5371.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Start local site
+        run: |
+          python3 -m http.server 4173 > /tmp/duodecima-skills-http.log 2>&1 &
+          sleep 2
+      - name: Check skills layout in desktop and mobile
+        run: node scripts/skills-layout-v5371-smoke.mjs
