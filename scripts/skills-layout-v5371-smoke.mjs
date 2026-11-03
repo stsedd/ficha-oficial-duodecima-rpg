@@ -1,4 +1,4 @@
-/* QA focalizado da v5.37.1 — roda independentemente de outras seções da ficha. */
+/* QA focalizado da v5.37.2 — perícias por atributo, independente de outras seções. */
 import { chromium } from 'playwright';
 
 const browser=await chromium.launch({headless:true});
@@ -30,13 +30,20 @@ try {
         const labels=[...row.querySelectorAll('.skill-tiny-check')];
         const flags=q('.skill-ledger-flags'),roll=q('.skill-roll-value'),name=q('.skill-ledger-name');
         const title=q('.skill-ledger-name b'),badge=q('.skill-attr-badge'),detail=q('.skill-settings summary');
+        const sidebar=document.querySelector('#sheetView .attribute-sidebar .section-title');
+        const sidebarTitle=sidebar?.querySelector('h3'),sidebarCount=sidebar?.querySelector('.level-point-count');
+        const groupElements=[...document.querySelectorAll('#sheetView .skill-ledger-group')];
         const ledger=document.querySelector('#sheetView .skill-ledger');
         const cols=getComputedStyle(ledger).gridTemplateColumns.split(/\s+/).filter(Boolean).length;
         return {
           flags:box(flags),p:box(labels[0]),e:box(labels[1]),roll:box(roll),
-          name:box(name),title:box(title),badge:box(badge),detail:box(detail),row:box(row),
+          name:box(name),title:box(title),badgeHidden:getComputedStyle(badge).display==='none',detail:box(detail),row:box(row),
+          groups:groupElements.map(el=>({attr:el.dataset.skillAttribute,count:el.querySelectorAll('.skill-ledger-row').length})),
+          attributeTitle:sidebarTitle?.textContent.trim(),attributeTitleWidth:sidebarTitle?.getBoundingClientRect().width,
+          attributeTitleHeight:sidebarTitle?.getBoundingClientRect().height,attributeTitleWhitespace:sidebarTitle?getComputedStyle(sidebarTitle).whiteSpace:'',
+          attributeCountWidth:sidebarCount?.getBoundingClientRect().width,
           nameDirection:getComputedStyle(name).flexDirection,
-          columns:cols,skillsWidth:ledger.getBoundingClientRect().width,
+          columns:cols,skillsWidth:document.querySelector('#sheetView .overview-skills').getBoundingClientRect().width,
           hasManual:!!q('input[data-skill-manual]'),
           hasExpertise:!!q('input[data-skill-expertise]'),
           hasSource:!!q('[data-skill-source]')||!!q('.skill-source-tags'),
@@ -51,9 +58,13 @@ try {
       if(layout.detail.width<(test.name==='mobile'?39:36))failures.push(label+'botão de detalhes muito pequeno');
       if(layout.row.right<layout.detail.right-2)failures.push(label+'detalhes escaparam da linha');
       if(layout.name.right>layout.detail.x+2)failures.push(label+'nome invadiu detalhes');
-      if(test.name!=='mobile'&&Math.abs(layout.title.y-layout.badge.y)>9)failures.push(label+'atributo separado do nome');
+      if(!layout.badgeHidden)failures.push(label+'atributo repetido dentro da perícia');
+      const expected={for:1,con:1,fe:5,car:6,des:4,int:9};
+      if(layout.groups.length!==6||layout.groups.some(x=>expected[x.attr]!==x.count))failures.push(label+'grupos/perícias incompletos: '+JSON.stringify(layout.groups));
+      if(layout.attributeTitle!=='Base'||layout.attributeTitleWhitespace!=='nowrap'||layout.attributeTitleHeight>30)failures.push(label+'Base quebrado verticalmente');
+      if(!layout.attributeCountWidth)failures.push(label+'contador de pontos ausente');
       if(!(layout.hasManual&&layout.hasExpertise&&layout.hasSource&&layout.hasDetail))failures.push(label+'inputs mecânicos ausentes');
-      if(layout.columns!==(layout.skillsWidth>=890?2:1))failures.push(label+'número de colunas não respeita container: '+layout.columns+' / '+layout.skillsWidth);
+      if(layout.columns!==(layout.skillsWidth>=650?2:1))failures.push(label+'número de colunas não respeita container: '+layout.columns+' / '+layout.skillsWidth);
       await page.locator('#sheetView .skill-ledger-row .skill-settings summary').first().click();
       const detailsVisible=await page.locator('#sheetView .skill-ledger-row .skill-settings[open] [data-skill-detail]').first().isVisible();
       if(!detailsVisible)failures.push(label+'detalhes não expandem');
@@ -64,5 +75,5 @@ try {
 }finally{
   await browser.close();
 }
-if(failures.length){console.error('❌ QA perícias v5.37.1\n- '+failures.join('\n- '));process.exit(1)}
+if(failures.length){console.error('❌ QA perícias v5.37.2\n- '+failures.join('\n- '));process.exit(1)}
 console.log('✅ Perícias: desktop 1440, mobile 390 e desktop largo 2200 validados.');
