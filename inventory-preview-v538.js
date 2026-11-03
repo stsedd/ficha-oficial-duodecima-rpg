@@ -86,7 +86,7 @@
     header.append(photo,textArea);
     card.append(header,editor);
     // Mantemos os próprios controles do app. Mover nós preserva seus event handlers.
-    const equipped=editor.querySelector(kind==='weapon'?'[data-weapon-equipped]':kind==='armor'?'#armorEquipped':kind==='shield'?'#shieldEquipped':'');
+    const equipped=kind==='item'?null:editor.querySelector(kind==='weapon'?'[data-weapon-equipped]':kind==='armor'?'#armorEquipped':'#shieldEquipped');
     if(equipped){
       const label=equipped.closest('label');
       if(label){
