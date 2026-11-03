@@ -318,3 +318,101 @@
     height:40px!important;min-height:40px!important;
   }
 }
+
+
+/* v5.37.2 — agrupamento de perícias por atributo em colunas equilibradas.
+   Muda somente a apresentação dos elementos originais da ficha. */
+#sheetView .attribute-sidebar .section-title{
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+  column-gap:6px!important;row-gap:1px!important;align-items:center!important;
+  min-width:0!important;
+}
+#sheetView .attribute-sidebar .section-title > div{display:contents!important}
+#sheetView .attribute-sidebar .section-title .eyebrow{
+  grid-column:1/-1!important;grid-row:1!important;margin:0 0 1px!important;
+  white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important;
+}
+#sheetView .attribute-sidebar .section-title h3{
+  grid-column:1!important;grid-row:2!important;
+  min-width:max-content!important;margin:0!important;
+  font-size:18px!important;line-height:1.2!important;
+  white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;
+}
+#sheetView .attribute-sidebar .section-title .level-point-count{
+  grid-column:2!important;grid-row:2!important;justify-self:end!important;
+  min-width:max-content!important;white-space:nowrap!important;
+  margin:0!important;font-size:13px!important;
+}
+#sheetView .attribute-sidebar .section-title::after{display:none!important}
+
+#sheetView .skill-ledger{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+  gap:12px!important;align-items:start!important;min-width:0!important;
+}
+#sheetView .skill-ledger-column{
+  display:flex!important;flex-direction:column!important;gap:13px!important;
+  min-width:0!important;
+}
+#sheetView .skill-ledger-group{display:block!important;min-width:0!important}
+#sheetView .skill-ledger-group-title{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:9px!important;min-width:0!important;
+  padding:2px 4px 6px!important;margin:0 0 5px!important;
+  border-bottom:1px solid color-mix(in srgb,var(--theme-accent,var(--red)) 35%,var(--line) 65%)!important;
+  font-family:var(--sans,system-ui,sans-serif)!important;
+  font-size:11px!important;font-weight:800!important;line-height:1.2!important;
+  letter-spacing:.075em!important;text-transform:uppercase!important;
+  color:var(--text)!important;
+}
+#sheetView .skill-ledger-group-title span{
+  flex:0 0 auto!important;color:var(--muted)!important;
+  font-size:9px!important;letter-spacing:.03em!important;
+}
+#sheetView .skill-ledger-group-rows{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+  gap:4px!important;min-width:0!important;
+}
+#sheetView .skill-ledger-row .skill-ledger-name .skill-attr-badge{
+  display:none!important;
+}
+#sheetView .skill-ledger-row .skill-row-main{
+  grid-template-columns:70px 38px minmax(0,1fr) 38px!important;
+  gap:5px!important;
+}
+#sheetView .skill-ledger-row .skill-ledger-name{
+  min-width:0!important;overflow-wrap:normal!important;
+}
+#sheetView .skill-ledger-row .skill-ledger-name b{
+  font-size:12px!important;line-height:1.17!important;
+  white-space:normal!important;overflow-wrap:break-word!important;
+}
+#sheetView .skill-ledger-row .skill-roll-value{font-size:14px!important}
+
+/* A largura da própria área de perícias determina se cabem duas colunas.
+   A coluna de atributos não deve comprimir as perícias em telas médias. */
+@container duo-skills (min-width:650px){
+  #sheetView .skill-ledger{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:12px!important;
+  }
+}
+@media (min-width:781px) and (max-width:1559px){
+  #sheetView .overview-grid{grid-template-columns:150px minmax(0,1fr)!important}
+  #sheetView .overview-aux{
+    grid-column:1/-1!important;
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+@media (max-width:780px){
+  #sheetView .skill-ledger{grid-template-columns:minmax(0,1fr)!important}
+  #sheetView .skill-ledger-column{gap:12px!important}
+  #sheetView .skill-ledger-row .skill-row-main{
+    grid-template-columns:70px 38px minmax(0,1fr) 38px!important;gap:5px!important;
+  }
+}
+@media (max-width:370px){
+  #sheetView .skill-ledger-row .skill-row-main{
+    grid-template-columns:66px 35px minmax(0,1fr) 38px!important;gap:3px!important;
+  }
+  #sheetView .skill-ledger-row .skill-ledger-name b{font-size:11.5px!important}
+}
