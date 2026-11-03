@@ -26,7 +26,7 @@
           };
         });
         const marker=profile.name+': ';
-        if(initial.count<7||initial.panes!==4||!initial.hiddenOriginals||!initial.linked||initial.used<3)problems.push(marker+'estrutura inadequada '+JSON.stringify(initial));
+        if(initial.count!==6||initial.panes!==4||!initial.hiddenOriginals||!initial.linked||initial.used<3)problems.push(marker+'estrutura inadequada '+JSON.stringify(initial));
         if(profile.name==='mobile'){
           if(initial.detail.visible)problems.push(marker+'painel de detalhes visível sem seleção');
         }else if(!(initial.list.right<initial.detail.x))problems.push(marker+'não há duas colunas lado a lado');
