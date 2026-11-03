@@ -98,6 +98,8 @@
  border-radius:11px!important;border:1px solid var(--inv-preview-edge)!important;
  background:var(--panel)!important;transition:border-color .18s ease,box-shadow .18s ease;
 }
+/* Os filtros nativos aplicam .hidden aos itens. Esta regra deve vencer o display:block do cartão. */
+#sheetView .duo-inventory-preview .duo-preview-card.hidden{display:none!important}
 #sheetView .duo-inventory-preview .duo-preview-card:hover{
  border-color:color-mix(in srgb,var(--theme-accent,var(--red)) 57%,var(--line) 43%)!important;
 }
