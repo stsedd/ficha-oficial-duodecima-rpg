@@ -1,37 +1,40 @@
-# Prévia experimental — inventário v5.38
+# Prévia experimental: Armamentarium minimalista v5.38
 
-Esta branch serve **apenas para avaliação visual** do novo inventário. A branch `main` continua com a interface aprovada pelos jogadores.
+**Somente na branch `preview-inventario-v538` e no PR de rascunho #2.**
+Nada foi mesclado para a `main`, e a versão pública da ficha mantém a interface anterior.
 
-## Abrir a ficha de testes
+## Abrir a versão de testes
 
-[Visualizar a ficha de demonstração](https://raw.githack.com/stsedd/ficha-oficial-duodecima-rpg/preview-inventario-v538/index.html)
+[Armamentarium minimalista (HTML experimental)](https://raw.githack.com/stsedd/ficha-oficial-duodecima-rpg/preview-inventario-v538/index.html)
 
-O link é servido por um proxy público de arquivos do GitHub, **raw.githack.com**, independente do domínio oficial da ficha. Ele pode exibir um aviso de confirmação de navegação. Por precaução, **não importe fichas reais, pessoais ou sensíveis nesse ambiente**.
+Este link usa um proxy externo de arquivos públicos do GitHub, em uma origem separada da ficha oficial. **Não importe dados pessoais ou fichas reais**. Há uma personagem fictícia de demonstração. Para voltar aos dados de exemplo atualizados, escolha **Restaurar exemplo** na parte inferior da aba Inventário.
 
-O navegador recebe uma personagem fictícia automaticamente se não houver dados nesta origem. É possível testar:
-- Abas Equipamentos, Itens e Heranças;
-- busca e filtro das categorias existentes;
-- cartões com imagens de exemplo, indicadores e informações essenciais;
-- botão para expandir edição completa sem recriar os campos;
-- ativação de armas, consumo de poções, adição manual e biblioteca;
-- opções de tema e versão mobile;
-- **Restaurar exemplo**, para voltar a testar com os dados iniciais.
+## Visual aprovado como referência
 
-O armazenamento do protótipo é local do domínio de prévia, separado do `stsedd.github.io`. O código da prévia contém somente modificações visuais e dados fictícios. A versão final **não deve** incluir `inventory-preview-demo-v538.js`.
+Inspirado diretamente no screenshot fornecido pelo usuário:
 
-## Aprovação
+- Faixa **Em uso** com chips pequenos e ícones de traço;
+- Abas discretas **Tudo / Equipamentos / Bolsa / Heranças**;
+- Lista de registros à esquerda, linhas compactas, fundo neutro, contorno arredondado;
+- Único painel de detalhes à direita: ícone ou imagem (quando cadastrada), tipo, nome, material, propriedades, descrição;
+- Botões **Editar**, **Equipar/Desequipar** e **Baralho**, de acordo com a natureza do objeto;
+- No celular, a lista abre a visualização do item com botão **Voltar aos itens**;
+- Busca, filtros e inclusão manual/biblioteca presentes em controles discretos, recolhidos por padrão.
 
-Esta branch está ligada a um **pull request em rascunho**. Não mesclar nem substituir a versão oficial antes da aprovação visual.
+## Segurança de dados e compatibilidade
 
-As mudanças estão isoladas em:
-- `inventory-preview-v538.css`
-- `inventory-preview-v538.js`
-- `inventory-preview-demo-v538.js`
-- adições exclusivas desta branch em `index.html`
-- `scripts/preview-inventory-v538-smoke.mjs`, para testes desktop/mobile
+O novo layout usa os próprios inputs e os handlers da ficha original, **movendo os editores reais para o painel de detalhes** somente quando necessário. As regras de ataque, dano, defesa, materiais, estacas, resistência e consumo não são reimplementadas. As alterações de quantidade, estado equipado e fixação no baralho seguem os fluxos do app principal. O baralho de combate original continua com imagens, arrastar/soltar e cálculos.
 
-As regras, cálculos, dados, materiais e handlers originais permanecem inalterados. Os nós dos controles existentes são reorganizados visualmente sem alterar os seus identificadores e valores.
+A demonstração usa somente dados fictícios, em armazenamento local do domínio de prévia. O arquivo `inventory-preview-demo-v538.js` **não deve integrar a publicação oficial**.
 
-## Observações para implementação definitiva
+A implementação definitiva, depois da aprovação, deve migrar a camada de UI sem o demonstrador, revisar importação/exportação, cores de todos os temas e dados longos, e repetir os testes responsivos.
 
-Após a aprovação, migrar somente a interface consolidada (sem a personagem fictícia), testar a persistência de inventário em fichas existentes, conferir eventos de importação/exportação e rever casos extremos no mobile.
+## Arquivos do protótipo
+
+- `inventory-preview-v538.js`: visualização lista + detalhe, usando elementos originais do DOM
+- `inventory-preview-v538.css`: CSS limitado à aba de inventário experimental
+- `inventory-preview-demo-v538.js`: personagem fictícia demonstrativa
+- `scripts/preview-inventory-v538-smoke.mjs`: teste Playwright no PC e mobile
+- `index.html`: referências aos arquivos exclusivos da branch
+
+**Não mesclar antes da aprovação visual.**
