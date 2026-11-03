@@ -59,7 +59,7 @@
         await pane.locator('[data-am-item="weapon:prev-gladius"]').click();
         const equippedBefore=await pane.locator('[data-weapon-equipped="prev-gladius"]').isChecked();
         await pane.locator('.am-detail-actions .am-secondary').click();
-        await pane.locator('[data-weapon-equipped="prev-gladius"]').waitFor();
+        await page.waitForTimeout(150); // O controle original fica oculto até clicar em Editar.
         const equippedAfter=await pane.locator('[data-weapon-equipped="prev-gladius"]').isChecked();
         if(equippedBefore===equippedAfter)problems.push(marker+'equipar não alterou o checkbox original');
         await pane.locator('button[aria-label="Adicionar item"]').click();
