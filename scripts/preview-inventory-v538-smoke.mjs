@@ -15,6 +15,10 @@
         await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:60000});
         await page.waitForSelector('#sheetView:not(.hidden) [data-pane="inventory"] .am-shell',{state:'visible',timeout:25000});
         const pane=page.locator('#sheetView [data-pane="inventory"]');
+        if(profile.name==='desktop'){
+          const shot=await page.screenshot({type:'jpeg',quality:35,fullPage:false});
+          console.log('PREVIEW_VISUAL_JPEG:'+shot.toString('base64'));
+        }
         const initial=await pane.evaluate(root=>{
           const l=root.querySelector('.am-list').getBoundingClientRect(),r=root.querySelector('.am-detail').getBoundingClientRect();
           return {count:root.querySelectorAll('.am-item-row').length,panes:root.querySelectorAll('.am-tab').length,
