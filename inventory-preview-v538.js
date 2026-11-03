@@ -154,6 +154,12 @@
     pane.dataset.duoInventoryPreviewReady='1';
     pane.classList.add('duo-inventory-preview');
     const banner=titleCard();
+    if(typeof window.DUODECIMA_PREVIEW_RESTORE_DEMO==='function'){
+      const restore=html('button','duo-preview-restore','Restaurar exemplo');
+      restore.type='button';
+      restore.addEventListener('click',window.DUODECIMA_PREVIEW_RESTORE_DEMO);
+      banner.append(restore);
+    }
     const tools=html('div','duo-preview-controls');
     const tabs=html('div','duo-preview-tabs');
     tabs.setAttribute('role','group');
