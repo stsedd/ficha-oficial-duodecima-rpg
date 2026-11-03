@@ -6,7 +6,7 @@
   const state={mode:(()=>{try{return sessionStorage.getItem(modeKey)||'all'}catch(_){return 'all'}})(),selected:'',query:'',filter:'all',searchOpen:false,filtersOpen:false,adding:false,mobileDetails:false,editing:false};
   let scheduled=false;
   const ICONS={
-    sword:'<path d="M14 16 20.5 9.5 21 3l-6.5.5L8 10"/><path d="m7 11 6 6"/><path d="m11 7 6 6"/><path d="m7 13-4 4 4 4 4-4"/>',
+    sword:'<path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6M16 16l4 4M19 21l2-2"/>',
     shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>',
     armor:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="M12 3v17"/>',
     bow:'<circle cx="12" cy="12" r="9"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="2"/>',
@@ -102,9 +102,14 @@
     const result=[];
     const armor=pane.querySelector('#armorEditor');
     const shield=pane.querySelector('#shieldEditor');
-    pane.querySelectorAll('.weapon-list [data-weapon-card]').forEach(card=>result.push(readCard(card,'weapon')));
-    if(armor)result.push(readCard(armor,'armor'));
-    if(shield)result.push(readCard(shield,'shield'));
+    const weapons=[...pane.querySelectorAll('.weapon-list [data-weapon-card]')].map(card=>readCard(card,'weapon'));
+    // Os itens em uso vêm primeiro; os guardados aparecem logo depois.
+    result.push(...weapons.filter(item=>item.equipped));
+    if(armor&&checked(armor,'#armorEquipped'))result.push(readCard(armor,'armor'));
+    if(shield&&checked(shield,'#shieldEquipped'))result.push(readCard(shield,'shield'));
+    result.push(...weapons.filter(item=>!item.equipped));
+    if(armor&&!checked(armor,'#armorEquipped'))result.push(readCard(armor,'armor'));
+    if(shield&&!checked(shield,'#shieldEquipped'))result.push(readCard(shield,'shield'));
     pane.querySelectorAll('.inventory-grid-large [data-item-card]').forEach(card=>result.push(readCard(card,'item')));
     return result;
   }
