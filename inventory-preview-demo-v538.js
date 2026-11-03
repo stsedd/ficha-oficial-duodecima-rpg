@@ -21,18 +21,17 @@
     initialSkills:['Atletismo','Percepção'],levelSkillChoices:{20:'',40:''},skillMeta:{},talents:[],
     lineage:{type:'normal',namingVersion:2,secondaryGodId:'',structureGodId:'iuppiter',compoundPassiveReplacements:[],compoundActiveReplacements:[],compoundActiveSlots:[],directPrimaryPassives:[],directSecondaryPassives:[]},
     weapons:[
-      {id:'prev-gladius',name:'Gladius da Décima Segunda',type:'corpo-a-corpo',attr:'for',material:'ferro-aco',stakes:30,resistanceCurrent:3,attackExtra:1,damageExtra:0,equipped:true,imageUrl:art('GLADIUS','⚔','#36201f','#09090d'),isHeritage:false,notes:'Arma de treino em bronze e ferro, cuidadosamente mantida.'},
-      {id:'prev-arco',name:'Arco Cerimonial',type:'distancia',attr:'des',material:'ferro-aco',stakes:15,resistanceCurrent:3,attackExtra:0,damageExtra:0,equipped:false,imageUrl:art('ARCUS','➶','#26333d','#0a1116'),isHeritage:true,notes:'Arco entregue como lembrança de uma missão. Apenas para testar o marcador de herança.'}
+      {id:'prev-gladius',name:'Gladius Fulminata',type:'corpo-a-corpo',attr:'for',material:'ferro-aco',stakes:30,resistanceCurrent:3,attackExtra:1,damageExtra:0,equipped:true,imageUrl:'',isHeritage:false,notes:'Arma de treino em bronze e ferro, cuidadosamente mantida.'},
+      {id:'prev-arco',name:'Arco de Diana',type:'distancia',attr:'des',material:'ferro-aco',stakes:15,resistanceCurrent:3,attackExtra:0,damageExtra:0,equipped:false,imageUrl:'',isHeritage:false,notes:'Arco entregue como lembrança de uma missão. Apenas para testar o marcador de herança.'}
     ],
     armor:{equipped:true,name:'Lorica Segmentata',type:'leve',material:'ferro-aco',resistanceCurrent:3,
-      imageUrl:art('LORICA','♜','#40372b','#11100d'),isHeritage:false,notes:'Armadura pessoal de serviço.'},
-    shield:{equipped:true,name:'Scutum Legionário',material:'ferro-aco',stakes:18,resistanceCurrent:3,masterTalent:false,
-      imageUrl:art('SCUTUM','⬡','#442523','#110a0b'),isHeritage:false,notes:'Escudo de treinamento.'},
+      imageUrl:'',isHeritage:false,notes:'Armadura pessoal de serviço.'},
+    shield:{equipped:false,name:'Escudo',material:'ferro-aco',stakes:18,resistanceCurrent:3,masterTalent:false,
+      imageUrl:'',isHeritage:false,notes:'Escudo de treinamento.'},
     inventory:{aureus:0,denarius:0,notes:'Itens exclusivamente demonstrativos.',items:[
-      makeItem('prev-pocao','Poção de Cura',3,'consumivel',art('POTIO','✚','#6d2241','#150b17'),'Vidro','Recupera pontos de vida durante a cena.','Um frasco de demonstração; não constitui regra adicional.',true,false),
-      makeItem('prev-anel','Anel da Tempestade',1,'item-magico',art('ANEL','✧','#51422a','#141213'),'Prata','Um brilho acompanha o movimento das nuvens.','Item ilustrativo. Nenhuma habilidade automática é atribuída.',true,true),
-      makeItem('prev-flechas','Flechas de Treino',20,'municao',art('FLECHAE','➶','#35412d','#13170d'),'Madeira','Projéteis de treinamento.','Uma unidade por flecha.',false,false),
-      makeItem('prev-corda','Corda de Viagem',1,'outro',art('CORDA','⌁','#483626','#18110e'),'Cânhamo','Corda para escalada e acampamentos.','Utensílio de viagem.',false,false)
+      makeItem('prev-pocao','Poção de Cura',3,'consumivel','','Vidro','Recupera pontos de vida durante a cena.','Um frasco de demonstração; não constitui regra adicional.',true,false),
+      makeItem('prev-corda','Corda de Viagem',1,'outro','','Cânhamo','Corda para escalada e acampamentos.','Utensílio de viagem.',false,false),
+      makeItem('prev-anel','Anel de Jove',1,'item-magico','','Prata','Um brilho acompanha o movimento das nuvens.','Item ilustrativo. Nenhuma habilidade automática é atribuída.',true,true)
     ]},
     familiars:{entries:[],mountFameClaimed:false,notes:''},
     roma:{fame:0,fameEntries:[],rebentoApproved:false,rebentoAttributes:[],successorOfRebento:false,affinities:[],affinityEntries:[],legionRank:'',religioRank:'',customRank:'',job:'',jobSalary:0,jobPeriod:'',cohort:'I',citizenship:'',legionYears:0,serviceMarks:0,retired:false,titles:[],permissions:[],deeds:[],notes:''},
