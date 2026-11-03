@@ -62,7 +62,7 @@
   };
   function readCard(card,kind){
     const c=controlsFor(card,kind),common={kind,card,equipped:!!c.equipped?.checked,pinned:!!c.pin?.checked,
-      image:imageOf(card),heritage:false,quantity:1,material:'',notes:'',short:'',stats:'',type:'',name:'',icon:'package',category:''};
+      image:imageOf(card),heritage:false,quantity:1,material:'',notes:'',short:'',stats:'',type:'',name:'',icon:'package',category:'',placeholder:false};
     if(kind==='weapon'){
       const ranged=v(card,'[data-weapon-field$=":type"]')==='distancia';
       const stats=[...card.querySelectorAll('.weapon-results .pill')].slice(0,2).map(n=>n.textContent.trim()).filter(Boolean);
@@ -74,7 +74,9 @@
     if(kind==='armor'||kind==='shield'){
       const shield=kind==='shield';
       const cardName=v(card,shield?'#shieldName':'#armorName');
-      return {...common,key:kind,name:cardName||(shield?'Escudo':'Armadura'),type:shield?'Escudo':'Armadura',icon:shield?'shield':'armor',
+      const emptyName=!cardName||cardName===(shield?'Escudo':'Armadura');
+      const placeholder=emptyName&&!common.equipped&&!common.image;
+      return {...common,placeholder,key:kind,name:cardName||(shield?'Escudo':'Armadura'),type:shield?'Escudo':'Armadura',icon:shield?'shield':'armor',
         material:nativeSelected(card,shield?'#shieldMaterial':'#armorMaterial'),
         heritage:checked(card,'[data-equipment-heritage]'),stats:txt(card,'.subcard.compact'),short:txt(card,'.row.between span'),
         category:'equipment'};
@@ -96,14 +98,15 @@
     const result=[];
     const armor=pane.querySelector('#armorEditor');
     const shield=pane.querySelector('#shieldEditor');
+    pane.querySelectorAll('.weapon-list [data-weapon-card]').forEach(card=>result.push(readCard(card,'weapon')));
     if(armor)result.push(readCard(armor,'armor'));
     if(shield)result.push(readCard(shield,'shield'));
-    pane.querySelectorAll('.weapon-list [data-weapon-card]').forEach(card=>result.push(readCard(card,'weapon')));
     pane.querySelectorAll('.inventory-grid-large [data-item-card]').forEach(card=>result.push(readCard(card,'item')));
     return result;
   }
   function available(records){
     return records.filter(record=>{
+      if(record.placeholder&&state.selected!==record.key)return false;
       if(state.mode==='equipment'&&record.kind==='item')return false;
       if(state.mode==='bag'&&(record.kind!=='item'||record.heritage))return false;
       if(state.mode==='heritage'&&!record.heritage)return false;
@@ -348,7 +351,7 @@
       const editHeader=el('div','am-edit-header');
       editHeader.append(el('strong','','Editar '+record.name));
       editHeader.append(button('am-icon-button','x','',()=>{
-        state.editing=false;showDetail(record);
+        state.editing=false;showDetail(readCard(record.card,record.kind));
       }));
       const stage=el('div','am-editor-native');
       editor.append(editHeader,stage);
