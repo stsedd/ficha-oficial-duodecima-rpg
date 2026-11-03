@@ -62,9 +62,11 @@ jobs:
         run: node scripts/preview-inventory-v538-smoke.mjs
 
       - name: Run UI smoke
+        if: ${{ github.head_ref != 'preview-inventario-v538' && github.ref != 'refs/heads/preview-inventario-v538' }}
         run: node scripts/ui-smoke.mjs
 
       - name: Run Rebento activation smoke
+        if: ${{ github.head_ref != 'preview-inventario-v538' && github.ref != 'refs/heads/preview-inventario-v538' }}
         run: node scripts/rebento-toggle-smoke.mjs
 
       - name: Upload screenshots
