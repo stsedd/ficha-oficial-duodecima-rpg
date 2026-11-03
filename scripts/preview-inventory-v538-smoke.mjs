@@ -35,7 +35,7 @@
         if(!(await pane.locator('.am-detail-name').isVisible()))problems.push(marker+'painel não visível após selecionar item');
         const before=await pane.locator('[data-item-card="prev-pocao"] [data-item-field$=":qty"]').inputValue();
         await pane.locator('.am-detail-read .am-text-action').filter({hasText:'Consumir 1'}).click();
-        await pane.locator('[data-item-card="prev-pocao"] [data-item-field$=":qty"]').waitFor();
+        await page.waitForTimeout(150); // O campo original está corretamente oculto fora da edição.
         const after=await pane.locator('[data-item-card="prev-pocao"] [data-item-field$=":qty"]').inputValue();
         if(Number(after)!==Number(before)-1)problems.push(marker+'consumo não diminuiu quantidade '+before+' -> '+after);
         if(profile.name==='mobile')await pane.locator('.am-mobile-back').click();
