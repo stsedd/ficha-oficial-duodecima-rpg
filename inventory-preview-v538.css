@@ -18,6 +18,15 @@
  border:1px solid var(--inv-preview-edge);color:var(--theme-accent,var(--text));
  font:800 16px/1 Georgia,serif;letter-spacing:.08em;
 }
+#sheetView .duo-inventory-preview .duo-preview-restore{
+ margin-left:auto;flex:0 0 auto;align-self:center;min-height:36px;
+ border:1px solid var(--inv-preview-edge);border-radius:8px;
+ padding:7px 10px;font:700 11px/1.25 system-ui,sans-serif;
+ background:var(--panel2);color:var(--text);
+}
+#sheetView .duo-inventory-preview .duo-preview-restore:focus-visible{
+ outline:2px solid var(--theme-accent,var(--red));outline-offset:2px;
+}
 #sheetView .duo-inventory-preview .duo-preview-banner-text{min-width:0}
 #sheetView .duo-inventory-preview .duo-preview-eyebrow{
  display:block;color:var(--theme-accent,var(--text));font:800 9px/1.3 system-ui,sans-serif;
@@ -227,6 +236,9 @@
  font-size:11px!important;
 }
 @media(max-width:780px){
+ #sheetView .duo-inventory-preview .duo-preview-banner{flex-wrap:wrap}
+ #sheetView .duo-inventory-preview .duo-preview-restore{margin-left:0;width:100%}
+
  #sheetView .duo-inventory-preview .duo-preview-equipment-group [data-inventory-kind="protection"]{
    grid-template-columns:1fr!important;
  }
