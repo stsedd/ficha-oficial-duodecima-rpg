@@ -76,9 +76,13 @@
       const cardName=v(card,shield?'#shieldName':'#armorName');
       const emptyName=!cardName||cardName===(shield?'Escudo':'Armadura');
       const placeholder=emptyName&&!common.equipped&&!common.image;
+      const rawStats=txt(card,'.subcard.compact');
+      const armorMatch=rawStats.match(/\+(\d+)\s+Defesa\s*·\s*(\d+)\s+redução de dano/i);
+      const shieldMatch=rawStats.match(/Defesa:\s*\+(\d+)/i);
+      const compactStats=shield?(shieldMatch?'Defesa +'+shieldMatch[1]:cap(rawStats,90)):(armorMatch?'Defesa +'+armorMatch[1]+' · RD '+armorMatch[2]:cap(rawStats,90));
       return {...common,placeholder,key:kind,name:cardName||(shield?'Escudo':'Armadura'),type:shield?'Escudo':'Armadura',icon:shield?'shield':'armor',
         material:nativeSelected(card,shield?'#shieldMaterial':'#armorMaterial'),
-        heritage:checked(card,'[data-equipment-heritage]'),stats:txt(card,'.subcard.compact'),short:txt(card,'.row.between span'),
+        heritage:checked(card,'[data-equipment-heritage]'),stats:compactStats,short:txt(card,'.row.between span'),
         category:'equipment'};
     }
     const category=v(card,'[data-item-field$=":category"]')||'outro';
