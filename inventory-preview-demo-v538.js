@@ -40,7 +40,7 @@
     currentHp:null,currentEnergy:null,currentSanity:100,resourceCurrent:0,resourceValues:{},targetResources:{},abilityStakes:{},abilityChoices:{},choiceDetails:{},abilityUses:{},conditions:[],exhaustion:0,
     death:{successes:0,failures:0,stable:false,dead:false,atZero:false,lastRoll:null,returnCount:0},
     tempMods:{rolls:0,defense:0,damageReduction:0},fortunaBlessing:false,fortunaBlessingMonth:'',skillTrainings:[],
-    appearance:{mode:'dark',palette:'red',special:'none',exclusiveThemeId:''},
+    appearance:{mode:'light',palette:'mono-white',special:'none',exclusiveThemeId:''},
     history:{summary:'Prévia isolada para aprovação do inventário.',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',birth:'',residence:'',portraitUrl:'',bannerUrl:'',bannerSourceUrl:'',bannerPositionX:50,bannerPositionY:50,bannerScale:100},
     notes:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),
     [DEMO_TAG]:true
