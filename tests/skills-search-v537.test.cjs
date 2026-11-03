@@ -43,7 +43,9 @@ test('collapsible sections default open, and only store UI state in session',()=
 });
 test('versioned assets are loaded',()=>{
  assert.ok(html.includes('skills-search-collapse-v537.js?v=5.37.0'));
- assert.ok(html.includes('skills-search-collapse-v537.css?v=5.37.1'));
+ assert.ok(html.includes('skills-search-collapse-v537.css?v=5.37.2'));
+ assert.ok(html.includes('bootstrap-v511.js?v=5.37.2'));
+ assert.ok(read('bootstrap-v511.js').includes('app-v511.js?v=5.37.2-'));
 });
 
 test('v5.37.1 keeps P/E on the same horizontal line and name beside badge',()=>{
@@ -56,4 +58,16 @@ test('v5.37.1 keeps P/E on the same horizontal line and name beside badge',()=>{
  assert.match(fix,/min-height:40px!important/);
  assert.match(fix,/\.skill-ledger-flags\s*>\s*\.skill-tiny-check:focus-within/);
  assert.match(fix,/@media\(max-width:550px\)/);
+});
+
+test('v5.37.2 groups skills by attributes in balanced columns',()=>{
+ const start=app.indexOf('function renderSkillMatrix(){');
+ const view=app.slice(start,app.indexOf('function renderSkillTrainingCard(){',start));
+ for(const attr of ["key:'for'","key:'con'","key:'fe'","key:'car'","key:'des'","key:'int'"])assert.ok(view.includes(attr),attr);
+ for(const group of ['skill-ledger-column','skill-ledger-group','skill-ledger-group-title','skill-ledger-group-rows'])assert.ok(view.includes(group),group);
+ assert.match(view,/skills\.filter\(sk=>sk\.attr===group\.key\)\.map\(renderSkillRow\)/);
+ assert.match(css,/@container duo-skills \(min-width:650px\)/);
+ assert.match(css,/\.skill-ledger-row \.skill-ledger-name \.skill-attr-badge\{\s*display:none!important/);
+ assert.match(css,/\.attribute-sidebar \.section-title h3\{[\s\S]*?white-space:nowrap!important/);
+ assert.match(css,/@media \(min-width:781px\) and \(max-width:1559px\)/);
 });
