@@ -18,9 +18,11 @@ O endereço usa um proxy externo para os arquivos públicos do repositório. **N
 
 ## Isolamento
 
-`ficha-teste.html` reproduz o HTML da ficha oficial exatamente (exceto título invisível, comentário e referência ao seletor de personagens isolado).
+`ficha-teste.html` mantém a interface e os estilos originais. As diferenças são um título de página, o seletor com armazenamento próprio e um script de dados fictícios.
 
 `multi-character-preview-original.js` é uma cópia do seletor original com **apenas as três chaves de armazenamento substituídas**, evitando compartilhamento de dados com a ficha oficial ou protótipos anteriores.
+
+`ficha-teste-dados-ficticios.js` inicializa a **Personagem de Teste** somente quando a base está vazia. As alterações posteriores ficam salvas apenas no ambiente de teste.
 
 A cópia é intencional para permitir testes sem migrar ou apagar fichas reais. Não exporte fichas pessoais para o domínio externo.
 
