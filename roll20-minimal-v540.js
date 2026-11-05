@@ -110,14 +110,21 @@
     intro.append(node('h2','','Poderes'),node('p','','Habilidades divinas e acesso rápido às regras'));
     pane.insertBefore(intro,dock);
     const extras=node('div','r20-combat-addons');
-    const targets=[...pane.children].filter(e=>e!==intro&&e!==dock&&e!==abilities&&e.classList?.contains('mechanics-section'));
-    const command=pane.querySelector('.combat-command-grid');
-    if(command&&!targets.includes(command))targets.push(command);
+    const nativeTargets=[...pane.children].filter(e=>e.classList?.contains('target-resource-zone')||e.classList?.contains('combat-command-grid'));
+    // O módulo de descansos/sanidade usa insertBefore com esses anchors diretos;
+    // movê-los para dentro de <details> quebraria os cálculos/atualizações.
+    const targets=[...pane.children].filter(e=>e!==intro&&e!==dock&&e!==abilities&&e.classList?.contains('mechanics-section')&&!nativeTargets.includes(e));
     const mortality=pane.querySelector('.mortal-power-empty')?.closest('.mechanics-section');
-    if(mortality&&!targets.includes(mortality))targets.push(mortality);
+    if(mortality&&!targets.includes(mortality)&&!nativeTargets.includes(mortality))targets.push(mortality);
     for(const block of targets)extras.append(block);
     const extrasAcc=detailsPanel('Combate, descansos, condições e baralhos',extras,{cls:'r20-addons r20-combat-disclosure'});
+    extrasAcc.addEventListener('toggle',()=>{pane.dataset.r20ExtrasOpen=String(extrasAcc.open)});
+    pane.dataset.r20ExtrasOpen='false';
     pane.append(extrasAcc);
+    for(const anchor of nativeTargets){
+      anchor.classList.add('r20-native-combat-extra');
+      pane.append(anchor); // continua filho DIRETO de [data-pane=combat]
+    }
     if(!abilities){
       const empty=node('div','r20-no-powers','Este personagem não possui poderes divinos para consultar.');
       dock.after(empty);
