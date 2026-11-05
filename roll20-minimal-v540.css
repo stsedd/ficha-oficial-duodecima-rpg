@@ -769,3 +769,64 @@ body.duo-roll20-minimal #sheetView .r20-profile-popup>.archive-brandbar .appeara
 body.duo-roll20-minimal #sheetView .r20-profile-popup>.archive-brandbar .multi-character-bar{
   display:flex!important;max-width:100%!important;min-width:0!important;
 }
+
+/* Componentes de descanso/sanidade mantidos como filhos diretos para as rotinas do core. */
+body.duo-roll20-minimal #sheetView [data-pane="status"]>.qol-rest-strip{
+  display:flex!important;justify-content:space-between!important;align-items:center!important;
+  gap:8px!important;flex-wrap:wrap!important;
+  padding:5px 8px!important;min-height:36px!important;margin:0 0 8px!important;
+  background:#f7f7f7!important;color:#222!important;
+  border:1px solid var(--r20-line)!important;border-radius:3px!important;box-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView .qol-rest-copy{
+  display:flex!important;align-items:baseline!important;gap:7px!important;min-width:0!important;
+}
+body.duo-roll20-minimal #sheetView .qol-rest-copy b{
+  color:#222!important;font:800 10px/1.2 Inter,system-ui,sans-serif!important;
+}
+body.duo-roll20-minimal #sheetView .qol-rest-copy small{
+  color:#666!important;font:450 10px/1.25 Inter,system-ui,sans-serif!important;
+}
+body.duo-roll20-minimal #sheetView .qol-rest-actions{
+  display:flex!important;align-items:center!important;gap:4px!important;flex-wrap:wrap!important;
+}
+body.duo-roll20-minimal #sheetView .qol-rest-actions button{
+  min-height:27px!important;padding:4px 7px!important;
+  font:700 10px/1.1 Inter,system-ui,sans-serif!important;
+  border-radius:2px!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"]>.qol-sanity-card,
+body.duo-roll20-minimal #sheetView [data-pane="combat"]>.qol-sanity-card{
+  display:none!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"][data-r20-sanity-open="true"]>.qol-sanity-card{
+  display:grid!important;grid-template-columns:180px minmax(0,1fr)!important;
+  gap:10px!important;padding:9px!important;margin:0 0 8px!important;
+  background:#fff!important;color:#222!important;border:1px solid #ccc!important;
+  border-left:3px solid #111!important;border-radius:3px!important;box-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .qol-sanity-value,
+body.duo-roll20-minimal #sheetView [data-pane="status"] .qol-sanity-name b,
+body.duo-roll20-minimal #sheetView [data-pane="status"] .qol-sanity-effect{
+  color:#222!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="combat"]>.r20-native-combat-extra{
+  display:none!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="combat"][data-r20-extras-open="true"]>.r20-native-combat-extra{
+  display:grid!important;grid-template-columns:1fr!important;
+  background:#fff!important;border:1px solid var(--r20-line)!important;
+  border-radius:3px!important;padding:10px!important;margin:7px 0!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="combat"][data-r20-extras-open="true"]>.combat-command-grid.r20-native-combat-extra{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:start!important;gap:9px!important;
+}
+@media(max-width:780px){
+  body.duo-roll20-minimal #sheetView .qol-rest-copy{flex-wrap:wrap!important}
+  body.duo-roll20-minimal #sheetView [data-pane="status"][data-r20-sanity-open="true"]>.qol-sanity-card{
+    grid-template-columns:1fr!important;
+  }
+  body.duo-roll20-minimal #sheetView [data-pane="combat"][data-r20-extras-open="true"]>.combat-command-grid.r20-native-combat-extra{
+    grid-template-columns:1fr!important;
+  }
+}
