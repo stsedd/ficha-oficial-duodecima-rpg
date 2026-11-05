@@ -49,6 +49,22 @@ try{
      const jpg=await page.screenshot({type:'jpeg',quality:40,fullPage:false});
      console.log('MINIMAL_MAIN_JPEG:'+jpg.toString('base64'));
    }
+   if(profile.name==='mobile'){
+     const jpg=await page.screenshot({type:'jpeg',quality:47,fullPage:false});
+     console.log('MINIMAL_MOBILE_MAIN_JPEG:'+jpg.toString('base64'));
+   }
+   // Os controles P/E continuam editáveis e persistem depois de um rerender.
+   const manual=page.locator('[data-pane="status"] input[data-skill-manual]:not([disabled])').first();
+   if(await manual.count()){
+     const skillName=await manual.getAttribute('data-skill-manual');
+     const skillBefore=await manual.isChecked();
+     await manual.locator('xpath=..').click();
+     await page.waitForTimeout(180);
+     const afterInput=page.locator('[data-pane="status"] input[data-skill-manual]').filter({hasNotText:'DUMMY_UNUSED'}).evaluateAll(
+       (els,name)=>els.find(e=>e.dataset.skillManual===name)?.checked??null,skillName);
+     const skillAfter=await afterInput;
+     if(skillAfter===skillBefore||skillAfter===null)problems.push(profile.name+' P/E click did not update '+skillName);
+   }
    await page.locator('[data-tab="combat"]').click();
    await page.waitForSelector('[data-pane="combat"] .r20-power-board',{state:'visible',timeout:15000});
    const powers=await page.evaluate(()=>{
@@ -87,6 +103,18 @@ try{
    if(profile.name==='desktop'){
      const jpg=await page.screenshot({type:'jpeg',quality:40,fullPage:false});
      console.log('MINIMAL_POWERS_JPEG:'+jpg.toString('base64'));
+   }
+   if(profile.name==='mobile'){
+     const jpg=await page.screenshot({type:'jpeg',quality:47,fullPage:false});
+     console.log('MINIMAL_MOBILE_POWERS_JPEG:'+jpg.toString('base64'));
+   }
+   const deckButton=page.locator('.r20-power-detail-content .ability-deck-toggle');
+   if(await deckButton.count()){
+     const deckBefore=await deckButton.getAttribute('aria-pressed');
+     await deckButton.click();
+     await page.waitForTimeout(180);
+     const deckAfter=await page.locator('.r20-power-detail-content .ability-deck-toggle').getAttribute('aria-pressed');
+     if(deckBefore===deckAfter)problems.push(profile.name+' Baralho toggle failed');
    }
    console.log('MINIMAL_V540 '+profile.name+' '+JSON.stringify({status,powers}));
   }catch(err){problems.push(profile.name+': '+(err.stack||err.message))}
