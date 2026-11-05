@@ -42,8 +42,10 @@
     profile.append(rail);
     const toolbar=document.querySelector('main.shell > .archive-toolbar');
     if(toolbar)profile.append(toolbar);
-    const appearance=document.querySelector('.archive-brandbar .appearance-top-actions');
-    if(appearance)profile.append(appearance);
+    // Mantém a barra de personagens inteira: suas integrações inserem controles
+    // ao lado de .appearance-top-actions e dependem desse mesmo parentElement.
+    const archiveBrand=document.querySelector('main.shell > .archive-brandbar');
+    if(archiveBrand)profile.append(archiveBrand);
     const left=node('div','r20-head-left');left.append(brand,identity);
     h.append(left,headFacts,profile);
     main.insertBefore(h,tabs);
