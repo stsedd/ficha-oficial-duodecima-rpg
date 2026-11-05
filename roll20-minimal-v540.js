@@ -239,12 +239,28 @@
     search.addEventListener('input',()=>{query=search.value;refresh()});
     refresh();
   }
+  function statusAccessories(pane){
+    if(!pane)return;
+    const rest=pane.querySelector(':scope > .qol-rest-strip');
+    if(!rest||rest.querySelector('.r20-sanity-toggle'))return;
+    pane.dataset.r20SanityOpen='false';
+    const act=rest.querySelector('.qol-rest-actions')||rest;
+    const toggle=button('Ver estado mental','r20-sanity-toggle',()=>{
+      const now=pane.dataset.r20SanityOpen!=='true';
+      pane.dataset.r20SanityOpen=String(now);
+      toggle.textContent=now?'Ocultar estado mental':'Ver estado mental';
+      toggle.setAttribute('aria-expanded',String(now));
+    });
+    toggle.setAttribute('aria-expanded','false');
+    act.append(toggle);
+  }
   function setup(){
     const sheet=document.getElementById('sheetView');
     if(!sheet||sheet.classList.contains('hidden')||!sheet.querySelector('.sheet-frame'))return;
     document.body.classList.add('duo-roll20-minimal');
     header(sheet);
     status(sheet.querySelector('[data-pane="status"]'));
+    statusAccessories(sheet.querySelector('[data-pane="status"]'));
     powers(sheet.querySelector('[data-pane="combat"]'));
   }
   function schedule(){
