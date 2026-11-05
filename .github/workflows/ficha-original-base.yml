@@ -1,0 +1,40 @@
+name: Base de testes · Ficha original
+on:
+  push:
+    branches: [preview-ficha-original-base]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  testar-base:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verificar sintaxe
+        run: |
+          node --check ficha-teste-dados-ficticios.js
+          node --check multi-character-preview-original.js
+          node --check scripts/ficha-original-base-smoke.mjs
+      - name: Preparar Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Iniciar servidor local
+        run: |
+          python3 -m http.server 4173 > /tmp/original-preview.log 2>&1 &
+          sleep 2
+      - name: Testar base isolada
+        run: node scripts/ficha-original-base-smoke.mjs
+      - name: Salvar capturas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ficha-original-base
+          path: ui-artifacts/
+          if-no-files-found: ignore
