@@ -716,3 +716,37 @@ body.duo-roll20-minimal #sheetView [data-pane="combat"] .r20-combat-disclosure{
     transition-duration:.01ms!important;animation-duration:.01ms!important;
   }
 }
+
+/* Ajustes após inspeção da captura real. */
+body.duo-roll20-minimal #sheetView .r20-profile-popup:not([open]) > :not(summary){
+  display:none!important;visibility:hidden!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-row .skill-row-main{
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  min-width:0!important;width:100%!important;gap:6px!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-row .skill-ledger-flags{
+  display:flex!important;position:static!important;
+  flex:0 0 48px!important;width:48px!important;min-width:48px!important;
+  max-width:48px!important;margin:0!important;padding:0!important;gap:2px!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-row .skill-roll-value{
+  position:static!important;flex:0 0 32px!important;display:block!important;
+  width:32px!important;min-width:32px!important;max-width:32px!important;
+  margin:0!important;padding:0!important;transform:none!important;
+  text-align:center!important;line-height:1.2!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-row .skill-ledger-name{
+  position:static!important;display:block!important;flex:1 1 0!important;
+  min-width:0!important;max-width:none!important;margin:0!important;padding:0!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-row .skill-settings{
+  flex:0 0 24px!important;position:relative!important;
+  width:24px!important;min-width:24px!important;margin:0!important;padding:0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-deck-toggle{
+  position:static!important;top:auto!important;right:auto!important;bottom:auto!important;
+  left:auto!important;inset:auto!important;float:none!important;transform:none!important;
+  margin:0!important;z-index:auto!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-title-row{display:none!important}
