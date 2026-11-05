@@ -750,3 +750,22 @@ body.duo-roll20-minimal #sheetView .r20-power-detail .ability-deck-toggle{
   margin:0!important;z-index:auto!important;
 }
 body.duo-roll20-minimal #sheetView .r20-power-detail .ability-title-row{display:none!important}
+
+body.duo-roll20-minimal #sheetView .r20-profile-popup>.archive-brandbar{
+  display:flex!important;flex-wrap:wrap!important;align-items:center!important;
+  justify-content:space-between!important;gap:6px!important;
+  position:absolute!important;top:calc(42px + min(70vh,620px) + 65px)!important;
+  right:0!important;width:min(370px,90vw)!important;
+  min-width:0!important;max-width:90vw!important;z-index:22;
+  padding:9px!important;background:#fff!important;color:#111!important;
+  border:1px solid var(--r20-line-dark)!important;box-shadow:0 12px 22px rgba(0,0,0,.14)!important;
+}
+body.duo-roll20-minimal #sheetView .r20-profile-popup>.archive-brandbar .archive-brand-copy{
+  display:none!important;
+}
+body.duo-roll20-minimal #sheetView .r20-profile-popup>.archive-brandbar .appearance-top-actions{
+  display:flex!important;flex:0 1 auto!important;gap:5px!important;
+}
+body.duo-roll20-minimal #sheetView .r20-profile-popup>.archive-brandbar .multi-character-bar{
+  display:flex!important;max-width:100%!important;min-width:0!important;
+}
