@@ -12,7 +12,7 @@ try{
  for(const profile of sample){
   const ctx=await browser.newContext({viewport:{width:profile.width,height:profile.height}});
   const page=await ctx.newPage();
-  page.on('pageerror',e=>problems.push(profile.name+' JS: '+e.message));
+  page.on('pageerror',e=>problems.push(profile.name+' JS: '+(e.stack||e.message)));
   try{
    await page.goto('http://127.0.0.1:4173/roll20-minimal.html',{waitUntil:'networkidle',timeout:60000});
    await page.waitForSelector('#sheetView:not(.hidden) .r20-character-header',{state:'visible',timeout:25000});
@@ -34,12 +34,15 @@ try{
       skillsBox:rect('[data-pane="status"] .skills-ledger-card'),
       screen:window.innerWidth,scroll:document.documentElement.scrollWidth,
       profileClosed:!document.querySelector('.r20-profile-popup').open,
-      profileRailVisible:visible(document.querySelector('.r20-profile-popup .character-rail'))
+      profileRailVisible:visible(document.querySelector('.r20-profile-popup .character-rail')),
+      statusChildren:[...document.querySelector('[data-pane="status"]').children].map(x=>({tag:x.tagName,cls:x.className,txt:x.textContent.slice(0,55)})),
+      rowBoxes:[...document.querySelectorAll('[data-pane="status"] .skill-ledger-row .skill-row-main:first-child > *')].slice(0,4).map(x=>({cls:x.className,position:getComputedStyle(x).position,x:Math.round(x.getBoundingClientRect().x),w:Math.round(x.getBoundingClientRect().width)}))
     };
    });
    if(status.attrs!==6||status.groups!==6||status.skills<20)problems.push(profile.name+' main missing attribute/skills: '+JSON.stringify(status));
    if(status.trainedButtons!==status.skills||status.expertButtons!==status.skills)problems.push(profile.name+' P/E missing');
    if(status.tabs.length!==2)problems.push(profile.name+' wrong number tabs '+JSON.stringify(status.tabs));
+   if(status.profileRailVisible)problems.push(profile.name+' profile shown while collapsed');
    if(status.scroll>profile.width+3)problems.push(profile.name+' main horizontal overflow '+JSON.stringify(status));
    await page.screenshot({path:'ui-artifacts/minimal-main-'+profile.name+'.png',fullPage:false});
    if(profile.name==='desktop'){
@@ -60,7 +63,8 @@ try{
        stash:pane.querySelectorAll('.r20-powers-stash .ability-card').length,
        screen:pane.dataset.r20PowerScreen,
        listVisible:visible(pane.querySelector('.r20-power-list')),
-       detailVisible:visible(pane.querySelector('.r20-power-detail'))
+       detailVisible:visible(pane.querySelector('.r20-power-detail')),
+       deckButton:pane.querySelector('.r20-power-detail .ability-deck-toggle')?(()=>{const e=pane.querySelector('.r20-power-detail .ability-deck-toggle'),r=e.getBoundingClientRect();return {x:Math.round(r.x),y:Math.round(r.y),position:getComputedStyle(e).position}})():null
      };
    });
    if(powers.count<3||powers.filters!==4||powers.selectedCards!==1||!powers.originalControls)problems.push(profile.name+' powers missing: '+JSON.stringify(powers));
