@@ -1,0 +1,718 @@
+/* Duodécima | prévia visual v5.40 | ficha compacta monocromática.
+   Somente roll20-minimal.html. Sem mudanças de regras, cálculos ou JSON. */
+body.duo-roll20-minimal{
+  --r20-bg:#fff;
+  --r20-page:#efefef;
+  --r20-ink:#171717;
+  --r20-sub:#666;
+  --r20-line:#d5d5d5;
+  --r20-line-dark:#8f8f8f;
+  --r20-soft:#f6f6f6;
+  --r20-soft2:#ededed;
+  background:var(--r20-page)!important;
+  color:var(--r20-ink)!important;
+  font:13px/1.4 Inter,Arial,system-ui,sans-serif!important;
+}
+body.duo-roll20-minimal .theme-ambient-layer,
+body.duo-roll20-minimal .archive-brandbar,
+body.duo-roll20-minimal #siteBanner{
+  display:none!important;
+}
+body.duo-roll20-minimal .shell{
+  box-sizing:border-box!important;
+  max-width:1320px!important;min-width:0!important;width:calc(100% - 28px)!important;
+  margin:14px auto 28px!important;padding:18px!important;
+  background:var(--r20-bg)!important;border:1px solid var(--r20-line)!important;
+  border-radius:5px!important;box-shadow:none!important;
+}
+body.duo-roll20-minimal .shell>footer{font-size:10px!important;color:var(--r20-sub)!important;border:0!important;background:transparent!important;margin-top:15px!important}
+body.duo-roll20-minimal #sheetView{min-width:0!important;background:transparent!important}
+body.duo-roll20-minimal #sheetView .sheet-frame{
+  display:block!important;grid-template-columns:1fr!important;
+  min-width:0!important;max-width:100%!important;width:100%!important;
+  padding:0!important;margin:0!important;gap:0!important;background:transparent!important;
+}
+body.duo-roll20-minimal #sheetView .sheet-main{
+  width:100%!important;max-width:100%!important;
+  min-width:0!important;padding:0!important;margin:0!important;
+}
+body.duo-roll20-minimal #sheetView .tab-pane:not([data-pane="status"]):not([data-pane="combat"]){display:none!important}
+body.duo-roll20-minimal #sheetView .tab-pane.hidden{display:none!important}
+body.duo-roll20-minimal #sheetView .tab-pane:not(.hidden):is([data-pane="status"],[data-pane="combat"]){
+  display:block!important;min-width:0!important;padding:0!important;
+}
+body.duo-roll20-minimal #sheetView *{box-sizing:border-box}
+body.duo-roll20-minimal #sheetView :is(.card,.subcard,.notice){
+  border-radius:3px!important;box-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView :is(input,select,textarea,button){
+  font-family:Inter,Arial,system-ui,sans-serif!important;
+}
+body.duo-roll20-minimal #sheetView :is(input,select,textarea):not([type="range"]):not([type="checkbox"]){
+  background:#fff!important;border:1px solid #bcbcbc!important;color:var(--r20-ink)!important;
+  border-radius:3px!important;box-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView :is(input,select,textarea,button,summary):focus-visible{
+  outline:2px solid #161616!important;outline-offset:2px!important;
+}
+body.duo-roll20-minimal #sheetView :is(input[type="checkbox"],input[type="range"]){
+  accent-color:#111!important;
+}
+body.duo-roll20-minimal #sheetView :is(.pill,.badge){
+  background:var(--r20-soft2)!important;color:var(--r20-ink)!important;
+  border:1px solid var(--r20-line)!important;box-shadow:none!important;
+  border-radius:3px!important;font-size:10px!important;
+}
+body.duo-roll20-minimal #sheetView :is(.primary,button.primary){
+  background:#181818!important;color:#fff!important;border:1px solid #181818!important;
+  box-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView button:not(.primary):not(.r20-filter):not(.r20-power-row):not(.r20-power-back):not(.r20-profile-popup summary){
+  color:#242424!important;background:#fff!important;border:1px solid var(--r20-line)!important;
+  box-shadow:none!important;
+}
+/* Identidade horizontal substitui a coluna do retrato sem perder seus controles. */
+body.duo-roll20-minimal #sheetView .r20-character-header{
+  display:flex!important;align-items:center;gap:15px;flex-wrap:wrap;
+  margin:0 0 10px;padding:0 0 10px;
+  border-bottom:2px solid var(--r20-ink)!important;position:relative!important;
+}
+body.duo-roll20-minimal #sheetView .r20-head-left{
+  display:flex;align-items:baseline;flex-wrap:wrap;gap:7px 14px;flex:1 1 330px;min-width:0;
+}
+body.duo-roll20-minimal #sheetView .r20-brand{
+  flex:0 0 100%;font:800 9px/1.2 Inter,system-ui,sans-serif!important;
+  letter-spacing:.11em;color:#6a6a6a;
+}
+body.duo-roll20-minimal #sheetView .r20-identity{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:7px 13px;min-width:0;
+}
+body.duo-roll20-minimal #sheetView .r20-character-name{
+  font:800 clamp(21px,2.35vw,29px)/1.13 Inter,Arial,sans-serif!important;
+  letter-spacing:-.025em;color:#111;
+}
+body.duo-roll20-minimal #sheetView .r20-god-name{
+  font-size:11px;font-weight:600;letter-spacing:.03em;color:var(--r20-sub);
+}
+body.duo-roll20-minimal #sheetView .r20-head-facts{display:flex;align-items:stretch;gap:5px}
+body.duo-roll20-minimal #sheetView .r20-head-fact{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:67px;min-height:46px;padding:4px 10px;
+  background:#fff;border:1px solid var(--r20-line-dark);border-radius:3px;
+}
+body.duo-roll20-minimal #sheetView .r20-head-fact small{
+  font:750 9px/1.1 Inter,system-ui,sans-serif;color:#777;letter-spacing:.08em;
+}
+body.duo-roll20-minimal #sheetView .r20-head-fact strong{
+  color:#111;font:800 19px/1.15 Inter,system-ui,sans-serif;
+}
+body.duo-roll20-minimal #sheetView .r20-profile-popup{
+  position:relative;flex:0 0 auto;z-index:20;
+}
+body.duo-roll20-minimal #sheetView .r20-profile-popup>summary{
+  cursor:pointer;list-style:none;
+  display:flex;align-items:center;min-height:39px;
+  padding:7px 10px;color:#191919;background:#fff;
+  font-weight:650;font-size:11px;border:1px solid var(--r20-line-dark);
+  border-radius:3px;
+}
+body.duo-roll20-minimal #sheetView .r20-profile-popup>summary::-webkit-details-marker{display:none}
+body.duo-roll20-minimal #sheetView .r20-profile-popup[open]{
+  background:white;border-radius:4px;
+}
+body.duo-roll20-minimal #sheetView .r20-profile-popup>.character-rail,
+body.duo-roll20-minimal #sheetView .r20-profile-popup>.archive-toolbar,
+body.duo-roll20-minimal #sheetView .r20-profile-popup>.appearance-top-actions{
+  position:absolute!important;right:0!important;
+  width:min(370px,90vw)!important;max-width:90vw!important;
+  margin:0!important;background:#fff!important;
+  color:#111!important;border:1px solid var(--r20-line-dark)!important;
+  box-shadow:0 12px 22px rgba(0,0,0,.14)!important;
+}
+body.duo-roll20-minimal #sheetView .r20-profile-popup>.character-rail{
+  top:42px;max-height:70vh!important;overflow-y:auto!important;
+  display:block!important;padding:10px!important;border-radius:3px!important;z-index:22;
+}
+body.duo-roll20-minimal #sheetView .r20-profile-popup>.archive-toolbar{
+  top:calc(42px + min(70vh,620px));padding:8px!important;z-index:22;
+  display:flex!important;flex-wrap:wrap;gap:6px;
+}
+body.duo-roll20-minimal #sheetView .r20-profile-popup>.appearance-top-actions{
+  top:calc(42px + min(70vh,620px) + 65px);padding:8px!important;z-index:22;
+  display:flex!important;gap:8px;
+}
+body.duo-roll20-minimal #sheetView .r20-profile-popup .rail-portrait-wrap{
+  max-width:120px!important;margin:4px auto!important;
+}
+body.duo-roll20-minimal #sheetView .r20-profile-popup .rail-identity h2{font-size:19px!important}
+body.duo-roll20-minimal #sheetView .r20-profile-popup .rail-mobile-summary{display:none!important}
+body.duo-roll20-minimal #sheetView .r20-profile-popup .rail-mobile-profile-toggle{display:none!important}
+body.duo-roll20-minimal #sheetView .r20-profile-popup .character-rail::before{display:none!important}
+/* Duas abas grandes e só elas nesta prévia. */
+body.duo-roll20-minimal #sheetView .r20-main-nav{
+  display:flex!important;position:static!important;top:auto!important;
+  width:100%!important;min-height:0!important;gap:0!important;
+  margin:0 0 9px!important;padding:0!important;
+  background:#fff!important;border:0!important;border-bottom:1px solid var(--r20-line)!important;
+  box-shadow:none!important;border-radius:0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-main-nav .sheet-tab-scroll{
+  display:flex!important;overflow:visible!important;gap:0!important;
+  min-height:0!important;align-items:stretch!important;
+}
+body.duo-roll20-minimal #sheetView .r20-main-nav [data-tab]{
+  min-width:105px!important;min-height:35px!important;
+  border:0!important;border-bottom:3px solid transparent!important;
+  border-radius:0!important;margin:0!important;padding:7px 14px!important;
+  background:#fff!important;color:#777!important;
+  box-shadow:none!important;
+  font:750 12px/1.2 Inter,system-ui,sans-serif!important;
+  text-transform:none!important;letter-spacing:0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-main-nav [data-tab].active{
+  color:#101010!important;background:#fff!important;
+  border-bottom-color:#141414!important;
+}
+body.duo-roll20-minimal #sheetView .r20-main-nav [data-tab] > span{display:none!important}
+body.duo-roll20-minimal #sheetView .r20-main-nav [data-tab]:not([data-tab="status"]):not([data-tab="combat"]){
+  display:none!important;
+}
+body.duo-roll20-minimal #sheetView .r20-main-nav :is(.sheet-tab-edge,.sheet-global-search-trigger){
+  display:none!important;
+}
+/* Cabeçalho pequeno para cada página. */
+body.duo-roll20-minimal #sheetView .r20-pane-heading{
+  display:flex;align-items:baseline;flex-wrap:wrap;gap:5px 12px;
+  border-bottom:1px solid var(--r20-line);padding:3px 0 7px;margin:0 0 9px;
+}
+body.duo-roll20-minimal #sheetView .r20-pane-heading h2{
+  margin:0!important;color:#111!important;
+  font:800 16px/1.2 Inter,system-ui,sans-serif!important;
+}
+body.duo-roll20-minimal #sheetView .r20-pane-heading p{
+  margin:0!important;color:#777!important;font-size:11px!important;line-height:1.25!important;
+}
+/* Vitals: 6+ caixas pequenas, valores numéricos e ajustes originais. */
+body.duo-roll20-minimal #sheetView :is(.status-core-strip,.combat-resource-dock).r20-vitals{
+  display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  align-items:stretch!important;gap:6px!important;
+  background:transparent!important;border:0!important;
+  box-shadow:none!important;margin:0 0 10px!important;padding:0!important;
+  max-width:100%!important;min-width:0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-vitals > :is(.core-stat,.combat-resource-chip){
+  position:relative!important;display:flex!important;
+  flex-direction:column!important;justify-content:flex-start!important;
+  gap:3px!important;min-width:0!important;min-height:86px!important;
+  padding:8px 9px!important;border:1px solid var(--r20-line)!important;
+  border-radius:3px!important;background:#fff!important;
+  color:#111!important;box-shadow:none!important;overflow:visible!important;
+}
+body.duo-roll20-minimal #sheetView .r20-vitals > *::before,
+body.duo-roll20-minimal #sheetView .r20-vitals > *::after{display:none!important}
+body.duo-roll20-minimal #sheetView .r20-vitals :is(.core-stat-label,.combat-resource-chip>span){
+  display:flex!important;align-items:center!important;gap:3px!important;
+  color:#676767!important;font:750 10px/1.15 Inter,system-ui,sans-serif!important;
+  text-transform:uppercase!important;letter-spacing:.04em!important;
+}
+body.duo-roll20-minimal #sheetView .r20-vitals :is(.core-stat-label,.combat-resource-chip>span) svg,
+body.duo-roll20-minimal #sheetView .r20-vitals .theme-resource-icon{display:none!important}
+body.duo-roll20-minimal #sheetView .r20-vitals :is(.core-stat-value,.combat-resource-chip>strong){
+  display:block!important;font:800 21px/1.15 Inter,system-ui,sans-serif!important;
+  color:#111!important;text-shadow:none!important;margin:0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-vitals :is(.core-stat-value,.combat-resource-chip>strong) small{
+  color:#888!important;font-size:12px!important;font-weight:500!important;
+}
+body.duo-roll20-minimal #sheetView .r20-vitals :is(.core-stat-caption,.combat-resource-chip>small){
+  color:#888!important;font:500 9px/1.2 Inter,system-ui,sans-serif!important;
+  margin:0!important;white-space:normal!important;
+}
+body.duo-roll20-minimal #sheetView .r20-vitals :is(.core-stat-meter,.combat-mini-meter){
+  height:3px!important;min-height:3px!important;margin:2px 0!important;
+  border:0!important;border-radius:0!important;background:#e6e6e6!important;
+}
+body.duo-roll20-minimal #sheetView .r20-vitals :is(.core-stat-meter,.combat-mini-meter) i{
+  background:#222!important;box-shadow:none!important;border-radius:0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-vitals :is(.core-stat-adjust,.combat-resource-adjust){
+  display:flex!important;gap:3px!important;align-items:center!important;
+  margin-top:auto!important;min-width:0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-vitals :is(.core-stat-adjust,.combat-resource-adjust) input{
+  width:calc(100% - 26px)!important;max-width:100%!important;
+  min-width:0!important;min-height:25px!important;height:25px!important;
+  padding:2px 5px!important;font-size:11px!important;
+}
+body.duo-roll20-minimal #sheetView .r20-vitals :is(.core-stat-adjust,.combat-resource-adjust) button{
+  width:25px!important;min-width:25px!important;height:25px!important;min-height:25px!important;
+  padding:0!important;background:#eee!important;color:#111!important;border:1px solid #bbb!important;
+  border-radius:2px!important;
+}
+body.duo-roll20-minimal #sheetView .r20-vitals .core-cast,
+body.duo-roll20-minimal #sheetView .r20-vitals .core-defense{min-height:86px!important}
+/* Ficha: atributos compactos à esquerda, perícias agrupadas à direita. */
+body.duo-roll20-minimal #sheetView [data-pane="status"] .overview-grid{
+  display:grid!important;
+  grid-template-columns:190px minmax(0,1fr)!important;
+  gap:10px!important;align-items:start!important;
+  margin:0!important;padding:0!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .attribute-sidebar{
+  width:auto!important;min-width:0!important;margin:0!important;
+  padding:10px!important;border:1px solid var(--r20-line)!important;
+  background:white!important;color:#111!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .attribute-sidebar::before{display:none!important}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .attribute-sidebar .section-title{
+  display:flex!important;justify-content:space-between!important;align-items:center!important;
+  min-width:0!important;gap:5px!important;padding:0 0 6px!important;
+  border-bottom:2px solid #222!important;margin:0 0 6px!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .attribute-sidebar .section-title>div{display:block!important}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .attribute-sidebar .section-title .eyebrow{display:none!important}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .attribute-sidebar .section-title h3{
+  display:block!important;font:800 12px/1.2 Inter,system-ui,sans-serif!important;
+  margin:0!important;white-space:nowrap!important;color:#111!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .level-point-count{
+  display:inline-flex!important;font:750 10px/1.2 Inter,system-ui,sans-serif!important;
+  padding:3px 5px!important;background:#f0f0f0!important;
+  color:#333!important;white-space:nowrap!important;border:1px solid #ddd!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .attrs.vertical-attrs{
+  display:grid!important;grid-template-columns:1fr!important;
+  gap:4px!important;margin:0!important;padding:0!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .attrs.vertical-attrs .attr{
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-rows:auto auto!important;gap:3px 5px!important;
+  align-items:center!important;margin:0!important;padding:6px!important;
+  min-height:51px!important;width:100%!important;
+  border:1px solid var(--r20-line)!important;border-radius:3px!important;
+  color:#141414!important;background:#fff!important;box-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .vertical-attrs .attr .attr-name{
+  grid-column:1!important;grid-row:1!important;
+  color:#111!important;font:750 11px/1.2 Inter,system-ui,sans-serif!important;
+  letter-spacing:0!important;text-transform:none!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .vertical-attrs .attr .attr-total{
+  grid-column:2!important;grid-row:1!important;text-align:right!important;
+  color:#111!important;font:850 20px/1.05 Inter,system-ui,sans-serif!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .vertical-attrs .attr .attr-break{
+  display:none!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .vertical-attrs .attr .stepper{
+  grid-column:1/-1!important;grid-row:2!important;
+  display:flex!important;justify-content:flex-start!important;align-items:center!important;
+  gap:2px!important;margin:0!important;padding:0!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .vertical-attrs .attr .stepper button{
+  min-width:25px!important;width:25px!important;height:23px!important;min-height:23px!important;
+  padding:0!important;font-size:12px!important;border:1px solid #ccc!important;background:#fff!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .vertical-attrs .attr .stepper .base{
+  min-width:30px!important;font-size:11px!important;border:1px solid #ddd!important;background:#f5f5f5!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .level-point-mini{
+  display:flex!important;flex-wrap:wrap;gap:4px!important;margin:7px 0 3px!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .level-point-mini span{
+  min-width:22px!important;padding:3px!important;
+  background:#f5f5f5!important;color:#777!important;border:1px solid #ddd!important;
+  border-radius:2px!important;font-size:9px!important;text-align:center!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .level-point-mini span.earned{
+  background:#222!important;color:white!important;border-color:#222!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .attr-level-buttons{
+  display:flex!important;gap:4px!important;flex-wrap:wrap!important;margin:5px 0!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .attr-level-buttons button{
+  min-height:26px!important;padding:3px 5px!important;font-size:10px!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .overview-skills{
+  min-width:0!important;margin:0!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skills-ledger-card{
+  min-width:0!important;padding:10px!important;margin:0!important;
+  background:#fff!important;border:1px solid var(--r20-line)!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skills-ledger-head{
+  display:flex!important;align-items:center!important;
+  padding:0 0 6px!important;border-bottom:2px solid #222!important;
+  margin:0 0 7px!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skills-ledger-head .eyebrow{display:none!important}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skills-ledger-head h3{
+  font:800 12px/1.2 Inter,system-ui,sans-serif!important;
+  color:#111!important;margin:0!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:12px!important;align-items:start!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-column{
+  display:flex!important;flex-direction:column!important;gap:8px!important;min-width:0!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-group{
+  margin:0!important;padding:0!important;border:0!important;background:transparent!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-group-title{
+  display:flex!important;justify-content:space-between!important;align-items:center!important;
+  gap:5px!important;margin:0 0 3px!important;padding:4px 3px!important;
+  border:0!important;border-bottom:1px solid #777!important;
+  font:800 10px/1.1 Inter,system-ui,sans-serif!important;
+  color:#111!important;letter-spacing:.03em!important;text-transform:uppercase!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-group-title span{color:#666!important;font-size:9px!important}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-group-rows{
+  display:grid!important;grid-template-columns:1fr!important;gap:2px!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-row{
+  padding:3px 4px!important;min-height:30px!important;
+  border:1px solid #e6e6e6!important;border-radius:2px!important;
+  background:#fff!important;box-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-row.expert{border-left:2px solid #111!important}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-row .skill-row-main{
+  display:grid!important;
+  grid-template-columns:47px 27px minmax(0,1fr) 24px!important;
+  gap:4px!important;align-items:center!important;width:100%!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-flags{
+  display:flex!important;gap:2px!important;align-items:center!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-tiny-check{
+  display:inline-flex!important;min-width:22px!important;width:22px!important;
+  min-height:23px!important;height:23px!important;
+  margin:0!important;border:1px solid #aaa!important;border-radius:2px!important;
+  background:#fff!important;color:#777!important;box-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-tiny-check.active{
+  background:#171717!important;color:#fff!important;border-color:#171717!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-tiny-check span{
+  display:block!important;font:800 10px/1 Inter,system-ui,sans-serif!important;color:inherit!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-roll-value{
+  min-width:0!important;width:auto!important;text-align:center!important;
+  color:#111!important;font:800 12px/1.1 Inter,system-ui,sans-serif!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-name{
+  display:flex!important;align-items:center!important;
+  min-width:0!important;overflow:visible!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-name b{
+  font:550 11px/1.16 Inter,system-ui,sans-serif!important;
+  letter-spacing:0!important;overflow-wrap:anywhere!important;
+  color:#171717!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-attr-badge,
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-name>small{
+  display:none!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-settings{
+  min-width:0!important;max-width:24px!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-settings summary{
+  display:grid!important;place-items:center!important;
+  width:24px!important;height:23px!important;min-height:23px!important;
+  font-size:12px!important;padding:0!important;color:#777!important;
+  border:0!important;border-radius:2px!important;background:transparent!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skills-ledger-card .mini-help{display:none!important}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .training-disclosure{
+  margin-top:8px!important;border:1px solid var(--r20-line)!important;
+  border-radius:3px!important;padding:8px!important;
+  background:#fff!important;color:#111!important;font-size:11px!important;
+}
+/* Talentos e origem ainda existem, mas não ocupam a página principal por padrão. */
+body.duo-roll20-minimal #sheetView .r20-reveal{
+  background:#fff!important;color:#111!important;border:1px solid var(--r20-line)!important;
+  border-radius:3px!important;margin-top:8px!important;padding:0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-reveal>summary{
+  list-style:none;cursor:pointer;min-height:33px;padding:8px 10px;
+  color:#222!important;background:#f5f5f5!important;
+  font:700 11px/1.25 Inter,system-ui,sans-serif!important;
+}
+body.duo-roll20-minimal #sheetView .r20-reveal>summary::-webkit-details-marker{display:none}
+body.duo-roll20-minimal #sheetView .r20-reveal>summary::before{content:"▸";margin-right:7px}
+body.duo-roll20-minimal #sheetView .r20-reveal[open]>summary::before{content:"▾"}
+body.duo-roll20-minimal #sheetView .r20-reveal>.overview-aux,
+body.duo-roll20-minimal #sheetView .r20-reveal>.lineage-config-visible,
+body.duo-roll20-minimal #sheetView .r20-reveal>.r20-combat-addons{
+  padding:10px!important;margin:0!important;
+  background:#fff!important;
+}
+body.duo-roll20-minimal #sheetView .r20-reveal .card{
+  background:#fff!important;border:1px solid var(--r20-line)!important;
+  color:#171717!important;box-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView .r20-reveal :is(p,small,.muted){color:#555!important}
+/* Poderes: índice à esquerda e somente um poder expandido à direita. */
+body.duo-roll20-minimal #sheetView [data-pane="combat"] .r20-power-board{
+  min-width:0!important;border:1px solid var(--r20-line)!important;
+  border-radius:3px!important;background:#fff!important;padding:0!important;margin:0!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="combat"] .r20-power-toolbar{
+  display:grid!important;grid-template-columns:1fr auto!important;
+  gap:8px 10px!important;padding:9px 10px!important;
+  border-bottom:1px solid var(--r20-line)!important;background:#fafafa!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-toolbar-top{
+  display:flex;align-items:center;gap:8px;grid-column:1/-1!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-toolbar-top strong{font:800 12px/1.2 Inter,system-ui,sans-serif;color:#111}
+body.duo-roll20-minimal #sheetView .r20-power-count{font-size:10px;color:#777}
+body.duo-roll20-minimal #sheetView .r20-power-search{
+  grid-column:1!important;min-height:32px!important;height:32px!important;
+  padding:5px 8px!important;font-size:12px!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-filters{
+  display:flex!important;gap:4px!important;flex-wrap:wrap!important;
+  align-items:center!important;justify-content:flex-end!important;
+  grid-column:2!important;min-width:0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-filter{
+  border:1px solid var(--r20-line-dark)!important;border-radius:2px!important;
+  min-height:29px!important;padding:5px 9px!important;
+  color:#555!important;background:#fff!important;
+  font:700 10px/1.2 Inter,system-ui,sans-serif!important;
+}
+body.duo-roll20-minimal #sheetView .r20-filter.r20-selected{
+  background:#111!important;color:#fff!important;border-color:#111!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-columns{
+  display:grid!important;grid-template-columns:minmax(240px,37%) minmax(0,1fr)!important;
+  align-items:start!important;gap:0!important;min-width:0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-list{
+  height:auto;max-height:670px;min-height:500px;overflow:auto;
+  border-right:1px solid var(--r20-line);
+  padding:5px;background:#fff;
+}
+body.duo-roll20-minimal #sheetView .r20-power-row{
+  display:grid!important;grid-template-columns:26px minmax(0,1fr) auto!important;
+  align-items:center!important;gap:6px!important;
+  width:100%!important;min-height:43px!important;
+  padding:5px 7px!important;margin:0 0 2px!important;
+  border:1px solid transparent!important;border-bottom-color:#e8e8e8!important;
+  border-radius:2px!important;text-align:left!important;
+  color:#171717!important;background:#fff!important;box-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-row[aria-current="true"]{
+  background:#171717!important;color:#fff!important;border-color:#171717!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-type{
+  display:grid!important;place-items:center!important;
+  width:24px;height:24px;border:1px solid currentColor;border-radius:2px;
+  font:850 11px/1 Inter,system-ui,sans-serif;
+}
+body.duo-roll20-minimal #sheetView .r20-power-row-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+body.duo-roll20-minimal #sheetView .r20-power-row-copy strong{
+  font:700 11px/1.25 Inter,system-ui,sans-serif;overflow-wrap:anywhere;
+  color:inherit!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-row-copy small{
+  font:500 9px/1.2 Inter,system-ui,sans-serif;
+  color:inherit!important;opacity:.68;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;
+}
+body.duo-roll20-minimal #sheetView .r20-power-row-tail{
+  display:flex;gap:4px;align-items:center;color:inherit;
+  font-size:10px;white-space:nowrap;
+}
+body.duo-roll20-minimal #sheetView .r20-power-row-tail small{color:inherit!important;opacity:.75;font-size:9px}
+body.duo-roll20-minimal #sheetView .r20-power-detail{
+  min-width:0;max-height:670px;overflow-y:auto;scrollbar-gutter:stable;
+  padding:11px 12px!important;border:0!important;
+  border-radius:0!important;background:#fff!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail-top{
+  border-bottom:2px solid #111;margin:0 0 9px;padding:0 0 7px;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail-top h3{
+  margin:0 0 3px!important;
+  font:800 17px/1.18 Inter,system-ui,sans-serif!important;
+  color:#111!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail-top small{
+  color:#777;font-size:10px;
+}
+body.duo-roll20-minimal #sheetView .r20-power-back{display:none!important}
+body.duo-roll20-minimal #sheetView .r20-powers-stash{display:none!important}
+body.duo-roll20-minimal #sheetView .r20-power-detail-content{min-width:0}
+/* A carta original vira um painel de regras compacto; mantém seus botões, estacas e opções. */
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-card.r20-ability-selected{
+  display:block!important;position:static!important;min-width:0!important;
+  margin:0!important;padding:0!important;background:#fff!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  color:#111!important;overflow:visible!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-card::before,
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-card::after{display:none!important}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-art-banner{display:none!important}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-head{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:9px!important;padding:0 0 8px!important;margin:0 0 8px!important;
+  border-bottom:1px solid var(--r20-line)!important;background:transparent!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-title-row b{
+  font:800 13px/1.3 Inter,system-ui,sans-serif!important;color:#111!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-meta{
+  color:#666!important;font-size:10px!important;gap:7px!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-deck-toggle{
+  flex:0 0 auto!important;min-height:29px!important;
+  padding:4px 9px!important;border-radius:3px!important;
+  border:1px solid #777!important;color:#222!important;background:#fff!important;
+  font:700 10px/1.1 Inter,system-ui,sans-serif!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-deck-toggle.active{
+  background:#202020!important;color:#fff!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail :is(.ability-summary,.ability-lore,.ability-tier-copy,.core-note,.core-description){
+  background:#fff!important;color:#202020!important;
+  font:400 12px/1.5 Inter,system-ui,sans-serif!important;
+  text-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-summary{
+  padding:4px 0 8px!important;margin:0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail :is(.ability-summary,.ability-tier-copy) p{
+  color:#222!important;font-size:12px!important;line-height:1.5!important;margin:3px 0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail :is(.ability-tier-list,.ability-visual-config,.ability-usage,.stake-compact){
+  margin:8px 0!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-tier-list{
+  display:grid!important;grid-template-columns:1fr!important;gap:4px!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-tier{
+  display:grid!important;grid-template-columns:55px minmax(0,1fr)!important;
+  align-items:start!important;gap:9px!important;
+  margin:0!important;padding:7px 8px!important;border-radius:2px!important;
+  border:1px solid #ddd!important;background:#fff!important;
+  box-shadow:none!important;color:#222!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-tier.current{
+  border:1px solid #222!important;border-left:3px solid #111!important;
+  background:#f2f2f2!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .ability-tier>b{
+  font:800 11px/1.25 Inter,system-ui,sans-serif!important;color:#111!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .stake-compact{
+  border-top:1px solid var(--r20-line)!important;
+  padding-top:7px!important;background:#fff!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .stake-compact .row{
+  font-size:11px!important;color:#222!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .stake-compact input[type="range"]{
+  width:100%!important;height:15px!important;accent-color:#111!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail .stake-quick button{
+  min-height:27px!important;padding:4px 10px!important;font-size:10px!important;
+  background:#f5f5f5!important;border:1px solid #ddd!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail :is(.ability-visual-config,.ability-lore,.core-variant,.core-subability,.core-subtier,.ability-usage,.ability-choices){
+  border-radius:2px!important;background:#fff!important;border-color:#ddd!important;
+  box-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail :is(.core-variant,.core-subability,.core-subtier,.core-variant-summary,.core-option-grid article,.core-note){
+  background:#fafafa!important;color:#222!important;border-color:#ddd!important;
+  box-shadow:none!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-detail :is(.structured-heading,.ability-tier b,.core-subtier b){
+  color:#111!important;
+}
+body.duo-roll20-minimal #sheetView .r20-power-empty,
+body.duo-roll20-minimal #sheetView .r20-no-powers{
+  color:#777;font-size:12px;padding:20px;
+}
+body.duo-roll20-minimal #sheetView [data-pane="combat"] .r20-combat-disclosure{
+  margin-top:8px!important;
+}
+/* Tablet e celular, densos mas com controles acessíveis. */
+@media(max-width:1100px){
+  body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  body.duo-roll20-minimal #sheetView :is(.status-core-strip,.combat-resource-dock).r20-vitals{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+@media(max-width:780px){
+  body.duo-roll20-minimal .shell{
+    width:calc(100% - 10px)!important;margin:5px auto!important;padding:10px!important;
+    border-radius:3px!important;
+  }
+  body.duo-roll20-minimal #sheetView .r20-character-header{gap:7px}
+  body.duo-roll20-minimal #sheetView .r20-character-name{font-size:21px!important}
+  body.duo-roll20-minimal #sheetView .r20-head-facts{margin-left:0}
+  body.duo-roll20-minimal #sheetView [data-pane="status"] .overview-grid{
+    grid-template-columns:1fr!important;gap:9px!important;
+  }
+  body.duo-roll20-minimal #sheetView [data-pane="status"] .attrs.vertical-attrs{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;
+  }
+  body.duo-roll20-minimal #sheetView [data-pane="status"] .attribute-sidebar{grid-column:1}
+  body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger{
+    grid-template-columns:1fr!important;gap:9px!important;
+  }
+  body.duo-roll20-minimal #sheetView :is(.status-core-strip,.combat-resource-dock).r20-vitals{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  body.duo-roll20-minimal #sheetView .r20-power-columns{
+    display:block!important;
+  }
+  body.duo-roll20-minimal #sheetView [data-pane="combat"] .r20-power-list{
+    min-height:0!important;max-height:none!important;border-right:0!important;
+  }
+  body.duo-roll20-minimal #sheetView [data-pane="combat"][data-r20-power-screen="list"] .r20-power-detail{
+    display:none!important;
+  }
+  body.duo-roll20-minimal #sheetView [data-pane="combat"][data-r20-power-screen="detail"] .r20-power-list{
+    display:none!important;
+  }
+  body.duo-roll20-minimal #sheetView .r20-power-back{
+    display:flex!important;align-items:center!important;gap:7px!important;
+    min-height:32px!important;margin:0 0 9px!important;
+    color:#333!important;background:#fff!important;border:0!important;
+    font:700 11px/1.2 Inter,system-ui,sans-serif!important;
+  }
+  body.duo-roll20-minimal #sheetView [data-pane="combat"] .r20-power-detail{max-height:none!important;overflow:visible!important}
+  body.duo-roll20-minimal #sheetView .r20-power-toolbar{
+    grid-template-columns:1fr!important;
+  }
+  body.duo-roll20-minimal #sheetView .r20-power-filters{
+    grid-column:1!important;justify-content:flex-start!important;
+  }
+}
+@media(max-width:440px){
+  body.duo-roll20-minimal #sheetView :is(.status-core-strip,.combat-resource-dock).r20-vitals{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  body.duo-roll20-minimal #sheetView [data-pane="status"] .attrs.vertical-attrs{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  body.duo-roll20-minimal #sheetView .r20-head-fact{
+    min-width:56px!important;padding:4px 7px!important;
+  }
+  body.duo-roll20-minimal #sheetView .r20-power-row{
+    grid-template-columns:23px minmax(0,1fr) auto!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body.duo-roll20-minimal #sheetView *,
+  body.duo-roll20-minimal #sheetView *::before,
+  body.duo-roll20-minimal #sheetView *::after{
+    transition-duration:.01ms!important;animation-duration:.01ms!important;
+  }
+}
