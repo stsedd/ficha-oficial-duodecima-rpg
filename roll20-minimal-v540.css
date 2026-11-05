@@ -830,3 +830,41 @@ body.duo-roll20-minimal #sheetView [data-pane="combat"][data-r20-extras-open="tr
     grid-template-columns:1fr!important;
   }
 }
+
+/* Tamanho real dos dois controles P/E: 33 px cada, com separação visual do bônus. */
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-row .skill-ledger-flags{
+  display:flex!important;flex:0 0 72px!important;width:72px!important;
+  min-width:72px!important;max-width:72px!important;
+  gap:4px!important;overflow:visible!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-row .skill-tiny-check{
+  flex:0 0 33px!important;display:flex!important;
+  width:33px!important;min-width:33px!important;max-width:33px!important;
+  height:25px!important;min-height:25px!important;
+  margin:0!important;padding:0!important;align-items:center!important;justify-content:center!important;
+  box-sizing:border-box!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-row .skill-tiny-check span{
+  display:grid!important;place-items:center!important;
+  width:100%!important;height:100%!important;padding:0!important;margin:0!important;
+  font-size:10px!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="status"] .skill-ledger-row .skill-roll-value{
+  flex:0 0 40px!important;width:40px!important;min-width:40px!important;max-width:40px!important;
+  padding-left:5px!important;margin:0!important;
+  border-left:1px solid #b8b8b8!important;text-align:center!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="combat"] .r20-power-list{
+  min-height:0!important;max-height:570px!important;
+}
+body.duo-roll20-minimal #sheetView [data-pane="combat"] .r20-power-detail{
+  min-height:430px!important;max-height:570px!important;
+}
+@media(max-width:780px){
+  body.duo-roll20-minimal #sheetView [data-pane="combat"] .r20-power-list{
+    max-height:none!important;
+  }
+  body.duo-roll20-minimal #sheetView [data-pane="combat"] .r20-power-detail{
+    min-height:0!important;max-height:none!important;
+  }
+}
