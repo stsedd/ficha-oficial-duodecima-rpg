@@ -1,0 +1,45 @@
+name: Prévia Roll20 mínima · Ficha e Poderes
+on:
+  push:
+    branches: [preview-ficha-roll20-minimal-v540]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview-minimalista:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Conferir sintaxe
+        run: |
+          node --check roll20-minimal-demo-v540.js
+          node --check roll20-minimal-v540.js
+          node --check scripts/preview-roll20-v540-smoke.mjs
+          node --check app-v511.js
+      - name: Instalar Playwright
+        run: npm install --no-save playwright@1.55.0
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Iniciar servidor local
+        run: |
+          python3 -m http.server 4173 > /tmp/duodecima-http.log 2>&1 &
+          sleep 2
+      - name: Testar Ficha e Poderes
+        run: node scripts/preview-roll20-v540-smoke.mjs
+      - name: Capturas de tela
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: minimal-roll20-v540
+          path: ui-artifacts
+          if-no-files-found: ignore
