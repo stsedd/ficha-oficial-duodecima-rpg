@@ -1,7 +1,7 @@
 (function roll20MinimalDemo(){
  'use strict';
  // Este arquivo só existe na branch de demonstração. Não toca a produção.
- const KEY='duodecima_universal_stage4_v24';
+ const KEY='duodecima_roll20_minimal_v540_demo';
  const DEMO_TAG='duodecima-roll20-minimal-demo-v540';
  const old=(()=>{try{return localStorage.getItem(KEY)}catch(_){return null}})();
  const art=(word,glyph,a,b)=>{
