@@ -108,6 +108,7 @@ try{
      const jpg=await page.screenshot({type:'jpeg',quality:47,fullPage:false});
      console.log('MINIMAL_MOBILE_POWERS_JPEG:'+jpg.toString('base64'));
    }
+   if(profile.name==='mobile')await page.locator('.r20-power-row').nth(1).click();
    const deckButton=page.locator('.r20-power-detail-content .ability-deck-toggle');
    if(await deckButton.count()){
      const deckBefore=await deckButton.getAttribute('aria-pressed');
