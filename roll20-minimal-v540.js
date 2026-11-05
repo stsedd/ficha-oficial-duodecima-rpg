@@ -40,6 +40,10 @@
     const profile=node('details','r20-profile-popup');
     profile.append(node('summary','','Perfil e ajustes'));
     profile.append(rail);
+    const toolbar=document.querySelector('main.shell > .archive-toolbar');
+    if(toolbar)profile.append(toolbar);
+    const appearance=document.querySelector('.archive-brandbar .appearance-top-actions');
+    if(appearance)profile.append(appearance);
     const left=node('div','r20-head-left');left.append(brand,identity);
     h.append(left,headFacts,profile);
     main.insertBefore(h,tabs);
