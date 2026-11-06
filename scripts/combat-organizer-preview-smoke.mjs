@@ -55,7 +55,7 @@ try{
    await page.locator('button[data-duo-combat-view="powers"]').click();
    await page.waitForSelector('[data-pane="combat"] .duo-power-tools',{state:'visible'});
    data=await metrics(page);
-   if(data.view!=='powers'||!data.powerList||data.combatValues||data.expanded!==0||!data.uiState){
+   if(data.view!=='powers'||!data.powerList||!data.combatValues||data.expanded!==0||!data.uiState){
      fail(p.name,'poderes não recolhidos: '+JSON.stringify(data));
    }
    if(data.powerColumns!==(p.width>760?'2':'1'))fail(p.name,'número de colunas: '+data.powerColumns);
