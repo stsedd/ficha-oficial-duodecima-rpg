@@ -212,3 +212,9 @@
     padding:9px 10px!important;
   }
 }
+
+/* Somente a navegação de estado é compartilhada; o baralho de acesso rápido
+   pertence ao modo Combate, nunca ao índice de Poderes. */
+#sheetView [data-pane="combat"].duo-combat-organized[data-duo-combat-view="powers"] .ability-quick-deck{
+  display:none!important;
+}
