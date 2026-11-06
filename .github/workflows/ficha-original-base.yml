@@ -21,6 +21,8 @@ jobs:
           node --check ficha-teste-dados-ficticios.js
           node --check multi-character-preview-original.js
           node --check scripts/ficha-original-base-smoke.mjs
+          node --check combat-powers-organizer-preview.js
+          node --check scripts/combat-organizer-preview-smoke.mjs
       - name: Preparar Playwright
         run: |
           npm install --no-save playwright@1.55.0
@@ -31,6 +33,8 @@ jobs:
           sleep 2
       - name: Testar base isolada
         run: node scripts/ficha-original-base-smoke.mjs
+      - name: Testar reorganização de Combate e Poderes
+        run: node scripts/combat-organizer-preview-smoke.mjs
       - name: Auditar organização das oito abas
         run: node scripts/ux-organization-audit.mjs
       - name: Salvar capturas
