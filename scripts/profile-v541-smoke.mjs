@@ -19,7 +19,7 @@ for(const [name,viewport] of cases){
       portraitUrl:portrait,portraitSourceUrl:portrait,
       bannerUrl:banner,bannerSourceUrl:banner,
       bannerPositionX:50,bannerPositionY:50,bannerScale:100}};
-  await context.addInitScript(s=>localStorage.setItem('duodecima_universal_stage4_v24',JSON.stringify(s)),seed);
+  await context.addInitScript(s=>{const k='duodecima_universal_stage4_v24';if(!localStorage.getItem(k))localStorage.setItem(k,JSON.stringify(s))},seed);
   const page=await context.newPage();
   page.on('pageerror',e=>failures.push(name+': erro JS '+e.message));
   await page.goto(base,{waitUntil:'networkidle',timeout:60000});
