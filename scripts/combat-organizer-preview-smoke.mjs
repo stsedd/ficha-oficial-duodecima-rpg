@@ -26,7 +26,7 @@ async function metrics(page){
     powerList:vis(pane.querySelector('.abilities-wrap')),
     tools:vis(pane.querySelector('.duo-power-tools')),
     buttons:[...pane.querySelectorAll('[data-duo-combat-view]')].map(b=>b.getAttribute('aria-selected')),
-    uiState:!!localStorage.getItem('duo-test-combat-powers-v1:'+String(window.DUODECIMA_CHARACTER_STORAGE_KEY||'preview-original')),
+    uiState:!!localStorage.getItem('duo-test-combat-powers-v2:'+String(window.DUODECIMA_CHARACTER_STORAGE_KEY||'preview-original')),
     allInputs:cards.reduce((sum,c)=>sum+c.querySelectorAll('input,select,textarea').length,0),
     powerColumns:pane.querySelector('.ability-grid')?getComputedStyle(pane.querySelector('.ability-grid')).columnCount:null,
     overflow:document.documentElement.scrollWidth>innerWidth+4,
@@ -120,7 +120,7 @@ try{
    await page.screenshot({path:'ui-artifacts/combat-powers-'+p.name+'-expanded.png',fullPage:false});
    await page.locator('.duo-power-action').filter({hasText:'Só destaques abertos'}).click();
    await page.locator('button[data-duo-combat-view="quick"]').click();
-   await page.waitForSelector('[data-pane="combat"] .combat-command-grid',{state:'visible'});
+   await page.waitForSelector('[data-pane="combat"] .duo-compact-conditions',{state:'visible'});
    await page.locator('[data-pane="combat"] [data-open-ability]').first().click();
    await page.waitForTimeout(100);
    const quick=await metrics(page);
