@@ -69,7 +69,8 @@ for(const profile of [
     },{timeout:10000});
     const dynamicSanity=page.locator('[data-pane="combat"] .duo-combat-topline > .qol-sanity-card');
     if((await dynamicSanity.locator('.qol-sanity-value').textContent())?.trim()!=='55')errors.push(profile.name+' Sanity value did not follow resource change');
-    if(!(await dynamicSanity.locator('.duo-sanity-more').evaluate(el=>el.open)))errors.push(profile.name+' Sanity effects should open automatically when unstable');
+    if(await dynamicSanity.locator('.duo-sanity-more').evaluate(el=>el.open))errors.push(profile.name+' long Sanity explanation should start collapsed');
+    if(!(await dynamicSanity.locator('.duo-sanity-auto-peek').textContent())?.includes('INT'))errors.push(profile.name+' automatic penalties not visible in compact Sanity');
     const firstCond=page.locator('[data-pane="combat"] .duo-compact-conditions');
     const add=firstCond.locator('.duo-add-condition');
     await add.click();
