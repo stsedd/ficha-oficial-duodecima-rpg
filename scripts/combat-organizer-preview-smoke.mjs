@@ -58,7 +58,7 @@ try{
    if(data.view!=='powers'||!data.powerList||!data.combatValues||data.expanded!==0||!data.uiState){
      fail(p.name,'poderes não recolhidos: '+JSON.stringify(data));
    }
-   if(data.powerColumns!==(p.width>760?'2':'1'))fail(p.name,'número de colunas: '+data.powerColumns);
+   if(data.powerColumns!==(p.width>1180?'2':'1'))fail(p.name,'número de colunas: '+data.powerColumns);
    const first=page.locator('[data-pane="combat"] .ability-card:has(.stake-compact input[type="range"])').first();
    const firstKey=await first.getAttribute('data-ability-key');
    const preview=first.locator('.duo-power-compact');
