@@ -91,8 +91,24 @@
       });
     }
     card.dataset.duoSection='quick';
+    const list=card.querySelector('.active-condition-list');
+    card.classList.toggle('duo-conditions-empty',!list?.querySelector('.active-condition-item'));
+    for(const item of card.querySelectorAll('.active-condition-item')){
+      const description=item.querySelector('small');
+      if(!description||item.querySelector('.duo-condition-more'))continue;
+      if((description.textContent||'').trim().length<=108)continue;
+      const more=make('button','duo-condition-more','Ler tudo');
+      more.type='button';
+      more.setAttribute('aria-expanded','false');
+      more.addEventListener('click',()=>{
+        const expanded=item.classList.toggle('duo-condition-expanded');
+        more.setAttribute('aria-expanded',String(expanded));
+        more.textContent=expanded?'Recolher descrição':'Ler tudo';
+      });
+      item.querySelector('div')?.append(more);
+    }
     const quick=combat.querySelector(':scope > .ability-quick-deck');
-    if(quick&&card.nextElementSibling!==quick)quick.before(card);
+    if(quick&&!card.closest('.duo-combat-topline')&&card.nextElementSibling!==quick)quick.before(card);
   }
   function rules(combat){
     const old=combat.querySelector('.combat-general-rules-card');
@@ -110,6 +126,34 @@
     const equipment=combat.querySelector('.equipment-summary-card')?.closest('.mechanics-section');
     if(equipment&&old.previousElementSibling!==equipment)equipment.after(old);
   }
+  function topSummary(combat){
+    const nav=combat.querySelector('.duo-combat-nav');
+    const conditionsCard=combat.querySelector('.compact-conditions-card');
+    if(!nav||!conditionsCard)return;
+    let bar=combat.querySelector(':scope > .duo-combat-topline');
+    if(!bar){
+      bar=make('div','duo-combat-topline');
+      bar.setAttribute('aria-label','Acesso rápido a combate, condições e sanidade');
+      const dock=combat.querySelector(':scope > .combat-resource-dock');
+      if(dock)dock.after(bar);else combat.prepend(bar);
+    }
+    if(nav.parentElement!==bar)bar.append(nav);
+    if(conditionsCard.parentElement!==bar)bar.append(conditionsCard);
+    const sanity=combat.querySelector('.qol-sanity-card[data-qol-sanity="combat"]');
+    if(!sanity)return;
+    if(sanity.parentElement!==bar)bar.append(sanity);
+    if(!sanity.querySelector('.duo-sanity-kicker')){
+      sanity.prepend(make('span','duo-sanity-kicker','Sanidade'));
+    }
+    const existing=sanity.querySelector('.qol-sanity-effect');
+    if(existing&&!sanity.querySelector('.duo-sanity-more')){
+      const detail=make('details','duo-sanity-more');
+      const isHealthy=sanity.dataset.tone==='good';
+      detail.open=!isHealthy;
+      detail.append(make('summary','',isHealthy?'Ver estado mental':'Efeitos do estado mental'));
+      existing.before(detail);detail.append(existing);
+    }
+  }
   function setup(){
     const view=document.getElementById(ROOT_ID);
     if(!view||view.classList.contains('hidden'))return;
@@ -120,6 +164,7 @@
     moveAdvancedControls(combat,status);
     conditions(combat);
     rules(combat);
+    topSummary(combat);
   }
   function schedule(){
     if(scheduled)return;
