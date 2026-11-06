@@ -49,10 +49,10 @@ try{
    if(data.total<15||data.view!=='quick'||!data.resource||!data.combatValues||data.powerList)fail(p.name,'aba Combate rápido inicial '+JSON.stringify(data));
    if(data.overflow)fail(p.name,'overflow inicial');
    // Tabs também funcionam por teclado (setas esquerda/direita).
-   await page.locator('[data-duo-combat-view="quick"]').focus();
+   await page.locator('button[data-duo-combat-view="quick"]').focus();
    await page.keyboard.press('ArrowRight');
    if((await metrics(page)).view!=='powers')fail(p.name,'navegação por teclado não alterou o painel');
-   await page.locator('[data-duo-combat-view="powers"]').click();
+   await page.locator('button[data-duo-combat-view="powers"]').click();
    await page.waitForSelector('[data-pane="combat"] .duo-power-tools',{state:'visible'});
    data=await metrics(page);
    if(data.view!=='powers'||!data.powerList||data.combatValues||data.expanded!==0||!data.uiState){
@@ -119,7 +119,7 @@ try{
    if(expanded.expanded!==expanded.total)fail(p.name,'expandir todos: '+JSON.stringify(expanded));
    await page.screenshot({path:'ui-artifacts/combat-powers-'+p.name+'-expanded.png',fullPage:false});
    await page.locator('.duo-power-action').filter({hasText:'Só destaques abertos'}).click();
-   await page.locator('[data-duo-combat-view="quick"]').click();
+   await page.locator('button[data-duo-combat-view="quick"]').click();
    await page.waitForSelector('[data-pane="combat"] .combat-command-grid',{state:'visible'});
    await page.locator('[data-pane="combat"] [data-open-ability]').first().click();
    await page.waitForTimeout(100);
@@ -134,7 +134,7 @@ try{
    await page.waitForSelector('#sheetView:not(.hidden) .duo-combat-nav',{state:'attached',timeout:20000});
    const afterReload=await metrics(page);
    if(afterReload.view!=='powers'||!afterReload.uiState)fail(p.name,'estado do painel não persistiu: '+JSON.stringify(afterReload));
-   await page.locator('[data-duo-combat-view="quick"]').click();
+   await page.locator('button[data-duo-combat-view="quick"]').click();
    console.log('COMBAT_ORGANIZER_'+p.name+' '+JSON.stringify({initial:data, favorite:fav, active, passive, reload:afterReload}));
   }catch(err){fail(p.name,err.stack||err.message)}
   await context.close();
