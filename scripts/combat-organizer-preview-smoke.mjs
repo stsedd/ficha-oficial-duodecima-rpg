@@ -48,6 +48,10 @@ try{
    let data=await metrics(page);
    if(data.total<15||data.view!=='quick'||!data.resource||!data.combatValues||data.powerList)fail(p.name,'aba Combate rápido inicial '+JSON.stringify(data));
    if(data.overflow)fail(p.name,'overflow inicial');
+   // Tabs também funcionam por teclado (setas esquerda/direita).
+   await page.locator('[data-duo-combat-view="quick"]').focus();
+   await page.keyboard.press('ArrowRight');
+   if((await metrics(page)).view!=='powers')fail(p.name,'navegação por teclado não alterou o painel');
    await page.locator('[data-duo-combat-view="powers"]').click();
    await page.waitForSelector('[data-pane="combat"] .duo-power-tools',{state:'visible'});
    data=await metrics(page);
@@ -70,6 +74,17 @@ try{
    await toggle.click();
    if(!(await first.locator('.stake-compact input[type="range"]').isVisible())){
      fail(p.name,'expansão não revelou estacas');
+   }
+   // As estacas continuam no input original e sobreviverão ao rerender da ficha.
+   await first.locator('input[data-stakes]').evaluate(el=>{
+     el.value='16';
+     el.dispatchEvent(new Event('change',{bubbles:true}));
+   });
+   await page.waitForTimeout(160);
+   const afterStake=page.locator('[data-ability-key="'+firstKey+'"]');
+   if((await afterStake.locator('input[data-stakes]').inputValue())!=='16'||
+      !(await afterStake.locator('input[data-stakes]').isVisible())){
+     fail(p.name,'estacas e expansão não persistiram ao salvar');
    }
    await first.locator('[data-ability-deck-toggle]').click();
    await page.waitForTimeout(180);
