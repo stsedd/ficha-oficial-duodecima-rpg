@@ -55,13 +55,17 @@ try{
      fail(p.name,'poderes não recolhidos: '+JSON.stringify(data));
    }
    if(data.powerColumns!==(p.width>760?'2':'1'))fail(p.name,'número de colunas: '+data.powerColumns);
-   const first=page.locator('[data-pane="combat"] .ability-card').first();
+   const first=page.locator('[data-pane="combat"] .ability-card:has(.stake-compact input[type="range"])').first();
    const firstKey=await first.getAttribute('data-ability-key');
    const preview=first.locator('.duo-power-compact');
    if(!(await preview.isVisible())||await first.locator('.stake-compact input[type="range"]').isVisible()){
      fail(p.name,'resumo compacto não funcionou');
    }
    await page.screenshot({path:'ui-artifacts/combat-powers-'+p.name+'-compact.png',fullPage:false});
+   if(p.name==='desktop'||p.name==='mobile'){
+     const jpeg=await page.screenshot({type:'jpeg',quality:50,fullPage:false});
+     console.log('COMBAT_ORGANIZER_VISUAL_'+p.name+':'+jpeg.toString('base64'));
+   }
    const toggle=first.locator('.duo-power-toggle');
    await toggle.click();
    if(!(await first.locator('.stake-compact input[type="range"]').isVisible())){
