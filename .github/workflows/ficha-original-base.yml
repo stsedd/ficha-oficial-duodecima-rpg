@@ -22,6 +22,8 @@ jobs:
           node --check multi-character-preview-original.js
           node --check scripts/ficha-original-base-smoke.mjs
           node --check combat-powers-organizer-preview.js
+          node --check combat-layout-cleanup-v2.js
+          node --check scripts/combat-cleanup-v2-smoke.mjs
           node --check scripts/combat-organizer-preview-smoke.mjs
       - name: Preparar Playwright
         run: |
@@ -33,6 +35,8 @@ jobs:
           sleep 2
       - name: Testar base isolada
         run: node scripts/ficha-original-base-smoke.mjs
+      - name: Testar limpeza de Combate e minimização de poderes
+        run: node scripts/combat-cleanup-v2-smoke.mjs
       - name: Testar reorganização de Combate e Poderes
         run: node scripts/combat-organizer-preview-smoke.mjs
       - name: Auditar organização das oito abas
