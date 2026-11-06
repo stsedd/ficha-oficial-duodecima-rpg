@@ -60,11 +60,40 @@ for(const profile of [
     await details.locator('summary').click();
     if((await details.evaluate(el=>el.open))===initiallyOpen)errors.push(profile.name+' Sanity details did not toggle');
     await details.locator('summary').click();
+    const sanInput=page.locator('[data-pane="combat"] input[data-resource-manual-input="san"]');
+    await sanInput.fill('-45');
+    await page.locator('[data-pane="combat"] button[data-manual-resource="san"]').click();
+    await page.waitForFunction(()=>{
+      const card=document.querySelector('[data-pane="combat"] .duo-combat-topline > .qol-sanity-card');
+      return card?.querySelector('.qol-sanity-name b')?.textContent.trim()==='Instável';
+    },{timeout:10000});
+    const dynamicSanity=page.locator('[data-pane="combat"] .duo-combat-topline > .qol-sanity-card');
+    if((await dynamicSanity.locator('.qol-sanity-value').textContent())?.trim()!=='55')errors.push(profile.name+' Sanity value did not follow resource change');
+    if(!(await dynamicSanity.locator('.duo-sanity-more').evaluate(el=>el.open)))errors.push(profile.name+' Sanity effects should open automatically when unstable');
     const firstCond=page.locator('[data-pane="combat"] .duo-compact-conditions');
     const add=firstCond.locator('.duo-add-condition');
     await add.click();
     if(!(await firstCond.locator('.condition-adder').isVisible()))errors.push(profile.name+' Condition form cannot open');
-    await add.click();
+    const conditionSelect=firstCond.locator('#conditionSelect');
+    const choice=await conditionSelect.evaluate(select=>{
+      const options=[...select.options].filter(x=>x.value);
+      return (options.find(o=>o.value==='Enjoado')||options[0])?.value||null;
+    });
+    if(choice){
+      await conditionSelect.selectOption(choice);
+      await firstCond.locator('#addConditionBtn').click();
+      await page.waitForSelector('[data-pane="combat"] .duo-combat-topline .active-condition-item',{state:'visible',timeout:10000});
+      const fontSize=await page.locator('[data-pane="combat"] .duo-combat-topline .active-condition-item small').first().evaluate(n=>parseFloat(getComputedStyle(n).fontSize));
+      if(fontSize<11.9)errors.push(profile.name+' condition description remained too small after adding condition');
+      const more=page.locator('[data-pane="combat"] .duo-combat-topline .duo-condition-more').first();
+      if(await more.count()){
+        await more.click();
+        if((await more.getAttribute('aria-expanded'))!=='true')errors.push(profile.name+' condition description did not expand');
+      }
+    }else{
+      errors.push(profile.name+' could not find a test condition');
+      await add.click();
+    }
     await page.locator('button[data-duo-combat-view="powers"]').click();
     await page.waitForSelector('[data-pane="combat"] .duo-power-tools',{state:'visible',timeout:10000});
     if(!(await sanityPanel.isVisible())||!(await firstCond.isVisible()))errors.push(profile.name+' Sanity and conditions disappeared on Powers view');
