@@ -82,6 +82,29 @@
     card.dataset.duoPowerReady='1';
     const header=card.querySelector(':scope > .ability-head');
     if(!header)return;
+    // Nome e categoria são uma informação só: não reservar outra linha apenas
+    // para o rótulo Ativa/Passiva. Preservamos Nv/custo e badges de linhagem.
+    const titleRow=header.querySelector('.ability-title-row');
+    const metadata=header.querySelector('.ability-meta');
+    if(titleRow&&metadata){
+      const type=card.dataset.abilityType==='active'?'Ativa':'Passiva';
+      if(type==='Passiva'){
+        const passive=[...metadata.children].find(child=>child.textContent?.trim().toLowerCase()==='passiva');
+        if(passive){
+          passive.classList.add('duo-ability-kind');
+          titleRow.querySelector('b')?.after(passive);
+        }
+      }else if(!titleRow.querySelector('.duo-ability-kind')){
+        const badge=element('span','duo-ability-kind','Ativa');
+        titleRow.querySelector('b')?.after(badge);
+      }
+      if(metadata.childElementCount){
+        metadata.classList.add('duo-ability-inline-meta');
+        titleRow.append(metadata);
+      }else{
+        metadata.remove();
+      }
+    }
     const toggle=button('duo-power-toggle','Expandir',()=>remember(card,!isExpanded(card)));
     toggle.dataset.duoExpandPower=card.dataset.abilityKey;
     const preview=element('div','duo-power-compact');
