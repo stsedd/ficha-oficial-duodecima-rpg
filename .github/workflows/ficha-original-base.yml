@@ -31,6 +31,8 @@ jobs:
           sleep 2
       - name: Testar base isolada
         run: node scripts/ficha-original-base-smoke.mjs
+      - name: Auditar organização das oito abas
+        run: node scripts/ux-organization-audit.mjs
       - name: Salvar capturas
         if: always()
         uses: actions/upload-artifact@v4
