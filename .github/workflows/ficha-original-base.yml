@@ -24,6 +24,7 @@ jobs:
           node --check combat-powers-organizer-preview.js
           node --check combat-layout-cleanup-v2.js
           node --check scripts/combat-cleanup-v2-smoke.mjs
+          node --check scripts/combat-topline-v3-smoke.mjs
           node --check scripts/combat-organizer-preview-smoke.mjs
       - name: Preparar Playwright
         run: |
@@ -35,6 +36,8 @@ jobs:
           sleep 2
       - name: Testar base isolada
         run: node scripts/ficha-original-base-smoke.mjs
+      - name: Testar nova faixa compacta de Combate
+        run: node scripts/combat-topline-v3-smoke.mjs
       - name: Testar limpeza de Combate e minimização de poderes
         run: node scripts/combat-cleanup-v2-smoke.mjs
       - name: Testar reorganização de Combate e Poderes
