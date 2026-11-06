@@ -162,6 +162,26 @@
       existing.before(detail);detail.append(existing);
     }
   }
+  function enhanceMeters(combat){
+    // Barras informativas acessíveis sem mudar o cálculo ou valor dos recursos.
+    for(const meter of combat.querySelectorAll('.combat-resource-dock .combat-mini-meter')){
+      const chip=meter.closest('.combat-resource-chip');
+      const raw=chip?.querySelector('strong')?.textContent||'';
+      const match=raw.match(/(-?\\d+)\\s*\\/\\s*(\\d+)/);
+      if(!match)continue;
+      const current=Number(match[1]),max=Number(match[2]);
+      if(!Number.isFinite(current)||!Number.isFinite(max)||max<=0)continue;
+      const percent=Math.max(0,Math.min(100,Math.round(current/max*100)));
+      const label=chip.querySelector('.theme-resource-label')?.textContent?.trim()||'Recurso';
+      meter.setAttribute('role','progressbar');
+      meter.setAttribute('aria-label',label);
+      meter.setAttribute('aria-valuemin','0');
+      meter.setAttribute('aria-valuemax',String(max));
+      meter.setAttribute('aria-valuenow',String(Math.max(0,Math.min(current,max))));
+      meter.setAttribute('aria-valuetext',percent+'%');
+      meter.title=label+': '+current+' de '+max+' ('+percent+'%)';
+    }
+  }
   function setup(){
     const view=document.getElementById(ROOT_ID);
     if(!view||view.classList.contains('hidden'))return;
@@ -173,6 +193,7 @@
     conditions(combat);
     rules(combat);
     topSummary(combat);
+    enhanceMeters(combat);
   }
   function schedule(){
     if(scheduled)return;
