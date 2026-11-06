@@ -52,7 +52,7 @@ function profile(rail){
   const picture=avatar.querySelector('.rail-portrait');
   if(picture)picture.setAttribute('role','img');
   const photo=avatar.querySelector('#heroPortraitUploadBtn');
-  if(photo){photo.textContent='✎';photo.title='Trocar retrato';photo.setAttribute('aria-label','Trocar retrato')}
+  if(photo){if(photo.textContent!=='✎')photo.textContent='✎';photo.title='Trocar retrato';photo.setAttribute('aria-label','Trocar retrato')}
   let orbs=rail.querySelector(':scope > .duo-profile-orbs');
   if(!orbs){orbs=node('div','duo-profile-orbs');identity.after(orbs)}
   const controls=avatar.querySelector('.rail-portrait-badges');
@@ -90,7 +90,7 @@ function disclosure(title,cls,content,keyName,anchor){
 }
 function overview(pane){
   const heading=pane?.querySelector('.attribute-sidebar .section-title h3');
-  if(heading)heading.textContent='Atributos';
+  if(heading&&heading.textContent!=='Atributos')heading.textContent='Atributos';
   const skills=pane?.querySelector('.skills-ledger-head');
   if(skills&&!skills.querySelector('.duo-skill-legend'))
     skills.append(node('span','duo-skill-legend','P = Proficiência · E = Expertise'));
@@ -101,7 +101,9 @@ function overview(pane){
   const additional=disclosure('Talentos, referência e ajustes','duo-overview-secondary',aux,'secondaryOpen',grid);
   if(additional){
     const count=aux.querySelector('.talents-compact-card .pill')?.textContent?.trim();
-    additional.querySelector('summary').textContent='Talentos, referência e ajustes'+(count?' · '+count:'');
+    const caption='Talentos, referência e ajustes'+(count?' · '+count:'');
+    const summary=additional.querySelector('summary');
+    if(summary&&summary.textContent!==caption)summary.textContent=caption;
   }
   const lineage=pane.querySelector(':scope > .lineage-config-visible')||
       pane.querySelector('.duo-overview-lineage .lineage-config-visible');
