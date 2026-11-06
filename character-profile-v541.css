@@ -162,7 +162,7 @@ body #sheetView .character-rail .rail-portrait-badges .rail-orb-level input#leve
   #sheetView{position:relative!important;z-index:110!important}
   #sheetView .sheet-frame{grid-template-columns:minmax(0,1fr)!important;gap:8px!important}
   #sheetView .sheet-frame > .character-rail{
-    position:relative!important;top:auto!important;
+    display:block!important;position:relative!important;top:auto!important;
     margin-top:-52px!important;margin-bottom:5px!important;
     padding:10px 13px 12px!important;z-index:3!important;
   }
