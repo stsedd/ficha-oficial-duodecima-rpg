@@ -134,3 +134,10 @@
     column-count:1!important;
   }
 }
+
+
+/* "Combate & Poderes" já está escrito na aba principal. O segundo título,
+   imediatamente acima dos mesmos botões, era informação duplicada. */
+#sheetView [data-pane="combat"].duo-combat-organized .duo-combat-topline .duo-combat-nav-heading{
+  display:none!important;
+}
