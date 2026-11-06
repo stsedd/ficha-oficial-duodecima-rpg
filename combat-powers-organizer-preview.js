@@ -2,7 +2,7 @@
   'use strict';
   if(window.__DUO_COMBAT_ORGANIZER_PREVIEW__)return;
   window.__DUO_COMBAT_ORGANIZER_PREVIEW__=true;
-  const STORAGE_PREFIX='duo-test-combat-powers-v1:';
+  const STORAGE_PREFIX='duo-test-combat-powers-v2:';
   const state={pane:null,view:'quick',filter:'all',query:'',expanded:{}};
   let frame=0;
   const root=()=>document.getElementById('sheetView');
@@ -53,12 +53,13 @@
     const expanded=(expandOverride===undefined?isExpanded(c):expandOverride);
     c.classList.toggle('duo-power-minimized',!expanded);
     c.classList.toggle('duo-power-open',expanded);
+    c.dataset.duoCollapsed=expanded?'false':'true';
     const toggle=c.querySelector('.duo-power-toggle');
     if(toggle){
       toggle.setAttribute('aria-expanded',String(expanded));
       toggle.setAttribute('aria-label',(expanded?'Recolher':'Expandir')+' detalhes de '+(c.querySelector('.ability-title-row b')?.textContent?.trim()||'habilidade'));
       toggle.title=expanded?'Minimizar habilidade':'Mostrar detalhes completos';
-      toggle.textContent=expanded?'⌃':'⌄';
+      toggle.textContent=expanded?'Recolher':'Expandir';
     }
   }
   function remember(c,expanded){
@@ -81,7 +82,7 @@
     card.dataset.duoPowerReady='1';
     const header=card.querySelector(':scope > .ability-head');
     if(!header)return;
-    const toggle=button('duo-power-toggle','⌄',()=>remember(card,!isExpanded(card)));
+    const toggle=button('duo-power-toggle','Expandir',()=>remember(card,!isExpanded(card)));
     toggle.dataset.duoExpandPower=card.dataset.abilityKey;
     const preview=element('div','duo-power-compact');
     const data=compactText(card);
@@ -99,8 +100,7 @@
       c.classList.toggle('duo-power-filtered',!show);
       c.setAttribute('data-duo-visible',show?'true':'false');
       if(show)visible++;
-      if(state.query&&show)updateCard(c,true);
-      else updateCard(c);
+      updateCard(c);
     }
     const count=state.pane?.querySelector('.duo-power-count');
     if(count)count.textContent=`${visible} de ${all.length} habilidades`;
@@ -130,7 +130,7 @@
       if(child.classList.contains('duo-combat-nav'))continue;
       if(child.classList.contains('duo-power-tools'))continue;
       if(child.classList.contains('combat-resource-dock'))continue;
-      if(child.classList.contains('ability-quick-deck')){child.dataset.duoSection='shared';continue}
+      if(child.classList.contains('ability-quick-deck')){child.dataset.duoSection='quick';continue}
       if(child.classList.contains('abilities-wrap')||child.querySelector?.('.mortal-power-empty')){
         child.dataset.duoSection='powers';continue;
       }
@@ -217,7 +217,11 @@
   function setup(){
     const view=root(),pane=view?.querySelector('.sheet-main > [data-pane="combat"]');
     if(!pane||view.classList.contains('hidden'))return;
-    if(pane===state.pane&&pane.dataset.duoCombatReady==='1')return;
+    if(pane===state.pane&&pane.dataset.duoCombatReady==='1'){
+      for(const card of cards())decorateCard(card);
+      applyView();applyFilters();
+      return;
+    }
     if(state.pane!==pane){
       read();state.filter='all';state.query='';
     }
@@ -265,7 +269,7 @@
   }
   function init(){
     const view=root();if(!view)return;
-    new MutationObserver(queue).observe(view,{childList:true});
+    new MutationObserver(queue).observe(view,{childList:true,subtree:true});
     document.addEventListener('click',navigate,true);
     // As mudanças de abas não substituem o DOM; o estado permanece até o próximo render.
     queue();
