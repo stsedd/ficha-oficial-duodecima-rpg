@@ -218,8 +218,8 @@
     const view=root(),pane=view?.querySelector('.sheet-main > [data-pane="combat"]');
     if(!pane||view.classList.contains('hidden'))return;
     if(pane===state.pane&&pane.dataset.duoCombatReady==='1'){
-      for(const card of cards())decorateCard(card);
-      applyView();applyFilters();
+      const fresh=cards().filter(card=>card.dataset.duoPowerReady!=='1');
+      if(fresh.length){fresh.forEach(decorateCard);applyView();applyFilters()}
       return;
     }
     if(state.pane!==pane){
@@ -269,7 +269,7 @@
   }
   function init(){
     const view=root();if(!view)return;
-    new MutationObserver(queue).observe(view,{childList:true,subtree:true});
+    new MutationObserver(queue).observe(view,{childList:true});
     document.addEventListener('click',navigate,true);
     // As mudanças de abas não substituem o DOM; o estado permanece até o próximo render.
     queue();
