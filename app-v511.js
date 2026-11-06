@@ -2191,9 +2191,12 @@ document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{
     const railDef=byId('railDefenseAdjust');if(railDef)railDef.onchange=e=>{state.tempMods.defense=Number(e.target.value)||0;save();renderSheet()};
     const fortunaBlessingToggle=byId('fortunaBlessingToggle');if(fortunaBlessingToggle)fortunaBlessingToggle.onclick=()=>{const activating=!fortunaBlessingIsCurrent();state.fortunaBlessing=activating;state.fortunaBlessingMonth=activating?currentMonthKey():'';syncCurrentCaps();save();renderSheet();notify(activating?'Bênção de Fortuna ativa: +10 no HP máximo até o fim do mês.':'Bênção de Fortuna removida: HP máximo normal restaurado.')};
     const tdr=byId('tempReduction');if(tdr)tdr.onchange=e=>{state.tempMods.damageReduction=Number(e.target.value)||0;save();renderSheet()};
-    const pBtn=byId('uploadPortraitBtn'); const pInput=byId('portraitUploadInput'); if(pBtn&&pInput){pBtn.onclick=()=>pInput.click(); pInput.onchange=e=>readImageToHistory(e.target.files?.[0],'portraitUrl')}
+    const pBtn=byId('uploadPortraitBtn'); const pInput=byId('portraitUploadInput'); if(pBtn&&pInput){pBtn.onclick=()=>openPortraitCrop(); pInput.onchange=e=>{openPortraitCrop(e.target.files?.[0]);e.target.value=''}}
     const bBtn=byId('uploadBannerBtn'); const bInput=byId('bannerUploadInput'); if(bBtn&&bInput){bBtn.onclick=()=>bInput.click(); bInput.onchange=e=>readImageToHistory(e.target.files?.[0],'bannerUrl')}
-    const heroBtn=byId('heroPortraitUploadBtn'); if(heroBtn&&pInput){heroBtn.onclick=()=>pInput.click()}
+    const heroBtn=byId('heroPortraitUploadBtn');if(heroBtn)heroBtn.onclick=()=>openPortraitCrop();
+    const characterPhoto=byId('characterPortraitCropBtn');if(characterPhoto)characterPhoto.onclick=()=>openPortraitCrop();
+    const characterUpload=byId('characterPortraitUploadBtn');if(characterUpload&&pInput)characterUpload.onclick=()=>pInput.click();
+    const characterCover=byId('characterBannerEditBtn');if(characterCover)characterCover.onclick=()=>byId('editBannerBtn')?.click();
     const short=byId('shortRest');if(short)short.onclick=shortRest;const long=byId('longRest');if(long)long.onclick=longRest;const resetUses=byId('resetAbilityUses');if(resetUses)resetUses.onclick=()=>{state.abilityUses={};save();renderSheet();notify('Contadores de uso da cena/combate resetados.')}
     const rd=byId('rollDefense');if(rd)rd.onclick=rollDefense;const ri=byId('rollInitiative');if(ri)ri.onclick=rollInitiative;
 
@@ -2267,6 +2270,78 @@ function useAbility(key,cost){
     return new Promise(resolve=>{const src=String(source||'');if(!/^data:image\//i.test(src)){resolve(src);return}const img=new Image();img.onload=()=>{try{let width=img.naturalWidth||img.width||1,height=img.naturalHeight||img.height||1,scale=Math.min(1,maxDimension/Math.max(width,height));width=Math.max(1,Math.round(width*scale));height=Math.max(1,Math.round(height*scale));const encode=(w,h,q)=>{const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('canvas');ctx.drawImage(img,0,0,w,h);return canvas.toDataURL('image/webp',q)};let quality=.78,result=encode(width,height,quality);while(result.length>targetLength&&quality>.46){quality-=.08;result=encode(width,height,quality)}if(result.length>targetLength){const shrink=Math.max(.45,Math.min(.92,Math.sqrt(targetLength/result.length)*.92));width=Math.max(1,Math.round(width*shrink));height=Math.max(1,Math.round(height*shrink));result=encode(width,height,.68)}resolve(result&&result!=='data:,'?result:src)}catch(err){console.warn('[Ficha] Não foi possível compactar a imagem.',err);resolve(src)}};img.onerror=()=>resolve(src);img.src=src})
   }
   function readImageToHistory(file,key){if(!file)return;const reader=new FileReader();reader.onload=async()=>{const src=String(reader.result||''),isPortrait=key==='portraitUrl',compact=await compactDataImage(src,isPortrait?900:1400,isPortrait?420000:900000),previous=state.history[key];state.history[key]=compact;if(!save()){state.history[key]=previous;return}renderSheet();notify(isPortrait?'Retrato atualizado.':'Banner atualizado.')};reader.readAsDataURL(file)}
+
+  // Recorte independente do retrato, preservando a origem para reenquadramentos futuros.
+  let portraitCropDraft=null;
+  function openPortraitCrop(file){
+    const dlg=byId('portraitCropDialog'),input=byId('portraitUploadInput');if(!dlg)return;
+    const source=String(state.history?.portraitSourceUrl||state.history?.portraitUrl||'');
+    if(!file&&!source.trim()){input?.click();return}
+    const activate=imgSource=>{
+      const img=new Image();
+      img.onload=()=>{
+        portraitCropDraft={source:imgSource,img};
+        for(const [id,v] of [['portraitCropX',50],['portraitCropY',50],['portraitCropZoom',100]]){const el=byId(id);if(el)el.value=v}
+        updatePortraitCropPreview();
+        if(!dlg.open){if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','')}
+      };
+      img.onerror=()=>notify('Não foi possível abrir a imagem do retrato.');
+      img.src=imgSource;
+    };
+    if(file){
+      const reader=new FileReader();
+      reader.onload=async()=>activate(await compactDataImage(String(reader.result||''),900,420000));
+      reader.onerror=()=>notify('Não foi possível ler a foto.');
+      reader.readAsDataURL(file);
+    }else activate(source);
+  }
+  function paintPortrait(canvas){
+    if(!canvas||!portraitCropDraft)return;
+    const img=portraitCropDraft.img,c=canvas.getContext('2d');if(!c)return;
+    const width=canvas.width,height=canvas.height;
+    const x=clamp(Number(byId('portraitCropX')?.value??50),0,100)/100,y=clamp(Number(byId('portraitCropY')?.value??50),0,100)/100,z=clamp(Number(byId('portraitCropZoom')?.value??100),100,250)/100;
+    const scale=Math.max(width/img.naturalWidth,height/img.naturalHeight)*z,drawWidth=img.naturalWidth*scale,drawHeight=img.naturalHeight*scale;
+    c.clearRect(0,0,width,height);c.drawImage(img,(width-drawWidth)*x,(height-drawHeight)*y,drawWidth,drawHeight);
+  }
+  function updatePortraitCropPreview(){
+    paintPortrait(byId('portraitCropCanvas'));
+    for(const id of ['X','Y','Zoom']){
+      const range=byId('portraitCrop'+id),output=byId('portraitCrop'+id+'Value');
+      if(range&&output)output.textContent=range.value+'%';
+    }
+  }
+  function bindPortraitCropDialog(){
+    const dlg=byId('portraitCropDialog'),canvas=byId('portraitCropCanvas');if(!dlg||!canvas)return;
+    for(const id of ['portraitCropX','portraitCropY','portraitCropZoom']){
+      const el=byId(id);if(el)el.oninput=updatePortraitCropPreview;
+    }
+    byId('portraitCropCancel').onclick=()=>{portraitCropDraft=null;dlg.close()};
+    byId('portraitCropSave').onclick=async()=>{
+      if(!portraitCropDraft)return;
+      const target=document.createElement('canvas');target.width=600;target.height=600;paintPortrait(target);
+      const cropped=await compactDataImage(target.toDataURL('image/webp',.84),600,240000);
+      const oldPortrait=state.history.portraitUrl,oldSource=state.history.portraitSourceUrl;
+      state.history.portraitUrl=cropped;state.history.portraitSourceUrl=portraitCropDraft.source;
+      if(!save()){state.history.portraitUrl=oldPortrait;state.history.portraitSourceUrl=oldSource;return}
+      portraitCropDraft=null;dlg.close();renderSheet();notify('Retrato enquadrado e salvo.');
+    };
+    let drag=null;
+    canvas.addEventListener('pointerdown',e=>{
+      if(!portraitCropDraft)return;
+      drag={x:e.clientX,y:e.clientY,startX:Number(byId('portraitCropX').value),startY:Number(byId('portraitCropY').value)};
+      canvas.setPointerCapture(e.pointerId);
+    });
+    canvas.addEventListener('pointermove',e=>{
+      if(!drag)return;
+      const z=Math.max(1,Number(byId('portraitCropZoom').value)/100),scale=48/z;
+      byId('portraitCropX').value=clamp(drag.startX-(e.clientX-drag.x)/canvas.getBoundingClientRect().width*scale,0,100);
+      byId('portraitCropY').value=clamp(drag.startY-(e.clientY-drag.y)/canvas.getBoundingClientRect().height*scale,0,100);
+      updatePortraitCropPreview();
+    });
+    canvas.addEventListener('pointerup',()=>{drag=null});canvas.addEventListener('pointercancel',()=>{drag=null});
+    dlg.addEventListener('close',()=>{portraitCropDraft=null});
+  }
+
   function chooseStoredImage(onReady,maxDimension=480,targetLength=150000){
     const input=document.createElement('input');input.type='file';input.accept='image/*';
     input.onchange=()=>{const file=input.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=async()=>{const src=String(reader.result||''),compact=await compactDataImage(src,maxDimension,targetLength);onReady(compact)};reader.onerror=()=>notify('Não foi possível ler essa imagem.');reader.readAsDataURL(file)};input.click();
@@ -2397,5 +2472,6 @@ function longRest(){
   await compactStoredEquipmentImages();
   await initExclusiveThemes();
   bindShellChrome();
+  bindPortraitCropDialog();
   render();
 })();
