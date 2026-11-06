@@ -23,7 +23,13 @@ for(const p of profiles){
     const nav=pane.locator('.duo-combat-nav');
     const b1=nav.locator('button[data-duo-combat-view="quick"]');
     const b2=nav.locator('button[data-duo-combat-view="powers"]');
-    let y1=(await b1.boundingBox())?.y,y2=(await b2.boundingBox())?.y;
+    const navPosition=()=>nav.evaluate(n=>{
+      const first=n.querySelector('button[data-duo-combat-view="quick"]');
+      const second=n.querySelector('button[data-duo-combat-view="powers"]');
+      return {y1:first?.getBoundingClientRect().top??null,y2:second?.getBoundingClientRect().top??null,
+        columns:getComputedStyle(n.querySelector('.duo-combat-nav-buttons')).gridTemplateColumns};
+    });
+    let {y1,y2}=await navPosition();
     const empty=pane.locator('.duo-combat-topline > .duo-compact-conditions');
     if(!(await empty.evaluate(n=>n.classList.contains('duo-conditions-empty')))){
       failures.push(p.name+': demo unexpectedly has an active condition at start');
@@ -47,7 +53,9 @@ for(const p of profiles){
     await pane.locator('#addConditionBtn').click();
     await pane.locator('.duo-combat-topline .active-condition-item').waitFor({state:'visible',timeout:10000});
     await page.waitForTimeout(100);
-    y1=(await b1.boundingBox())?.y;y2=(await b2.boundingBox())?.y;
+    const current=await navPosition();
+    y1=current.y1;y2=current.y2;
+    console.log('POLISH_V4_NAV_'+p.name+' '+JSON.stringify(current));
     if(p.width>760 && !(y2>y1+20))failures.push(p.name+': navigation did not stack when condition is present');
     if(p.width<=760 && Math.abs(y1-y2)>5)failures.push(p.name+': mobile navigation should remain side-by-side');
     const read=await pane.locator('.duo-combat-topline .active-condition-item small').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize));
