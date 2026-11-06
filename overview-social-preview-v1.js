@@ -31,6 +31,9 @@ function syncBanner(){
 function profile(rail){
   if(!rail)return;
   rail.classList.add('duo-social-profile');
+  // A antiga versão mobile esconde o conteúdo atrás de “Ver perfil completo”.
+  // O perfil social substitui esse resumo e mantém seus controles acessíveis.
+  if(rail.dataset.mobileExpanded!=='true')rail.dataset.mobileExpanded='true';
   const avatar=rail.querySelector(':scope > .rail-portrait-wrap');
   const identity=rail.querySelector(':scope > .rail-identity');
   if(!avatar||!identity)return;
