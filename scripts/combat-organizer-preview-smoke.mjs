@@ -22,7 +22,7 @@ async function metrics(page){
     expanded:cards.filter(c=>c.classList.contains('duo-power-open')).length,
     quickDeck:!!pane.querySelector('.ability-quick-deck'),
     resource:vis(pane.querySelector('.combat-resource-dock')),
-    combatValues:vis(pane.querySelector('.combat-command-grid')),
+    combatValues:vis(pane.querySelector('.duo-compact-conditions')),
     powerList:vis(pane.querySelector('.abilities-wrap')),
     tools:vis(pane.querySelector('.duo-power-tools')),
     buttons:[...pane.querySelectorAll('[data-duo-combat-view]')].map(b=>b.getAttribute('aria-selected')),
