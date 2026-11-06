@@ -1,0 +1,231 @@
+/* Duodécima · revisão v3 do combate (somente ficha-teste.html).
+   Mantém o HTML e os controles originais; reúne navegação, condições e sanidade
+   em uma faixa superior. */
+#sheetView [data-pane="combat"].duo-combat-organized > .duo-combat-topline{
+  display:grid!important;
+  grid-template-columns:minmax(184px,.94fr) minmax(270px,1.45fr) minmax(155px,.77fr)!important;
+  gap:9px!important;align-items:stretch!important;
+  width:100%!important;min-width:0!important;margin:0 0 10px!important;
+}
+#sheetView [data-pane="combat"].duo-combat-organized .duo-combat-topline > *{
+  box-sizing:border-box!important;min-width:0!important;margin:0!important;
+}
+/* Navegação: botões próximos, sem duas colunas gigantes ocupando a ficha. */
+#sheetView [data-pane="combat"].duo-combat-organized .duo-combat-topline > .duo-combat-nav{
+  display:flex!important;flex-direction:column!important;
+  justify-content:space-between!important;gap:7px!important;
+  padding:11px!important;min-height:0!important;
+  border-radius:11px!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .duo-combat-nav-heading{
+  display:flex!important;align-items:baseline!important;gap:4px!important;
+  min-width:0!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .duo-combat-nav-heading strong{
+  font-size:10px!important;letter-spacing:.075em!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .duo-combat-nav-heading small{
+  display:none!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .duo-combat-nav-buttons{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:5px!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .duo-combat-choice{
+  min-height:35px!important;padding:6px 7px!important;
+  border-radius:7px!important;
+  font-size:11px!important;line-height:1.2!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .duo-combat-number{
+  min-width:18px!important;min-height:17px!important;
+  padding:1px 4px!important;font-size:9px!important;
+}
+/* Condições na mesma faixa — descrição legível sem forçar blocos altos.
+   O texto completo está disponível por "Ler tudo". */
+#sheetView [data-pane="combat"].duo-combat-organized .duo-combat-topline > .duo-compact-conditions{
+  display:flex!important;flex-direction:column!important;justify-content:flex-start!important;
+  gap:7px!important;width:100%!important;min-height:0!important;
+  padding:10px 11px!important;border-radius:11px!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .duo-compact-conditions .section-title{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  flex-wrap:wrap!important;column-gap:7px!important;row-gap:5px!important;
+  padding:0!important;margin:0!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .duo-compact-conditions .section-title h3{
+  font-size:12px!important;line-height:1.28!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .duo-add-condition{
+  min-height:28px!important;padding:5px 7px!important;
+  font-size:10px!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .active-condition-list{
+  display:grid!important;gap:5px!important;
+  min-width:0!important;width:100%!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .active-condition-item{
+  display:flex!important;align-items:flex-start!important;justify-content:space-between!important;
+  gap:8px!important;min-width:0!important;
+  padding:7px 8px!important;border-radius:7px!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .active-condition-item > div{
+  min-width:0!important;flex:1 1 0!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .active-condition-item b{
+  display:block!important;font-size:12px!important;line-height:1.25!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .active-condition-item small{
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;
+  overflow:hidden!important;overflow-wrap:anywhere!important;
+  color:var(--muted,#c3b4bf)!important;
+  font:500 12px/1.45 Inter,system-ui,sans-serif!important;
+  margin-top:4px!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .active-condition-item.duo-condition-expanded small{
+  display:block!important;overflow:visible!important;
+  -webkit-line-clamp:unset!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .active-condition-item > .danger{
+  min-height:27px!important;padding:5px 8px!important;
+  font-size:10px!important;flex:0 0 auto!important;
+}
+#sheetView [data-pane="combat"] .duo-condition-more{
+  display:inline-flex!important;min-height:26px!important;
+  padding:4px 2px!important;margin:3px 0 0!important;
+  border:0!important;background:transparent!important;
+  color:var(--red,#ef5367)!important;
+  font:700 11px/1.3 Inter,system-ui,sans-serif!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .duo-conditions-empty .active-condition-list .notice{
+  padding:0!important;margin:0!important;font-size:11px!important;
+  line-height:1.3!important;
+}
+/* Estado mental original, atualizado pela própria ficha, sem cartões duplicados. */
+#sheetView [data-pane="combat"].duo-combat-organized .duo-combat-topline > .qol-sanity-card{
+  display:flex!important;flex-direction:column!important;
+  align-items:stretch!important;justify-content:flex-start!important;
+  min-height:0!important;gap:7px!important;
+  margin:0!important;padding:10px 11px!important;
+  border-radius:11px!important;
+  border:1px solid var(--line,#4b2b35)!important;
+  border-left:3px solid var(--accent,#e24758)!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline > .qol-sanity-card[data-tone="good"]{border-left-color:#4bc46b!important}
+#sheetView [data-pane="combat"] .duo-combat-topline > .qol-sanity-card[data-tone="warn"]{border-left-color:#e0b43e!important}
+#sheetView [data-pane="combat"] .duo-combat-topline > .qol-sanity-card[data-tone="orange"]{border-left-color:#ed802f!important}
+#sheetView [data-pane="combat"] .duo-combat-topline > .qol-sanity-card[data-tone="danger"]{border-left-color:#e23a50!important}
+#sheetView [data-pane="combat"] .duo-sanity-kicker{
+  color:var(--muted,#c3b4bf)!important;text-transform:uppercase!important;
+  font:800 10px/1.2 Inter,system-ui,sans-serif!important;
+  letter-spacing:.075em!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .qol-sanity-head{
+  display:flex!important;align-items:center!important;
+  flex-wrap:wrap!important;gap:7px!important;min-width:0!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .qol-sanity-value{
+  font:850 21px/1 Inter,system-ui,sans-serif!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .qol-sanity-name b{
+  font-size:12px!important;line-height:1.3!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .qol-sanity-name small{
+  font-size:10px!important;line-height:1.35!important;
+}
+#sheetView [data-pane="combat"] .duo-sanity-more{
+  min-width:0!important;max-width:100%!important;
+}
+#sheetView [data-pane="combat"] .duo-sanity-more summary{
+  cursor:pointer!important;
+  list-style:none!important;
+  color:var(--muted,#c3b4bf)!important;
+  font:650 10px/1.3 Inter,system-ui,sans-serif!important;
+  padding:1px 0!important;margin:0!important;
+}
+#sheetView [data-pane="combat"] .duo-sanity-more summary::-webkit-details-marker{display:none}
+#sheetView [data-pane="combat"] .duo-sanity-more summary:before{
+  content:"▸";color:var(--red,#e24758);margin-right:5px;
+}
+#sheetView [data-pane="combat"] .duo-sanity-more[open] summary:before{content:"▾"}
+#sheetView [data-pane="combat"] .duo-combat-topline .qol-sanity-effect{
+  margin:6px 0 0!important;font-size:11px!important;
+  line-height:1.43!important;color:var(--text,#f6eff3)!important;
+  overflow-wrap:anywhere!important;
+}
+#sheetView [data-pane="combat"] .duo-combat-topline .qol-sanity-effect small{
+  display:block!important;margin-top:5px!important;
+  font-size:9px!important;line-height:1.35!important;
+}
+/* Baralho vazio: mantém o acesso sem reservar área de ilustração. */
+#sheetView [data-pane="combat"].duo-combat-organized .ability-quick-deck.is-empty{
+  display:flex!important;flex-direction:column!important;
+  padding:10px 12px!important;min-height:0!important;
+  gap:5px!important;margin:0 0 10px!important;
+}
+#sheetView [data-pane="combat"] .ability-quick-deck.is-empty > .muted.compact{display:none!important}
+#sheetView [data-pane="combat"] .ability-quick-deck.is-empty .ability-quick-deck-head{
+  padding:0!important;margin:0!important;gap:7px!important;
+}
+#sheetView [data-pane="combat"] .ability-quick-deck.is-empty .ability-quick-deck-head .eyebrow{display:none!important}
+#sheetView [data-pane="combat"] .ability-quick-deck.is-empty .ability-quick-deck-head h3{
+  font-size:12px!important;
+}
+#sheetView [data-pane="combat"] .ability-quick-deck.is-empty .ability-quick-empty{
+  display:block!important;min-height:0!important;
+  margin:0!important;padding:0!important;
+  border:0!important;background:transparent!important;box-shadow:none!important;
+}
+#sheetView [data-pane="combat"] .ability-quick-deck.is-empty .ability-quick-empty > span,
+#sheetView [data-pane="combat"] .ability-quick-deck.is-empty .ability-quick-empty b{display:none!important}
+#sheetView [data-pane="combat"] .ability-quick-deck.is-empty .ability-quick-empty p{
+  margin:0!important;color:var(--muted,#c3b4bf)!important;
+  font-size:11px!important;line-height:1.3!important;
+}
+/* Com espaço limitado, a faixa quebra em uma composição legível. */
+@media(max-width:1080px){
+  #sheetView [data-pane="combat"].duo-combat-organized > .duo-combat-topline{
+    grid-template-columns:minmax(0,1.1fr) minmax(0,1.2fr)!important;
+  }
+  #sheetView [data-pane="combat"] .duo-combat-topline > .qol-sanity-card{
+    grid-column:1/-1!important;
+  }
+  #sheetView [data-pane="combat"] .duo-combat-topline > .qol-sanity-card .qol-sanity-head{
+    gap:10px!important;
+  }
+}
+@media(max-width:760px){
+  #sheetView [data-pane="combat"].duo-combat-organized > .duo-combat-topline{
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:7px!important;
+  }
+  #sheetView [data-pane="combat"] .duo-combat-topline > .qol-sanity-card{
+    grid-column:auto!important;
+  }
+  #sheetView [data-pane="combat"] .duo-combat-topline > .duo-combat-nav{
+    padding:9px!important;
+  }
+  #sheetView [data-pane="combat"] .duo-combat-topline .duo-combat-choice{
+    min-height:38px!important;
+  }
+  #sheetView [data-pane="combat"] .duo-combat-topline .duo-compact-conditions{
+    padding:9px 10px!important;
+  }
+}
+
+/* Somente a navegação de estado é compartilhada; o baralho de acesso rápido
+   pertence ao modo Combate, nunca ao índice de Poderes. */
+#sheetView [data-pane="combat"].duo-combat-organized[data-duo-combat-view="powers"] .ability-quick-deck{
+  display:none!important;
+}
+
+/* A informação mecânica essencial permanece visível mesmo com os efeitos recolhidos. */
+#sheetView [data-pane="combat"] .duo-sanity-auto-peek{
+  display:inline-flex!important;align-self:flex-start!important;
+  max-width:100%!important;flex-wrap:wrap!important;
+  padding:4px 6px!important;border-radius:6px!important;
+  border:1px solid color-mix(in srgb,var(--accent,#e24758) 32%,var(--line,#4b2b35))!important;
+  color:var(--text,#f6eff3)!important;
+  background:color-mix(in srgb,var(--accent,#e24758) 7%,transparent)!important;
+  font:750 10px/1.25 Inter,system-ui,sans-serif!important;
+}
