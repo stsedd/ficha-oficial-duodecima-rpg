@@ -127,7 +127,7 @@
       b.setAttribute('tabindex',active?'0':'-1');
     }
     for(const child of state.pane.children){
-      if(child.classList.contains('duo-combat-nav'))continue;
+      if(child.classList.contains('duo-combat-nav')||child.classList.contains('duo-combat-topline'))continue;
       if(child.classList.contains('duo-power-tools'))continue;
       if(child.classList.contains('combat-resource-dock'))continue;
       if(child.classList.contains('ability-quick-deck')){child.dataset.duoSection='quick';continue}
