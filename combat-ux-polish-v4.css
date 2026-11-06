@@ -116,3 +116,12 @@
     padding:3px 5px!important;
   }
 }
+
+
+/* Sem condições ativas, a área é curta: conservar os botões lado a lado.
+   Quando uma condição ocupa mais altura, empilhá-los aproveita a coluna. */
+@media(min-width:761px){
+  #sheetView [data-pane="combat"].duo-combat-organized .duo-combat-topline:has(.duo-compact-conditions.duo-conditions-empty) .duo-combat-nav-buttons{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
