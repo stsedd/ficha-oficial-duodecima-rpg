@@ -171,6 +171,14 @@
     powers.append(count);
     picks.append(combat,powers);
     nav.append(title,picks);
+    nav.addEventListener('keydown',e=>{
+      if(!e.target.closest('.duo-combat-choice'))return;
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
+      e.preventDefault();
+      const next=(e.key==='Home'||e.key==='ArrowLeft')?'quick':'powers';
+      selectView(next);
+      nav.querySelector('[data-duo-combat-view="'+next+'"]')?.focus();
+    });
     const dock=pane.querySelector('.combat-resource-dock');
     if(dock)dock.after(nav);else pane.prepend(nav);
     // Barra de consulta: antes dos poderes, depois do baralho de acesso rápido.
