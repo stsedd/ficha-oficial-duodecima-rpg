@@ -184,7 +184,7 @@
     // Barra de consulta: antes dos poderes, depois do baralho de acesso rápido.
     const controls=element('section','duo-power-tools');
     controls.append(element('h3','','Consultar habilidades'));
-    const help=element('p','duo-power-guidance','Mantenha abertas as habilidades frequentes e recolha as situacionais. As cartas do baralho já ficam em destaque.');
+    const help=element('p','duo-power-guidance','Use a seta no cartão para abrir ou minimizar. Mantenha visíveis os poderes que usa sempre; os fixados no baralho ficam abertos por padrão.');
     controls.append(help);
     const row=element('div','duo-power-controls');
     const search=element('input','duo-power-search');
@@ -225,6 +225,8 @@
     pane.dataset.duoCombatReady='1';
     pane.classList.add('duo-combat-organized');
     for(const c of cards())decorateCard(c);
+    const oldHint=pane.querySelector('.abilities-wrap .ability-section-head .muted');
+    if(oldHint)oldHint.textContent='Poderes situacionais podem ficar recolhidos. Abra cada habilidade para consultar todas as estacas e regras.';
     toolbar(pane);
     applyView();
     applyFilters();
