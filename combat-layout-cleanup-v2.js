@@ -167,7 +167,7 @@
     for(const meter of combat.querySelectorAll('.combat-resource-dock .combat-mini-meter')){
       const chip=meter.closest('.combat-resource-chip');
       const raw=chip?.querySelector('strong')?.textContent||'';
-      const match=raw.match(/(-?\\d+)\\s*\\/\\s*(\\d+)/);
+      const match=raw.match(/(-?\d+)\s*\/\s*(\d+)/);
       if(!match)continue;
       const current=Number(match[1]),max=Number(match[2]);
       if(!Number.isFinite(current)||!Number.isFinite(max)||max<=0)continue;
