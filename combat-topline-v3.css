@@ -218,3 +218,14 @@
 #sheetView [data-pane="combat"].duo-combat-organized[data-duo-combat-view="powers"] .ability-quick-deck{
   display:none!important;
 }
+
+/* A informação mecânica essencial permanece visível mesmo com os efeitos recolhidos. */
+#sheetView [data-pane="combat"] .duo-sanity-auto-peek{
+  display:inline-flex!important;align-self:flex-start!important;
+  max-width:100%!important;flex-wrap:wrap!important;
+  padding:4px 6px!important;border-radius:6px!important;
+  border:1px solid color-mix(in srgb,var(--accent,#e24758) 32%,var(--line,#4b2b35))!important;
+  color:var(--text,#f6eff3)!important;
+  background:color-mix(in srgb,var(--accent,#e24758) 7%,transparent)!important;
+  font:750 10px/1.25 Inter,system-ui,sans-serif!important;
+}
