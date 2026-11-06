@@ -53,6 +53,9 @@ try{
                  (p.label==='mobile'&&['status','combat','inventory'].includes(tab));
     if(images){
       if(tab==='combat'){
+       // Nesta prévia a consulta de poderes é um painel próprio.
+       const powersTab=page.locator('[data-duo-combat-view="powers"]');
+       if(await powersTab.count())await powersTab.click();
        const power=page.locator('.abilities-wrap .ability-group').first();
        if(await power.count()){await power.scrollIntoViewIfNeeded();await page.waitForTimeout(100);}
       }
