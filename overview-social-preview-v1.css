@@ -1,0 +1,392 @@
+/* Duodécima · Perfil social + organização da Visão Geral.
+   Somente ficha-teste.html. Conserva a identidade vermelha/romana da ficha. */
+body.duo-overview-test:has(#sheetView:not(.hidden)) #siteBanner{
+  display:none!important; /* mesma capa agora aparece dentro do perfil */
+}
+body.duo-overview-test #sheetView .sheet-frame > .character-rail.duo-social-profile{
+  position:sticky!important;top:12px!important;
+  display:flex!important;flex-direction:column!important;
+  gap:0!important;align-items:stretch!important;
+  min-width:0!important;max-width:100%!important;
+  padding:0 12px 12px!important;
+  overflow:hidden!important;
+  border-radius:13px!important;
+  background:var(--panel,#080508)!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile .rail-brandline,
+body.duo-overview-test #sheetView .duo-social-profile .rail-mobile-summary,
+body.duo-overview-test #sheetView .duo-social-profile .rail-mobile-profile-toggle{
+  display:none!important;
+}
+body.duo-overview-test #sheetView .duo-profile-cover{
+  position:relative!important;
+  display:block!important;
+  height:120px!important;
+  min-height:120px!important;
+  margin:0 -12px!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(ellipse at 80% 12%,rgba(209,37,57,.38),transparent 44%),
+    radial-gradient(ellipse at 16% 95%,rgba(138,58,80,.2),transparent 48%),
+    repeating-linear-gradient(140deg,transparent 0 13px,rgba(255,255,255,.025) 13px 14px),
+    linear-gradient(125deg,#320b15,#120b10 55%,#050508)!important;
+  border-bottom:1px solid #6d2b39!important;
+}
+body.duo-overview-test #sheetView .duo-profile-cover-image{
+  display:block!important;position:absolute!important;inset:0!important;
+  width:100%!important;height:100%!important;
+  object-fit:cover!important;object-position:center!important;
+  filter:brightness(.84) saturate(.92)!important;
+  border:0!important;
+}
+body.duo-overview-test #sheetView .duo-profile-cover-image[hidden]{display:none!important}
+body.duo-overview-test #sheetView .duo-profile-cover::after{
+  content:"";position:absolute;inset:0;
+  pointer-events:none;
+  background:linear-gradient(180deg,transparent 35%,rgba(12,5,8,.68));
+}
+body.duo-overview-test #sheetView .duo-profile-cover-caption{
+  position:absolute!important;z-index:2!important;
+  left:13px!important;top:12px!important;
+  color:#f3d6c0!important;
+  font:800 9px/1.2 Inter,system-ui,sans-serif!important;
+  letter-spacing:.13em!important;
+  text-shadow:0 2px 6px #080305;
+}
+body.duo-overview-test #sheetView .duo-profile-cover-edit{
+  position:absolute!important;z-index:3!important;right:10px!important;top:10px!important;
+  width:29px!important;height:29px!important;
+  display:grid!important;place-items:center!important;
+  border:1px solid rgba(255,255,255,.35)!important;
+  border-radius:8px!important;background:rgba(9,6,9,.7)!important;
+  color:#fff!important;box-shadow:none!important;cursor:pointer!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile > .rail-portrait-wrap{
+  position:relative!important;z-index:4!important;align-self:flex-start!important;
+  display:block!important;width:110px!important;max-width:110px!important;
+  height:110px!important;min-height:110px!important;
+  margin:-48px 0 0 9px!important;padding:0!important;
+  grid-column:auto!important;grid-row:auto!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile > .rail-portrait-wrap > .rail-portrait{
+  display:grid!important;place-items:center!important;
+  width:110px!important;height:110px!important;max-height:none!important;
+  aspect-ratio:1!important;
+  border:5px solid var(--panel,#080508)!important;border-radius:50%!important;
+  background-size:cover!important;background-position:center 25%!important;
+  box-shadow:0 0 0 1px #7a4149,0 9px 22px rgba(0,0,0,.33)!important;
+  font:750 26px/1 Georgia,serif!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile > .rail-portrait-wrap > .rail-photo-button{
+  position:absolute!important;
+  left:auto!important;right:0!important;bottom:2px!important;
+  display:grid!important;place-items:center!important;
+  width:32px!important;height:32px!important;
+  min-width:32px!important;min-height:32px!important;
+  margin:0!important;padding:0!important;
+  border-radius:50%!important;border:2px solid var(--panel,#080508)!important;
+  color:#f9e6e8!important;background:#51202b!important;
+  font:800 17px/1 Inter,system-ui,sans-serif!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile > .rail-identity{
+  display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+  gap:3px!important;
+  grid-column:auto!important;grid-row:auto!important;
+  padding:8px 2px 9px!important;margin:0!important;
+  min-width:0!important;max-width:100%!important;
+  border-bottom:1px solid var(--line,#3e2a33)!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile .rail-identity .eyebrow{
+  display:none!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile .rail-identity h2{
+  order:0!important;
+  margin:0!important;
+  font:750 clamp(22px,2vw,29px)/1.09 Georgia,serif!important;
+  letter-spacing:-.022em!important;
+  overflow-wrap:anywhere!important;
+  color:var(--text,#f8eff2)!important;
+}
+body.duo-overview-test #sheetView .duo-profile-kind{
+  order:1!important;
+  color:var(--muted,#beafb4)!important;
+  font:650 11px/1.35 Inter,system-ui,sans-serif!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile .rail-meta{
+  order:2!important;display:flex!important;flex-wrap:wrap!important;
+  gap:4px!important;align-items:center!important;margin:4px 0!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile .rail-meta > span{
+  display:inline-flex!important;align-items:center!important;
+  padding:4px 6px!important;max-width:100%!important;
+  border-radius:6px!important;
+  background:color-mix(in srgb,var(--panel,#090709) 84%,var(--theme-accent,#a72c44))!important;
+  border:1px solid var(--line,#4a3139)!important;
+  color:var(--text,#e8dbe0)!important;
+  font:600 10px/1.2 Inter,system-ui,sans-serif!important;
+  overflow-wrap:anywhere!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile .rail-meta > .duo-profile-rebento-badge{
+  border-color:#a57743!important;color:#f1d0a4!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile .rail-tagline{
+  order:3!important;
+  margin:3px 0 0!important;
+  color:var(--muted,#cfbdc2)!important;
+  font:500 11px/1.45 Inter,system-ui,sans-serif!important;
+  white-space:normal!important;overflow-wrap:anywhere!important;
+}
+body.duo-overview-test #sheetView .duo-profile-orbs{
+  display:flex!important;flex-wrap:wrap!important;gap:6px!important;
+  align-items:center!important;margin:8px 0 9px!important;
+  padding:0!important;max-width:100%!important;
+}
+body.duo-overview-test #sheetView .duo-profile-orbs > .rail-portrait-badges{
+  display:flex!important;align-items:center!important;
+  justify-content:flex-start!important;
+  gap:6px!important;position:static!important;
+  inset:auto!important;left:auto!important;right:auto!important;
+  top:auto!important;bottom:auto!important;
+  margin:0!important;padding:0!important;
+  height:auto!important;min-height:0!important;width:auto!important;
+  pointer-events:auto!important;
+}
+body.duo-overview-test #sheetView .duo-profile-orbs > .rail-portrait-badges::after,
+body.duo-overview-test #sheetView .duo-profile-orbs .rail-orb::after{
+  display:none!important;content:none!important;
+}
+body.duo-overview-test #sheetView .duo-profile-orbs .rail-orb{
+  position:static!important;inset:auto!important;
+  display:flex!important;flex-direction:row!important;
+  align-items:center!important;justify-content:center!important;
+  gap:6px!important;
+  width:auto!important;height:34px!important;min-height:34px!important;
+  min-width:0!important;max-width:100%!important;
+  padding:4px 8px!important;margin:0!important;
+  border:1px solid var(--line,#53323b)!important;border-radius:8px!important;
+  color:var(--text,#eee2e4)!important;
+  background:color-mix(in srgb,var(--panel,#090709) 80%,var(--theme-accent,#bd2e41))!important;
+  box-shadow:none!important;
+}
+body.duo-overview-test #sheetView .duo-profile-orbs .rail-orb>*{
+  transform:none!important;margin:0!important;
+}
+body.duo-overview-test #sheetView .duo-profile-orbs .rail-orb span{
+  width:auto!important;margin:0!important;
+  color:var(--muted,#cbbac1)!important;
+  font:800 9px/1.1 Inter,system-ui,sans-serif!important;
+  white-space:nowrap!important;
+}
+body.duo-overview-test #sheetView .duo-profile-orbs .rail-orb strong{
+  display:inline-block!important;max-width:none!important;height:auto!important;
+  color:var(--text,#f5e9ed)!important;
+  font:800 15px/1.1 Inter,system-ui,sans-serif!important;
+}
+body.duo-overview-test #sheetView .duo-profile-orbs input#levelOrbInput{
+  display:inline-block!important;
+  width:43px!important;max-width:43px!important;min-width:34px!important;
+  height:24px!important;max-height:24px!important;
+  padding:1px 4px!important;margin:0!important;
+  border-radius:5px!important;background:#100b0d!important;
+  font:800 14px/1.1 Inter,system-ui,sans-serif!important;
+  text-align:center!important;
+  color:var(--text,#fff)!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile > .rail-level-row{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:6px!important;margin:0 0 6px!important;padding:0!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile > .rail-level-row > div{
+  min-width:0!important;min-height:46px!important;
+  border:1px solid var(--line,#413039)!important;border-radius:8px!important;
+  padding:6px!important;background:transparent!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile > .rail-vitals{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:5px!important;margin:0!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile > .rail-vitals > div{
+  min-height:0!important;padding:6px!important;border-radius:8px!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile > .rail-death,
+body.duo-overview-test #sheetView .duo-social-profile > .rail-editor{
+  margin-top:8px!important;
+}
+/* Recursos já aparecem logo no alto da Visão Geral, sem duas cópias na lateral. */
+body.duo-overview-test #sheetView .sheet-frame:has([data-pane="status"]:not(.hidden)) > .duo-social-profile > .rail-level-row,
+body.duo-overview-test #sheetView .sheet-frame:has([data-pane="status"]:not(.hidden)) > .duo-social-profile > .rail-vitals{
+  display:none!important;
+}
+body.duo-overview-test #sheetView .duo-social-profile > .duo-profile-extras{
+  margin:7px 0!important;
+  border:1px solid var(--line,#473139)!important;border-radius:9px!important;
+}
+body.duo-overview-test #sheetView .duo-profile-extras > summary{
+  list-style:none!important;cursor:pointer!important;
+  padding:9px 10px!important;
+  color:var(--muted,#c4afb7)!important;
+  font:700 11px/1.2 Inter,system-ui,sans-serif!important;
+}
+body.duo-overview-test #sheetView .duo-profile-extras > summary::-webkit-details-marker{display:none}
+body.duo-overview-test #sheetView .duo-profile-extras > summary::before{
+  content:"▸";margin-right:7px;color:var(--red,#e23d51);
+}
+body.duo-overview-test #sheetView .duo-profile-extras[open] > summary::before{content:"▾"}
+body.duo-overview-test #sheetView .duo-profile-extras > button{
+  display:block!important;width:calc(100% - 14px)!important;
+  margin:7px!important;min-height:34px!important;
+}
+/* Rebento: a lateral só exibe selo; o controle real e suas escolhas estão em Roma. */
+body.duo-overview-test #sheetView .duo-social-profile > .rebento-profile-control{
+  display:none!important;
+}
+body.duo-overview-test #sheetView [data-pane="roma"] .duo-roma-rebento-card{
+  margin:10px 0!important;padding:13px!important;
+  border:1px solid var(--line,#50313d)!important;border-radius:11px!important;
+  background:var(--panel,#11090d)!important;
+}
+body.duo-overview-test #sheetView [data-pane="roma"] .duo-roma-rebento-heading{
+  display:flex!important;flex-wrap:wrap!important;align-items:baseline!important;
+  gap:6px 13px!important;margin:0 0 9px!important;
+}
+body.duo-overview-test #sheetView [data-pane="roma"] .duo-roma-rebento-heading h3{
+  margin:0!important;font:750 16px/1.2 Georgia,serif!important;color:var(--text,#fff)!important;
+}
+body.duo-overview-test #sheetView [data-pane="roma"] .duo-roma-rebento-heading p{
+  margin:0!important;font:500 11px/1.3 Inter,system-ui,sans-serif!important;color:var(--muted,#c6b6bd)!important;
+}
+body.duo-overview-test #sheetView [data-pane="roma"] .duo-roma-rebento-controls{
+  display:block!important;margin:0!important;
+}
+body.duo-overview-test #sheetView [data-pane="roma"] .duo-rebento-original-approval{
+  display:none!important;
+}
+/* A Visão Geral mantém duas colunas funcionais: atributos e perícias. */
+body.duo-overview-test #sheetView [data-pane="status"] .overview-grid{
+  display:grid!important;
+  grid-template-columns:152px minmax(0,1fr)!important;
+  align-items:start!important;gap:11px!important;
+  min-width:0!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] .attribute-sidebar{
+  grid-column:1!important;width:100%!important;min-width:0!important;
+  padding:10px!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] .attribute-sidebar .section-title{
+  display:flex!important;justify-content:space-between!important;align-items:center!important;
+  gap:6px!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] .attribute-sidebar .section-title .eyebrow{
+  display:none!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] .attribute-sidebar .section-title h3{
+  font:750 13px/1.3 Inter,system-ui,sans-serif!important;
+  white-space:nowrap!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] .overview-skills{
+  grid-column:2!important;min-width:0!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] .skills-ledger-head{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  flex-wrap:wrap!important;gap:6px!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] .duo-skill-legend{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  font:650 10px/1.25 Inter,system-ui,sans-serif!important;
+  color:var(--muted,#c6b7bf)!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] .skill-ledger-group-title{
+  letter-spacing:.04em!important;
+  line-height:1.2!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] .skill-ledger-row{
+  min-height:35px!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] .skill-ledger-row .skill-tiny-check{
+  min-height:31px!important;
+}
+/* Talentos, diagnósticos e configuração de linhagem permanecem completos,
+   apenas fechados até que o jogador peça os detalhes. */
+body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-secondary,
+body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-lineage{
+  display:block!important;
+  margin:9px 0!important;
+  padding:0!important;
+  border:1px solid var(--line,#4c313b)!important;
+  border-radius:11px!important;
+  background:var(--panel,#10090c)!important;
+  overflow:visible!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-secondary > summary,
+body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-lineage > summary{
+  cursor:pointer!important;list-style:none!important;
+  min-height:39px!important;
+  padding:10px 12px!important;
+  font:750 11px/1.3 Inter,system-ui,sans-serif!important;
+  color:var(--text,#eee2e4)!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-secondary > summary::-webkit-details-marker,
+body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-lineage > summary::-webkit-details-marker{
+  display:none!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-secondary > summary::before,
+body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-lineage > summary::before{
+  content:"▸";margin-right:8px;color:var(--red,#e34458);
+}
+body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-secondary[open] > summary::before,
+body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-lineage[open] > summary::before{
+  content:"▾";
+}
+body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-secondary > .overview-aux{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+  width:100%!important;min-width:0!important;
+  padding:10px!important;margin:0!important;
+}
+body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-lineage > .lineage-config-visible{
+  padding:10px!important;margin:0!important;min-width:0!important;
+}
+@media(min-width:781px) and (max-width:1150px){
+  body.duo-overview-test #sheetView [data-pane="status"] .overview-grid{
+    grid-template-columns:140px minmax(0,1fr)!important;
+  }
+  body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-secondary > .overview-aux{
+    grid-template-columns:1fr!important;
+  }
+}
+@media(max-width:900px){
+  body.duo-overview-test #sheetView .sheet-frame > .character-rail.duo-social-profile{
+    position:static!important;
+  }
+}
+@media(max-width:780px){
+  body.duo-overview-test #sheetView [data-pane="status"] .overview-grid{
+    grid-template-columns:minmax(0,1fr)!important;gap:9px!important;
+  }
+  body.duo-overview-test #sheetView [data-pane="status"] .attribute-sidebar,
+  body.duo-overview-test #sheetView [data-pane="status"] .overview-skills{
+    grid-column:1!important;
+  }
+  body.duo-overview-test #sheetView [data-pane="status"] > .duo-overview-secondary > .overview-aux{
+    grid-template-columns:1fr!important;
+  }
+  body.duo-overview-test #sheetView .duo-profile-cover{
+    height:115px!important;min-height:115px!important;
+  }
+  body.duo-overview-test #sheetView .duo-social-profile > .rail-portrait-wrap{
+    width:100px!important;height:100px!important;min-height:100px!important;
+  }
+  body.duo-overview-test #sheetView .duo-social-profile > .rail-portrait-wrap > .rail-portrait{
+    width:100px!important;height:100px!important;
+  }
+}
+@media(max-width:420px){
+  body.duo-overview-test #sheetView .duo-social-profile > .rail-level-row,
+  body.duo-overview-test #sheetView .duo-social-profile > .rail-vitals{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  body.duo-overview-test #sheetView .duo-profile-cover{height:101px!important;min-height:101px!important}
+  body.duo-overview-test #sheetView .duo-social-profile .rail-identity h2{font-size:23px!important}
+  body.duo-overview-test #sheetView .duo-profile-cover-caption{font-size:8px!important}
+}
