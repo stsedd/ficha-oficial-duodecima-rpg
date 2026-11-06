@@ -149,8 +149,16 @@
     if(existing&&!sanity.querySelector('.duo-sanity-more')){
       const detail=make('details','duo-sanity-more');
       const isHealthy=sanity.dataset.tone==='good';
-      detail.open=!isHealthy;
-      detail.append(make('summary','',isHealthy?'Ver estado mental':'Efeitos do estado mental'));
+      // Penalidades importantes aparecem no resumo; a explicação extensa não
+      // aumenta a altura do painel sem que o jogador a solicite.
+      const auto=existing.querySelector('.qol-sanity-auto')?.textContent?.trim()
+        .replace(/^automático\s*·\s*/i,'');
+      if(auto){
+        const note=make('span','duo-sanity-auto-peek',auto);
+        const head=sanity.querySelector('.qol-sanity-head');
+        if(head)head.after(note);else sanity.append(note);
+      }
+      detail.append(make('summary','',isHealthy?'Ver estado mental':'Ver efeitos'));
       existing.before(detail);detail.append(existing);
     }
   }
