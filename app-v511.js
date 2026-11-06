@@ -219,7 +219,7 @@
     currentHp:null,currentEnergy:null,currentSanity:100,resourceCurrent:0,resourceValues:{},targetResources:{},
     abilityStakes:{},abilityChoices:{},choiceDetails:{},abilityUses:{},abilityVisuals:{},abilityDeck:[],conditions:[],exhaustion:0,death:defaultDeath(),tempMods:defaultTempMods(),fortunaBlessing:false,fortunaBlessingMonth:'',
     skillTrainings:[],weapons:[],armor:defaultArmor(),shield:defaultShield(),lastRoll:null,
-    activeTab:'status',appearance:{mode:'dark',palette:'red',special:'none',exclusiveThemeId:''},history:{summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',birth:'',residence:'',portraitUrl:'',bannerUrl:'',bannerSourceUrl:'',bannerPositionX:50,bannerPositionY:50,bannerScale:100},notes:'',
+    activeTab:'status',appearance:{mode:'dark',palette:'red',special:'none',exclusiveThemeId:''},history:{summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',epithet:'',aliases:'',office:'',birth:'',residence:'',portraitUrl:'',portraitSourceUrl:'',bannerUrl:'',bannerSourceUrl:'',bannerPositionX:50,bannerPositionY:50,bannerScale:100},notes:'',
     createdAt:null,updatedAt:null
   });
   let state = defaultState();
@@ -851,7 +851,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
     out.appearance.palette=THEME_PALETTES[out.appearance.palette]?out.appearance.palette:'red';
     out.appearance.special=['fire','snow'].includes(out.appearance.special)?out.appearance.special:'none';
     out.appearance.exclusiveThemeId=normalizeExclusiveThemeId(out.appearance.exclusiveThemeId||'');
-    out.history=Object.assign({summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',birth:'',residence:'',portraitUrl:'',bannerUrl:'',bannerSourceUrl:'',bannerPositionX:50,bannerPositionY:50,bannerScale:100},data?.history||{});
+    out.history=Object.assign({summary:'',goals:'',relationships:'',milestones:'',origin:'',age:'',affiliation:'',description:'',tagline:'',epithet:'',aliases:'',office:'',birth:'',residence:'',portraitUrl:'',portraitSourceUrl:'',bannerUrl:'',bannerSourceUrl:'',bannerPositionX:50,bannerPositionY:50,bannerScale:100},data?.history||{});
     if(!out.history.bannerSourceUrl&&out.history.bannerUrl)out.history.bannerSourceUrl=out.history.bannerUrl;
     out.history.bannerPositionX=clamp(Number(out.history.bannerPositionX)||50,0,100);
     out.history.bannerPositionY=clamp(Number(out.history.bannerPositionY)||50,0,100);
@@ -1026,7 +1026,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function finishCreation(){if(!canFinishCreation())return;state.isCreated=true;state.createdAt=state.createdAt||new Date().toISOString();syncCurrentCaps();save();render();notify('Ficha criada.')}
 
   function renderTabs(){
-    const tabs=[['status','Visão geral'],['combat','Combate & Poderes'],['inventory','Inventário'],['familiars','Familiares'],['roma','Roma'],['magic','Magia'],['history','História'],['notes','Notas']];
+    const tabs=[['status','Visão geral'],['combat','Combate & Poderes'],['inventory','Inventário'],['familiars','Familiares'],['roma','Roma'],['magic','Magia'],['history','Personagem'],['notes','Notas']];
     return `<nav class="sheet-tabs" data-theme-component="tabs" aria-label="Seções da ficha"><button class="sheet-tab-edge sheet-tab-edge--left" type="button" data-tab-scroll="-1" aria-label="Mostrar abas anteriores">‹</button><div class="sheet-tab-scroll">${tabs.map(([id,label],idx)=>`<button type="button" data-tab="${id}" data-theme-tab="${id}" aria-current="${state.activeTab===id?'page':'false'}" class="${state.activeTab===id?'active':''}"><span>${String(idx+1).padStart(2,'0')}</span>${label}</button>`).join('')}</div><button class="sheet-tab-edge sheet-tab-edge--right" type="button" data-tab-scroll="1" aria-label="Mostrar próximas abas">›</button><button class="sheet-global-search-trigger" type="button" data-global-search aria-label="Busca rápida na ficha" title="Busca rápida · Ctrl + K"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 5 5"></path></svg></button></nav>`;
   }
   function resourceAdjustBox(kind,label,current,max,quick,context='status',showBand=false){
@@ -1153,7 +1153,9 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
 
   function renderCharacterRail(g){
     const h=state.history||{},band=sanityBand(),energy=energyBand();
-    const profileBits=[h.age?`${esc(h.age)} anos`:'',state.roma?.cohort?esc(state.roma.cohort):'',h.origin?esc(h.origin):'',state.roma?.citizenship?esc(state.roma.citizenship):''].filter(Boolean);
+    const role=rankById('legion',state.roma?.legionRank)?.name||'';
+    const publicRole=String(h.office||role||state.roma?.job||'').trim();
+    const profileBits=[state.roma?.cohort||h.affiliation||'Coorte não informada',publicRole,fameTotal()>0?fameBand().name:''].filter(Boolean).map(esc);
     let mobileProfileExpanded=false;
     try{mobileProfileExpanded=sessionStorage.getItem('duodecima_mobile_profile_expanded')==='1'}catch(_){}
     return `<aside class="character-rail card" data-theme-component="profile" data-theme-frame="profile" data-mobile-expanded="${mobileProfileExpanded?'true':'false'}">
@@ -1171,22 +1173,20 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
         </div>
       </div>
       <button id="railMobileProfileToggle" class="rail-mobile-profile-toggle ghost" type="button" aria-expanded="${mobileProfileExpanded?'true':'false'}">${mobileProfileExpanded?'Ocultar perfil':'Ver perfil completo'}</button>
-      <div class="rail-portrait-wrap"><div class="rail-portrait-badges"><label class="rail-orb rail-orb-level" data-theme-component="orb" data-orb="level" data-theme-frame="orb"><span>Nível</span><input id="levelOrbInput" type="number" min="${CORE_LEVEL_MIN}" max="${CORE_LEVEL_MAX}" value="${state.level}"></label><div class="rail-orb rail-orb-bp" data-theme-component="orb" data-orb="bp" data-theme-frame="orb"><span>BP</span><strong>${signed(bp())}</strong></div></div><div class="rail-portrait ${h.portraitUrl?'has-image':''}"${h.portraitUrl?` style="background-image:url('${esc(h.portraitUrl)}')"`:''}>${h.portraitUrl?'':esc(initials(state.name||g.name))}</div><button id="heroPortraitUploadBtn" class="rail-photo-button" type="button">Trocar retrato</button></div>
-      <div class="rail-identity"><p class="eyebrow">${esc(g.name)}${!isMortal()&&state.lineage?.type!=='normal'?' · LEGADO':''}</p><h2>${esc(state.name||'Sem nome')}</h2>${h.tagline?`<p class="rail-tagline">${esc(h.tagline)}</p>`:''}<div class="rail-meta">${profileBits.length?profileBits.map(x=>`<span>${x}</span>`).join(''):'<span>Perfil sem detalhes adicionais</span>'}</div></div>
+      <div class="rail-portrait-wrap">
+        <div class="rail-portrait ${h.portraitUrl?'has-image':''}"${h.portraitUrl?` style="background-image:url('${esc(h.portraitUrl)}')"`:''}>${h.portraitUrl?'':esc(initials(state.name||g.name))}</div>
+        <button id="heroPortraitUploadBtn" class="rail-photo-button" type="button" title="Reenquadrar o retrato" aria-label="Reenquadrar o retrato">✎</button>
+        <div class="rail-portrait-badges"><label class="rail-orb rail-orb-level" data-theme-component="orb" data-orb="level" data-theme-frame="orb"><span>NÍVEL</span><input id="levelOrbInput" aria-label="Nível" type="number" min="${CORE_LEVEL_MIN}" max="${CORE_LEVEL_MAX}" value="${state.level}"></label><div class="rail-orb rail-orb-bp" data-theme-component="orb" data-orb="bp" data-theme-frame="orb"><span>BP</span><strong>${signed(bp())}</strong></div></div>
+      </div>
+      <div class="rail-identity"><h2>${esc(state.name||'Sem nome')}</h2><p class="rail-prole">Prole de ${esc(g.name)}${!isMortal()&&state.lineage?.type!=='normal'?' · Legado':''}</p>${h.epithet?`<p class="rail-epithet">${esc(h.epithet)}</p>`:''}${h.aliases?`<p class="rail-aliases">Também conhecido como ${esc(h.aliases)}</p>`:''}<div class="rail-meta">${profileBits.map(x=>`<span>${x}</span>`).join('')}</div><button type="button" class="rail-profile-link" id="openCharacterProfile">Editar informações do personagem <span aria-hidden="true">↗</span></button></div>
       <div class="rail-level-row" data-theme-component="profile-stats"><div class="rail-defense-stat" ${themeResourceAttrs('defense')}><span>${themeIconSlot('defense')}<span class="theme-resource-label">Defesa</span></span><strong>${signed(defenseBonus())}</strong><label class="rail-defense-adjust" title="Bônus ou penalidade manual de Defesa">manual <input id="railDefenseAdjust" type="number" value="${Number(state.tempMods.defense)||0}"></label></div><div ${themeResourceAttrs('dt')}><span>${themeIconSlot('dt')}<span class="theme-resource-label">DT</span></span><strong>${castDtText()}</strong></div></div>
       <div class="rail-vitals" data-theme-component="profile-vitals"><div ${themeResourceAttrs('hp')}><span>${themeIconSlot('hp')}<span class="theme-resource-label">HP</span></span><b>${state.currentHp}/${hpMax()}</b></div><div ${themeResourceAttrs('en')}><span>${themeIconSlot('en')}<span class="theme-resource-label">EN</span></span><b>${energyValueText()}</b><small>${energy.name}</small></div><div ${themeResourceAttrs('san')}><span>${themeIconSlot('san')}<span class="theme-resource-label">SAN</span></span><b>${state.currentSanity}/100</b><small>${band.name}</small></div>${hudResources().slice(0,2).map(r=>{const key=resourceKey(r);return `<div ${themeResourceAttrs('divine',r.id||'',key)}><span>${themeIconSlot('divine')}<span class="theme-resource-label">${esc(r.name)}</span>${r.scope==='collective'?'<small>COLETIVO</small>':''}</span><b>${resourceValue(r)}/${resourceMaxFor(r)}</b></div>`}).join('')}</div>
-      <button id="fortunaBlessingToggle" class="${fortunaBlessingIsCurrent()?'primary':'ghost'} small-btn wide-button" type="button" aria-pressed="${fortunaBlessingIsCurrent()?'true':'false'}" title="Bênção mensal de Fortuna: +10 no HP máximo enquanto estiver ativa; reseta automaticamente na virada do mês">${fortunaBlessingIsCurrent()?'✓ Bênção de Fortuna ativa · +10 HP máximo':'Bênção de Fortuna · +10 HP máximo'}<small style="display:block">Reseta automaticamente no fim do mês</small></button>
-      ${renderMiniDeath()}
-      <details class="rail-editor"><summary>Editar perfil</summary><div class="stack">
-        <label><span class="label">Personagem</span><input id="sheetNameInput" value="${esc(state.name)}"></label>
+      <details class="rail-editor"><summary>Configurações do personagem</summary><div class="stack">
         <div class="grid two compact-fields"><label><span class="label">Player</span><input id="sheetPlayerInput" value="${esc(state.player)}"></label><label><span class="label">Nível</span><input id="levelInput" type="number" min="${CORE_LEVEL_MIN}" max="${CORE_LEVEL_MAX}" value="${state.level}"></label></div>
-        <label><span class="label">Frase / subtítulo</span><input data-history="tagline" value="${esc(h.tagline||'')}" placeholder="Ex.: Centurião da Segunda Coorte"></label>
-        <div class="grid two compact-fields"><label><span class="label">Idade</span><input data-history="age" value="${esc(h.age||'')}"></label><label><span class="label">Nascimento</span><input data-history="birth" value="${esc(h.birth||'')}"></label></div>
-        <div class="grid two compact-fields"><label><span class="label">Origem</span><input data-history="origin" value="${esc(h.origin||'')}"></label><label><span class="label">Residência</span><input data-history="residence" value="${esc(h.residence||h.affiliation||'')}"></label></div>
-        <label><span class="label">URL do retrato</span><input data-history="portraitUrl" value="${esc(h.portraitUrl||'')}"></label><div class="row"><button id="uploadPortraitBtn" type="button">Upload do retrato</button></div>
         <input id="portraitUploadInput" type="file" accept="image/*" hidden>
+        <button id="fortunaBlessingToggle" class="${fortunaBlessingIsCurrent()?'primary':'ghost'} small-btn wide-button" type="button" aria-pressed="${fortunaBlessingIsCurrent()?'true':'false'}" title="Bênção mensal de Fortuna: +10 no HP máximo enquanto estiver ativa; reseta automaticamente na virada do mês">${fortunaBlessingIsCurrent()?'✓ Bênção de Fortuna ativa · +10 HP máximo':'Bênção de Fortuna · +10 HP máximo'}<small style="display:block">Reseta automaticamente no fim do mês</small></button>
+        <button id="backCreation" class="ghost rail-back">Voltar à criação</button>
       </div></details>
-      <button id="backCreation" class="ghost rail-back">Voltar à criação</button>
     </aside>`;
   }
 
@@ -1520,8 +1520,16 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function fieldFromRoma(el){return (el?.dataset?.fameEntry||el?.dataset?.affinityEntry||'').split(':')[1]||''}
 
   function renderHistoryTab(){
-    const h=state.history||{};
-    return `<section class="tab-pane ${state.activeTab==='history'?'':'hidden'}" data-pane="history" data-theme-zone="history"><div class="grid two"><article class="card"><p class="eyebrow">INFORMAÇÕES NARRATIVAS</p><div class="grid two"><label><span class="label">Origem</span><input data-history="origin" value="${esc(h.origin||'')}" placeholder="Cidade, região, contexto..."></label><label><span class="label">Idade</span><input data-history="age" value="${esc(h.age||'')}" placeholder="Opcional"></label></div><label><span class="label">Afiliação / coorte / grupo</span><input data-history="affiliation" value="${esc(h.affiliation||'')}" placeholder="Informação livre"></label><label><span class="label">Descrição curta</span><textarea data-history="description" rows="5" placeholder="Aparência, personalidade ou apresentação...">${esc(h.description||'')}</textarea></label></article><article class="card"><p class="eyebrow">HISTÓRIA DO PERSONAGEM</p><label><span class="label">Resumo da história</span><textarea data-history="summary" rows="10" placeholder="Lore, passado, acontecimentos importantes...">${esc(h.summary||'')}</textarea></label></article></div><div class="grid two mechanics-section"><article class="card"><label><span class="label">Objetivos</span><textarea data-history="goals" rows="8" placeholder="Objetivos atuais, promessas, missões pessoais...">${esc(h.goals||'')}</textarea></label></article><article class="card"><label><span class="label">Vínculos & relações</span><textarea data-history="relationships" rows="8" placeholder="Aliados, família, rivalidades, relações importantes...">${esc(h.relationships||'')}</textarea></label></article></div><article class="card mechanics-section"><label><span class="label">Marcos da campanha</span><textarea data-history="milestones" rows="10" placeholder="Missões, títulos, decisões, acontecimentos que você quer lembrar...">${esc(h.milestones||'')}</textarea></label></article></section>`;
+    const h=state.history||{},r=state.roma||defaultRoma(),band=fameBand();
+    return `<section class="tab-pane ${state.activeTab==='history'?'':'hidden'}" data-pane="history" data-theme-zone="history"><article class="card character-data-editor">
+    <div class="section-title"><div><p class="eyebrow">IDENTIDADE</p><h2>Personagem</h2></div><span class="pill">Resumo exibido no perfil</span></div>
+    <div class="grid two"><label><span class="label">Nome</span><input id="characterNameInput" maxlength="130" value="${esc(state.name)}"></label><label><span class="label">Epíteto</span><input data-history="epithet" maxlength="100" value="${esc(h.epithet||'')}" placeholder="Ex.: A Indivisível"></label></div>
+    <div class="grid two"><label><span class="label">Prole divina</span><input value="${esc(god().name)}" disabled title="Definida na criação da ficha"></label><label><span class="label">Coorte</span><input id="characterCohortInput" maxlength="70" value="${esc(r.cohort||'')}" placeholder="Ex.: I Coorte"></label></div>
+    <div class="grid two"><label><span class="label">Patente na Legião</span><select id="characterLegionRank">${(romaRules.legionRanks||[]).map(x=>`<option value="${x.id}" ${r.legionRank===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label><label><span class="label">Cargo público (opcional)</span><input data-history="office" maxlength="110" value="${esc(h.office||'')}" placeholder="Ex.: Centuriã, emissária..."></label></div>
+    <div class="grid two"><label><span class="label">Alcunhas (opcional)</span><input data-history="aliases" maxlength="180" value="${esc(h.aliases||'')}" placeholder="Como também é conhecido"></label><label><span class="label">Condição de fama</span><input value="${esc(band.name)} · ${fameTotal()} pontos" readonly title="Calculada pelo histórico da aba Roma"></label></div>
+    <p class="muted compact">A fama acompanha os registros em Roma. Cargo público é uma informação narrativa, sem alterar salário ou patente.</p>
+    <div class="row character-photo-actions"><button type="button" id="characterPortraitCropBtn">Enquadrar foto</button><button type="button" id="characterPortraitUploadBtn">Enviar foto</button><button type="button" id="characterBannerEditBtn">Ajustar capa</button></div>
+    </article><div class="grid two"><article class="card"><p class="eyebrow">INFORMAÇÕES NARRATIVAS</p><div class="grid two"><label><span class="label">Origem</span><input data-history="origin" value="${esc(h.origin||'')}" placeholder="Cidade, região, contexto..."></label><label><span class="label">Idade</span><input data-history="age" value="${esc(h.age||'')}" placeholder="Opcional"></label></div><label><span class="label">Afiliação / coorte / grupo</span><input data-history="affiliation" value="${esc(h.affiliation||'')}" placeholder="Informação livre"></label><div class="grid two"><label><span class="label">Data de nascimento</span><input data-history="birth" value="${esc(h.birth||'')}" placeholder="Opcional"></label><label><span class="label">Residência</span><input data-history="residence" value="${esc(h.residence||'')}" placeholder="Onde vive atualmente"></label></div><label><span class="label">Frase ou subtítulo</span><input data-history="tagline" value="${esc(h.tagline||'')}" placeholder="Uma frase do personagem"></label><label><span class="label">Descrição curta</span><textarea data-history="description" rows="5" placeholder="Aparência, personalidade ou apresentação...">${esc(h.description||'')}</textarea></label></article><article class="card"><p class="eyebrow">HISTÓRIA DO PERSONAGEM</p><label><span class="label">Resumo da história</span><textarea data-history="summary" rows="10" placeholder="Lore, passado, acontecimentos importantes...">${esc(h.summary||'')}</textarea></label></article></div><div class="grid two mechanics-section"><article class="card"><label><span class="label">Objetivos</span><textarea data-history="goals" rows="8" placeholder="Objetivos atuais, promessas, missões pessoais...">${esc(h.goals||'')}</textarea></label></article><article class="card"><label><span class="label">Vínculos & relações</span><textarea data-history="relationships" rows="8" placeholder="Aliados, família, rivalidades, relações importantes...">${esc(h.relationships||'')}</textarea></label></article></div><article class="card mechanics-section"><label><span class="label">Marcos da campanha</span><textarea data-history="milestones" rows="10" placeholder="Missões, títulos, decisões, acontecimentos que você quer lembrar...">${esc(h.milestones||'')}</textarea></label></article></section>`;
   }
 
   function renderNotesTab(){
@@ -2054,6 +2062,10 @@ function applyManualResource(kind,input){
     bindLevelChange(byId('levelInput'));
     bindLevelChange(byId('levelOrbInput'));
     const sn=byId('sheetNameInput');if(sn)sn.onchange=e=>{state.name=e.target.value;save();renderSheet()};
+    const charName=byId('characterNameInput');if(charName)charName.onchange=e=>{state.name=e.target.value;save();renderSheet()};
+    const charCohort=byId('characterCohortInput');if(charCohort)charCohort.onchange=e=>{state.roma.cohort=e.target.value;save();renderSheet()};
+    const charRank=byId('characterLegionRank');if(charRank)charRank.onchange=e=>{state.roma.legionRank=e.target.value;save();renderSheet()};
+    const openProfile=byId('openCharacterProfile');if(openProfile)openProfile.onclick=()=>switchSheetTab('history');
     const sp=byId('sheetPlayerInput');if(sp)sp.onchange=e=>{state.player=e.target.value;save()};
     byId('backCreation').onclick=()=>{state.isCreated=false;save();render()};
     document.querySelectorAll('[data-base-inc]').forEach(b=>b.onclick=()=>changeBase(b.dataset.baseInc,1));document.querySelectorAll('[data-base-dec]').forEach(b=>b.onclick=()=>changeBase(b.dataset.baseDec,-1));
@@ -2174,14 +2186,17 @@ document.querySelectorAll('[data-reset-ability-use]').forEach(b=>b.onclick=()=>{
     const railDef=byId('railDefenseAdjust');if(railDef)railDef.onchange=e=>{state.tempMods.defense=Number(e.target.value)||0;save();renderSheet()};
     const fortunaBlessingToggle=byId('fortunaBlessingToggle');if(fortunaBlessingToggle)fortunaBlessingToggle.onclick=()=>{const activating=!fortunaBlessingIsCurrent();state.fortunaBlessing=activating;state.fortunaBlessingMonth=activating?currentMonthKey():'';syncCurrentCaps();save();renderSheet();notify(activating?'Bênção de Fortuna ativa: +10 no HP máximo até o fim do mês.':'Bênção de Fortuna removida: HP máximo normal restaurado.')};
     const tdr=byId('tempReduction');if(tdr)tdr.onchange=e=>{state.tempMods.damageReduction=Number(e.target.value)||0;save();renderSheet()};
-    const pBtn=byId('uploadPortraitBtn'); const pInput=byId('portraitUploadInput'); if(pBtn&&pInput){pBtn.onclick=()=>pInput.click(); pInput.onchange=e=>readImageToHistory(e.target.files?.[0],'portraitUrl')}
+    const pBtn=byId('uploadPortraitBtn'); const pInput=byId('portraitUploadInput'); if(pBtn&&pInput){pBtn.onclick=()=>openPortraitCrop(); pInput.onchange=e=>{openPortraitCrop(e.target.files?.[0]);e.target.value=''}}
     const bBtn=byId('uploadBannerBtn'); const bInput=byId('bannerUploadInput'); if(bBtn&&bInput){bBtn.onclick=()=>bInput.click(); bInput.onchange=e=>readImageToHistory(e.target.files?.[0],'bannerUrl')}
-    const heroBtn=byId('heroPortraitUploadBtn'); if(heroBtn&&pInput){heroBtn.onclick=()=>pInput.click()}
+    const heroBtn=byId('heroPortraitUploadBtn');if(heroBtn)heroBtn.onclick=()=>openPortraitCrop();
+    const characterPhoto=byId('characterPortraitCropBtn');if(characterPhoto)characterPhoto.onclick=()=>openPortraitCrop();
+    const characterUpload=byId('characterPortraitUploadBtn');if(characterUpload&&pInput)characterUpload.onclick=()=>pInput.click();
+    const characterCover=byId('characterBannerEditBtn');if(characterCover)characterCover.onclick=()=>byId('editBannerBtn')?.click();
     const short=byId('shortRest');if(short)short.onclick=shortRest;const long=byId('longRest');if(long)long.onclick=longRest;const resetUses=byId('resetAbilityUses');if(resetUses)resetUses.onclick=()=>{state.abilityUses={};save();renderSheet();notify('Contadores de uso da cena/combate resetados.')}
     const rd=byId('rollDefense');if(rd)rd.onclick=rollDefense;const ri=byId('rollInitiative');if(ri)ri.onclick=rollInitiative;
 
     document.querySelectorAll('[data-attr-extra]').forEach(el=>el.onchange=()=>{state.attributeExtras[el.dataset.attrExtra]=clamp(Number(el.value)||0,-10,10);syncCurrentCaps();save();renderSheet()});
-    document.querySelectorAll('[data-history]').forEach(el=>el.oninput=()=>{state.history[el.dataset.history]=el.value;save()});
+    document.querySelectorAll('[data-history]').forEach(el=>{el.oninput=()=>{state.history[el.dataset.history]=el.value;save()};el.onchange=()=>{if(['epithet','aliases','office','tagline'].includes(el.dataset.history))renderSheet()}});
     const notes=byId('notesField');if(notes)notes.oninput=e=>{state.notes=e.target.value;save()};
     bindDeath();
     document.querySelectorAll('[data-consume-item]').forEach(b=>b.onclick=()=>consumeInventoryItem(b.dataset.consumeItem));
@@ -2250,6 +2265,78 @@ function useAbility(key,cost){
     return new Promise(resolve=>{const src=String(source||'');if(!/^data:image\//i.test(src)){resolve(src);return}const img=new Image();img.onload=()=>{try{let width=img.naturalWidth||img.width||1,height=img.naturalHeight||img.height||1,scale=Math.min(1,maxDimension/Math.max(width,height));width=Math.max(1,Math.round(width*scale));height=Math.max(1,Math.round(height*scale));const encode=(w,h,q)=>{const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('canvas');ctx.drawImage(img,0,0,w,h);return canvas.toDataURL('image/webp',q)};let quality=.78,result=encode(width,height,quality);while(result.length>targetLength&&quality>.46){quality-=.08;result=encode(width,height,quality)}if(result.length>targetLength){const shrink=Math.max(.45,Math.min(.92,Math.sqrt(targetLength/result.length)*.92));width=Math.max(1,Math.round(width*shrink));height=Math.max(1,Math.round(height*shrink));result=encode(width,height,.68)}resolve(result&&result!=='data:,'?result:src)}catch(err){console.warn('[Ficha] Não foi possível compactar a imagem.',err);resolve(src)}};img.onerror=()=>resolve(src);img.src=src})
   }
   function readImageToHistory(file,key){if(!file)return;const reader=new FileReader();reader.onload=async()=>{const src=String(reader.result||''),isPortrait=key==='portraitUrl',compact=await compactDataImage(src,isPortrait?900:1400,isPortrait?420000:900000),previous=state.history[key];state.history[key]=compact;if(!save()){state.history[key]=previous;return}renderSheet();notify(isPortrait?'Retrato atualizado.':'Banner atualizado.')};reader.readAsDataURL(file)}
+
+  // Recorte independente do retrato, preservando a origem para reenquadramentos futuros.
+  let portraitCropDraft=null;
+  function openPortraitCrop(file){
+    const dlg=byId('portraitCropDialog'),input=byId('portraitUploadInput');if(!dlg)return;
+    const source=String(state.history?.portraitSourceUrl||state.history?.portraitUrl||'');
+    if(!file&&!source.trim()){input?.click();return}
+    const activate=imgSource=>{
+      const img=new Image();
+      img.onload=()=>{
+        portraitCropDraft={source:imgSource,img};
+        for(const [id,v] of [['portraitCropX',50],['portraitCropY',50],['portraitCropZoom',100]]){const el=byId(id);if(el)el.value=v}
+        updatePortraitCropPreview();
+        if(!dlg.open){if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','')}
+      };
+      img.onerror=()=>notify('Não foi possível abrir a imagem do retrato.');
+      img.src=imgSource;
+    };
+    if(file){
+      const reader=new FileReader();
+      reader.onload=async()=>activate(await compactDataImage(String(reader.result||''),900,420000));
+      reader.onerror=()=>notify('Não foi possível ler a foto.');
+      reader.readAsDataURL(file);
+    }else activate(source);
+  }
+  function paintPortrait(canvas){
+    if(!canvas||!portraitCropDraft)return;
+    const img=portraitCropDraft.img,c=canvas.getContext('2d');if(!c)return;
+    const width=canvas.width,height=canvas.height;
+    const x=clamp(Number(byId('portraitCropX')?.value??50),0,100)/100,y=clamp(Number(byId('portraitCropY')?.value??50),0,100)/100,z=clamp(Number(byId('portraitCropZoom')?.value??100),100,250)/100;
+    const scale=Math.max(width/img.naturalWidth,height/img.naturalHeight)*z,drawWidth=img.naturalWidth*scale,drawHeight=img.naturalHeight*scale;
+    c.clearRect(0,0,width,height);c.drawImage(img,(width-drawWidth)*x,(height-drawHeight)*y,drawWidth,drawHeight);
+  }
+  function updatePortraitCropPreview(){
+    paintPortrait(byId('portraitCropCanvas'));
+    for(const id of ['X','Y','Zoom']){
+      const range=byId('portraitCrop'+id),output=byId('portraitCrop'+id+'Value');
+      if(range&&output)output.textContent=range.value+'%';
+    }
+  }
+  function bindPortraitCropDialog(){
+    const dlg=byId('portraitCropDialog'),canvas=byId('portraitCropCanvas');if(!dlg||!canvas)return;
+    for(const id of ['portraitCropX','portraitCropY','portraitCropZoom']){
+      const el=byId(id);if(el)el.oninput=updatePortraitCropPreview;
+    }
+    byId('portraitCropCancel').onclick=()=>{portraitCropDraft=null;dlg.close()};
+    byId('portraitCropSave').onclick=async()=>{
+      if(!portraitCropDraft)return;
+      const target=document.createElement('canvas');target.width=600;target.height=600;paintPortrait(target);
+      const cropped=await compactDataImage(target.toDataURL('image/webp',.84),600,240000);
+      const oldPortrait=state.history.portraitUrl,oldSource=state.history.portraitSourceUrl;
+      state.history.portraitUrl=cropped;state.history.portraitSourceUrl=portraitCropDraft.source;
+      if(!save()){state.history.portraitUrl=oldPortrait;state.history.portraitSourceUrl=oldSource;return}
+      portraitCropDraft=null;dlg.close();renderSheet();notify('Retrato enquadrado e salvo.');
+    };
+    let drag=null;
+    canvas.addEventListener('pointerdown',e=>{
+      if(!portraitCropDraft)return;
+      drag={x:e.clientX,y:e.clientY,startX:Number(byId('portraitCropX').value),startY:Number(byId('portraitCropY').value)};
+      canvas.setPointerCapture(e.pointerId);
+    });
+    canvas.addEventListener('pointermove',e=>{
+      if(!drag)return;
+      const z=Math.max(1,Number(byId('portraitCropZoom').value)/100),scale=48/z;
+      byId('portraitCropX').value=clamp(drag.startX-(e.clientX-drag.x)/canvas.getBoundingClientRect().width*scale,0,100);
+      byId('portraitCropY').value=clamp(drag.startY-(e.clientY-drag.y)/canvas.getBoundingClientRect().height*scale,0,100);
+      updatePortraitCropPreview();
+    });
+    canvas.addEventListener('pointerup',()=>{drag=null});canvas.addEventListener('pointercancel',()=>{drag=null});
+    dlg.addEventListener('close',()=>{portraitCropDraft=null});
+  }
+
   function chooseStoredImage(onReady,maxDimension=480,targetLength=150000){
     const input=document.createElement('input');input.type='file';input.accept='image/*';
     input.onchange=()=>{const file=input.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=async()=>{const src=String(reader.result||''),compact=await compactDataImage(src,maxDimension,targetLength);onReady(compact)};reader.onerror=()=>notify('Não foi possível ler essa imagem.');reader.readAsDataURL(file)};input.click();
@@ -2380,5 +2467,6 @@ function longRest(){
   await compactStoredEquipmentImages();
   await initExclusiveThemes();
   bindShellChrome();
+  bindPortraitCropDialog();
   render();
 })();

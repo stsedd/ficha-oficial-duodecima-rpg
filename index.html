@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Character Archive — Legio XII Fulminata · v5.37.2</title>
+  <title>Character Archive — Legio XII Fulminata · v5.41.1 · prévia</title>
   <link rel="stylesheet" href="styles-v511.css?v=v5.21.1-ability-deck-polish">
   <link rel="stylesheet" href="theme-consistency-v518.css?v=5.18.1">
   <link rel="stylesheet" href="critical-usability-v519.css?v=5.19.0">
@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="deck-reorder-v535.css?v=5.35.0">
   <link rel="stylesheet" href="diagnostics-v536.css?v=5.36.0">
   <link rel="stylesheet" href="skills-search-collapse-v537.css?v=5.37.2">
+  <link rel="stylesheet" href="character-profile-v541.css?v=5.41.1">
 </head>
 <body data-theme="standard" data-mode="dark" data-palette="red" data-special="none">
   <div class="theme-ambient-layer theme-ambient-back" data-theme-layer="back" aria-hidden="true"></div>
@@ -44,11 +45,6 @@
     </header>
 
     <section class="archive-toolbar" aria-label="Arquivo e personalização da ficha">
-      <div class="archive-toolbar-copy">
-        <div id="coreStatus" class="core-status loading" title="Sincronizando regras"><i></i><span>CORE…</span></div>
-        <span class="archive-save-note"><b>Salvamento local</b> · esta ficha fica neste navegador</span>
-        <span class="version-chip" title="Versão da ficha">v5.37.2</span>
-      </div>
       <div class="actions archive-actions">
         <button id="exportBtn" class="ghost small-btn" type="button">Exportar JSON</button>
         <label class="ghost file-btn small-btn">Importar JSON<input id="importInput" type="file" accept="application/json"></label>
@@ -65,7 +61,17 @@
     <section id="creationView" class="grid two"></section>
     <section id="sheetView" class="hidden"></section>
 
-    <footer><p>Ficha Universal da Legio XII Fulminata · v5.37.2</p></footer>
+    <footer class="archive-footer">
+      <p>Ficha Universal da Legio XII Fulminata</p>
+      <details class="archive-footer-diagnostics">
+        <summary>Informações da ficha</summary>
+        <div class="archive-toolbar-copy" aria-label="Estado técnico da ficha">
+          <div id="coreStatus" class="core-status loading" title="Estado de sincronização das regras"><i></i><span>CORE…</span></div>
+          <span class="archive-save-note"><b>Salvamento local</b> · esta ficha fica neste navegador</span>
+          <span class="version-chip" title="Versão da ficha">v5.41.1 · prévia</span>
+        </div>
+      </details>
+    </footer>
   </main>
 
   <dialog id="bannerCropDialog" class="banner-crop-dialog">
@@ -79,6 +85,20 @@
       </div>
       <div class="banner-crop-actions"><button type="button" id="bannerCropCancel" class="ghost">Cancelar</button><button type="button" id="bannerCropSave" class="primary">Salvar recorte</button></div>
     </form>
+  </dialog>
+
+
+  <dialog id="portraitCropDialog" class="portrait-crop-dialog">
+    <div class="portrait-crop-card">
+      <div><p class="eyebrow">RETRATO</p><h2>Enquadrar foto de perfil</h2><p class="muted compact">Arraste a foto dentro do círculo ou ajuste os controles. O recorte só muda ao confirmar.</p></div>
+      <div class="portrait-crop-workspace"><canvas id="portraitCropCanvas" width="320" height="320" aria-label="Prévia circular do retrato. Arraste para enquadrar."></canvas></div>
+      <div class="portrait-crop-controls">
+        <label><span>Horizontal</span><input id="portraitCropX" type="range" min="0" max="100" step="1" value="50"><b id="portraitCropXValue">50%</b></label>
+        <label><span>Vertical</span><input id="portraitCropY" type="range" min="0" max="100" step="1" value="50"><b id="portraitCropYValue">50%</b></label>
+        <label><span>Zoom</span><input id="portraitCropZoom" type="range" min="100" max="250" step="1" value="100"><b id="portraitCropZoomValue">100%</b></label>
+      </div>
+      <div class="portrait-crop-actions"><button id="portraitCropCancel" type="button" class="ghost">Cancelar</button><button id="portraitCropSave" type="button" class="primary">Salvar enquadramento</button></div>
+    </div>
   </dialog>
 
   <dialog id="themeDialog" class="theme-dialog">
