@@ -125,3 +125,12 @@
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
 }
+
+
+/* Quando o painel central perde largura para a coluna de personagem,
+   priorizar nomes/custos legíveis em vez de cartões muito estreitos. */
+@media(min-width:761px) and (max-width:1180px){
+  #sheetView [data-pane="combat"] .abilities-wrap .ability-grid{
+    column-count:1!important;
+  }
+}
