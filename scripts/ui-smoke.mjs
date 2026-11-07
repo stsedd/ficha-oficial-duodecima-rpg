@@ -68,6 +68,8 @@ for(const test of cases){
 
   const themeButton=page.locator('#themePaletteBtn');
   if(await themeButton.count()){
+    const appearanceMenu=page.locator('.unified-menu').filter({has:themeButton}).first();
+    if(await appearanceMenu.count()) await appearanceMenu.locator('summary').click();
     await themeButton.click();
     const dialog=page.locator('#themeDialog');
     if(await dialog.count()){
