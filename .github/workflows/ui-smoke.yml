@@ -58,11 +58,11 @@ jobs:
           echo $! > /tmp/duodecima-http.pid
           sleep 2
 
-      - name: Run UI smoke
-        run: node scripts/ui-smoke.mjs
-
       - name: Audit grid, typography and overflows at six resolutions
         run: node scripts/visual-grid-audit.mjs
+
+      - name: Run UI smoke
+        run: node scripts/ui-smoke.mjs
 
       - name: Run Rebento activation smoke
         run: node scripts/rebento-toggle-smoke.mjs
