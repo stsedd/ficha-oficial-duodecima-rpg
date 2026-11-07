@@ -41,3 +41,30 @@
 [data-pane="familiars"] .familiar-photo-actions button{font-size:11px;padding:5px}
 }
 @media(prefers-reduced-motion:reduce){[data-pane="familiars"] .familiar-summary-arrow{transition:none}}
+
+/* v5.38.1 · poderes legíveis, sem colunas comprimidas */
+[data-pane="familiars"] .familiar-abilities-panel{min-width:0}
+[data-pane="familiars"] .familiar-ability-columns{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:16px!important}
+[data-pane="familiars"] .familiar-ability-group{min-width:0;border-radius:12px;padding:14px;background:var(--panel,var(--bg));}
+[data-pane="familiars"] .familiar-ability-group .familiar-panel-heading{margin-bottom:12px}
+[data-pane="familiars"] .familiar-ability-group .familiar-panel-heading b{font-size:15px;line-height:1.4}
+[data-pane="familiars"] .familiar-ability-list{gap:12px}
+[data-pane="familiars"] .familiar-ability-card{min-width:0;display:flex;flex-direction:column;gap:9px;padding:14px;border-radius:12px}
+[data-pane="familiars"] .familiar-ability-title{display:grid;grid-template-columns:minmax(0,1fr) minmax(110px,145px) 38px;gap:9px;align-items:center}
+[data-pane="familiars"] .familiar-ability-title input{font:600 15px/1.4 inherit;min-width:0}
+[data-pane="familiars"] .familiar-ability-title select{font-size:13px;min-width:0}
+[data-pane="familiars"] .familiar-ability-title input,
+[data-pane="familiars"] .familiar-ability-title select{height:42px;padding:9px 11px;border-radius:8px}
+[data-pane="familiars"] .familiar-ability-title button{height:38px;min-width:38px;border-radius:8px;font-size:17px}
+[data-pane="familiars"] .familiar-ability-card textarea{box-sizing:border-box;display:block;width:100%;max-width:100%;min-height:145px;max-height:640px;overflow-y:auto;margin:0;padding:14px 15px;border-radius:9px;font-family:inherit;font-size:14px!important;line-height:1.65!important;letter-spacing:normal;white-space:pre-wrap;resize:vertical}
+[data-pane="familiars"] .familiar-ability-card textarea::placeholder{font-size:13px}
+[data-pane="familiars"] .familiar-abilities-panel>.familiar-panel-heading{gap:10px;flex-wrap:wrap}
+@media(max-width:520px){
+[data-pane="familiars"] .familiar-ability-group{padding:9px}
+[data-pane="familiars"] .familiar-ability-card{padding:10px}
+[data-pane="familiars"] .familiar-ability-title{grid-template-columns:minmax(0,1fr) 38px}
+[data-pane="familiars"] .familiar-ability-title input{grid-column:1}
+[data-pane="familiars"] .familiar-ability-title select{grid-column:1;grid-row:2}
+[data-pane="familiars"] .familiar-ability-title button{grid-column:2;grid-row:1}
+[data-pane="familiars"] .familiar-ability-card textarea{padding:12px;font-size:14px!important;min-height:155px}
+}
