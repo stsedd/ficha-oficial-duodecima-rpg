@@ -1,0 +1,50 @@
+import fs from 'node:fs/promises';
+import {chromium} from 'playwright';
+const browser=await chromium.launch({headless:true});
+const records=[], issues=[];
+await fs.mkdir('visual-grid-artifacts',{recursive:true});
+for(const width of [320,390,768,1024,1440,1920]){
+ const context=await browser.newContext({viewport:{width,height:900}});
+ await context.addInitScript(()=>{
+  localStorage.setItem('duodecima_universal_stage4_v24',JSON.stringify({
+   isCreated:true,name:'Auditoria visual da Duodécima — personagem de teste',player:'QA',
+   level:35,godId:'iuppiter',activeTab:'status',
+   lineage:{type:'normal',namingVersion:2,secondaryGodId:'',structureGodId:'iuppiter'},
+   inventory:{items:[]},weapons:[],familiars:{entries:[]}
+  }));
+ });
+ const page=await context.newPage();
+ page.on('pageerror',e=>issues.push({width,tab:'all',type:'javascript',message:e.message}));
+ await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:60000});
+ await page.locator('#sheetView:not(.hidden)').waitFor({timeout:25000});
+ const tabs=await page.locator('#sheetView [data-tab]').evaluateAll(els=>[...new Set(els.map(el=>el.dataset.tab))]);
+ for(const tab of tabs){
+  if(!tab)continue;
+  await page.locator('#sheetView [data-tab="'+tab+'"]').first().click();
+  await page.waitForTimeout(80);
+  const measure=await page.evaluate(()=>{
+   const vw=document.documentElement.clientWidth;
+   const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&r.width>1&&r.height>1};
+   const names='.card,.subcard,.stat,.skill-ledger-row,.weapon-card,.inventory-item,.ability-card';
+   const cards=[...document.querySelectorAll('#sheetView '+names.replaceAll(',',',#sheetView '))].filter(visible);
+   const escaping=cards.filter(el=>{const r=el.getBoundingClientRect();return r.left < -3||r.right>vw+3}).slice(0,8).map(el=>({className:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right}));
+   const skillRows=[...document.querySelectorAll('#sheetView .skill-ledger-row')].filter(visible);
+   const skillOverlaps=skillRows.slice(0,10).some(row=>{
+    const arr=['.skill-ledger-flags','.skill-roll-value','.skill-ledger-name','.skill-settings summary'].map(s=>row.querySelector(s));
+    return arr.every(Boolean)&&arr.some((e,i)=>i>0&&arr[i-1].getBoundingClientRect().right>e.getBoundingClientRect().left+5);
+   });
+   const fonts=[...document.querySelectorAll('#sheetView h2,#sheetView h3,#sheetView .label,#sheetView button')].filter(visible).slice(0,60).map(el=>getComputedStyle(el).fontFamily);
+   return {scroll:document.documentElement.scrollWidth,vw,escaping,skillOverlaps,cards:cards.length,skills:skillRows.length,fonts:[...new Set(fonts)]};
+  });
+  if(measure.scroll>width+3)issues.push({width,tab,type:'horizontal-overflow',scroll:measure.scroll});
+  if(measure.escaping.length)issues.push({width,tab,type:'offscreen-cards',samples:measure.escaping});
+  if(measure.skillOverlaps)issues.push({width,tab,type:'skills-overlap'});
+  records.push({width,tab,...measure});
+  await page.screenshot({path:'visual-grid-artifacts/'+width+'-'+tab+'.png',fullPage:true,animations:'disabled'});
+ }
+ await context.close();
+}
+await browser.close();
+await fs.writeFile('visual-grid-artifacts/report.json',JSON.stringify({records,issues},null,2));
+console.log(JSON.stringify({screenshots:records.length,issues:issues.slice(0,40),issueCount:issues.length},null,2));
+if(issues.length)process.exitCode=1;
