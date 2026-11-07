@@ -38,11 +38,11 @@ for(const test of cases){
     const successor=await page.evaluate(()=>({
       checked:document.querySelector('#rebentoSuccessorToggle')?.checked===true,
       nine:[...document.querySelectorAll('#creationView .label')].some(x=>/9 pontos de atributos/i.test(x.textContent||'')),
-      energy:Number(window.DUODECIMA_SYSTEM?.energy?.base||0)+Number(window.DUODECIMA_SYSTEM?.rebentos?.successor?.energyBaseBonus??25)
+      energy:Number(window.DUODECIMA_SYSTEM?.energy?.base||0)
     }));
     if(!successor.checked)failures.push(`${test.name}: sucessor não persistiu após recarregar`);
     if(!successor.nine)failures.push(`${test.name}: criação de sucessor não mostrou 9 pontos`);
-    if(successor.energy!==125)failures.push(`${test.name}: base 100 + bônus de sucessor 25 deveria resultar em 125, recebeu ${successor.energy}`);
+    if(successor.energy!==125)failures.push(`${test.name}: Energia base de sucessor esperada 125, recebeu ${successor.energy}`);
   }
 
   const bannerCheck=await page.evaluate(async()=>{
@@ -68,8 +68,6 @@ for(const test of cases){
 
   const themeButton=page.locator('#themePaletteBtn');
   if(await themeButton.count()){
-    const appearanceMenu=page.locator('.unified-menu').filter({has:themeButton}).first();
-    if(await appearanceMenu.count()) await appearanceMenu.locator('summary').click();
     await themeButton.click();
     const dialog=page.locator('#themeDialog');
     if(await dialog.count()){
@@ -135,7 +133,7 @@ for(const test of cases){
     if(L.flags.length!==2||Math.abs(L.flags[0].y-L.flags[1].y)>2)failures.push(`${test.name}-skills: controles P/E não estão na mesma linha`);
     if(L.flags.some(x=>x.width<30||x.height<(test.name==='mobile'?39:32)))failures.push(`${test.name}-skills: áreas de clique P/E pequenas: ${JSON.stringify(L.flags)}`);
     if(!(L.bonus.x>L.flags[1].x&&L.name.x>L.bonus.x&&L.details.x>L.name.x))failures.push(`${test.name}-skills: ordem P/E → bônus → nome → detalhes incorreta`);
-    if(test.name==='desktop'&&L.badge.width>0.1)failures.push(`${test.name}-skills: badge de atributo deve ficar oculto após agrupamento por atributo`);
+    if(test.name==='desktop'&&Math.abs(L.title.y-L.badge.y)>9)failures.push(`${test.name}-skills: atributo não acompanha o nome na linha`);
     if(!L.sourceInput||!L.expertInput)failures.push(`${test.name}-skills: entradas de perícia não encontradas`);
     if(L.overflows)failures.push(`${test.name}-skills: controles vazaram da linha`);
   }
@@ -151,7 +149,7 @@ for(const test of cases){
       palette:document.body.dataset.palette,
       mode:document.body.dataset.mode,
       special:document.body.dataset.special,
-      energy:Number(window.DUODECIMA_SYSTEM?.energy?.base||0)+Number(window.DUODECIMA_SYSTEM?.rebentos?.successor?.energyBaseBonus??25),
+      energy:Number(window.DUODECIMA_SYSTEM?.energy?.base||0),
       carTotal:Number(car?.querySelector('.attr-total')?.textContent||NaN),
       conTotal:Number(con?.querySelector('.attr-total')?.textContent||NaN),
       conBreak:con?.querySelector('.attr-break')?.textContent||'',
@@ -168,7 +166,7 @@ for(const test of cases){
   });
   if(result.rebento!=='true')failures.push(`${test.name}-rebento: marcador visual de Rebento ausente`);
   if(result.palette!=='pink'||result.mode!=='light'||result.special!=='none')failures.push(`${test.name}-rebento: visual alterou o tema escolhido (${result.palette}/${result.mode}/${result.special})`);
-  if(result.energy!==125)failures.push(`${test.name}-rebento: energia-base 100 + bônus de sucessor 25 deveria resultar em 125, recebeu ${result.energy}`);
+  if(result.energy!==125)failures.push(`${test.name}-rebento: sucessor + Rebento deveria manter Energia base 125, recebeu ${result.energy}`);
   if(result.carTotal!==6)failures.push(`${test.name}-rebento: CAR com +1 de Rebento deveria chegar a 6, recebeu ${result.carTotal}`);
   if(result.conTotal!==5)failures.push(`${test.name}-rebento: CON 5 + Rebento 1 − sacrifício 1 deveria exibir 5, recebeu ${result.conTotal}`);
   if(!/extra \+1/.test(result.conBreak)||!/magia [−-]1/.test(result.conBreak))failures.push(`${test.name}-rebento: detalhamento de CON não separou bônus protegido e sacrifício (${result.conBreak})`);
@@ -182,11 +180,7 @@ for(const test of cases){
 
   // Regressão de tema: trocar para Azul deve eliminar vestígios vermelhos da identidade visual.
   const themeButton=page.locator('#themePaletteBtn');
-  if(await themeButton.count()){
-      const menu=page.locator('.unified-menu').filter({has:themeButton}).first();
-      if(await menu.count())await menu.locator('summary').click();
-      await themeButton.click();
-    }
+  if(await themeButton.count())await themeButton.click();
   const blueChoice=page.locator('[data-palette-choice="blue"][data-theme-mode="dark"]').first();
   if(await blueChoice.count()){
     await blueChoice.click();
