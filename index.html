@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#050505">
-  <title>Character Archive — Legio XII Fulminata · v5.38.1</title>
+  <title>Character Archive — Legio XII Fulminata · v5.38.2</title>
   <link rel="stylesheet" href="styles-v511.css?v=v5.21.1-ability-deck-polish">
   <link rel="stylesheet" href="theme-consistency-v518.css?v=5.18.1">
   <link rel="stylesheet" href="critical-usability-v519.css?v=5.19.0">
@@ -48,11 +48,11 @@
       <div class="archive-toolbar-copy">
         <div id="coreStatus" class="core-status loading" title="Sincronizando regras"><i></i><span>CORE…</span></div>
         <span class="archive-save-note"><b>Salvamento local</b> · esta ficha fica neste navegador</span>
-        <span class="version-chip" title="Versão da ficha">v5.38.1</span>
+        <span class="version-chip" title="Versão da ficha">v5.38.2</span>
       </div>
       <div class="actions archive-actions">
         <button id="exportBtn" class="ghost small-btn" type="button">Exportar JSON</button>
-        <label class="ghost file-btn small-btn">Importar JSON<input id="importInput" type="file" accept="application/json"></label>
+        <button id="importJsonBtn" class="ghost small-btn" type="button" aria-controls="importInput">Importar JSON</button><input id="importInput" type="file" accept=".json,application/json" hidden aria-label="Selecionar arquivo JSON de ficha">
         <button id="backupsBtn" class="ghost small-btn" type="button">Backups</button>
         <button id="helpBtn" class="ghost small-btn" type="button">Ajuda</button>
         <label id="bannerBtn" class="primary file-btn small-btn banner-upload-label" for="bannerUploadInput" role="button" tabindex="0">Adicionar banner</label>
