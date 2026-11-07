@@ -41,6 +41,10 @@ for(const width of [320,390,768,1024,1440,1920]){
   if(measure.skillOverlaps)issues.push({width,tab,type:'skills-overlap'});
   records.push({width,tab,...measure});
   await page.screenshot({path:'visual-grid-artifacts/'+width+'-'+tab+'.png',fullPage:true,animations:'disabled'});
+  if([390,1440].includes(width)&&['status','inventory'].includes(tab)){
+   const shot=await page.screenshot({type:'jpeg',quality:38,fullPage:false,animations:'disabled'});
+   console.log('GRID_AUDIT_IMAGE|'+width+'|'+tab+'|'+shot.toString('base64'));
+  }
  }
  await context.close();
 }
