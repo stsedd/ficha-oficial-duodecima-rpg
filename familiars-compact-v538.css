@@ -1,0 +1,43 @@
+/* Familiares: cartões compactos e galerias adaptativas — v5.38 */
+[data-pane="familiars"] .familiar-list{display:grid;gap:12px;align-items:start}
+[data-pane="familiars"] .familiar-card{overflow:hidden;border-radius:18px}
+[data-pane="familiars"] .familiar-fold{min-width:0}
+[data-pane="familiars"] .familiar-fold>summary{list-style:none;cursor:pointer}
+[data-pane="familiars"] .familiar-fold>summary::-webkit-details-marker{display:none}
+[data-pane="familiars"] .familiar-summary{display:flex;align-items:center;gap:12px;padding:12px 15px;min-height:80px}
+[data-pane="familiars"] .familiar-summary:focus-visible{outline:2px solid var(--accent,#bf807d);outline-offset:-4px;border-radius:14px}
+[data-pane="familiars"] .familiar-summary-image{flex:0 0 64px;width:64px;height:64px;display:grid;place-items:center;border-radius:13px;background:var(--panel-2,#272426);overflow:hidden;font-size:22px}
+[data-pane="familiars"] .familiar-summary-image img{width:100%;height:100%;object-fit:cover}
+[data-pane="familiars"] .familiar-summary-info{min-width:0;display:flex;flex:1;flex-direction:column;gap:3px}
+[data-pane="familiars"] .familiar-summary-info b{font-size:15px;overflow-wrap:anywhere}
+[data-pane="familiars"] .familiar-summary-info small{font-size:12px;opacity:.74;overflow-wrap:anywhere}
+[data-pane="familiars"] .familiar-summary-arrow{font-size:22px;opacity:.65;transition:transform .18s}
+[data-pane="familiars"] details[open] .familiar-summary-arrow{transform:rotate(180deg)}
+[data-pane="familiars"] .familiar-fold-body{border-top:1px solid rgba(150,150,150,.17);padding-top:6px}
+[data-pane="familiars"] nav[aria-label="Categorias de familiares"]{display:flex;flex-wrap:wrap;gap:7px!important}
+[data-pane="familiars"] nav[aria-label="Categorias de familiares"] button{border-radius:999px;padding:7px 12px;min-height:36px}
+[data-pane="familiars"] .familiar-gallery{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:stretch}
+[data-pane="familiars"] .familiar-gallery .familiar-photo-slot{min-width:0;width:100%;aspect-ratio:1/1;height:auto!important;overflow:hidden;border-radius:12px}
+[data-pane="familiars"] .familiar-gallery .familiar-photo-slot img{width:100%;height:100%;object-fit:cover}
+[data-pane="familiars"] .familiar-gallery-count-1{grid-template-columns:1fr}
+[data-pane="familiars"] .familiar-gallery-count-1 .familiar-photo-slot{aspect-ratio:16/9}
+[data-pane="familiars"] .familiar-gallery-count-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+[data-pane="familiars"] .familiar-gallery-count-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+[data-pane="familiars"] .familiar-gallery-count-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+[data-pane="familiars"] .familiar-gallery-count-5{grid-template-columns:repeat(4,minmax(0,1fr))}
+[data-pane="familiars"] .familiar-gallery-count-5 .familiar-photo-slot:first-child{grid-column:span 2;grid-row:span 2;aspect-ratio:auto}
+[data-pane="familiars"] .familiar-gallery-count-6{grid-template-columns:repeat(3,minmax(0,1fr))}
+[data-pane="familiars"] .familiar-add-photo{margin-top:9px;border-radius:10px;padding:9px 14px;width:100%;border:1px dashed currentColor;opacity:.85}
+[data-pane="familiars"] [data-narrative="true"] .familiar-hp-hero,
+[data-pane="familiars"] [data-narrative="true"] .familiar-sheet-left,
+[data-pane="familiars"] [data-narrative="true"] .familiar-mount-status,
+[data-pane="familiars"] [data-narrative="true"] .familiar-type-grid>label:nth-child(2){display:none!important}
+[data-pane="familiars"] [data-narrative="true"] .familiar-sheet-right{width:100%;max-width:none}
+@media(max-width:680px){
+[data-pane="familiars"] .familiar-summary{padding:10px;gap:9px}
+[data-pane="familiars"] .familiar-summary-image{width:52px;height:52px;flex-basis:52px}
+[data-pane="familiars"] .familiar-gallery{gap:5px}
+[data-pane="familiars"] .familiar-gallery-count-3,.familiar-gallery-count-6{grid-template-columns:repeat(3,minmax(0,1fr))}
+[data-pane="familiars"] .familiar-photo-actions button{font-size:11px;padding:5px}
+}
+@media(prefers-reduced-motion:reduce){[data-pane="familiars"] .familiar-summary-arrow{transition:none}}
