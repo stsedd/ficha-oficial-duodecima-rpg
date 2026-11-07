@@ -38,7 +38,7 @@ for(const test of cases){
     const successor=await page.evaluate(()=>({
       checked:document.querySelector('#rebentoSuccessorToggle')?.checked===true,
       nine:[...document.querySelectorAll('#creationView .label')].some(x=>/9 pontos de atributos/i.test(x.textContent||'')),
-      energy:Number(window.DUODECIMA_SYSTEM?.energy?.base||0)+Number(window.DUODECIMA_SYSTEM?.rebentos?.successor?.energyBaseBonus||0)
+      energy:Number(window.DUODECIMA_SYSTEM?.energy?.base||0)+Number(window.DUODECIMA_SYSTEM?.rebentos?.successor?.energyBaseBonus??25)
     }));
     if(!successor.checked)failures.push(`${test.name}: sucessor não persistiu após recarregar`);
     if(!successor.nine)failures.push(`${test.name}: criação de sucessor não mostrou 9 pontos`);
@@ -151,7 +151,7 @@ for(const test of cases){
       palette:document.body.dataset.palette,
       mode:document.body.dataset.mode,
       special:document.body.dataset.special,
-      energy:Number(window.DUODECIMA_SYSTEM?.energy?.base||0)+Number(window.DUODECIMA_SYSTEM?.rebentos?.successor?.energyBaseBonus||0),
+      energy:Number(window.DUODECIMA_SYSTEM?.energy?.base||0)+Number(window.DUODECIMA_SYSTEM?.rebentos?.successor?.energyBaseBonus??25),
       carTotal:Number(car?.querySelector('.attr-total')?.textContent||NaN),
       conTotal:Number(con?.querySelector('.attr-total')?.textContent||NaN),
       conBreak:con?.querySelector('.attr-break')?.textContent||'',
