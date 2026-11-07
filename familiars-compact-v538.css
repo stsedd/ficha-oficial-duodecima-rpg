@@ -1,6 +1,6 @@
 /* Familiares: cartões compactos e galerias adaptativas — v5.38 */
 [data-pane="familiars"] .familiar-list{display:grid;gap:12px;align-items:start}
-[data-pane="familiars"] .familiar-card{overflow:hidden;border-radius:18px}
+[data-pane="familiars"] .familiar-card{display:block!important;overflow:hidden;border-radius:18px}
 [data-pane="familiars"] .familiar-fold{min-width:0}
 [data-pane="familiars"] .familiar-fold>summary{list-style:none;cursor:pointer}
 [data-pane="familiars"] .familiar-fold>summary::-webkit-details-marker{display:none}
