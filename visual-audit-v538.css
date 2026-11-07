@@ -271,3 +271,13 @@ body :is(.card, .subcard) > :last-child { margin-bottom: 0; }
    max-width:none!important;
  }
 }
+
+/* Roma — o texto completo das patentes deve caber nos seletores
+   da coluna dupla no desktop, sem alterar os valores disponíveis. */
+@media(min-width:621px) {
+ #sheetView [data-pane="roma"] :is(#legionRank,#religioRank) {
+   font-size:13px!important;
+   padding-inline:8px!important;
+   letter-spacing:0!important;
+ }
+}
