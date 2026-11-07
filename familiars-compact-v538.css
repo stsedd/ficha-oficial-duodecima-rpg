@@ -51,7 +51,7 @@
 [data-pane="familiars"] .familiar-ability-list{gap:12px}
 [data-pane="familiars"] .familiar-ability-card{min-width:0;display:flex;flex-direction:column;gap:9px;padding:14px;border-radius:12px}
 [data-pane="familiars"] .familiar-ability-title{display:grid;grid-template-columns:minmax(0,1fr) minmax(110px,145px) 38px;gap:9px;align-items:center}
-[data-pane="familiars"] .familiar-ability-title input{font:600 15px/1.4 inherit;min-width:0}
+[data-pane="familiars"] .familiar-ability-title input{font-family:inherit;font-weight:600;font-size:15px;line-height:1.4;min-width:0}
 [data-pane="familiars"] .familiar-ability-title select{font-size:13px;min-width:0}
 [data-pane="familiars"] .familiar-ability-title input,
 [data-pane="familiars"] .familiar-ability-title select{height:42px;padding:9px 11px;border-radius:8px}
