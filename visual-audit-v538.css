@@ -235,3 +235,21 @@ body :is(.card, .subcard) > :last-child { margin-bottom: 0; }
    max-width:none!important;
  }
 }
+
+/* Select e ação manual legíveis no celular, sem aparar o nome
+   da categoria escolhida para ganhar alguns pixels. */
+@media(max-width:460px) {
+ #sheetView [data-pane="inventory"] .inventory-manual-row {
+   grid-template-columns:minmax(0,1fr)!important;
+ }
+ #sheetView [data-pane="inventory"] .inventory-manual-row select {
+   width:100%!important;
+   min-height:42px!important;
+   font-size:14px!important;
+ }
+ #sheetView [data-pane="inventory"] .inventory-manual-row button {
+   width:100%!important;
+   min-height:42px!important;
+   justify-self:stretch!important;
+ }
+}
