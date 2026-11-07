@@ -17,6 +17,13 @@ for(const width of [320,390,768,1024,1440,1920]){
  page.on('pageerror',e=>issues.push({width,tab:'all',type:'javascript',message:e.message}));
  await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:60000});
  await page.locator('#sheetView:not(.hidden)').waitFor({timeout:25000});
+ if(width<=390){
+   const header=await page.evaluate(()=>{
+     const pick=s=>{const el=document.querySelector(s);if(!el)return null;const r=el.getBoundingClientRect();return {x:r.x,width:r.width,right:r.right,display:getComputedStyle(el).display,gridColumn:getComputedStyle(el).gridColumn,flex:getComputedStyle(el).flex,maxWidth:getComputedStyle(el).maxWidth}};
+     return {brand:pick('.archive-brandbar'),bar:pick('.multi-character-bar'),select:pick('#duoCharacterSelect'),newButton:pick('[data-multi="new"]'),appearance:pick('.appearance-top-actions')};
+   });
+   console.log('GRID_HEADER_METRICS|'+width+'|'+JSON.stringify(header));
+ }
  const tabs=await page.locator('#sheetView [data-tab]').evaluateAll(els=>[...new Set(els.map(el=>el.dataset.tab))]);
  for(const tab of tabs){
   if(!tab)continue;
