@@ -61,6 +61,9 @@ jobs:
       - name: Run UI smoke
         run: node scripts/ui-smoke.mjs
 
+      - name: Audit grid, typography and overflows at six resolutions
+        run: node scripts/visual-grid-audit.mjs
+
       - name: Run Rebento activation smoke
         run: node scripts/rebento-toggle-smoke.mjs
 
@@ -69,5 +72,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ficha-ui-smoke
-          path: ui-artifacts
+          path: |
+            ui-artifacts
+            visual-grid-artifacts
           if-no-files-found: ignore
