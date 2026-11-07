@@ -1,18 +1,8 @@
 (async () => {
   'use strict';
 
-  // v5.16.3 · Rebentos de Roma, sucessores, regras canônicas e camada visual aditiva.
-  try {
-    await new Promise((resolve,reject)=>{
-      const io=document.createElement('script');
-      io.src='io-recovery-v51515.js?v=5.38.2-import-fix';
-      io.onload=resolve;
-      io.onerror=()=>reject(new Error('Falha ao carregar recuperação de importação/exportação'));
-      document.body.appendChild(io);
-    });
-  } catch (err) {
-    console.warn('[Ficha] Camada de recuperação de I/O indisponível.',err);
-  }
+  // O importador é carregado diretamente pelo index.html, depois do seletor
+  // de personagens. Não depender de injeção dinâmica para abrir arquivos JSON.
 
   try { await window.DUODECIMA_CORE_READY; } catch (_) {}
 
