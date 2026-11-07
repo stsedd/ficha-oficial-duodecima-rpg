@@ -253,3 +253,21 @@ body :is(.card, .subcard) > :last-child { margin-bottom: 0; }
    justify-self:stretch!important;
  }
 }
+
+/* O grid do cabeçalho mobile mantém a largura do seletor limitada
+   à primeira trilha mesmo com grid-column abrangente. Fixar a largura
+   útil do segundo andar ao viewport elimina o truncamento "A...". */
+@media(max-width:620px) {
+ .archive-brandbar > .multi-character-bar {
+   box-sizing:border-box!important;
+   width:calc(100vw - 44px)!important;
+   min-width:0!important;
+   max-width:calc(100vw - 44px)!important;
+ }
+ .archive-brandbar > .multi-character-bar select {
+   flex:1 1 auto!important;
+   width:0!important;
+   min-width:0!important;
+   max-width:none!important;
+ }
+}
