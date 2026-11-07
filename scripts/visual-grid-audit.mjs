@@ -22,7 +22,6 @@ for(const width of [320,390,768,1024,1440,1920]){
      const pick=s=>{const el=document.querySelector(s);if(!el)return null;const r=el.getBoundingClientRect();return {x:r.x,width:r.width,right:r.right,display:getComputedStyle(el).display,gridColumn:getComputedStyle(el).gridColumn,flex:getComputedStyle(el).flex,maxWidth:getComputedStyle(el).maxWidth}};
      return {brand:pick('.archive-brandbar'),bar:pick('.multi-character-bar'),select:pick('#duoCharacterSelect'),newButton:pick('[data-multi="new"]'),appearance:pick('.appearance-top-actions')};
    });
-   console.log('GRID_HEADER_METRICS|'+width+'|'+JSON.stringify(header));
    if(!header.bar||header.bar.width<width-62)issues.push({width,tab:'header',type:'character-switcher-too-narrow',details:header});
  }
  const tabs=await page.locator('#sheetView [data-tab]').evaluateAll(els=>[...new Set(els.map(el=>el.dataset.tab))]);
@@ -64,10 +63,7 @@ for(const width of [320,390,768,1024,1440,1920]){
   if(measure.inventoryCollision)issues.push({width,tab,type:'inventory-controls-overlap'});
   records.push({width,tab,...measure});
   await page.screenshot({path:'visual-grid-artifacts/'+width+'-'+tab+'.png',fullPage:true,animations:'disabled'});
-  if([390,1440].includes(width)){
-   const shot=await page.screenshot({type:'jpeg',quality:38,fullPage:false,animations:'disabled'});
-   console.log('GRID_AUDIT_IMAGE|'+width+'|'+tab+'|'+shot.toString('base64'));
-  }
+
  }
  await context.close();
 }
