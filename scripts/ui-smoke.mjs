@@ -182,7 +182,11 @@ for(const test of cases){
 
   // Regressão de tema: trocar para Azul deve eliminar vestígios vermelhos da identidade visual.
   const themeButton=page.locator('#themePaletteBtn');
-  if(await themeButton.count())await themeButton.click();
+  if(await themeButton.count()){
+      const menu=page.locator('.unified-menu').filter({has:themeButton}).first();
+      if(await menu.count())await menu.locator('summary').click();
+      await themeButton.click();
+    }
   const blueChoice=page.locator('[data-palette-choice="blue"][data-theme-mode="dark"]').first();
   if(await blueChoice.count()){
     await blueChoice.click();
