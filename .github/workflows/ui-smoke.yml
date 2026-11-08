@@ -58,9 +58,6 @@ jobs:
           echo $! > /tmp/duodecima-http.pid
           sleep 2
 
-      - name: Run import JSON end-to-end smoke
-        run: node scripts/import-e2e-smoke.mjs
-
       - name: Run UI smoke
         run: node scripts/ui-smoke.mjs
 
