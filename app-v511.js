@@ -721,7 +721,43 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function broadcastSaveStatus(status,error){
     try{window.dispatchEvent(new CustomEvent('duodecima:save-status',{detail:{status,storageKey:STORAGE_KEY,at:state.updatedAt,persistent:window.DUODECIMA_STORAGE_PERSISTENT!==false,error:error?String(error.message||error):''}}))}catch(_){}
   }
-  function save(){state.schemaVersion=SCHEMA_VERSION;state.updatedAt=new Date().toISOString();try{safeStorage.setItem(STORAGE_KEY,JSON.stringify(state));sheetWriteSequence++;broadcastSaveStatus(window.DUODECIMA_STORAGE_PERSISTENT===false?'temporary':'saved');return true}catch(err){broadcastSaveStatus('error',err);console.error('[Ficha] Falha ao salvar a ficha localmente.',err);notify('A ficha atingiu o limite de armazenamento deste navegador. Remova imagens antigas ou exporte o JSON antes de continuar.');return false}}
+  let largeStorageMode=false,largeWriteQueue=Promise.resolve();
+  function saveLargeSheet(removeLocal=false){
+    const db=window.DUODECIMA_LARGE_SHEETS;
+    if(!db){notify('Armazenamento de fichas grandes indisponível. Exporte seu JSON.');return false}
+    const snapshot=deepCloneJson(state);
+    largeWriteQueue=largeWriteQueue.catch(()=>{}).then(async()=>{
+      await db.put(STORAGE_KEY,snapshot);
+      if(removeLocal)safeStorage.removeItem(STORAGE_KEY);
+      sheetWriteSequence++;
+      broadcastSaveStatus('saved');
+    });
+    window.DUODECIMA_SAVE_PENDING=largeWriteQueue;
+    largeWriteQueue.catch(err=>{
+      broadcastSaveStatus('error',err);
+      console.error('[Ficha] Não foi possível salvar ficha grande no IndexedDB.',err);
+      notify('Não foi possível salvar a ficha grande. Exporte seu JSON antes de sair.');
+    });
+    return true;
+  }
+  function save(){
+    state.schemaVersion=SCHEMA_VERSION;state.updatedAt=new Date().toISOString();
+    if(largeStorageMode)return saveLargeSheet();
+    try{
+      safeStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+      sheetWriteSequence++;broadcastSaveStatus(window.DUODECIMA_STORAGE_PERSISTENT===false?'temporary':'saved');
+      return true;
+    }catch(err){
+      if(window.DUODECIMA_LARGE_SHEETS?.isQuotaError(err)){
+        largeStorageMode=true;
+        return saveLargeSheet(true);
+      }
+      broadcastSaveStatus('error',err);
+      console.error('[Ficha] Falha ao salvar a ficha localmente.',err);
+      notify('Não foi possível salvar a ficha. Exporte seu JSON antes de sair.');
+      return false;
+    }
+  }
   window.DUODECIMA_REORDER_DECK=(type,keys)=>{
     if(!Array.isArray(keys)||!keys.length||new Set(keys).size!==keys.length||keys.some(k=>typeof k!=='string'))return false;
     if(type==='abilities'){
@@ -867,6 +903,16 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
         state=migrate(window.__DUODECIMA_PRELOAD__);if(state.tempMods)state.tempMods.rolls=0;save();return;
       }
       let raw=safeStorage.getItem(STORAGE_KEY);
+      if(!raw&&window.DUODECIMA_LARGE_SHEETS){
+        const stored=await window.DUODECIMA_LARGE_SHEETS.get(STORAGE_KEY);
+        if(stored){
+          largeStorageMode=true;
+          state=migrate(stored);
+          if(state.tempMods)state.tempMods.rolls=0;
+          save();
+          return;
+        }
+      }
       if(!raw && STORAGE_KEY === 'duodecima_universal_stage4_v24'){for(const k of LEGACY_KEYS){raw=safeStorage.getItem(k);if(raw)break}}
       if(!raw)return;
       state=migrate(JSON.parse(raw));if(state.tempMods)state.tempMods.rolls=0;save();
