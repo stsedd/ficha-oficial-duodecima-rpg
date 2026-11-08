@@ -29,8 +29,18 @@
     setTimeout(()=>URL.revokeObjectURL(url),5000);
   };
   function safeName(value){return String(value||'personagem').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'personagem'}
-  function currentSheet(){try{return JSON.parse(localStorage.getItem(activeStorageKey())||'null')}catch(_){return null}}
-  function backupBeforeImport(){const current=currentSheet();if(!current)return;try{localStorage.setItem(RECOVERY_KEY,JSON.stringify({savedAt:new Date().toISOString(),storageKey:activeStorageKey(),state:current}))}catch(_){}}
+  async function currentSheet(){
+    const key=activeStorageKey();
+    try{
+      const raw=localStorage.getItem(key);
+      if(raw)return JSON.parse(raw);
+      return await window.DUODECIMA_LARGE_SHEETS?.get(key)||null;
+    }catch(err){console.warn('[Duodecima IO] Não foi possível ler a ficha.',err);return null}
+  }
+  async function backupBeforeImport(){
+    const current=await currentSheet();if(!current)return;
+    try{localStorage.setItem(RECOVERY_KEY,JSON.stringify({savedAt:new Date().toISOString(),storageKey:activeStorageKey(),state:current}))}catch(_){}
+  }
   function validateSheet(data,file){
     if(typeof window.DUODECIMA_VALIDATE_SHEET_V536!=='function')throw new Error('Verificação de segurança indisponível. Recarregue a página antes de importar.');
     return window.DUODECIMA_VALIDATE_SHEET_V536(data,{byteSize:file?.size||0});
@@ -56,7 +66,7 @@
     req.onsuccess=()=>{const db=req.result;let tx;try{tx=db.transaction(THEME_STORE,'readwrite');tx.objectStore(THEME_STORE).put(theme)}catch(err){db.close();reject(err);return}tx.oncomplete=()=>{db.close();resolve(true)};tx.onerror=()=>{const err=tx.error;db.close();reject(err||new Error('Falha ao salvar tema'))};tx.onabort=tx.onerror};
   })}
   function fallbackStoreTheme(theme){localStorage.setItem(`duodecima_exclusive_theme_v1_${theme.id}`,JSON.stringify(theme));let ids=[];try{ids=JSON.parse(localStorage.getItem(THEME_INDEX)||'[]')}catch(_){}if(!Array.isArray(ids))ids=[];localStorage.setItem(THEME_INDEX,JSON.stringify([...new Set([...ids,theme.id])]))}
-  async function importTheme(file){const raw=await parseJsonFile(file),theme=validateTheme(raw);try{await Promise.race([storeTheme(theme),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),2500))])}catch(_){fallbackStoreTheme(theme)}const sheet=currentSheet();if(sheet){sheet.appearance=sheet.appearance||{};sheet.appearance.exclusiveThemeId=theme.id;sheet.appearance.special='none';localStorage.setItem(activeStorageKey(),JSON.stringify(sheet))}toast(`Tema exclusivo ${theme.name} instalado. Recarregando…`);setTimeout(()=>location.reload(),250)}
+  async function importTheme(file){const raw=await parseJsonFile(file),theme=validateTheme(raw);try{await Promise.race([storeTheme(theme),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),2500))])}catch(_){fallbackStoreTheme(theme)}const sheet=await currentSheet();if(sheet){sheet.appearance=sheet.appearance||{};sheet.appearance.exclusiveThemeId=theme.id;sheet.appearance.special='none';const key=activeStorageKey();if(localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(sheet));else await window.DUODECIMA_LARGE_SHEETS.put(key,sheet)}toast(`Tema exclusivo ${theme.name} instalado. Recarregando…`);setTimeout(()=>location.reload(),250)}
 
   let importing=false;
   function ensureImportDialog(){
@@ -99,16 +109,30 @@
     if(choice==='new'){
       const manager=window.DUODECIMA_CHARACTER_MANAGER;
       if(!manager?.importAsNew)throw new Error('O seletor de personagens está indisponível. Recarregue a página.');
-      if(!manager.importAsNew(data))throw new Error('Não foi possível guardar a nova personagem. Verifique o espaço do navegador.');
+      if(!await manager.importAsNew(data))throw new Error('Não foi possível guardar a nova personagem. Verifique o armazenamento do navegador.');
       return;
     }
-    const backups=window.DUODECIMA_BACKUP_API;
-    if(!backups||backups.activeStorageKey!==activeStorageKey())throw new Error('Sistema de backup não está pronto. Recarregue a página antes de substituir.');
+    let backups=window.DUODECIMA_BACKUP_API;
+    // A importação pode estar pronta antes da ficha carregar. Não rejeitar uma
+    // substituição enquanto o gerenciador de backups ainda inicializa.
+    for(let i=0;i<40&&(!backups||backups.activeStorageKey!==activeStorageKey());i++){
+      await new Promise(resolve=>setTimeout(resolve,250));
+      backups=window.DUODECIMA_BACKUP_API;
+    }
+    if(!backups||backups.activeStorageKey!==activeStorageKey())throw new Error('Sistema de backup não inicializou. Nenhum dado foi alterado.');
+    if(window.DUODECIMA_SAVE_PENDING)await window.DUODECIMA_SAVE_PENDING;
     const ok=await backups.create('Antes de substituir por JSON');
     if(!ok)throw new Error('Substituição cancelada: não foi possível criar um backup. Exporte a ficha atual primeiro.');
-    // Recuperação extra por personagem; o backup normal fica no IndexedDB.
-    backupBeforeImport();
-    localStorage.setItem(activeStorageKey(),JSON.stringify(data));
+    await backupBeforeImport();
+    const key=activeStorageKey();
+    try{
+      localStorage.setItem(key,JSON.stringify(data));
+      if(window.DUODECIMA_LARGE_SHEETS)await window.DUODECIMA_LARGE_SHEETS.remove(key);
+    }catch(err){
+      if(!window.DUODECIMA_LARGE_SHEETS?.isQuotaError(err))throw err;
+      await window.DUODECIMA_LARGE_SHEETS.put(key,data);
+      localStorage.removeItem(key);
+    }
     toast('Importação concluída nesta personagem. Recarregando…');
     setTimeout(()=>location.reload(),180);
   }
@@ -116,7 +140,7 @@
   function install(){
     const exp=q('exportBtn'),imp=q('importInput'),trigger=q('importJsonBtn'),theme=q('exclusiveThemeInput');
     if(trigger&&!trigger.dataset.ioImportTrigger){trigger.dataset.ioImportTrigger='1';trigger.addEventListener('click',()=>{const input=q('importInput');if(!input){toast('Seletor de arquivo indisponível. Atualize a página.');return}input.value='';input.click()})}
-    if(exp&&!exp.dataset.ioRecovery){exp.dataset.ioRecovery='1';exp.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();const data=currentSheet();if(!data){toast('Não encontrei uma ficha local para exportar.');return}downloadJson(data,`duodecima-${safeName(data.name)}.json`);toast('Ficha exportada.')},true)}
+    if(exp&&!exp.dataset.ioRecovery){exp.dataset.ioRecovery='1';exp.addEventListener('click',async e=>{e.preventDefault();e.stopImmediatePropagation();try{if(window.DUODECIMA_SAVE_PENDING)await window.DUODECIMA_SAVE_PENDING;const data=await currentSheet();if(!data){toast('Não encontrei uma ficha local para exportar.');return}downloadJson(data,`duodecima-${safeName(data.name)}.json`);toast('Ficha exportada.')}catch(err){toast('Falha ao exportar: '+String(err?.message||err))}},true)}
     if(imp&&!imp.dataset.ioRecovery){imp.dataset.ioRecovery='1';window.DUODECIMA_SAFE_IMPORT_READY=true;imp.addEventListener('change',async e=>{e.preventDefault();e.stopImmediatePropagation();const file=e.target.files?.[0];e.target.value='';if(!file||importing)return;importing=true;try{toast('Verificando arquivo da ficha…');await handleImport(file)}catch(err){console.warn('[Duodecima IO] import',err);const message=err?.message||'Não foi possível importar este JSON.';toast(message);window.alert('Importação não concluída: '+message+'\n\nNenhuma ficha foi substituída.')}finally{importing=false}},true)}
     if(theme&&!theme.dataset.ioRecovery){theme.dataset.ioRecovery='1';theme.addEventListener('change',async e=>{e.stopImmediatePropagation();const file=e.target.files?.[0];e.target.value='';if(!file)return;try{await importTheme(file)}catch(err){console.warn('[Duodecima IO] theme',err);toast(err?.message||'Não foi possível instalar este tema exclusivo.')}},true)}
   }

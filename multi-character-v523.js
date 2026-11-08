@@ -8,26 +8,54 @@ function write(k,v){store.setItem(k,JSON.stringify(v))}
 function registry(){const r=read(META);const base=r&&Array.isArray(r.characters)&&r.characters.length?r:{active:'legacy',characters:[{id:'legacy',name:'Personagem original'}]};return {...base,trash:Array.isArray(base.trash)?base.trash:[]}}
 function key(id){return id==='legacy'?MAIN:PREFIX+id}
 function sheet(id){return read(key(id))}
-function label(id){const s=sheet(id);return String(s?.name||'').trim()|| (id==='legacy'?'Personagem original':'Novo personagem')}
+function label(id){const s=sheet(id);return String(s?.name||registry().characters.find(x=>x.id===id)?.name||'').trim()|| (id==='legacy'?'Personagem original':'Novo personagem')}
 function makeId(){return (window.crypto?.randomUUID?.()||String(Date.now())+'-'+Math.random().toString(36).slice(2))}
 function ensure(){let r=registry();if(!r.characters.some(c=>c.id===r.active))r.active='legacy';if(!store.getItem(META)){const raw=store.getItem(MAIN);if(raw){try{store.setItem(MAIN+'_before_multichar_v1',raw)}catch(e){}}write(META,r)}return r}
 function current(){return registry().active}
-function change(id){const r=registry();if(!r.characters.some(c=>c.id===id))return;r.active=id;write(META,r);window.location.reload()}
-function add(copy){const r=registry();const id=makeId();if(copy){const data=store.getItem(key(r.active));if(data){try{store.setItem(key(id),data)}catch(e){alert('Não há espaço suficiente para duplicar esta ficha. Exporte o JSON antes de continuar.');return}}}r.characters.push({id,name:copy?label(r.active)+' (cópia)':'Novo personagem'});r.active=id;try{write(META,r)}catch(e){alert('Não foi possível criar a ficha neste navegador.');return}window.location.reload()}
-function importAsNew(data){
- const r=registry(),id=makeId(),storageKey=key(id),name=String(data?.name||'').trim()||'Personagem importado';
- let stored=false;
+async function change(id){
+ const r=registry();if(!r.characters.some(c=>c.id===id))return;
+ try{if(window.DUODECIMA_SAVE_PENDING)await window.DUODECIMA_SAVE_PENDING}catch(err){alert('A ficha atual não pôde ser salva. Exporte seu JSON antes de trocar de personagem.');return}
+ r.active=id;write(META,r);window.location.reload();
+}
+async function putSheet(storageKey,data){
+ const raw=JSON.stringify(data);
+ try{store.setItem(storageKey,raw);return 'local'}
+ catch(err){
+   if(!window.DUODECIMA_LARGE_SHEETS?.isQuotaError(err))throw err;
+   await window.DUODECIMA_LARGE_SHEETS.put(storageKey,data);
+   return 'large';
+ }
+}
+async function add(copy){
+ const r=registry(),id=makeId(),destination=key(id);let location=null;
  try{
-   // Grava a ficha ANTES de ativá-la. Se o registro falhar, não troca a personagem atual.
-   store.setItem(storageKey,JSON.stringify(data));stored=true;
-   const next={...r,characters:[...r.characters,{id,name}],active:id};
-   write(META,next);
-   window.location.reload();
-   return true;
+  if(copy){
+    const source=sheet(r.active)||await window.DUODECIMA_LARGE_SHEETS?.get(key(r.active));
+    if(!source)throw new Error('A ficha original não foi encontrada.');
+    location=await putSheet(destination,source);
+  }
+  const next={...r,characters:[...r.characters,{id,name:copy?label(r.active)+' (cópia)':'Novo personagem'}],active:id};
+  write(META,next);window.location.reload();
  }catch(err){
-   if(stored)try{store.removeItem(storageKey)}catch(_){}
-   console.error('[Duodecima] Não foi possível importar como novo personagem.',err);
-   return false;
+  if(location==='local')try{store.removeItem(destination)}catch(_){}
+  if(location==='large')try{await window.DUODECIMA_LARGE_SHEETS.remove(destination)}catch(_){}
+  console.error('[Duodecima] Falha ao criar personagem',err);
+  alert('Não foi possível criar ou duplicar a ficha. Nenhum personagem existente foi alterado.');
+ }
+}
+async function importAsNew(data){
+ const r=registry(),id=makeId(),storageKey=key(id),name=String(data?.name||'').trim()||'Personagem importado';
+ let location=null;
+ try{
+  location=await putSheet(storageKey,data);
+  const next={...r,characters:[...r.characters,{id,name}],active:id};
+  write(META,next);
+  window.location.reload();return true;
+ }catch(err){
+  if(location==='local')try{store.removeItem(storageKey)}catch(_){}
+  if(location==='large')try{await window.DUODECIMA_LARGE_SHEETS.remove(storageKey)}catch(_){}
+  console.error('[Duodecima] Não foi possível importar como novo personagem.',err);
+  return false;
  }
 }
 window.DUODECIMA_CHARACTER_MANAGER={
@@ -46,12 +74,12 @@ function del(){
  try{write(META,next);window.location.reload()}
  catch(e){console.error('[Duodecima] Falha ao arquivar personagem',e);alert('Não foi possível mover a ficha para a lixeira. Seus dados continuam intactos.')}
 }
-function restoreTrashed(id){
+async function restoreTrashed(id){
  const r=registry(),old=r.trash.find(x=>x.id===id);
  if(!old)return false;
  if(r.characters.some(x=>x.id===id)){alert('Este personagem já está na lista principal.');return false}
  // Se os dados não existem, não oferece falsa recuperação.
- if(!store.getItem(key(id))){alert('Não encontrei os dados desta ficha neste navegador. Nenhuma alteração foi realizada.');return false}
+ if(!store.getItem(key(id))&&!await window.DUODECIMA_LARGE_SHEETS?.get(key(id))){alert('Não encontrei os dados desta ficha neste navegador. Nenhuma alteração foi realizada.');return false}
  const next={...r,characters:[...r.characters,{id,name:old.name||label(id)}],trash:r.trash.filter(x=>x.id!==id),active:id};
  try{write(META,next);window.location.reload();return true}
  catch(e){console.error('[Duodecima] Falha ao restaurar personagem',e);alert('Não foi possível restaurar a ficha. Tente novamente depois.');return false}
@@ -86,7 +114,7 @@ function trashDialog(){
  }
  if(dialog.showModal)dialog.showModal();else dialog.setAttribute('open','');
 }
-function download(){const data=store.getItem(key(current()));if(!data){alert('Esta ficha ainda não contém dados salvos.');return}const blob=new Blob([data],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='duodecima-'+label(current()).replace(/[^a-z0-9-]+/gi,'-')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+async function download(){try{if(window.DUODECIMA_SAVE_PENDING)await window.DUODECIMA_SAVE_PENDING;let data=store.getItem(key(current()));if(!data){const large=await window.DUODECIMA_LARGE_SHEETS?.get(key(current()));if(large)data=JSON.stringify(large)}if(!data){alert('Esta ficha ainda não contém dados salvos.');return}const blob=new Blob([data],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='duodecima-'+label(current()).replace(/[^a-z0-9-]+/gi,'-')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000)}catch(err){console.error('[Duodecima] Exportação falhou',err);alert('Não foi possível exportar esta ficha. Seus dados continuam salvos.')}}
 function init(){
 const r=ensure(),parent=document.querySelector('.archive-brandbar')||document.querySelector('.archive-toolbar');if(!parent)return;
 const box=document.createElement('div');box.className='multi-character-bar';box.innerHTML='<label for="duoCharacterSelect">PERSONAGEM</label><select id="duoCharacterSelect" aria-label="Selecionar personagem"></select><button type="button" data-multi="new" title="Criar nova ficha">+ Nova</button><details class="multi-character-actions"><summary aria-label="Mais opções de personagem" title="Mais opções">•••</summary><div class="multi-character-menu"><button type="button" data-multi="copy">Duplicar ficha</button><button type="button" data-multi="export">Exportar JSON</button><button type="button" data-multi="trash">Lixeira</button><button type="button" data-multi="delete">Mover para lixeira</button></div></details>';
