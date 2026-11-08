@@ -1,0 +1,45 @@
+name: Importação JSON · teste de navegador
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'app-v511.js'
+      - 'io-recovery-v51515.js'
+      - 'multi-character-v523.js'
+      - 'large-character-storage-v540.js'
+      - 'bootstrap-v511.js'
+      - 'scripts/import-e2e-smoke.mjs'
+      - '.github/workflows/import-json-e2e.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  import-json:
+    name: Importar, substituir, editar e exportar JSON
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Conferir sintaxe
+        run: |
+          node --check scripts/import-e2e-smoke.mjs
+          node --check large-character-storage-v540.js
+          node --check io-recovery-v51515.js
+          node --check multi-character-v523.js
+          node --check app-v511.js
+      - name: Instalar navegador
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Iniciar site local
+        run: |
+          python3 -m http.server 4173 >/tmp/duodecima-http.log 2>&1 &
+          sleep 2
+      - name: Testar importação no Chromium
+        run: node scripts/import-e2e-smoke.mjs
