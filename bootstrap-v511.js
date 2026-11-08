@@ -4,7 +4,7 @@
   // O importador é carregado diretamente pelo index.html, depois do seletor
   // de personagens. Não depender de injeção dinâmica para abrir arquivos JSON.
 
-  try { await Promise.race([Promise.resolve(window.DUODECIMA_CORE_READY),new Promise(resolve=>setTimeout(resolve,8500))]); } catch (_) {}
+  try { await Promise.race([Promise.resolve(window.DUODECIMA_CORE_READY),new Promise(resolve=>setTimeout(resolve,5500))]); } catch (_) {}
 
   if(!document.querySelector('link[data-duodecima-polish="5.15.2"]')){
     const polish=document.createElement('link');
@@ -54,7 +54,7 @@
     const base=String(state.base||'https://stsedd.github.io/duodecima-core/').replace(/\/+$/,'')+'/';
     const version=encodeURIComponent(state.version||'current');
     try{
-      const response=await fetch(`${base}data/magia.json?v=${version}`,{cache:'default',signal:typeof AbortSignal?.timeout==='function'?AbortSignal.timeout(6000):undefined});
+      const response=await fetch(`${base}data/magia.json?v=${version}`,{cache:'default',signal:typeof AbortSignal?.timeout==='function'?AbortSignal.timeout(4500):undefined});
       if(!response.ok)throw new Error(`${response.status} ${response.statusText}`);
       const magic=await response.json();
       const awakening=magic.awakening||{};
@@ -81,7 +81,7 @@
       guard.onload=resolve;guard.onerror=()=>reject(new Error('Falha ao carregar guarda de contrato do Core'));
       document.body.appendChild(guard);
     });
-    try{await window.DUODECIMA_CONTRACT_GUARD_READY}catch(_){}
+    try{await Promise.race([Promise.resolve(window.DUODECIMA_CONTRACT_GUARD_READY),new Promise(resolve=>setTimeout(resolve,2500))])}catch(_){}
   }catch(err){console.warn('[Ficha] Guarda de contrato do Core indisponível; seguindo com as regras empacotadas.',err)}
 
   try {
@@ -91,7 +91,7 @@
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar automação de Legados'));
       document.body.appendChild(patch);
     });
-    try { await window.DUODECIMA_LINEAGE_CREATION_READY; } catch (_) {}
+    try { await Promise.race([Promise.resolve(window.DUODECIMA_LINEAGE_CREATION_READY),new Promise(resolve=>setTimeout(resolve,2500))]); } catch (_) {}
   } catch (err) {console.warn('[Ficha] Automação de Legados indisponível; carregando ficha base.',err)}
 
   // Sucessor implementado no app principal; a camada de criacao antiga foi desativada.
