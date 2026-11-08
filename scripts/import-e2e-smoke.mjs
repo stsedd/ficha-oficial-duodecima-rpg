@@ -54,10 +54,9 @@ await run('new');
 await run('replace');
 
 async function probeLarge(){
- const context=await browser.newContext();
+ const context=await browser.newContext({acceptDownloads:true});
  const page=await context.newPage();
- const dialogs=[];
- page.on('dialog',async d=>{dialogs.push(d.message());await d.accept()});
+ page.on('pageerror',e=>failures.push('large: pageerror '+e.message));
  await page.goto(base,{waitUntil:'networkidle'});
  const archive=page.locator('.unified-menu').filter({has:page.locator('summary[aria-label="Abrir menu Arquivo"]')});
  await archive.locator('summary').click();
@@ -65,11 +64,29 @@ async function probeLarge(){
  const heavy={...fixture,name:'Importação Grande',notes:randomBytes(4300000).toString('base64')};
  const bytes=Buffer.byteLength(JSON.stringify(heavy));
  await chooser.setFiles({name:'import-large.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(heavy))});
- await page.locator('#duodecimaSafeImportDialog').waitFor({state:'visible',timeout:12000});
- await page.locator('[data-safe-import="new"]').click();
- await page.waitForTimeout(1000);
- const result=await page.evaluate(()=>({registry:JSON.parse(localStorage.getItem('duodecima_character_registry_v1')||'null')?.characters?.length,main:JSON.parse(localStorage.getItem('duodecima_universal_stage4_v24')||'null')?.name}));
- console.log('LARGE IMPORT PROBE',{bytes,dialogs,result});
+ await page.locator('#duodecimaSafeImportDialog').waitFor({state:'visible',timeout:15000});
+ await Promise.all([page.waitForEvent('load',{timeout:30000}),page.locator('[data-safe-import="new"]').click()]);
+ const saved=await page.evaluate(async()=>{
+   const registry=JSON.parse(localStorage.getItem('duodecima_character_registry_v1')||'null');
+   const key=window.DUODECIMA_CHARACTER_MANAGER.activeStorageKey();
+   const db=await window.DUODECIMA_LARGE_SHEETS.get(key);
+   return {registry,dbName:db?.name,notesLength:db?.notes?.length,key};
+ });
+ console.log('LARGE IMPORT PROBE',{bytes,name:saved.dbName,notesLength:saved.notesLength,active:saved.registry?.active});
+ if(saved.dbName!=='Importação Grande'||saved.notesLength!==heavy.notes.length)throw Error('Large JSON not preserved in IndexedDB');
+ await page.locator('#nameInput').fill('Importação Grande Editada');
+ await page.evaluate(async()=>{if(window.DUODECIMA_SAVE_PENDING)await window.DUODECIMA_SAVE_PENDING});
+ await page.reload({waitUntil:'networkidle'});
+ const edited=await page.evaluate(async()=>{
+  const key=window.DUODECIMA_CHARACTER_MANAGER.activeStorageKey();
+  return (await window.DUODECIMA_LARGE_SHEETS.get(key))?.name;
+ });
+ if(edited!=='Importação Grande Editada')throw Error('Large-sheet edits did not persist after reload: '+edited);
+ await archive.locator('summary').click();
+ const [download]=await Promise.all([page.waitForEvent('download',{timeout:15000}),page.locator('#exportBtn').click()]);
+ const json=JSON.parse((await import('node:fs/promises')).readFile?await (await import('node:fs/promises')).readFile(await download.path(),'utf8'):'{}');
+ if(json.name!==edited||json.notes?.length!==heavy.notes.length)throw Error('Large JSON export was incomplete');
+ console.log('LARGE IMPORT EDIT EXPORT SUCCESS',json.name,json.notes.length);
  await context.close();
 }
 await probeLarge();
