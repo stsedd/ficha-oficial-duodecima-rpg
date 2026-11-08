@@ -1,4 +1,5 @@
 import {chromium} from 'playwright';
+import {randomBytes} from 'node:crypto';
 const browser=await chromium.launch({headless:true});
 const base='http://127.0.0.1:4173/';
 const fixture={schemaVersion:24,isCreated:true,name:'Importação E2E',player:'QA',level:2,godId:'iuppiter',baseAttributes:{for:1,des:1,con:1,int:1,fe:1,car:1},inventory:{items:[]},familiars:{entries:[]},history:{summary:'Importado e verificado'},weapons:[],talents:[],conditions:[]};
@@ -51,6 +52,28 @@ async function run(mode){
 }
 await run('new');
 await run('replace');
+
+async function probeLarge(){
+ const context=await browser.newContext();
+ const page=await context.newPage();
+ const dialogs=[];
+ page.on('dialog',async d=>{dialogs.push(d.message());await d.accept()});
+ await page.goto(base,{waitUntil:'networkidle'});
+ const archive=page.locator('.unified-menu').filter({has:page.locator('summary[aria-label="Abrir menu Arquivo"]')});
+ await archive.locator('summary').click();
+ const [chooser]=await Promise.all([page.waitForEvent('filechooser'),page.locator('#importJsonBtn').click()]);
+ const heavy={...fixture,name:'Importação Grande',notes:randomBytes(4300000).toString('base64')};
+ const bytes=Buffer.byteLength(JSON.stringify(heavy));
+ await chooser.setFiles({name:'import-large.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(heavy))});
+ await page.locator('#duodecimaSafeImportDialog').waitFor({state:'visible',timeout:12000});
+ await page.locator('[data-safe-import="new"]').click();
+ await page.waitForTimeout(1000);
+ const result=await page.evaluate(()=>({registry:JSON.parse(localStorage.getItem('duodecima_character_registry_v1')||'null')?.characters?.length,main:JSON.parse(localStorage.getItem('duodecima_universal_stage4_v24')||'null')?.name}));
+ console.log('LARGE IMPORT PROBE',{bytes,dialogs,result});
+ await context.close();
+}
+await probeLarge();
+
 await browser.close();
 if(failures.length){console.error(failures.join('\n'));process.exit(1)}
 console.log('IMPORT E2E SUCCESS');
