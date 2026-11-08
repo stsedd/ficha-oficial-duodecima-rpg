@@ -58,11 +58,11 @@ jobs:
           echo $! > /tmp/duodecima-http.pid
           sleep 2
 
-      - name: Run UI smoke
-        run: node scripts/ui-smoke.mjs
-
       - name: Run import JSON end-to-end smoke
         run: node scripts/import-e2e-smoke.mjs
+
+      - name: Run UI smoke
+        run: node scripts/ui-smoke.mjs
 
       - name: Run Rebento activation smoke
         run: node scripts/rebento-toggle-smoke.mjs
