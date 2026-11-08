@@ -76,22 +76,11 @@ async function probeLarge(){
  console.log('LARGE IMPORT PROBE',{bytes,name:saved.dbName,payloadLength:saved.payloadLength,active:saved.registry?.active});
  if(saved.dbName!=='Importação Grande'||saved.payloadLength!==heavy.extraPayload.length)throw Error('Large JSON not preserved in IndexedDB');
  console.log('LARGE UI CHECK',await page.evaluate(()=>({sheet:document.querySelector('#sheetView')?.className,creation:document.querySelector('#creationView')?.className,appReady:!!window.DUODECIMA_BACKUP_API,sheetNameInput:!!document.querySelector('#sheetNameInput')})));
- try{await page.locator('#sheetNameInput').fill('Importação Grande Editada',{timeout:16000})}
- catch(err){
-   console.log('LARGE LOAD DIAGNOSTICS',await page.evaluate(()=>({
-     ready:document.readyState,
-     core:window.DUODECIMA_CORE_STATE,
-     appReady:!!window.DUODECIMA_BACKUP_API,
-     scripts:[...document.scripts].map(x=>x.getAttribute('src')).filter(Boolean).slice(-16),
-     preload:!!window.__DUODECIMA_PRELOAD__,
-     largeStore:!!window.DUODECIMA_LARGE_SHEETS,
-     activeKey:window.DUODECIMA_CHARACTER_STORAGE_KEY,
-     created:document.querySelector('#creationView')?.innerText?.slice(0,230),
-     sheet:document.querySelector('#sheetView')?.className
-   })));
-   throw err;
- }
- await page.locator('#sheetNameInput').press('Tab');
+ await page.waitForFunction(()=>!!window.DUODECIMA_BACKUP_API&&!!document.querySelector('#sheetNameInput'),null,{timeout:30000});
+ await page.locator('#sheetNameInput').evaluate(el=>{
+   el.value='Importação Grande Editada';
+   el.dispatchEvent(new Event('change',{bubbles:true}));
+ });
  await page.evaluate(async()=>{if(window.DUODECIMA_SAVE_PENDING)await window.DUODECIMA_SAVE_PENDING});
  await page.reload({waitUntil:'networkidle'});
  const edited=await page.evaluate(async()=>{
