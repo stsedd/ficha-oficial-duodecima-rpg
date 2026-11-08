@@ -87,7 +87,7 @@
   try {
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`lineage-creation-v515.js?v=5.26.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`lineage-creation-v515.js?v=5.40.2-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar automação de Legados'));
       document.body.appendChild(patch);
     });
