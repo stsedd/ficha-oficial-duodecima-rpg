@@ -9,9 +9,10 @@ async function run(mode){
  await context.addInitScript(({seed})=>{
    localStorage.setItem('duodecima_universal_stage4_v24',JSON.stringify(seed));
  },{seed:original});
+ await context.addInitScript(()=>{const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k==='duodecima_universal_stage4_v24'){try{console.log('TRACE main setItem name='+JSON.parse(v).name+' caller='+new Error().stack.split('\\n').slice(2,4).join(' | '))}catch(_){}}return original.call(this,k,v)}});
  const page=await context.newPage();
  page.on('pageerror',e=>failures.push(mode+': pageerror '+e.message));
- page.on('console',msg=>{if(msg.type()==='error')console.log('console error:',msg.text())});
+ page.on('console',msg=>{if(msg.type()==='error'||msg.text().startsWith('TRACE'))console.log('browser:',msg.text())});
  page.on('dialog',async d=>{console.log('browser dialog:',d.message());await d.accept()});
  try{
    await page.goto(base,{waitUntil:'networkidle',timeout:60000});
