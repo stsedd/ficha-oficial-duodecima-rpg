@@ -24,7 +24,11 @@ async function run(mode){
    const [chooser]=await Promise.all([page.waitForEvent('filechooser',{timeout:8000}),trigger.click()]);
    await chooser.setFiles({name:'import-e2e.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(fixture))});
    await page.locator('#duodecimaSafeImportDialog').waitFor({state:'visible',timeout:9000});
-   console.log(mode,'dialog visible');
+   console.log(mode,'dialog visible, backup ready:',await page.evaluate(()=>!!window.DUODECIMA_BACKUP_API));
+   if(mode==='replace'){
+     await page.waitForFunction(()=>!!window.DUODECIMA_BACKUP_API,null,{timeout:30000}).catch(e=>console.warn('BACKUP NEVER READY',e.message));
+     console.log('replace readiness:',await page.evaluate(()=>({backup:!!window.DUODECIMA_BACKUP_API,activeKey:window.DUODECIMA_BACKUP_API?.activeStorageKey,saveStatus:window.DUODECIMA_STORAGE_PERSISTENT,loaded:!!document.querySelector('.rail-vitals')})));
+   }
    await Promise.all([
      page.waitForEvent('load',{timeout:15000}),
      page.locator('[data-safe-import="'+mode+'"]').click()
