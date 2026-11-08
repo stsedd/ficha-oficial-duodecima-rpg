@@ -56,7 +56,8 @@ await run('replace');
 async function probeLarge(){
  const context=await browser.newContext({acceptDownloads:true});
  const page=await context.newPage();
- page.on('pageerror',e=>failures.push('large: pageerror '+e.message));
+ page.on('pageerror',e=>{failures.push('large: pageerror '+e.message);console.log('LARGE PAGE ERROR',e.message)});
+ page.on('console',m=>{if(['error','warning'].includes(m.type()))console.log('LARGE CONSOLE',m.type(),m.text())});
  await page.goto(base,{waitUntil:'networkidle'});
  const archive=page.locator('.unified-menu').filter({has:page.locator('summary[aria-label="Abrir menu Arquivo"]')});
  await archive.locator('summary').click();
@@ -75,7 +76,21 @@ async function probeLarge(){
  console.log('LARGE IMPORT PROBE',{bytes,name:saved.dbName,payloadLength:saved.payloadLength,active:saved.registry?.active});
  if(saved.dbName!=='Importação Grande'||saved.payloadLength!==heavy.extraPayload.length)throw Error('Large JSON not preserved in IndexedDB');
  console.log('LARGE UI CHECK',await page.evaluate(()=>({sheet:document.querySelector('#sheetView')?.className,creation:document.querySelector('#creationView')?.className,appReady:!!window.DUODECIMA_BACKUP_API,nameInput:!!document.querySelector('#nameInput')})));
- await page.locator('#nameInput').fill('Importação Grande Editada');
+ try{await page.locator('#nameInput').fill('Importação Grande Editada',{timeout:16000})}
+ catch(err){
+   console.log('LARGE LOAD DIAGNOSTICS',await page.evaluate(()=>({
+     ready:document.readyState,
+     core:window.DUODECIMA_CORE_STATE,
+     appReady:!!window.DUODECIMA_BACKUP_API,
+     scripts:[...document.scripts].map(x=>x.getAttribute('src')).filter(Boolean).slice(-16),
+     preload:!!window.__DUODECIMA_PRELOAD__,
+     largeStore:!!window.DUODECIMA_LARGE_SHEETS,
+     activeKey:window.DUODECIMA_CHARACTER_STORAGE_KEY,
+     created:document.querySelector('#creationView')?.innerText?.slice(0,230),
+     sheet:document.querySelector('#sheetView')?.className
+   })));
+   throw err;
+ }
  await page.evaluate(async()=>{if(window.DUODECIMA_SAVE_PENDING)await window.DUODECIMA_SAVE_PENDING});
  await page.reload({waitUntil:'networkidle'});
  const edited=await page.evaluate(async()=>{
