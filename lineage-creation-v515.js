@@ -133,7 +133,9 @@ function seedMigratedCompoundChoices(data){
   }
 
   function checkRuntimeSignature(){
-    if(reloadScheduled)return;
+    // A escolha entre criar personagem, substituir ou cancelar ainda não terminou.
+    // Recarregar aqui descarta o <dialog> e obriga a pessoa a clicar em poucos segundos.
+    if(reloadScheduled||window.DUODECIMA_IMPORT_DECISION_PENDING)return;
     const current=runtimeSignature(readState());
     if(current===appliedRuntimeSignature)return;
     reloadScheduled=true;
@@ -152,9 +154,8 @@ function seedMigratedCompoundChoices(data){
     };
     const root=document.querySelector('main')||document.body;
     if(root)new MutationObserver(scheduleCheck).observe(root,{childList:true,subtree:true});
-    document.addEventListener('change',event=>{
-      if(event.target?.id==='importInput')setTimeout(checkRuntimeSignature,0);
-    });
+    // A importação gerencia seu próprio reload somente depois da decisão e do
+    // salvamento. O antigo listener em #importInput fazia a janela desaparecer.
     document.addEventListener('click',event=>{
       if(event.target?.closest?.('#resetBtn'))setTimeout(checkRuntimeSignature,0);
     });

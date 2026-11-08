@@ -193,7 +193,7 @@
     document.addEventListener('change',e=>{
       const selector=e.target.closest?.('[data-rebento-slot]');
       if(selector){e.stopImmediatePropagation();changeRebentoSelection(Number(selector.dataset.rebentoSlot),selector.value);return}
-      if(e.target?.id==='importInput')setTimeout(reload,900);
+      // O importador controla o reload após escolha explícita; não reiniciar aqui.
     },true);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initObserver,{once:true});else initObserver();
