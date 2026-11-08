@@ -11,7 +11,7 @@
   state.base = coreBase;
 
   async function getJson(url, cache='default'){
-    const response = await fetch(url, { cache, signal: typeof AbortSignal?.timeout==='function' ? AbortSignal.timeout(7000) : undefined });
+    const response = await fetch(url, { cache });
     if(!response.ok) throw new Error(`${response.status} ${response.statusText} · ${url}`);
     return response.json();
   }
