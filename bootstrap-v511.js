@@ -99,7 +99,7 @@
   try{
     await new Promise((resolve,reject)=>{
       const patch=document.createElement('script');
-      patch.src=`rebento-mechanics-v516.js?v=5.24.0-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
+      patch.src=`rebento-mechanics-v516.js?v=5.40.2-${encodeURIComponent(window.DUODECIMA_CORE_STATE?.version || 'fallback')}`;
       patch.onload=resolve;patch.onerror=()=>reject(new Error('Falha ao carregar mecânicas de Rebento'));
       document.body.appendChild(patch);
     });
