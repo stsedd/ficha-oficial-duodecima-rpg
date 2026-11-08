@@ -4,7 +4,7 @@
   // O importador é carregado diretamente pelo index.html, depois do seletor
   // de personagens. Não depender de injeção dinâmica para abrir arquivos JSON.
 
-  try { await window.DUODECIMA_CORE_READY; } catch (_) {}
+  try { await Promise.race([Promise.resolve(window.DUODECIMA_CORE_READY),new Promise(resolve=>setTimeout(resolve,8500))]); } catch (_) {}
 
   if(!document.querySelector('link[data-duodecima-polish="5.15.2"]')){
     const polish=document.createElement('link');
@@ -54,7 +54,7 @@
     const base=String(state.base||'https://stsedd.github.io/duodecima-core/').replace(/\/+$/,'')+'/';
     const version=encodeURIComponent(state.version||'current');
     try{
-      const response=await fetch(`${base}data/magia.json?v=${version}`,{cache:'default'});
+      const response=await fetch(`${base}data/magia.json?v=${version}`,{cache:'default',signal:typeof AbortSignal?.timeout==='function'?AbortSignal.timeout(6000):undefined});
       if(!response.ok)throw new Error(`${response.status} ${response.statusText}`);
       const magic=await response.json();
       const awakening=magic.awakening||{};
