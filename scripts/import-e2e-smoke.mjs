@@ -27,6 +27,12 @@ async function run(mode){
    await chooser.setFiles({name:'import-e2e.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(fixture))});
    await page.locator('#duodecimaSafeImportDialog').waitFor({state:'visible',timeout:9000});
    console.log(mode,'dialog visible, backup ready:',await page.evaluate(()=>!!window.DUODECIMA_BACKUP_API));
+   // Regressão: a janela não pode sumir sozinha após 7 segundos de indecisão.
+   const navBefore=await page.evaluate(()=>performance.getEntriesByType('navigation').length);
+   await page.waitForTimeout(7000);
+   if(!await page.locator('#duodecimaSafeImportDialog').isVisible())throw Error('A janela de importação desapareceu sem decisão do usuário');
+   if(!await page.locator('[data-safe-import="'+mode+'"]').isVisible())throw Error('Botão de escolha de importação desapareceu');
+   console.log(mode,'dialog stayed open >7s');
    if(mode==='replace'){
      await page.waitForFunction(()=>!!window.DUODECIMA_BACKUP_API,null,{timeout:30000}).catch(e=>console.warn('BACKUP NEVER READY',e.message));
      console.log('replace readiness:',await page.evaluate(()=>({backup:!!window.DUODECIMA_BACKUP_API,activeKey:window.DUODECIMA_BACKUP_API?.activeStorageKey,saveStatus:window.DUODECIMA_STORAGE_PERSISTENT,loaded:!!document.querySelector('.rail-vitals')})));
