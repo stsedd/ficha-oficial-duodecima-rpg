@@ -75,8 +75,8 @@ async function probeLarge(){
  });
  console.log('LARGE IMPORT PROBE',{bytes,name:saved.dbName,payloadLength:saved.payloadLength,active:saved.registry?.active});
  if(saved.dbName!=='Importação Grande'||saved.payloadLength!==heavy.extraPayload.length)throw Error('Large JSON not preserved in IndexedDB');
- console.log('LARGE UI CHECK',await page.evaluate(()=>({sheet:document.querySelector('#sheetView')?.className,creation:document.querySelector('#creationView')?.className,appReady:!!window.DUODECIMA_BACKUP_API,nameInput:!!document.querySelector('#nameInput')})));
- try{await page.locator('#nameInput').fill('Importação Grande Editada',{timeout:16000})}
+ console.log('LARGE UI CHECK',await page.evaluate(()=>({sheet:document.querySelector('#sheetView')?.className,creation:document.querySelector('#creationView')?.className,appReady:!!window.DUODECIMA_BACKUP_API,sheetNameInput:!!document.querySelector('#sheetNameInput')})));
+ try{await page.locator('#sheetNameInput').fill('Importação Grande Editada',{timeout:16000})}
  catch(err){
    console.log('LARGE LOAD DIAGNOSTICS',await page.evaluate(()=>({
      ready:document.readyState,
@@ -91,6 +91,7 @@ async function probeLarge(){
    })));
    throw err;
  }
+ await page.locator('#sheetNameInput').press('Tab');
  await page.evaluate(async()=>{if(window.DUODECIMA_SAVE_PENDING)await window.DUODECIMA_SAVE_PENDING});
  await page.reload({waitUntil:'networkidle'});
  const edited=await page.evaluate(async()=>{
