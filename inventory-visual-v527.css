@@ -236,3 +236,106 @@
   [data-pane="inventory"] *,
   .unified-menu-content{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
 }
+
+/* v5.39.0 — conserto do layout de adição ao inventário.
+   Cada bloco ocupa sua própria linha: introdução, modos de criação e busca. */
+[data-pane="inventory"] > .inventory-toolbar-card.card{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-auto-flow:row!important;
+  align-items:stretch!important;
+  gap:12px!important;
+  padding:16px!important;
+  min-width:0!important;
+}
+[data-pane="inventory"] > .inventory-toolbar-card.card > div:first-child{
+  grid-column:1/-1!important;
+  grid-row:auto!important;
+  min-width:0!important;
+}
+[data-pane="inventory"] > .inventory-toolbar-card.card > .inventory-toolbar-grid.inventory-toolbar-grid--priority{
+  grid-column:1/-1!important;
+  grid-row:auto!important;
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:12px!important;
+  align-items:start!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+}
+[data-pane="inventory"] .inventory-toolbar-grid--priority > .inventory-import-card,
+[data-pane="inventory"] .inventory-toolbar-grid--priority > .inventory-manual-card{
+  box-sizing:border-box!important;
+  display:block!important;
+  position:relative!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:12px!important;
+}
+[data-pane="inventory"] .inventory-manual-row{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:8px!important;
+  width:100%!important;
+  min-width:0!important;
+  align-items:center!important;
+}
+[data-pane="inventory"] .inventory-manual-row select{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+}
+[data-pane="inventory"] .inventory-manual-row button{
+  width:auto!important;
+  flex:none!important;
+  white-space:nowrap!important;
+}
+[data-pane="inventory"] .inventory-library-picker,
+[data-pane="inventory"] .inventory-library-panel,
+[data-pane="inventory"] .inventory-library-controls{
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+[data-pane="inventory"] > .inventory-toolbar-card.card > .inventory-filter-row{
+  grid-column:1/-1!important;
+  grid-row:auto!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(150px,.38fr)!important;
+  gap:10px!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+}
+[data-pane="inventory"] .inventory-filter-row > input,
+[data-pane="inventory"] .inventory-filter-row > select{
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+[data-pane="inventory"] > .inventory-toolbar-card.card > .inventory-help-inline{
+  grid-column:1/-1!important;
+  grid-row:auto!important;
+  min-width:0!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+@media(max-width:840px){
+  [data-pane="inventory"] > .inventory-toolbar-card.card > .inventory-toolbar-grid.inventory-toolbar-grid--priority{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}
+@media(max-width:540px){
+  [data-pane="inventory"] > .inventory-toolbar-card.card{padding:12px!important;gap:10px!important}
+  [data-pane="inventory"] > .inventory-toolbar-card.card > .inventory-filter-row{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  [data-pane="inventory"] .inventory-manual-row{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  [data-pane="inventory"] .inventory-manual-row button{width:100%!important}
+}
