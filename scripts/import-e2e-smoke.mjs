@@ -7,7 +7,7 @@ const failures=[];
 async function run(mode){
  const context=await browser.newContext();
  await context.addInitScript(({seed})=>{
-   localStorage.setItem('duodecima_universal_stage4_v24',JSON.stringify(seed));
+   if(!localStorage.getItem('duodecima_universal_stage4_v24'))localStorage.setItem('duodecima_universal_stage4_v24',JSON.stringify(seed));
  },{seed:original});
  await context.addInitScript(()=>{const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k==='duodecima_universal_stage4_v24'){try{console.log('TRACE main setItem name='+JSON.parse(v).name+' caller='+new Error().stack.split('\\n').slice(2,4).join(' | '))}catch(_){}}return original.call(this,k,v)}});
  const page=await context.newPage();
