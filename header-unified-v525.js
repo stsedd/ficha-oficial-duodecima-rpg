@@ -10,8 +10,8 @@ function init(){
  const theme=menu('Aparência'),archive=menu('Arquivo'),banner=menu('Banner');
  const palette=document.querySelector('#themePaletteBtn'),special=document.querySelector('#themeSpecialBtn');
  if(palette)theme.appendChild(palette);if(special)theme.appendChild(special);
- for(const id of ['exportBtn','importInput','backupsBtn','helpBtn','resetBtn']){
-  let el=id==='importInput'?document.querySelector('#importInput')?.closest('label'):document.getElementById(id);if(el)archive.appendChild(el);
+ for(const id of ['exportBtn','importJsonBtn','backupsBtn','helpBtn','resetBtn']){
+  const el=document.getElementById(id);if(el)archive.appendChild(el);
  }
  for(const id of ['bannerBtn','editBannerBtn','clearBannerBtn','bannerUploadInput']){const el=document.getElementById(id);if(el)banner.appendChild(el)}
  appearance.appendChild(controls);
