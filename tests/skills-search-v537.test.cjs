@@ -44,7 +44,7 @@ test('collapsible sections default open, and only store UI state in session',()=
 test('versioned assets are loaded',()=>{
  assert.ok(html.includes('skills-search-collapse-v537.js?v=5.37.0'));
  assert.ok(html.includes('skills-search-collapse-v537.css?v=5.37.2'));
- assert.match(html,/bootstrap-v511\.js\?v=5\.38\.3/);
+ assert.match(html,/bootstrap-v511\.js\?v=5\.40\.0/);
  assert.match(read('bootstrap-v511.js'),/app-v511\.js\?v=5\.38\.2-/);
 });
 
