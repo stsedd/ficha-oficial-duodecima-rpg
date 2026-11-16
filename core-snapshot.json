@@ -2,8 +2,8 @@
   "manifest": {
     "core": "Duodécima Core",
     "schemaVersion": 2,
-    "contentVersion": "2026.10.21.1",
-    "updatedAt": "2026-10-21",
+    "contentVersion": "2026.11.15.1",
+    "updatedAt": "2026-11-15",
     "status": "canonical-phase-2",
     "counts": {
       "deities": 54,
@@ -25,9 +25,11 @@
       "equipment": "data/equipamentos.json",
       "aliases": "data/aliases.json",
       "magic": "data/magia.json",
-      "godsSupplement": "data/proles-2026-10.json"
+      "godsSupplement": "data/proles-2026-10.json",
+      "abilityAdjustments": "data/ajustes-habilidades-2026-11.json"
     },
     "notes": [
+      "15/11: regras completas de magia, exceções de estaca 30 para proles mágicas, +2 resistência de forja de Vulcano e cinco revisões de habilidades em camada canônica de ajustes.",
       "Tempestas e Cloacina adicionadas em 2026-10-21 via dados complementares canônicos, consumidos por Guia e Ficha.",
       "Talentos revisados em 2026-10-02: o padrão passa a ser uma única aquisição, salvo quando o próprio talento autoriza repetição; Adepto Elemental, Campeão e Aumento de Atributo são repetíveis conforme suas descrições.",
       "Combate recebe estrutura canônica de 2 ações, 10 m de deslocamento e 1 ação livre, além de Disparada, Defender, Ajudar, Preparar, Furtividade, Percepção Passiva, manobras, cobertura e quedas.",
@@ -57351,7 +57353,7 @@
   },
   "equipment": {
     "schemaVersion": 3,
-    "updatedAt": "2026-09-27",
+    "updatedAt": "2026-11-15",
     "materials": [
       {
         "id": "ferro-aco",
@@ -57546,6 +57548,19 @@
           "failureLimit": 3,
           "lossMustBeReported": true
         }
+      },
+      "divineCraftsmanship": {
+        "deity": "vulcano",
+        "label": "Fabricado por prole de Vulcano",
+        "resistanceBonus": 2,
+        "applicableKinds": [
+          "weapon",
+          "armor",
+          "shield"
+        ],
+        "affects": "resistência máxima e resistência atual na fabricação; não altera o dano, defesa ou outras propriedades",
+        "unbreakableHandling": "materiais inquebráveis permanecem inquebráveis e não recebem contador numérico",
+        "note": "Itens feitos por proles de Vulcano recebem +2 de resistência contra quebra."
       }
     },
     "armorTypes": [
@@ -57772,7 +57787,7 @@
   },
   "magic": {
     "schemaVersion": 2,
-    "updatedAt": "2026-09-27",
+    "updatedAt": "2026-11-15",
     "circles": [
       {
         "circle": 1,
@@ -57875,6 +57890,54 @@
       "Efeitos anteriormente descritos como 1 minuto passam, em regra, a 3 turnos; controles fortes podem usar 2 turnos.",
       "No despertar, cada ponto retirado de FOR, DES ou CON concede +25 de Energia máxima, até 3 pontos no total.",
       "Bônus divinos e os +1 concedidos por Rebento de Roma não podem ser sacrificados no despertar mágico."
+    ],
+    "divineAbilityProgression": {
+      "magicalCharacterDefaultMaximumStake": 29,
+      "magicalAffinityDeities": [
+        "jano",
+        "libitina",
+        "trivia",
+        "somnia"
+      ],
+      "additionalAcceptedAliases": [
+        "janus",
+        "somnium"
+      ],
+      "exemptPassiveAbilities": true,
+      "exemptFirstActiveAbilities": 4,
+      "magicalAffinityMaximumStake": 30,
+      "appliesToInheritedAbilitySource": true,
+      "note": "Proles de Jano, Libitina, Trívia e Somnium podem evoluir passivas e quatro primeiras habilidades divinas até a estaca 30, mesmo quando aprendem magia; outras proles mágicas permanecem na segunda estaca (29)."
+    },
+    "rules": {
+      "access": "Um personagem torna-se mágico quando recebe o primeiro círculo; qualquer origem pode despertar magia mediante história, missão, evento, treinamento especial ou recompensa.",
+      "initialBenefits": "Primeiro círculo, atributo de conjuração (Inteligência, Fé ou Carisma), três magias de primeiro círculo e dois cantrips.",
+      "unifiedEnergyPool": "Magia e habilidades divinas consomem a mesma barra de energia. Não existe reserva adicional.",
+      "awakening": "Até 3 pontos de FOR, DES ou CON podem ser sacrificados no despertar, concedendo +25 de Energia máxima por ponto; um atributo pode chegar a -1. Bônus divinos não podem ser sacrificados. Ao sacrificar CON, recalcular HP.",
+      "attributeInsteadOfImprovement": "Em um nível com ganho de atributo, o mágico pode renunciar permanentemente ao ponto e receber +25 de Energia máxima.",
+      "fragility": "Ao receber um aumento de HP máximo por progressão, mágico recebe 2 HP a menos. Despertar tardio recalcula retroativamente o HP, e sacrifícios de CON também afetam HP.",
+      "castingAttribute": "Escolher INT (estudo), FÉ (rituais/devoção) ou CAR (emoção/poder inato) de acordo com a origem da magia; não pode ser trocado por padrão.",
+      "circles": "Nove círculos; o nível mínimo não concede desbloqueio automático. Cada novo círculo depende de recompensa e apenas autoriza aprender magias do mesmo nível ou inferior.",
+      "learning": "Três magias iniciais de primeiro círculo; outras precisam ser obtidas por loot, grimórios, mentores, rituais, objetos ou recompensas. Sem limite fixo de magias conhecidas. Cada magia deve estar registrada e ter fonte identificada. Ensino entre personagens exige talento de nível 60+.",
+      "energyCost": "Custo descontado na conjuração mesmo se ataque errar, alvo resistir ou ocorrer falha crítica. Ao chegar a 50% da Energia, aplicar cansaço; com 0 ou menos, desmaia.",
+      "combat": "Conjurar uma magia usa uma das duas ações do turno. No máximo uma magia de círculo por turno; a outra ação permanece disponível. Exceções fora do turno constam na descrição.",
+      "concentration": "Uma magia com concentração por vez. Termina por inconsciência, 0 Energia, decisão voluntária, nova concentração ou falha em resistência de Constituição (DT 10 ou metade do dano, o maior). Cada fonte de dano exige teste separado.",
+      "upcast": "Apenas magias cuja descrição autorize; requer círculo desbloqueado e custo correspondente ao círculo utilizado.",
+      "rituals": "Fora de combate, 10 minutos de preparação, local seguro e componentes; pagam metade do custo arredondado para cima em múltiplos de 5. Ritual não ocorre em combate, perseguição ou movimento; componentes consumíveis ainda são gastos.",
+      "components": "Verbal (fala), Somático (gestos), Material (objeto). Foco substitui apenas materiais comuns não consumíveis, não materiais raros ou caros.",
+      "focus": "Foco arcano em uma das mãos é obrigatório para conjurar, inclusive sem componente material. Foco comum custa 120 denários; focos personalizados são precificados pelo artesão; material do foco não concede propriedade mecânica.",
+      "focusCrafting": "Três sucessos de Ofício, DT 15, em etapas de 30 minutos. Falha repete etapa após 30 minutos e rola 1d6 de Instabilidade Arcana; falha crítica rola duas vezes. Efeitos narrativos duram uma semana e não alteram números.",
+      "cantrips": "Dois truques iniciais sem custo energético; novos truques aprendidos separadamente.",
+      "highMagic": "Círculos 6 e 7: duas conjurações cada por descanso longo; círculos 8 e 9: uma cada. O limite é compartilhado pelas magias daquele círculo.",
+      "powers": "Magia não substitui poderes divinos e não concede domínio sobre áreas ou autoridades de outros deuses; feitiços continuam sujeitos a custos, componentes e consequências narrativas."
+    },
+    "focusInstabilityTable": [
+      "1 — Crescimento Arcano: cresce 1d10 cm; vestimentas e equipamentos acompanham.",
+      "2 — Encolhimento Arcano: diminui 1d10 cm; vestimentas e equipamentos acompanham.",
+      "3 — Cromatismo Mágico: característica física muda de cor por uma semana.",
+      "4 — Gravidade Questionável: cabelos e objetos soltos flutuam por uma semana, sem efeito em missões.",
+      "5 — Manifestação Inconveniente: borboletas, flores, faíscas, chuva localizada ou equivalente por uma semana.",
+      "6 — Mutação Arcana Temporária: chifres, orelhas, pupilas ou outras alterações inofensivas por uma semana."
     ]
   },
   "godsSupplement": {
@@ -58790,5 +58853,136 @@
       }
     ]
   },
-  "generatedAt": "2026-11-15T12:44:35.532Z"
+  "abilityAdjustments": {
+    "schemaVersion": 1,
+    "updatedAt": "2026-11-15",
+    "description": "Correções canônicas das habilidades em 15/11/2026; aplicadas sobre os kits existentes sem alterar a descrição de outros efeitos.",
+    "changes": [
+      {
+        "deityId": "iuppiter",
+        "abilityId": "regeneracao-raios",
+        "abilityName": "Regeneração por Raios",
+        "replaceText": [
+          {
+            "find": "HP ou energia",
+            "replace": "HP",
+            "flags": "gi"
+          },
+          {
+            "find": "HP ou Energia",
+            "replace": "HP",
+            "flags": "gi"
+          }
+        ]
+      },
+      {
+        "deityId": "summanus",
+        "abilityId": "regeneracao-noturna",
+        "abilityName": "Regeneração Noturna",
+        "replaceText": [
+          {
+            "find": "HP ou energia",
+            "replace": "HP",
+            "flags": "gi"
+          },
+          {
+            "find": "HP ou Energia",
+            "replace": "HP",
+            "flags": "gi"
+          }
+        ]
+      },
+      {
+        "deityId": "bellona",
+        "abilityId": "sede-batalha",
+        "abilityName": "Sede de Batalha",
+        "replaceText": [
+          {
+            "find": "recupera 1d4 + 1 de energia",
+            "replace": "",
+            "flags": "gi"
+          },
+          {
+            "find": "recupera 1d4 de energia",
+            "replace": "",
+            "flags": "gi"
+          }
+        ],
+        "tierOverrides": {
+          "30+": "por 3 turnos, recebe +2 em ataque e +1d6 de dano físico."
+        }
+      },
+      {
+        "deityId": "juventas",
+        "abilityId": "calice-deuses",
+        "abilityName": "Cálice dos Deuses",
+        "replaceText": [
+          {
+            "find": "3x o nível do receptor de energia",
+            "replace": "2 × nível do receptor + 25 de energia",
+            "flags": "gi"
+          },
+          {
+            "find": "5x o nível do receptor de energia",
+            "replace": "3 × nível do receptor + 50 de energia",
+            "flags": "gi"
+          },
+          {
+            "find": "3× o nível do receptor de energia",
+            "replace": "2 × nível do receptor + 25 de energia",
+            "flags": "gi"
+          },
+          {
+            "find": "5× o nível do receptor de energia",
+            "replace": "3 × nível do receptor + 50 de energia",
+            "flags": "gi"
+          }
+        ],
+        "deityAliases": [
+          "iuventas"
+        ]
+      },
+      {
+        "deityId": "phantasos",
+        "deityAliases": [
+          "fantaso",
+          "fântaso"
+        ],
+        "abilityId": "paleta-sonhar",
+        "abilityName": "Paleta do Sonhar",
+        "summary": "Fântaso permite que a prole pinte no ar, criando objetos e estruturas temporariamente reais, como pontes de nuvens, chaves de brisa e muralhas de livros. Quanto maior e mais complexa a criação, mais instável ela se torna.",
+        "tierOverrides": {
+          "0-15": "cria 1 objeto simples e não ofensivo por 1 turno, como corda, luz, chave frágil ou pequena plataforma. Pode conceder +1 em um teste relacionado à sua utilização.",
+          "16-29": "cria ferramentas, barreiras, plataformas ou pontes curtas por até 2 turnos. Pode conceder +1 em defesa, dificultar o avanço inimigo ou fornecer +2 em um teste relacionado à criação.",
+          "30+": "cria estruturas complexas por até 3 turnos, podendo escolher uma das seguintes manifestações: Perturbadora — causa 2d8 + Carisma de dano de sanidade em um alvo, mediante resistência de Fé. Acolhedora — restaura 2d8 + Carisma de sanidade de um aliado. Protetora — concede 2d8 + Carisma de HP temporário a um aliado, na forma de um escudo que dura 3 turnos ou até absorver todo o dano."
+        },
+        "note": "Criações grandes não bloqueiam completamente a passagem, podendo apenas gerar terreno difícil em uma área curta. O HP temporário não constitui cura, não fecha feridas, não estabiliza criaturas e não impede testes contra a morte.",
+        "level": 15
+      },
+      {
+        "deityId": "somnus",
+        "deityAliases": [
+          "somnos"
+        ],
+        "abilityId": "sono-profundo",
+        "abilityName": "Sono Profundo",
+        "replaceText": [
+          {
+            "find": "Ao completar um descanso longo de sono real, recupera +70 de energia além do padrão do descanso.",
+            "replace": "Durante descansos curtos em que consiga dormir de verdade, recupera Energia adicional igual ao nível do personagem + 10.",
+            "flags": "gi"
+          },
+          {
+            "find": "recupera +70 de energia além do padrão do descanso",
+            "replace": "recupera Energia adicional igual ao nível do personagem + 10 durante descansos curtos",
+            "flags": "gi"
+          }
+        ]
+      }
+    ],
+    "policy": {
+      "alati": "Reformulação futura: não editar habilidades Alati nesta atualização."
+    }
+  },
+  "generatedAt": "2026-11-16T13:39:37.010Z"
 }
