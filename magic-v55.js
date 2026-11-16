@@ -21,5 +21,13 @@ window.DUODECIMA_MAGIC = {
   divineBonusesSacrificable: false,
   hpProgressionPenalty: 2,
   castingAttributes: ['int','fe','car'],
-  highCircleUses: {6:2,7:2,8:1,9:1}
+  highCircleUses: {6:2,7:2,8:1,9:1},
+  divineAbilityProgression: {
+    magicalCharacterDefaultMaximumStake: 29,
+    magicalAffinityDeities: ['jano','libitina','trivia','somnia'],
+    additionalAcceptedAliases: ['janus','somnium'],
+    exemptPassiveAbilities: true,
+    exemptFirstActiveAbilities: 4,
+    magicalAffinityMaximumStake: 30
+  }
 };
