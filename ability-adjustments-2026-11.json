@@ -58,7 +58,7 @@
       }
     },
     {
-      "deityId": "iuventas",
+      "deityId": "juventas",
       "abilityId": "calice-deuses",
       "abilityName": "Cálice dos Deuses",
       "replaceText": [
@@ -82,6 +82,9 @@
           "replace": "3 × nível do receptor + 50 de energia",
           "flags": "gi"
         }
+      ],
+      "deityAliases": [
+        "iuventas"
       ]
     },
     {
