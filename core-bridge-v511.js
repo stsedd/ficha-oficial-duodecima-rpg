@@ -199,26 +199,24 @@
   }
 
 
-  // Canonical Nov/2026 ability overlays; preserve descriptions and unrelated mechanics.
+  // Revisões canônicas de habilidades (15/11/2026), consumidas do Core.
   function applyAbilityAdjustments(bundle){
     const changes=bundle?.abilityAdjustments?.changes||[];
     const deities=bundle?.gods?.deities||[];
     const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
     const tierKey=t=>{
-      const min=Number(t?.min);
-      if(Number.isFinite(min)){if(min>=30)return '30+';if(min>=16)return '16-29';return '0-15'}
-      const name=norm(t?.id||t?.label||'');
-      if(name.includes('30'))return '30+';
-      if(name.includes('16')||name.includes('29'))return '16-29';
+      if(t&&t.min!=null){const min=Number(t.min);if(min>=30)return '30+';if(min>=16)return '16-29';return '0-15'}
+      const label=norm(t?.id||t?.label||'');
+      if(label.includes('30'))return '30+';
+      if(label.includes('16')||label.includes('29'))return '16-29';
       return '0-15';
     };
     const replaceDeep=(value,replacements)=>{
       if(typeof value==='string'){
         for(const entry of replacements){
-          const literal=String(entry.find||'').replace(/[.*+?^${}()|[\]\\]/g,'\\  function updateStatus(){');
-          value=value.replace(new RegExp(literal,entry.flags||'g'),String(entry.replace??''));
+          if(entry.find)value=value.split(String(entry.find)).join(String(entry.replace??''));
         }
-        return value.replace(/\.\s*\./g,'.').replace(/\s{2,}/g,' ').trim();
+        return value.replace(/\.\s*\./g,'.').replace(/ {2,}/g,' ').trim();
       }
       if(Array.isArray(value))return value.map(x=>replaceDeep(x,replacements));
       if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,replaceDeep(v,replacements)]));
@@ -228,32 +226,30 @@
       const ids=[change.deityId,...(change.deityAliases||[])].map(norm);
       const deity=deities.find(d=>ids.includes(norm(d.id))||ids.includes(norm(d.name)));
       if(!deity)continue;
-      const abilities=[...(deity.passives||[]),...(deity.actives||[])];
-      const ab=abilities.find(a=>a.id===change.abilityId||norm(a.name)===norm(change.abilityName));
-      if(!ab)continue;
-      const amended=replaceDeep(ab,change.replaceText||[]);
-      Object.assign(ab,amended);
-      if(change.summary!=null)ab.summary=change.summary;
-      if(change.note!=null)ab.note=change.note;
-      if(change.level!=null)ab.level=change.level;
+      const ability=[...(deity.passives||[]),...(deity.actives||[])].find(a=>a.id===change.abilityId||norm(a.name)===norm(change.abilityName));
+      if(!ability)continue;
+      Object.assign(ability,replaceDeep(ability,change.replaceText||[]));
+      if(change.summary!=null)ability.summary=change.summary;
+      if(change.note!=null)ability.note=change.note;
+      if(change.level!=null)ability.level=change.level;
       if(change.tierOverrides){
-        const vals=change.tierOverrides;
-        if(Array.isArray(ab.tiers)){
-          for(const tier of ab.tiers)if(vals[tierKey(tier)]!=null)tier.text=vals[tierKey(tier)];
-        } else if(ab.tiers&&typeof ab.tiers==='object'){
-          for(const [key,val] of Object.entries(vals)){const k=key==='30+'?'high':key==='16-29'?'mid':'low';ab.tiers[k]=val}
-        } else {
-          ab.tiers=[{id:'0-15',label:'0–15',min:0,max:15,text:vals['0-15']||''},{id:'16-29',label:'16–29',min:16,max:29,text:vals['16-29']||''},{id:'30+',label:'30+',min:30,max:null,text:vals['30+']||''}];
+        const values=change.tierOverrides;
+        if(Array.isArray(ability.tiers)){
+          for(const tier of ability.tiers)if(values[tierKey(tier)]!=null)tier.text=values[tierKey(tier)];
+        }else if(ability.tiers&&typeof ability.tiers==='object'){
+          for(const [name,value] of Object.entries(values))ability.tiers[name==='30+'?'high':name==='16-29'?'mid':'low']=value;
+        }else{
+          ability.tiers=[{id:'0-15',label:'0–15',min:0,max:15,text:values['0-15']||''},{id:'16-29',label:'16–29',min:16,max:29,text:values['16-29']||''},{id:'30+',label:'30+',min:30,max:null,text:values['30+']||''}];
         }
-        if(Array.isArray(ab.blocks)){
-          for(const block of ab.blocks){
+        if(Array.isArray(ability.blocks)){
+          for(const block of ability.blocks){
             if(block.type==='tiers'&&Array.isArray(block.items)){
-              for(const item of block.items)if(vals[tierKey(item)]!=null)item.text=vals[tierKey(item)];
+              for(const tier of block.items)if(values[tierKey(tier)]!=null)tier.text=values[tierKey(tier)];
             }
             if(block.type==='description'&&change.summary!=null)block.text=change.summary;
             if(block.type==='note'&&change.note!=null)block.text=change.note;
           }
-          if(change.note!=null&&!ab.blocks.some(x=>x.type==='note'))ab.blocks.push({type:'note',text:change.note});
+          if(change.note!=null&&!ability.blocks.some(b=>b.type==='note'))ability.blocks.push({type:'note',text:change.note});
         }
       }
     }
