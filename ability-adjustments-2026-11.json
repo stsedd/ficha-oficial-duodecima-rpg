@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-11-15",
+  "description": "Correções canônicas das habilidades em 15/11/2026; aplicadas sobre os kits existentes sem alterar a descrição de outros efeitos.",
+  "changes": [
+    {
+      "deityId": "iuppiter",
+      "abilityId": "regeneracao-raios",
+      "abilityName": "Regeneração por Raios",
+      "replaceText": [
+        {
+          "find": "HP ou energia",
+          "replace": "HP",
+          "flags": "gi"
+        },
+        {
+          "find": "HP ou Energia",
+          "replace": "HP",
+          "flags": "gi"
+        }
+      ]
+    },
+    {
+      "deityId": "summanus",
+      "abilityId": "regeneracao-noturna",
+      "abilityName": "Regeneração Noturna",
+      "replaceText": [
+        {
+          "find": "HP ou energia",
+          "replace": "HP",
+          "flags": "gi"
+        },
+        {
+          "find": "HP ou Energia",
+          "replace": "HP",
+          "flags": "gi"
+        }
+      ]
+    },
+    {
+      "deityId": "bellona",
+      "abilityId": "sede-batalha",
+      "abilityName": "Sede de Batalha",
+      "replaceText": [
+        {
+          "find": "recupera 1d4 + 1 de energia",
+          "replace": "",
+          "flags": "gi"
+        },
+        {
+          "find": "recupera 1d4 de energia",
+          "replace": "",
+          "flags": "gi"
+        }
+      ],
+      "tierOverrides": {
+        "30+": "por 3 turnos, recebe +2 em ataque e +1d6 de dano físico."
+      }
+    },
+    {
+      "deityId": "iuventas",
+      "abilityId": "calice-deuses",
+      "abilityName": "Cálice dos Deuses",
+      "replaceText": [
+        {
+          "find": "3x o nível do receptor de energia",
+          "replace": "2 × nível do receptor + 25 de energia",
+          "flags": "gi"
+        },
+        {
+          "find": "5x o nível do receptor de energia",
+          "replace": "3 × nível do receptor + 50 de energia",
+          "flags": "gi"
+        },
+        {
+          "find": "3× o nível do receptor de energia",
+          "replace": "2 × nível do receptor + 25 de energia",
+          "flags": "gi"
+        },
+        {
+          "find": "5× o nível do receptor de energia",
+          "replace": "3 × nível do receptor + 50 de energia",
+          "flags": "gi"
+        }
+      ]
+    },
+    {
+      "deityId": "phantasos",
+      "deityAliases": [
+        "fantaso",
+        "fântaso"
+      ],
+      "abilityId": "paleta-sonhar",
+      "abilityName": "Paleta do Sonhar",
+      "summary": "Fântaso permite que a prole pinte no ar, criando objetos e estruturas temporariamente reais, como pontes de nuvens, chaves de brisa e muralhas de livros. Quanto maior e mais complexa a criação, mais instável ela se torna.",
+      "tierOverrides": {
+        "0-15": "cria 1 objeto simples e não ofensivo por 1 turno, como corda, luz, chave frágil ou pequena plataforma. Pode conceder +1 em um teste relacionado à sua utilização.",
+        "16-29": "cria ferramentas, barreiras, plataformas ou pontes curtas por até 2 turnos. Pode conceder +1 em defesa, dificultar o avanço inimigo ou fornecer +2 em um teste relacionado à criação.",
+        "30+": "cria estruturas complexas por até 3 turnos, podendo escolher uma das seguintes manifestações: Perturbadora — causa 2d8 + Carisma de dano de sanidade em um alvo, mediante resistência de Fé. Acolhedora — restaura 2d8 + Carisma de sanidade de um aliado. Protetora — concede 2d8 + Carisma de HP temporário a um aliado, na forma de um escudo que dura 3 turnos ou até absorver todo o dano."
+      },
+      "note": "Criações grandes não bloqueiam completamente a passagem, podendo apenas gerar terreno difícil em uma área curta. O HP temporário não constitui cura, não fecha feridas, não estabiliza criaturas e não impede testes contra a morte.",
+      "level": 15
+    },
+    {
+      "deityId": "somnus",
+      "deityAliases": [
+        "somnos"
+      ],
+      "abilityId": "sono-profundo",
+      "abilityName": "Sono Profundo",
+      "replaceText": [
+        {
+          "find": "Ao completar um descanso longo de sono real, recupera +70 de energia além do padrão do descanso.",
+          "replace": "Durante descansos curtos em que consiga dormir de verdade, recupera Energia adicional igual ao nível do personagem + 10.",
+          "flags": "gi"
+        },
+        {
+          "find": "recupera +70 de energia além do padrão do descanso",
+          "replace": "recupera Energia adicional igual ao nível do personagem + 10 durante descansos curtos",
+          "flags": "gi"
+        }
+      ]
+    }
+  ],
+  "policy": {
+    "alati": "Reformulação futura: não editar habilidades Alati nesta atualização."
+  }
+}
