@@ -168,6 +168,7 @@
       },
       conditions:mapConditions(core),
       materials:[...(equipment.materials || [])],
+      crafting:equipment.forging || {},
       craftingComponents:[...(equipment.craftingComponents || [])],
       armorTypes:[...(equipment.armorTypes || [])],
       weaponTypes:[...(equipment.weaponTypes || [])],
@@ -288,6 +289,7 @@
   async function loadSnapshot(){
     const snapshot=await getJson(`${SNAPSHOT_URL}?v=1`,'no-cache');
     if(!snapshot?.manifest||!snapshot?.gods||!snapshot?.skills||!snapshot?.system)throw new Error('Snapshot local incompleto.');
+    try{snapshot.abilityAdjustments=await getJson('./ability-adjustments-2026-11.json?v=2026.11.15.1','no-cache')}catch(_){}
     return snapshot;
   }
 
