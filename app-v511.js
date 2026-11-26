@@ -691,7 +691,7 @@ function resourceByKey(key){return divineResources().find(r=>resourceKey(r)===ke
   function shieldDefense(){if(!state.shield?.equipped||Number(state.shield.stakes)<30)return 0;return hasTalent('mestre-escudos')?bp():Math.ceil(bp()/2)}
   function damageReduction(){return armorReduction()+(Number(state.tempMods?.damageReduction)||0)}
   function defenseBonus(){const base=hasTalent('bruto')?effectiveAttr('con'):effectiveAttr('des'),defensor=hasTalent('defensor')?2:0,agil=hasTalent('agil')&&skillIsProficient('Agilidade')?Math.ceil(bp()/2):0;return base+defensor+agil+armorDefense()+shieldDefense()+(Number(state.tempMods?.defense)||0)+globalD20Penalty()+conditionDefenseMod()}
-  function initiativeBonus(){return effectiveAttr('des')+globalD20Penalty()+conditionDexRollMod()}
+  function initiativeBonus(){return skillValue('Agilidade')}
   function weaponDiceCount(){return state.level>=80?3:state.level>=40?2:1}
   function weaponAttack(w){const a=w.attr||'for',mat=material(w.material),prof=Number(w.stakes)>=30?bp():0;return effectiveAttr(a)+(mat.attack||0)+prof+(Number(w.attackExtra)||0)+globalD20Penalty()+attrRollConditionPenalty(a)}
   function weaponDamageFormula(w){const wt=weaponType(w.type),count=weaponDiceCount(),bonus=effectiveAttr(w.attr||'for')+(Number(w.damageExtra)||0);return `${count}d${wt.die}${bonus===0?'':bonus>0?` + ${bonus}`:` - ${Math.abs(bonus)}`}`}
